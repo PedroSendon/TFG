@@ -1,0 +1,92 @@
+/* Estilos personalizados para el calendario */
+.react-calendar {
+    border-radius: 15px; /* Bordes redondeados */
+    border: 2px solid #D1D1D6; /* Borde gris claro */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    padding: 10px;
+}
+
+.react-calendar__navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+/* Estilos para las flechas de navegación */
+.react-calendar__navigation button {
+    color: #000; /* Flechas de navegación en negro */
+    background: none;
+    border: none;
+    font-size: 1rem; /* Tamaño de las flechas */
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Estilos para el texto del mes actual */
+.react-calendar__navigation__label {
+    font-size: 1rem; /* Reducimos el tamaño del texto del mes */
+    font-weight: bold;
+    color: #000; /* Mes actual en negro */
+}
+
+/* Quitar el fondo marcado al presionar las flechas */
+.react-calendar__navigation button:active {
+    background: none !important;
+}
+
+
+.react-calendar__tile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 50px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.react-calendar__tile--now {
+    background-color: #FFFFFF !important; /* Fondo blanco para el día actual */
+    color: #32CD32 !important; /* Color verde lima para el número */
+    border: 2px solid #32CD32; /* Añadimos un borde en verde lima */
+    border-radius: 50%; /* Redondeamos para que sea un círculo */
+}
+
+/* Estilo hover sobre el día actual */
+.react-calendar__tile--now:hover {
+    background-color: #e6ffe6 !important; /* Suave efecto hover */
+}
+
+.react-calendar__tile--active {
+    background-color: #32CD32 !important;
+    color: white !important;
+    border-radius: 50%;
+}
+
+/* Estilo para el día actual */
+.current-day {
+    background-color: #FFFFFF !important; /* Fondo blanco */
+    color: #32CD32 !important; /* Texto en verde lima */
+    border-radius: 50%; /* Redondeamos para que sea un círculo */
+    border: 2px solid #32CD32; /* Añadimos un borde en verde lima */
+}
+
+/* Otros estilos del calendario */
+.react-calendar__tile:enabled:hover {
+    background-color: #e6ffe6; /* Suave efecto hover en días seleccionables */
+}
+
+/* Eliminar el color rojo en fines de semana */
+.react-calendar__month-view__days__day--weekend {
+    color: inherit; /* Mantener el color del texto igual para todos los días */
+}
+
+.calendar-label {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #000;
+    margin-bottom: 10px;
+    display: block;
+    text-align: center; /* Centramos el título */
+}

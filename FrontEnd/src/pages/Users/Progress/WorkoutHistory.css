@@ -1,0 +1,12 @@
+.workout-card {
+    background-color: white; /* Fondo blanco */
+    border-radius: 8px; /* Borde redondeado */
+    border: 1px solid #D1D1D6; /* Borde gris claro */
+    margin-bottom: 10px; /* Separación entre tarjetas */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  }
+  
+  .workout-card.completed {
+    border: 1px solid #32CD32; /* Borde verde lima para completados */
+  }
+  

@@ -1,0 +1,43 @@
+/* Estilos personalizados adicionales */
+
+.no-focus {
+    outline: none !important; /* Elimina el borde azul en botones al ser clickeados o enfocados */
+  }
+  
+  /* Ajustes para el botón flotante */
+  .IonFabButton {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    background-color: #32CD32; /* Verde lima */
+    color: #FFFFFF; /* Color del ícono */
+}
+
+
+  .no-focus:focus {
+    outline: none; /* Elimina el contorno azul */
+    box-shadow: none; /* Elimina cualquier sombra predeterminada de enfoque */
+  }
+  
+  .no-focus:active {
+    background-color: #FFFFFF; /* Mantiene el fondo blanco al hacer clic */
+    color: inherit; /* Mantiene el color del texto */
+  }
+  
+  .no-focus:hover {
+    background-color: #f2f2f2; /* Cambia el color de fondo al pasar por encima */
+  }
+  button, .ion-button, .no-focus {
+    outline: none !important; /* Elimina el borde al enfocarse */
+    box-shadow: none !important; /* Elimina cualquier sombra de foco */
+}
+
+button:focus, .ion-button:focus, .no-focus:focus {
+    outline: none; /* Sin borde azul al hacer clic */
+    box-shadow: none;
+}
+
+button:active, .ion-button:active, .no-focus:active {
+    outline: none;
+    box-shadow: none;
+}

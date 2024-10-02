@@ -1,0 +1,5 @@
+.divider {
+    border: none;
+    border-top: 1px solid #D1D1D6; /* Línea divisoria en gris claro */
+    margin: 20px 0; /* Espacio alrededor de la línea */
+  }

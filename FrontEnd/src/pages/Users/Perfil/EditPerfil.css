@@ -1,0 +1,85 @@
+/* Estilo para el avatar personalizado */
+.custom-avatar {
+  width: 40%;  /* Usamos porcentaje en lugar de píxeles */
+  height: auto;
+  margin: 5% auto;
+  border-radius: 50%;
+  border: 0.2rem solid #007AFF; /* Bordes del avatar en color primario */
+}
+
+/* Centrar el contenido */
+.ion-text-center {
+  text-align: center;
+}
+
+/* Título del nombre del usuario */
+.username {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 5%;
+  color: #1c1c1e; /* Color del nombre del usuario */
+}
+
+/* Estilo para los inputs y selects */
+ion-item ion-label {
+  font-weight: bold;
+}
+
+ion-item ion-input, ion-item ion-select {
+  padding: 5%;
+  border-radius: 10px;
+  border: 1px solid #d1d1d6;
+  background-color: #f2f2f7;
+}
+
+/* Botón de cambiar contraseña y guardar cambios */
+ion-button {
+  margin: 5% 0;
+  padding: 5% 0;
+}
+
+ion-button.primary {
+  background-color: #007AFF;
+  color: white;
+}
+
+/* Margen para el botón de cambiar foto */
+.custom-avatar-button {
+  margin-bottom: 5%;
+}
+
+.boton-verde {
+  --background: var(--color-verde-lima); /* Fondo del botón verde */
+  --color: #FFFFFF; /* Color del texto blanco */
+}
+
+/* Botón de Confirmar */
+.confirm-button {
+  --background: var(--color-verde-lima);  /* Usamos la variable de color verde lima para el fondo */
+  --color: #fff;  /* Color del texto en blanco */
+}
+
+/* Botón de Cancelar (outline) */
+.cancel-button {
+  --border-color: var(--color-verde-lima);  /* Color del borde en verde lima */
+  --color: var(--color-verde-lima);  /* Color del texto en verde lima */
+  --ion-border-width: 2px;  /* Ajusta el grosor del borde */
+}
+
+.ion-invalid {
+  --highlight-background: #ffcccb; /* Cambia el fondo de los inputs con error */
+}
+
+/* Estilo para el borde rojo cuando hay un error */
+.error-input .item-native {
+  border: 1px solid red !important;
+}
+
+/* Alinear el texto de error debajo del input */
+.error-text {
+  text-align: left;
+  margin-left: 4%;
+  color: red;
+  font-size: 0.9em;
+}
+

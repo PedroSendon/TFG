@@ -1,0 +1,8 @@
+:root {
+  /* Colores de la paleta */
+  --color-morado-brillante: #8E24AA;  /* Para detalles llamativos */
+  --color-gris-claro: #F5F5F5;        /* Para el fondo de secciones */
+  --color-gris-oscuro: #424242;       /* Para el texto principal */
+  --color-blanco: #FFFFFF;            /* Para el fondo de la app y texto claro */
+  --color-verde-lima: #32CD32;         /* Para botones de confirmación */
+}

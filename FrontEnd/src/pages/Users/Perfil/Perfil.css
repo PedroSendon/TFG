@@ -1,0 +1,57 @@
+
+
+.thin-divider {
+    height: 1px;  /* Grosor de la línea */
+    background-color: #d1d1d6;  /* Color gris claro */
+    margin: 10px 0;  /* Margen para darle un poco de espacio */
+  }
+  .custom-card {
+    border-radius: 20px; /* Bordes redondeados */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra para darle profundidad */
+    margin: 10px 0; /* Espaciado entre las tarjetas */
+  }
+  
+  h3 {
+    font-size: 1.2rem; /* Tamaño más grande para los títulos */
+    font-weight: bold;
+    color: '--color-verde-lima'; /* Un color destacado, puedes cambiarlo si prefieres */
+  }
+  
+  p {
+    font-size: 1rem; /* Un tamaño de texto para los valores */
+    color: #333; /* Color de texto oscuro */
+  }
+  .avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra horizontalmente */
+    justify-content: center; /* Centra verticalmente */
+    text-align: center; /* Asegura que el texto también esté centrado */
+  }
+
+  .custom-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 2px solid #32CD32; /* Verde lima en lugar de la variable */
+    margin-bottom: 15px;
+}
+  
+  .username {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: '--color-verde-lima'; /* Un color destacado (puedes usar otro si lo prefieres) */
+    margin: 10px 0;
+  }
+  
+  .user-email {
+    font-size: 1rem;
+    color: #888; /* Color más apagado para el email */
+    margin-top: -5px;
+  }
+  
+  .verde-lima {
+    --background: var(--color-verde-lima);
+    --background-activated: var(--color-verde-lima);
+    --background-hover: var(--color-verde-lima);
+  }
