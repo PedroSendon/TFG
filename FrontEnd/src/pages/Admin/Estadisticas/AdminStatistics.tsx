@@ -16,6 +16,7 @@ import Header from '../../Header/Header';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar, ResponsiveContainer
 } from 'recharts'; // Librería para gráficos
+import { Box, Chip, InputLabel, MenuItem, OutlinedInput, Select } from '@mui/material';
 
 // Sample data for exercise popularity
 const exercisesData = [
@@ -110,20 +111,43 @@ const AdminStatistics: React.FC = () => {
                                         Platform Growth
                                     </IonLabel>
 
-                                    {/* Year Selector */}
-                                    <IonItem lines="none" style={{ marginBottom: '20px' }}>
-                                        <IonLabel position="stacked">Select Year</IonLabel>
-                                        <IonSelect
-                                            value={selectedYear}
-                                            placeholder="Select Year"
-                                            onIonChange={(e: { detail: { value: React.SetStateAction<string>; }; }) => setSelectedYear(e.detail.value)}
-                                            style={{ border: '1px solid #d1d1d6', borderRadius: '8px', padding: '10px' }}
-                                        >
-                                            <IonSelectOption value="2024">2024</IonSelectOption>
-                                            <IonSelectOption value="2023">2023</IonSelectOption>
-                                        </IonSelect>
-                                    </IonItem>
-
+                                    <IonRow style={{ marginTop: '20px' }}>
+                                        <IonCol size="12">
+                                            <InputLabel style={{ color: 'var(--color-gris-oscuro)' }}>Select Year</InputLabel>
+                                            <Select
+                                                labelId="year-selector-label"
+                                                id="yearSelector"
+                                                value={selectedYear}
+                                                onChange={(event) => setSelectedYear(event.target.value as string)}
+                                                input={<OutlinedInput id="select-year-chip" />}
+                                                renderValue={(selected) => (
+                                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                        <Chip key={selected} label={selected} />
+                                                    </Box>
+                                                )}
+                                                sx={{
+                                                    width: '100%',
+                                                    '& .MuiOutlinedInput-root': {
+                                                        '& fieldset': {
+                                                            borderColor: 'var(--color-gris-oscuro)',
+                                                        },
+                                                        '&:hover fieldset': {
+                                                            borderColor: 'var(--color-verde-lima)',
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                            borderColor: 'var(--color-verde-lima)',
+                                                        },
+                                                        '& input': {
+                                                            padding: '10px',
+                                                        },
+                                                    },
+                                                }}
+                                            >
+                                                <MenuItem value="2024">2024</MenuItem>
+                                                <MenuItem value="2023">2023</MenuItem>
+                                            </Select>
+                                        </IonCol>
+                                    </IonRow>
                                     {/* Platform Growth Chart */}
                                     <ResponsiveContainer width="100%" height={300}>
                                         <BarChart data={growthData}>
