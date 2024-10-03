@@ -4,7 +4,6 @@ import {
     Button,
     Grid,
     Container,
-    InputLabel,
     Select,
     OutlinedInput,
     MenuItem,
@@ -14,7 +13,7 @@ import {
     SelectChangeEvent
 } from '@mui/material'; // Importación de componentes de Material UI.
 import { useHistory } from 'react-router-dom'; // Hook para redirección.
-import { IonFabButton, IonIcon, IonContent, IonPage, IonLabel } from '@ionic/react';
+import { IonFabButton, IonIcon, IonContent, IonPage } from '@ionic/react';
 import { cameraOutline } from 'ionicons/icons';  // Icono de cámara para subir imágenes/videos.
 import Header from '../../Header/Header';  // Importación del Header
 import '../../../theme/variables.css'; // Archivo de estilos personalizados.
@@ -74,9 +73,12 @@ const AddExercises: React.FC = () => {
     // Función para manejar el envío del formulario.
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Lógica para validar y enviar el formulario.
         console.log('Ejercicio agregado:', formData, media);
         history.push('/admin/exercises');  // Redirigir a la página de ejercicios después de agregar.
+    };
+
+    const handleCancel = () => {
+        history.push('/admin/exercises');  // Cancelar y redirigir a la lista de ejercicios
     };
 
     return (
@@ -157,42 +159,35 @@ const AddExercises: React.FC = () => {
                                     />
                                 </Grid>
 
-                                {/* Selección múltiple de grupos musculares (ahora con el mismo estilo) */}
+                                {/* Selección múltiple de grupos musculares */}
                                 <Grid item xs={12}>
-                                    <InputLabel
-                                        id="muscleGroups-label"
-                                        style={{
-                                            color: 'var(--color-gris-oscuro)',
-                                            marginBottom: '5px',
-                                        }}
-                                    >
-                                        Muscle Groups
-                                    </InputLabel>
-                                    <Select
-                                        labelId="muscleGroups-label"
-                                        id="muscleGroups"
-                                        multiple
+                                    <TextField
+                                        variant="outlined"
                                         fullWidth
+                                        select
+                                        label="Muscle Groups"
                                         value={formData.muscleGroups}
-                                        onChange={handleMuscleGroupChange}
-                                        input={<OutlinedInput id="select-multiple-chip" />}
-                                        renderValue={(selected) => (
-                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                {(selected as string[]).map((value) => (
-                                                    <Chip key={value} label={value} />
-                                                ))}
-                                            </Box>
-                                        )}
+                                        onChange={(event) => handleMuscleGroupChange(event as SelectChangeEvent<string[]>)}
+                                        SelectProps={{
+                                            multiple: true,
+                                            renderValue: (selected) => (
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                    {(selected as string[]).map((value) => (
+                                                        <Chip key={value} label={value} />
+                                                    ))}
+                                                </Box>
+                                            ),
+                                        }}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 '& fieldset': {
-                                                    borderColor: 'var(--color-gris-oscuro)', // Borde gris por defecto
+                                                    borderColor: 'var(--color-gris-oscuro)',
                                                 },
                                                 '&:hover fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)', // Borde verde lima al pasar el mouse
+                                                    borderColor: 'var(--color-verde-lima)',
                                                 },
                                                 '&.Mui-focused fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)', // Borde verde lima al enfocar el input
+                                                    borderColor: 'var(--color-verde-lima)',
                                                 },
                                             },
                                         }}
@@ -202,9 +197,8 @@ const AddExercises: React.FC = () => {
                                                 {muscle}
                                             </MenuItem>
                                         ))}
-                                    </Select>
+                                    </TextField>
                                 </Grid>
-
 
                                 {/* Campo de instrucciones */}
                                 <Grid item xs={12}>
@@ -239,65 +233,75 @@ const AddExercises: React.FC = () => {
                                     />
                                 </Grid>
 
-                                {/* Botón para subir imagen o video, centrado */}
+                                {/* Botón para subir imagen o video */}
                                 <Grid item xs={12} className="ion-text-center">
-                                    {/* Botón rectangular para subir imagen o video */}
                                     <Button
                                         onClick={handleMediaUpload}
                                         variant="contained"
                                         style={{
-                                            backgroundColor: '#32CD32',
-                                            color: '#fff',
-                                            width: '60%',    // El botón ocupa el 60% del ancho
-                                            padding: '15px', // Espacio dentro del botón
-                                            borderRadius: '5px', // Bordes redondeados
-                                            textTransform: 'none', // Evitar que el texto esté en mayúsculas
-                                            margin: '0 auto',  // Centrar el botón horizontalmente
-                                            display: 'block',  // Asegurar que el botón ocupe su propio bloque
+                                            border: '1px solid #32CD32',
+                                            backgroundColor: '#FFFFFF',
+                                            color: '#32CD32',
+                                            padding: '3% 0',
+                                            borderRadius: '5px',
+                                            fontSize: '1em',
+                                            minWidth: '100%',
                                         }}
                                     >
-                                        <IonIcon icon={cameraOutline} style={{ color: '#fff', marginRight: '10px' }} />
+                                        <IonIcon icon={cameraOutline} style={{ color: '#32CD32', marginRight: '10px' }} />
                                         Upload Image/Video
                                     </Button>
 
-                                    {/* Input oculto para subir archivo */}
                                     <input
                                         type="file"
                                         ref={fileInputRef}
-                                        style={{ display: 'none' }} // Ocultamos el input
-                                        onChange={handleFileChange} // Manejo del cambio de archivo
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileChange}
                                     />
 
-                                    {/* Previsualización de la imagen/video cargado */}
                                     {media && <img src={media} alt="Preview" style={{ width: '100%', marginTop: '10px' }} />}
                                 </Grid>
-
 
                             </Grid>
                         </form>
                     </div>
                 </Container>
 
-                {/* Botón horizontal para añadir ejercicio */}
-                <Button
-                    onClick={handleSubmit}
-                    variant="contained"
-                    fullWidth
-                    style={{
-                        backgroundColor: 'var(--color-verde-lima)',
-                        color: '#FFFFFF',
-                        marginTop: '1rem',
-                        marginBottom: '15%',
-                        position: 'fixed',
-                        bottom: '2%',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        width: '80%',
-                        height: '50px'
-                    }}
-                >
-                    Add Exercise
-                </Button>
+                {/* Botones de Cancelar y Añadir */}
+                <Grid container spacing={2} style={{ marginTop: '20px' }}>
+                    <Grid item xs={6} className="ion-text-center">
+                        <Button
+                            onClick={handleCancel}
+                            style={{
+                                border: '1px solid #FF0000',
+                                backgroundColor: '#FFFFFF',
+                                color: '#FF0000',
+                                padding: '3% 0',
+                                borderRadius: '5px',
+                                fontSize: '1em',
+                                width: '100%',
+                            }}
+                        >
+                            CANCEL
+                        </Button>
+                    </Grid>
+                    <Grid item xs={6} className="ion-text-center">
+                        <Button
+                            onClick={handleSubmit}
+                            style={{
+                                border: '1px solid #32CD32',
+                                backgroundColor: '#FFFFFF',
+                                color: '#32CD32',
+                                padding: '3% 0',
+                                borderRadius: '5px',
+                                fontSize: '1em',
+                                width: '100%',
+                            }}
+                        >
+                            ADD
+                        </Button>
+                    </Grid>
+                </Grid>
             </IonContent>
         </IonPage>
     );
