@@ -267,39 +267,41 @@ const AddExercises: React.FC = () => {
                     </div>
                 </Container>
 
-                {/* Botones de Cancelar y Añadir */}
-                <Grid container spacing={2} style={{ marginTop: '20px' }}>
-                    <Grid item xs={6} className="ion-text-center">
-                        <Button
-                            onClick={handleCancel}
-                            style={{
-                                border: '1px solid #FF0000',
-                                backgroundColor: '#FFFFFF',
-                                color: '#FF0000',
-                                padding: '3% 0',
-                                borderRadius: '5px',
-                                fontSize: '1em',
-                                width: '100%',
-                            }}
-                        >
-                            CANCEL
-                        </Button>
-                    </Grid>
-                    <Grid item xs={6} className="ion-text-center">
-                        <Button
-                            onClick={handleSubmit}
-                            style={{
-                                border: '1px solid #32CD32',
-                                backgroundColor: '#FFFFFF',
-                                color: '#32CD32',
-                                padding: '3% 0',
-                                borderRadius: '5px',
-                                fontSize: '1em',
-                                width: '100%',
-                            }}
-                        >
-                            ADD
-                        </Button>
+                {/* Botones de Cancelar y Guardar */}
+                <Grid item xs={12}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                            <Button
+                                onClick={handleCancel}
+                                style={{
+                                    border: '1px solid #FF0000',
+                                    backgroundColor: '#FFFFFF',
+                                    color: '#FF0000',
+                                    padding: '3% 0',
+                                    borderRadius: '5px',
+                                    fontSize: '1em',
+                                    width: '100%',
+                                }}
+                            >
+                                CANCEL
+                            </Button>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Button
+                                onClick={handleSubmit}
+                                style={{
+                                    border: '1px solid #32CD32',
+                                    backgroundColor: '#FFFFFF',
+                                    color: '#32CD32',
+                                    padding: '3% 0',
+                                    borderRadius: '5px',
+                                    fontSize: '1em',
+                                    width: '100%',
+                                }}
+                            >
+                                SAVE
+                            </Button>
+                        </Grid>
                     </Grid>
                 </Grid>
             </IonContent>

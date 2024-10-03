@@ -65,6 +65,9 @@ const AddMacros: React.FC = () => {
             console.log('Errores en el formulario');
         }
     };
+    const handleCancel = () => {
+        history.push('/admin/nutrition');  // Cancelar y redirigir a la lista de ejercicios
+    };
 
     return (
         <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -172,23 +175,46 @@ const AddMacros: React.FC = () => {
                 </form>
             </div>
 
-            {/* Botón de enviar */}
-            <div style={{ padding: '1rem 0', marginBottom: '15%' }}>
-                <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    style={{
-                        backgroundColor: '#32CD32', // Color verde lima
-                        color: '#FFFFFF',
-                        marginTop: '1rem',
-                    }}
-                    onClick={handleSubmit}
-                    disabled={!formData.kcal || !formData.proteins || !formData.carbs || !formData.fats || !formData.dietType}
-                >
-                    Añadir Recomendación
-                </Button>
-            </div>
+
+            {/* Botones de Cancelar y Guardar */}
+            <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
+                <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                        <Button
+                            onClick={handleCancel}
+                            style={{
+                                border: '1px solid #FF0000',
+                                backgroundColor: '#FFFFFF',
+                                color: '#FF0000',
+                                padding: '3% 0',
+                                borderRadius: '5px',
+                                fontSize: '1em',
+                                width: '100%',
+                            }}
+                        >
+                            CANCEL
+                        </Button>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Button
+                            type="submit"
+                            style={{
+                                border: '1px solid #32CD32',
+                                backgroundColor: '#FFFFFF',
+                                color: '#32CD32',
+                                padding: '3% 0',
+                                borderRadius: '5px',
+                                fontSize: '1em',
+                                width: '100%',
+                            }}
+                            onClick={handleSubmit}
+                            disabled={!formData.kcal || !formData.proteins || !formData.carbs || !formData.fats || !formData.dietType}
+                        >
+                            ADD
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Grid>
         </Container>
     );
 };
