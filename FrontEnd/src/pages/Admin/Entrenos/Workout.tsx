@@ -140,7 +140,7 @@ const WorkoutsExercises: React.FC = () => {
                                                         minWidth: '55px',
                                                     }}
                                                 >
-                                                    Modificar
+                                                    Modify
                                                 </Button>
                                                 <Button
                                                     onClick={() => handleDelete(workout.id, 'workout')}
@@ -154,7 +154,7 @@ const WorkoutsExercises: React.FC = () => {
                                                         minWidth: '55px',
                                                     }}
                                                 >
-                                                    Eliminar
+                                                    Delete
                                                 </Button>
                                             </div>
                                         </IonCardContent>
@@ -197,7 +197,7 @@ const WorkoutsExercises: React.FC = () => {
                                                         minWidth: '55px',
                                                     }}
                                                 >
-                                                    Modificar
+                                                    Modify
                                                 </Button>
                                                 <Button
                                                     onClick={() => handleDelete(exercise.id, 'exercise')}
@@ -211,7 +211,7 @@ const WorkoutsExercises: React.FC = () => {
                                                         minWidth: '55px',
                                                     }}
                                                 >
-                                                    Eliminar
+                                                    Delete
                                                 </Button>
                                             </div>
                                         </IonCardContent>

@@ -164,7 +164,7 @@ const MacrosAdmin: React.FC = () => {
                                                 }}
                                                 className="no-focus"
                                             >
-                                                Modificar
+                                                Modify
                                             </Button>
 
                                             <Button
@@ -180,7 +180,7 @@ const MacrosAdmin: React.FC = () => {
                                                 }}
                                                 className="no-focus"
                                             >
-                                                Eliminar
+                                                Delete
                                             </Button>
                                         </div>
                                     </IonCardContent>

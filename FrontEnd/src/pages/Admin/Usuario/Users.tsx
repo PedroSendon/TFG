@@ -82,6 +82,13 @@ const Users: React.FC = () => {
     console.log('Navegando a /admin/nutrition/add');
     history.push(`/admin/users/add`);
   };
+  const handleAssign = (userId: number) => {
+    history.push({
+      pathname: `/admin/users/assign`, // Ruta de la nueva pantalla de asignación
+      state: { userId }, // Pasar el ID del usuario seleccionado
+    });
+  };
+
 
 
   return (
@@ -139,6 +146,22 @@ const Users: React.FC = () => {
 
                     {/* Botones Modificar y Eliminar juntos pero compactos */}
                     <div style={{ display: 'flex', gap: '5px' }}>
+                      <Button
+                        onClick={() => handleAssign(user.id)}
+                        style={{
+                          border: '1px solid #9C27B0',
+                          backgroundColor: '#FFFFFF',
+                          color: '#9C27B0',
+                          padding: '4px 8px',
+                          borderRadius: '5px',
+                          fontSize: '0.7em',
+                          minWidth: '55px',
+                        }}
+                        className="no-focus"
+                      >
+                        Assign
+                      </Button>
+
                       {/* Botón Modificar */}
                       <Button
                         onClick={() => handleEdit(user.id)}
@@ -153,7 +176,7 @@ const Users: React.FC = () => {
                         }}
                         className="no-focus"
                       >
-                        Modificar
+                        Modify
                       </Button>
 
 
@@ -171,7 +194,7 @@ const Users: React.FC = () => {
                         }}
                         className="no-focus"
                       >
-                        Eliminar
+                        Delete
                       </Button>
                     </div>
                   </IonCardContent>
