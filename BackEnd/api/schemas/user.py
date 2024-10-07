@@ -22,7 +22,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)  # type: ignore
     birth_date: date
-    gender: str = Field(..., pattern=r'^(M|F|Otro)$')  # Usar 'pattern' en lugar de 'regex'
+    gender: str = Field(..., pattern=r'^(M|F|Otro)$')
     terms_accepted: bool
 
     class Config:

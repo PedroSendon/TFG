@@ -1,6 +1,6 @@
 from api.models.workout import Workout, WorkoutExercise, Exercise, UserWorkout
 from api.models.exercise import Exercise
-from api.models.user import User
+from api.models.User import User
 from api.models.process import ProgressTracking, ExerciseLog
 from django.utils import timezone
 

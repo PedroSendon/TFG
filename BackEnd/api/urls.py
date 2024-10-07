@@ -17,7 +17,7 @@ urlpatterns = [
     path('user/details/', user.save_user_details, name='user-details'),
     path('users/email/<str:email>/', user.get_user_by_email, name='get-user-by-email'),
     path('users/', user.get_all_users, name='get-all-users'),
-    path('users/update/', user.update_user, name='update-user'),
+    path('users/update/', user.update_user_as_admin, name='update-user'),
     path('users/delete/<int:user_id>/', user.delete_user, name='delete-user'),
 
     # Perfil de usuario

@@ -1,15 +1,14 @@
 from datetime import datetime
-from api.models import user
+from api.models import User
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import check_password, make_password
-from api.models.user import  User, UserDetails, DietPreferences, MedicalConditions, TrainingPreferences
+from api.models.User import  User, UserDetails, DietPreferences, MedicalConditions, TrainingPreferences
 from api.models.process import ProgressTracking
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
 
 
 class UserRepository:
-    
     @staticmethod
     def create_user(user_data):
         """
@@ -18,16 +17,17 @@ class UserRepository:
         :return: El objeto usuario creado.
         """
         try:
-            user = user.objects.create(
+            user = User.objects.create(
                 first_name=user_data['first_name'],
                 last_name=user_data['last_name'],
                 email=user_data['email'],
-                password=user_data['password'],  # Asegúrate de hashear la contraseña antes de guardar
+                password=user_data['password'],  # Asegúrate de que la contraseña esté hasheada
                 birth_date=user_data['birth_date'],
-                gender=user_data['gender']
+                gender=user_data['gender'],
+                role=user_data.get('role', 'cliente')  # Asignar el rol, por defecto "cliente"
             )
             return user
-        except ValidationError as e:
+        except Exception as e:
             raise ValueError(f"Error creando usuario: {e}")
 
     @staticmethod
@@ -38,7 +38,7 @@ class UserRepository:
         :return: El objeto usuario completo si existe, None en caso contrario.
         """
         try:
-            user = user.objects.get(email=email)
+            user = User.objects.get(email=email)
             return {
                 "id": user.id,
                 "first_name": user.first_name,
@@ -58,7 +58,7 @@ class UserRepository:
         :param email: Correo electrónico del usuario.
         :return: True si existe, False en caso contrario.
         """
-        return user.objects.filter(email=email).exists()
+        return User.objects.filter(email=email).exists()
 
 
     @staticmethod
@@ -70,7 +70,7 @@ class UserRepository:
         :return: El usuario si las credenciales son correctas, None si no lo son.
         """
         try:
-            user = user.objects.get(email=email)
+            user = User.objects.get(email=email)
             if check_password(password, user.password):
                 return user
             else:
@@ -146,7 +146,7 @@ class UserDetailsRepository:
         :return: Los datos del perfil del usuario.
         """
         try:
-            user = user.objects.get(id=user_id)
+            user = User.objects.get(id=user_id)
             user_details = user.details  # Asegurarse de que exista el perfil de detalles
 
             profile_data = {
@@ -209,7 +209,7 @@ class UserDetailsRepository:
         """
         try:
             # Obtener el usuario y sus detalles
-            user = user.objects.get(id=user_id)
+            user = User.objects.get(id=user_id)
             user_details = user.details
 
             # Actualizar los campos básicos
@@ -247,7 +247,7 @@ class UserDetailsRepository:
         """
         try:
             # Obtener el usuario
-            user = user.objects.get(id=user_id)
+            user = User.objects.get(id=user_id)
 
             # Verificar que la contraseña actual es correcta
             if not check_password(current_password, user.password):
@@ -279,7 +279,7 @@ class UserDetailsRepository:
         :return: Los datos actualizados del perfil del usuario, incluyendo la URL de la foto.
         """
         try:
-            user = user.objects.get(id=user_id)
+            user = User.objects.get(id=user_id)
 
             # Actualizar la foto de perfil
             user.profile_photo = photo
@@ -299,7 +299,7 @@ class UserDetailsRepository:
         Obtener la lista de usuarios con información básica.
         :return: Lista de usuarios con id, nombre y correo.
         """
-        users = user.objects.all()
+        users = User.objects.all()
 
         # Crear una lista con los usuarios y su información básica
         user_data = [
@@ -340,7 +340,7 @@ class UserDetailsRepository:
 
         # Filtrar los usuarios registrados en el año y agrupar por mes
         monthly_growth = (
-            user.objects
+            User.objects
             .filter(date_joined__year=year)
             .annotate(month=TruncMonth('date_joined'))
             .values('month')

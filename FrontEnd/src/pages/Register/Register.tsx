@@ -129,14 +129,44 @@ const Register: React.FC = () => {
   };
 
   // Maneja el envío del formulario.
-  const handleSubmit = (e: React.FormEvent) => {
+  // Función para hacer la petición al backend (POST /register/)
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isFormValid()) {
-      console.log('Registro exitoso:', formData);
-      history.push('/form'); // Redirige a otra página si el formulario es válido.
-    } else {
+    if (!isFormValid()) {
       console.log('Errores en el formulario');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/register/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          birth_date: formData.birthDate.format('YYYY-MM-DD'),
+          gender: formData.gender,
+          terms_accepted: formData.termsAccepted,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Usuario registrado:', data);
+        history.push('/form');  // Redirige al usuario al login después del registro
+      } else {
+        const errorData = await response.json();
+        console.log('Error:', errorData);
+        setErrors({ apiError: errorData.error });
+      }
+    } catch (error) {
+      console.log('Error en la petición:', error);
+      setErrors({ apiError: 'Error de conexión con el servidor.' });
     }
   };
 
@@ -411,6 +441,8 @@ const Register: React.FC = () => {
             Register
           </Button>
 
+          {errors.apiError && <Typography color="error">{errors.apiError}</Typography>}
+
           {/* Enlace para iniciar sesión si ya tienes una cuenta */}
           <Grid container justifyContent="center" alignItems="center" style={{ marginTop: '1rem' }}>
             <Grid item>
@@ -418,7 +450,7 @@ const Register: React.FC = () => {
                 Do you already have an account?
               </Typography>
               <Link href="/login" variant="body2" style={{ marginLeft: '0.5rem', color: 'var(--color-verde-lima)' }}>
-              Sign in
+                Sign in
               </Link>
             </Grid>
           </Grid>

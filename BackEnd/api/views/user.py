@@ -8,6 +8,7 @@ from api.schemas.user import UserCreate, UserDetailsSchema,LoginSchema
 from django.contrib.auth.hashers import make_password
 from api.repositories.user_repository import UserDetailsRepository
 from django.contrib.auth.decorators import login_required
+from pydantic import ValidationError
 
 
 @api_view(['POST'])
@@ -16,8 +17,9 @@ def register(request):
     Registrar un nuevo usuario.
     """
     try:
+        print(request.data)  # Esto imprimirá los datos que están llegando
         user_data = UserCreate(**request.data)
-
+        
         # Verificar si el usuario ya existe por su email
         if UserRepository.user_exists_by_email(user_data.email):
             return Response({"error": "El usuario con este correo electrónico ya existe."}, status=status.HTTP_400_BAD_REQUEST)
@@ -34,8 +36,13 @@ def register(request):
 
         return Response({"message": "Usuario registrado exitosamente"}, status=status.HTTP_201_CREATED)
 
+    except ValidationError as e:
+        print(f"Error de validación: {e}")  # Esto imprimirá el error exacto en la consola
+        return Response({"error": f"Error de validación en los datos proporcionados: {e}"}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        print(f"Error inesperado: {e}")  # Agrega esto para más detalles en la consola
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])

@@ -27,6 +27,7 @@
     "@mui/x-date-pickers": "^7.16.0",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
+    "axios": "^1.7.7",
     "ionicons": "^7.0.0",
     "react": "^18.3.1",
     "react-calendar": "^5.0.0",
