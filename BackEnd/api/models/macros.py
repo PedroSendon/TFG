@@ -1,22 +1,23 @@
 from django.db import models
 from .User import User  # Asegúrate de que 'User' esté definido en otro archivo de modelos
 
-class MacrosRecommendation(models.Model):
-    DIET_TYPES = [
-        ('weightLoss', 'Pérdida de Peso'),
-        ('muscleGain', 'Ganancia Muscular'),
-        ('maintenance', 'Mantenimiento'),
-    ]
+class DietCategory(models.Model):
+    name = models.CharField(max_length=50, unique=True)  # Nombre de la categoría (p.ej., 'weightLoss', 'muscleGain', 'maintenance')
+    description = models.TextField(blank=True, null=True)  # Descripción opcional de la categoría
 
+    def __str__(self):
+        return self.name
+
+class MacrosRecommendation(models.Model):
+    category = models.ForeignKey(DietCategory, on_delete=models.CASCADE, default="")  # Relación con la categoría de la dieta
     kcal = models.PositiveIntegerField()  # Calorías recomendadas
     proteins = models.DecimalField(max_digits=5, decimal_places=2)  # Gramos de proteínas
     carbs = models.DecimalField(max_digits=5, decimal_places=2)  # Gramos de carbohidratos
     fats = models.DecimalField(max_digits=5, decimal_places=2)  # Gramos de grasas
-    diet_type = models.CharField(max_length=20, choices=DIET_TYPES)  # Tipo de dieta
     description = models.TextField(blank=True, null=True)  # Descripción opcional
 
     def __str__(self):
-        return f"{self.get_diet_type_display()} - {self.kcal} kcal"
+        return f"{self.category.name} - {self.kcal} kcal"
 
 class MealPlan(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)  # Relación con el usuario
@@ -40,3 +41,4 @@ class UserNutritionPlan(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - {self.plan.diet_type}"
+

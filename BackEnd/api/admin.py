@@ -5,8 +5,9 @@ from .models.exercise import MuscleGroup
 from django.contrib import admin
 from .models.User import User, DietPreferences
 from .models.workout import Workout, WorkoutExercise
-from .models.macros import MacrosRecommendation, MealPlan
+from .models.macros import MacrosRecommendation, MealPlan, DietCategory
 from .models.exercise import Exercise
+
 
 @admin.register(MuscleGroup)
 class MuscleGroupAdmin(admin.ModelAdmin):
@@ -16,7 +17,6 @@ class MuscleGroupAdmin(admin.ModelAdmin):
 class WorkoutExerciseInline(admin.TabularInline):
     model = WorkoutExercise
     extra = 1  # Permite añadir ejercicios adicionales al crear/editar un entrenamiento
-
 
 # Registrar el modelo de Ejercicio (Exercise)
 @admin.register(Exercise)
@@ -28,7 +28,6 @@ class ExerciseAdmin(admin.ModelAdmin):
     # Función para convertir los grupos musculares en una cadena de texto
     def display_muscle_groups(self, obj):
         return ", ".join([muscle.name for muscle in obj.muscle_groups.all()])
-
     display_muscle_groups.short_description = 'Muscle Groups'
 
 # Registrar el modelo de Usuario (User)
@@ -43,8 +42,6 @@ class UserAdmin(admin.ModelAdmin):
 class WorkoutAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'media')
     search_fields = ('name', 'description')
-
-    # Agregar la opción para editar ejercicios directamente en el mismo formulario del entrenamiento
     inlines = [WorkoutExerciseInline]
 
 # Registrar el modelo de Plan Nutricional (MealPlan)
@@ -63,11 +60,18 @@ class DietPreferencesAdmin(admin.ModelAdmin):
 # Registrar el modelo de Recomendación de Macronutrientes (MacrosRecommendation)
 @admin.register(MacrosRecommendation)
 class MacrosRecommendationAdmin(admin.ModelAdmin):
-    list_display = ('diet_type', 'kcal', 'proteins', 'carbs', 'fats')
-    search_fields = ('diet_type',)
+    list_display = ('category', 'kcal', 'proteins', 'carbs', 'fats', 'description')  # Mostrar la descripción también
+    search_fields = ('category__name', 'kcal', 'description')  # Búsqueda por el nombre de la categoría y la descripción
+    list_filter = ('category',)  # Filtro por categoría
 
 # Registrar el modelo intermedio de WorkoutExercise para administrar las relaciones
 @admin.register(WorkoutExercise)
 class WorkoutExerciseAdmin(admin.ModelAdmin):
     list_display = ('workout', 'exercise', 'sets', 'reps', 'rest')
     search_fields = ('workout__name', 'exercise__name')
+
+# Registrar la categoría de dieta (DietCategory)
+@admin.register(DietCategory)
+class DietCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    search_fields = ('name',)

@@ -1,6 +1,15 @@
-from api.models.macros import MacrosRecommendation, MealPlan
+from api.models.macros import MacrosRecommendation, MealPlan, DietCategory
+
 
 class MacrosRepository:
+
+    @staticmethod
+    def get_all_diet_categories():
+        """
+        Obtener todas las categorías de dieta desde la base de datos.
+        :return: Una lista de nombres de categorías.
+        """
+        return list(DietCategory.objects.values_list('name', flat=True))
 
     @staticmethod
     def get_user_macronutrients(user_id):
@@ -56,7 +65,7 @@ class MacrosRepository:
 
         except Exception as e:
             return None
-    
+
     @staticmethod
     def get_macronutrient_by_id(recommendation_id):
         """
@@ -65,7 +74,8 @@ class MacrosRepository:
         :return: Un diccionario con los detalles de la recomendación o None si no se encontró.
         """
         try:
-            recommendation = MacrosRecommendation.objects.get(id=recommendation_id)
+            recommendation = MacrosRecommendation.objects.get(
+                id=recommendation_id)
             return {
                 "id": recommendation.id,
                 "kcal": recommendation.kcal,
@@ -82,34 +92,31 @@ class MacrosRepository:
     def add_macronutrient_recommendation(kcal, proteins, carbs, fats, diet_type, description=None):
         """
         Añadir una nueva recomendación de macronutrientes.
-        :param kcal: Calorías recomendadas.
-        :param proteins: Gramos de proteínas.
-        :param carbs: Gramos de carbohidratos.
-        :param fats: Gramos de grasas.
-        :param diet_type: Tipo de dieta (weightLoss, muscleGain, maintenance).
-        :param description: Descripción opcional de la dieta.
-        :return: Un diccionario con los datos de la recomendación creada.
         """
-        # Crear una nueva recomendación de macronutrientes
-        recommendation = MacrosRecommendation.objects.create(
-            kcal=kcal,
-            proteins=proteins,
-            carbs=carbs,
-            fats=fats,
-            diet_type=diet_type,
-            description=description
-        )
+        try:
+            recommendation = MacrosRecommendation.objects.create(
+                kcal=kcal,
+                proteins=proteins,
+                carbs=carbs,
+                fats=fats,
+                category=diet_type,  # Asegúrate de que `diet_type` sea una instancia de DietCategory
+                description=description
+            )
+            return {
+                "id": recommendation.id,
+                "kcal": recommendation.kcal,
+                "proteins": float(recommendation.proteins),
+                "carbs": float(recommendation.carbs),
+                "fats": float(recommendation.fats),
+                # Asegúrate de obtener el nombre de la categoría
+                "dietType": recommendation.category.name,
+                "description": recommendation.description
+            }
+        except Exception as e:
+            # Manejo de errores
+            print(f"Error al agregar la recomendación de macronutrientes: {e}")
+            return None
 
-        return {
-            "id": recommendation.id,
-            "kcal": recommendation.kcal,
-            "proteins": float(recommendation.proteins),
-            "carbs": float(recommendation.carbs),
-            "fats": float(recommendation.fats),
-            "dietType": recommendation.diet_type,
-            "description": recommendation.description
-        }
-    
     @staticmethod
     def update_macronutrient_recommendation(category, recommendation_id, kcal, proteins, carbs, fats):
         """
@@ -123,7 +130,8 @@ class MacrosRepository:
         :return: True si se actualizó correctamente, False si no se encontró la recomendación.
         """
         try:
-            recommendation = MacrosRecommendation.objects.get(id=recommendation_id, diet_type=category)
+            recommendation = MacrosRecommendation.objects.get(
+                id=recommendation_id, diet_type=category)
 
             # Actualizar los valores de la recomendación
             recommendation.kcal = kcal
@@ -135,7 +143,7 @@ class MacrosRepository:
             return True
         except MacrosRecommendation.DoesNotExist:
             return False
-        
+
     @staticmethod
     def delete_macronutrient_recommendation(category, recommendation_id):
         """
@@ -145,22 +153,24 @@ class MacrosRepository:
         :return: True si se eliminó correctamente, False si no se encontró la recomendación.
         """
         try:
-            recommendation = MacrosRecommendation.objects.get(id=recommendation_id, diet_type=category)
+            recommendation = MacrosRecommendation.objects.get(
+                id=recommendation_id, diet_type=category)
             recommendation.delete()
             return True
         except MacrosRecommendation.DoesNotExist:
             return False
-        
+
     @staticmethod
     def get_macronutrient_recommendation(category, recommendation_id):
         """
         Obtener los detalles de una recomendación de macronutrientes.
-        :param category: La categoría de la dieta (weightLoss, muscleGain, maintenance).
+        :param category: La categoría de la dieta.
         :param recommendation_id: El ID de la recomendación.
         :return: Un diccionario con los detalles de la recomendación o None si no se encontró.
         """
         try:
-            recommendation = MacrosRecommendation.objects.get(id=recommendation_id, diet_type=category)
+            recommendation = MacrosRecommendation.objects.get(
+                id=recommendation_id, category__name=category)
             return {
                 "id": recommendation.id,
                 "kcal": recommendation.kcal,
@@ -170,3 +180,43 @@ class MacrosRepository:
             }
         except MacrosRecommendation.DoesNotExist:
             return None
+
+    @staticmethod
+    def get_macros_by_category(category):
+        """
+        Obtener todas las recomendaciones de macronutrientes por categoría.
+        :param category: La categoría de la dieta (p.ej., 'weightLoss').
+        :return: Lista de diccionarios con los detalles de cada recomendación.
+        """
+        recommendations = MacrosRecommendation.objects.filter(
+            category__name=category)
+        return [
+            {
+                "id": recommendation.id,
+                "kcal": recommendation.kcal,
+                "proteins": float(recommendation.proteins),
+                "carbs": float(recommendation.carbs),
+                "fats": float(recommendation.fats)
+            }
+            for recommendation in recommendations
+        ]
+
+
+class DietCategoryRepository:
+    @staticmethod
+    def list_all_categories():
+        """
+        Obtener todas las categorías de dietas.
+        :return: Lista de categorías de dietas con sus detalles.
+        """
+        return DietCategory.objects.all().values('id', 'name', 'description')
+
+    @staticmethod
+    def create_category(name, description):
+        """
+        Crear una nueva categoría de dieta.
+        :param name: Nombre de la categoría.
+        :param description: Descripción de la categoría.
+        :return: La categoría creada.
+        """
+        return DietCategory.objects.create(name=name, description=description)

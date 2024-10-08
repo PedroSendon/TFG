@@ -5,17 +5,12 @@ import {
 import { useHistory, useLocation } from 'react-router-dom'; // Hook para redirección y obtener datos.
 import Header from '../../Header/Header'; // Componente de header reutilizable
 
-// Definir los tipos de dieta disponibles
-const dietTypes = [
-    { value: 'weightLoss', label: 'Pérdida de Peso' },
-    { value: 'muscleGain', label: 'Ganancia Muscular' },
-    { value: 'maintenance', label: 'Mantenimiento' },
-];
-
 const ModifyMacros: React.FC = () => {
+
     const history = useHistory(); // Hook para redirección.
     interface LocationState {
         recommendation?: {
+            id: number; // Agregado para almacenar el ID de la recomendación
             kcal: string;
             proteins: string;
             carbs: string;
@@ -40,6 +35,9 @@ const ModifyMacros: React.FC = () => {
 
     // Estado para manejar los errores de validación.
     const [errors, setErrors] = useState<any>({});
+    
+    // Estado para los tipos de dieta.
+    const [dietTypes, setDietTypes] = useState<{ value: string; label: string }[]>([]);
 
     // Cargar los datos existentes al iniciar el componente.
     useEffect(() => {
@@ -53,6 +51,23 @@ const ModifyMacros: React.FC = () => {
                 description: recommendationData.description || '',
             });
         }
+
+        // Obtener los tipos de dieta desde la base de datos.
+        const fetchDietTypes = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/diet-categories/'); // Cambia la URL según tu configuración
+                const data = await response.json();
+                const types = data.categories.map((category: any) => ({
+                    value: category.name,
+                    label: category.description || category.name, // Ajusta según tu modelo
+                }));
+                setDietTypes(types);
+            } catch (error) {
+                console.error('Error fetching diet types:', error);
+            }
+        };
+
+        fetchDietTypes();
     }, [recommendationData]);
 
     // Validaciones básicas.
@@ -83,11 +98,34 @@ const ModifyMacros: React.FC = () => {
     };
 
     // Manejar el envío del formulario.
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (validateForm()) {
-            console.log('Recomendación modificada:', formData);
-            history.push('/admin/macros'); // Redirigir después de la modificación.
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/macros/${formData.dietType}/${recommendationData?.id}/update/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        kcal: formData.kcal,
+                        proteins: formData.proteins,
+                        carbs: formData.carbs,
+                        fats: formData.fats,
+                        description: formData.description,
+                    }),
+                });
+
+                if (response.ok) {
+                    console.log('Recomendación modificada:', formData);
+                    history.push('/admin/macros'); // Redirigir después de la modificación.
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error modificando la recomendación:', errorData);
+                }
+            } catch (error) {
+                console.error('Error al modificar la recomendación:', error);
+            }
         } else {
             console.log('Errores en el formulario');
         }

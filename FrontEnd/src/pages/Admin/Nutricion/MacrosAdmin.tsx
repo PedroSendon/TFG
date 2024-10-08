@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     IonPage,
     IonContent,
@@ -21,31 +21,64 @@ import { Button } from '@mui/material';
 import { useHistory } from 'react-router';
 
 // Definir un tipo para las categorías
-type Category = 'weightLoss' | 'muscleGain' | 'maintenance';
-
-const macroData: Record<Category, { id: number; kcal: number; proteins: number; carbs: number; fats: number }[]> = {
-    weightLoss: [
-        { id: 1, kcal: 1500, proteins: 100, carbs: 120, fats: 50 },
-        { id: 2, kcal: 1600, proteins: 110, carbs: 130, fats: 55 },
-    ],
-    muscleGain: [
-        { id: 3, kcal: 2500, proteins: 150, carbs: 300, fats: 70 },
-        { id: 4, kcal: 2700, proteins: 160, carbs: 320, fats: 75 },
-    ],
-    maintenance: [
-        { id: 5, kcal: 2000, proteins: 120, carbs: 200, fats: 60 },
-        { id: 6, kcal: 2200, proteins: 130, carbs: 220, fats: 65 },
-    ],
-};
-
+// Definir un tipo para la categoría que se obtiene desde el backend
+interface Category {
+    id: number;
+    name: string;
+    description: string;
+}
 const MacrosAdmin: React.FC = () => {
-    const [selectedCategory, setSelectedCategory] = useState<Category>('weightLoss');
-    const [macros, setMacros] = useState(macroData);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string>('');
+    const [macros, setMacros] = useState<Record<string, any[]>>({});
     const [showAlert, setShowAlert] = useState(false);
     const [macroToDelete, setMacroToDelete] = useState<number | null>(null);
-    const history = useHistory(); // Inicializa el hook para manejar la navegación.
+    const history = useHistory();
 
-    // Función para confirmar la eliminación
+    // Función para obtener las categorías de dieta desde el BE
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/diet-categories/`);  // Asegúrate de que el endpoint es correcto
+            const data = await response.json();
+            if (response.ok) {
+                setCategories(data.categories);
+                setSelectedCategory(data.categories[0]?.name || ''); // Selecciona la primera categoría por defecto
+            } else {
+                console.error('Error fetching categories:', data);
+            }
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    };
+
+    // Función para obtener las recomendaciones de macronutrientes desde el BE
+    const fetchMacros = async (category: string) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/macros/${category}/`);
+            const data = await response.json();
+            if (response.ok) {
+                setMacros((prev) => ({ ...prev, [category]: data }));
+            } else {
+                console.error('Error fetching macros:', data);
+            }
+        } catch (error) {
+            console.error('Error fetching macros:', error);
+        }
+    };
+
+    // Obtener las categorías al cargar el componente
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    // Actualizar las recomendaciones según la categoría seleccionada
+    useEffect(() => {
+        if (selectedCategory) {
+            fetchMacros(selectedCategory);
+        }
+    }, [selectedCategory]);
+
+    // Función para eliminar
     const handleDelete = () => {
         if (macroToDelete !== null) {
             setMacros((prevMacros) => {
@@ -55,25 +88,22 @@ const MacrosAdmin: React.FC = () => {
             });
             setMacroToDelete(null);
         }
-        setShowAlert(false); // Ocultar la alerta después de confirmar la eliminación
+        setShowAlert(false);
     };
 
-    // Función para abrir la confirmación de eliminación
     const confirmDelete = (id: number) => {
         setMacroToDelete(id);
-        setShowAlert(true); // Mostrar la alerta de confirmación
+        setShowAlert(true);
     };
 
     const handleAddMacros = () => {
-        console.log('Navegando a /admin/nutrition/add');
         history.push(`/admin/nutrition/add`);
     };
 
-    // Función para redirigir a la página de modificar macros
     const handleEditMacros = (macro: { id: number; kcal: number; proteins: number; carbs: number; fats: number }) => {
         history.push({
-            pathname: `/admin/nutrition/modify`, // Ruta a la página de modificación
-            state: { recommendation: macro }, // Pasar los datos del macro seleccionado
+            pathname: `/admin/nutrition/modify`,
+            state: { recommendation: macro },
         });
     };
 
@@ -81,21 +111,12 @@ const MacrosAdmin: React.FC = () => {
     return (
         <IonPage>
             {/* Header */}
-            <Header
-                title={
-                    selectedCategory === 'weightLoss'
-                        ? 'Weight Loss Nutrition'
-                        : selectedCategory === 'muscleGain'
-                            ? 'Muscle Gain Nutrition'
-                            : selectedCategory === 'maintenance'
-                                ? 'Maintenance Nutrition'
-                                : 'Exercises'
-                }
-            />            <IonContent style={{ backgroundColor: '#000000' }}>
-                {/* Navbar superior con categorías */}
+            <Header title="Nutrition Management" />
+            <IonContent style={{ backgroundColor: '#000000' }}>
+                {/* Navbar superior con categorías obtenidas desde el backend */}
                 <IonSegment
                     value={selectedCategory}
-                    onIonChange={(e: { detail: { value: Category } }) => {
+                    onIonChange={(e: { detail: { value: string } }) => {
                         if (e.detail.value !== selectedCategory) {
                             setSelectedCategory(e.detail.value!);
                         }
@@ -103,20 +124,16 @@ const MacrosAdmin: React.FC = () => {
                     className="custom-segment"
                     color="success"
                 >
-                    <IonSegmentButton value="weightLoss">
-                        <IonLabel>Weight Loss</IonLabel>
-                    </IonSegmentButton>
-                    <IonSegmentButton value="muscleGain">
-                        <IonLabel>Muscle Gain</IonLabel>
-                    </IonSegmentButton>
-                    <IonSegmentButton value="maintenance">
-                        <IonLabel>Maintenance</IonLabel>
-                    </IonSegmentButton>
+                    {categories.map((category) => (
+                        <IonSegmentButton key={category.id} value={category.name}>
+                            <IonLabel>{category.name}</IonLabel>
+                        </IonSegmentButton>
+                    ))}
                 </IonSegment>
 
                 <IonGrid>
                     <IonRow>
-                        {macros[selectedCategory].map((macro) => (
+                        {macros[selectedCategory] && macros[selectedCategory].map((macro) => (
                             <IonCol size="12" key={macro.id}>
                                 <IonCard
                                     style={{

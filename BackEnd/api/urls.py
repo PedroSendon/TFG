@@ -56,6 +56,8 @@ urlpatterns = [
     path('macros/<str:category>/<int:id>/delete/', macros.delete_macronutrient_recommendation, name='delete-macronutrient-recommendation'),
     path('macros/create/', macros.add_macronutrient_recommendation, name='add-macronutrient-recommendation'),
     path('macros/', macros.get_user_macronutrients, name='get-macronutrients'),
+    path('macros/<str:category>/', macros.get_macros_by_category, name='get-macros-by-category'),
+    path('diet-categories/', macros.list_diet_categories, name='get-diet-categories'),
 
     # Estadísticas
     path('statistics/exercises/', statistics.get_exercise_popularity, name='get-exercise-popularity'),

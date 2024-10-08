@@ -1,16 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     TextField, Button, Grid, Container, MenuItem
 } from '@mui/material'; // Importación de componentes de Material UI.
 import { useHistory } from 'react-router-dom';
 import Header from '../../Header/Header'; // Componente de header reutilizable
-
-// Definir los tipos de dieta disponibles
-const dietTypes = [
-    { value: 'weightLoss', label: 'Pérdida de Peso' },
-    { value: 'muscleGain', label: 'Ganancia Muscular' },
-    { value: 'maintenance', label: 'Mantenimiento' },
-];
 
 const AddMacros: React.FC = () => {
     const history = useHistory(); // Hook para navegación.
@@ -27,6 +20,28 @@ const AddMacros: React.FC = () => {
 
     // Estado para manejar los errores de validación.
     const [errors, setErrors] = useState<any>({});
+
+    // Estado para los tipos de dieta.
+    const [dietTypes, setDietTypes] = useState<{ value: string; label: string }[]>([]);
+
+    // Obtener los tipos de dieta desde la base de datos al cargar el componente.
+    useEffect(() => {
+        const fetchDietTypes = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/diet-categories/'); // Cambia la URL según tu configuración
+                const data = await response.json();
+                const types = data.categories.map((category: any) => ({
+                    value: category.name,
+                    label: category.description || category.name, // Ajusta según tu modelo
+                }));
+                setDietTypes(types);
+            } catch (error) {
+                console.error('Error fetching diet types:', error);
+            }
+        };
+
+        fetchDietTypes();
+    }, []);
 
     // Validaciones básicas.
     const validateField = (name: string, value: string) => {
@@ -56,18 +71,47 @@ const AddMacros: React.FC = () => {
     };
 
     // Manejar el envío del formulario.
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (validateForm()) {
-            console.log('Recomendación agregada:', formData);
-            history.push('/admin/macros'); // Redirigir después de añadir.
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/macros/create/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        kcal: formData.kcal,
+                        proteins: formData.proteins,
+                        carbs: formData.carbs,
+                        fats: formData.fats,
+                        dietType: formData.dietType,
+                        description: formData.description,
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Recomendación agregada:', data);
+                    history.push('/admin/macros'); // Redirigir después de añadir.
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error al añadir la recomendación:', errorData);
+                    setErrors({ submit: errorData.error || 'Error desconocido' });
+                }
+            } catch (error) {
+                console.error('Error en la conexión:', error);
+                setErrors({ submit: 'Error en la conexión con el servidor' });
+            }
         } else {
             console.log('Errores en el formulario');
         }
     };
+
     const handleCancel = () => {
         history.push('/admin/nutrition');  // Cancelar y redirigir a la lista de ejercicios
     };
+
 
     return (
         <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

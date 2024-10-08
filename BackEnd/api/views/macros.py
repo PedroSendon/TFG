@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from api.repositories.macros_repository import MacrosRepository
+from api.repositories.macros_repository import MacrosRepository, DietCategoryRepository
 
 @api_view(['GET'])
 def get_user_macronutrients(request):
@@ -151,16 +151,44 @@ def get_macronutrient_recommendation(request, category, id):
     """
     Obtener los detalles de una recomendación de macronutrientes de la categoría seleccionada.
     """
-    # Validar que la categoría es válida
-    valid_categories = ['weightLoss', 'muscleGain', 'maintenance']
+    valid_categories = MacrosRepository.get_all_diet_categories()
     if category not in valid_categories:
         return Response({"error": "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance."},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    # Obtener los detalles de la recomendación
+    # Obtener los detalles de la recomendación desde el repositorio
     recommendation = MacrosRepository.get_macronutrient_recommendation(category, id)
 
     if recommendation:
         return Response(recommendation, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Recommendation not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    
+
+@api_view(['GET'])
+def get_macros_by_category(request, category):
+    """
+    Obtener todas las recomendaciones de macronutrientes por categoría.
+    """
+    valid_categories = ['weightLoss', 'muscleGain', 'maintenance']
+    if category not in valid_categories:
+        return Response({"error": "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Obtener las recomendaciones de macronutrientes de la categoría seleccionada
+    recommendations = MacrosRepository.get_macros_by_category(category)
+
+    if recommendations:
+        return Response(recommendations, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "No se encontraron recomendaciones"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+def list_diet_categories(request):
+    """
+    Endpoint para listar las categorías de dieta.
+    """
+    categories = DietCategoryRepository.list_all_categories()
+    return Response({"categories": list(categories)})
+
