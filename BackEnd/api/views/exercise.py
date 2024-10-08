@@ -2,6 +2,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from api.repositories.exercise_repository import ExerciseRepository
+from api.models.exercise import MuscleGroup
+from api.schemas.exercise import ExerciseUpdateSchema
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -63,6 +65,16 @@ def create_exercise(request):
     }, status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
+def get_muscle_groups(request):
+    """
+    Endpoint para obtener la lista de todos los grupos musculares.
+    """
+    muscle_groups = MuscleGroup.objects.all()
+    muscle_groups_data = [{"id": muscle.id, "name": muscle.name} for muscle in muscle_groups]
+
+    return Response({"data": muscle_groups_data}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
 def list_all_exercises(request):
     """
     Listar todos los ejercicios disponibles en el sistema.
@@ -113,3 +125,27 @@ def get_exercises_by_training(request):
         return Response({"data": exercises}, status=status.HTTP_200_OK)
     else:
         return Response({"error": "No se encontraron ejercicios para el entrenamiento especificado."}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_exercise(request, exercise_id):
+    """
+    Modificar un ejercicio existente
+    """
+    user = request.user
+    if user.role not in ['entrenador', 'administrador']:
+        return Response({"error": "No tienes permisos para modificar ejercicios"}, status=status.HTTP_403_FORBIDDEN)
+
+    # Validar los datos con el schema
+    schema = ExerciseUpdateSchema(**request.data)
+    
+    # Llamar al repositorio para actualizar el ejercicio
+    updated_exercise = ExerciseRepository.update_exercise(exercise_id, schema.dict(exclude_unset=True))
+    
+    if not updated_exercise:
+        return Response({"error": "Ejercicio no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({
+        "message": "Ejercicio modificado con éxito.",
+        "data": updated_exercise
+    }, status=status.HTTP_200_OK)

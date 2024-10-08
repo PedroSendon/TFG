@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface Exercise {
     name: string;
@@ -26,6 +26,12 @@ import { IonFabButton, IonIcon, IonContent, IonPage, IonCol, IonRow, IonGrid, Io
 import { cameraOutline, trashOutline } from 'ionicons/icons';
 import Header from '../../Header/Header';
 import '../../../theme/variables.css';
+interface Exercise {
+    name: string;
+    sets: number;
+    reps: number;
+    rest: number;
+}
 
 const AddWorkouts: React.FC = () => {
     const history = useHistory();
@@ -39,10 +45,7 @@ const AddWorkouts: React.FC = () => {
     });
 
     const [errors, setErrors] = useState<any>({});
-
-    const exercisesList = [
-        'Squat', 'Deadlift', 'Bench Press', 'Pull-up', 'Push-up', 'Bicep Curl', 'Tricep Extension'
-    ];
+    const [exercisesList, setExercisesList] = useState<Exercise[]>([]); // Estado para la lista de ejercicios
 
     const handleAddExercise = () => {
         setWorkoutDetails({
@@ -55,9 +58,33 @@ const AddWorkouts: React.FC = () => {
         history.push('/admin/workout');
     };
 
-    const handleSave = () => {
-        console.log('Datos del entrenamiento guardados:', workoutDetails, media);
-        history.push('/admin/workout');
+    const handleSave = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/workouts/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Si usas JWT
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    description: formData.description,
+                    exercises: workoutDetails.exercises,
+                    media: media,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Entrenamiento creado con éxito:', data);
+                history.push('/admin/workouts');
+            } else {
+                const errorData = await response.json();
+                console.error('Error al crear el entrenamiento:', errorData);
+            }
+        } catch (error) {
+            console.error('Error al conectar con el servidor:', error);
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
@@ -99,16 +126,31 @@ const AddWorkouts: React.FC = () => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Entrenamiento agregado:', formData, media);
-        history.push('/admin/workouts');
-    };
-
     const handleDeleteExercise = (index: number) => {
         const updatedExercises = workoutDetails.exercises.filter((_, i) => i !== index);
         setWorkoutDetails({ ...workoutDetails, exercises: updatedExercises });
-      };
+    };
+
+    // Llamada al backend para obtener los ejercicios
+    const fetchExercises = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/exercises/all/', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Si usas JWT
+                },
+            });
+            const data = await response.json();
+            setExercisesList(data.data); // Actualiza el estado con los ejercicios obtenidos
+        } catch (error) {
+            console.error('Error al obtener ejercicios:', error);
+        }
+    };
+
+    // Ejecutar la llamada al backend cuando el componente se monta
+    useEffect(() => {
+        fetchExercises();
+    }, []);
 
     return (
         <IonPage>
@@ -116,7 +158,7 @@ const AddWorkouts: React.FC = () => {
             <IonContent>
                 <Container component="main" maxWidth="xs" style={{ paddingBottom: '80px' }}>
                     <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSave}>
                             <Grid container spacing={2}>
                                 <Grid item xs={12}>
                                     <TextField
@@ -129,25 +171,6 @@ const AddWorkouts: React.FC = () => {
                                         onChange={handleChange}
                                         error={!!errors.name}
                                         helperText={errors.name}
-                                        InputLabelProps={{
-                                            style: { color: 'var(--color-gris-oscuro)' },
-                                        }}
-                                        sx={{
-                                            '& label.Mui-focused': {
-                                                color: 'var(--color-verde-lima)',
-                                            },
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: 'var(--color-gris-oscuro)',
-                                                },
-                                                '&:hover fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                                '&.Mui-focused fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                            },
-                                        }}
                                     />
                                 </Grid>
 
@@ -161,30 +184,10 @@ const AddWorkouts: React.FC = () => {
                                         multiline
                                         rows={3}
                                         onChange={handleChange}
-                                        InputLabelProps={{
-                                            style: { color: 'var(--color-gris-oscuro)' },
-                                        }}
-                                        sx={{
-                                            '& label.Mui-focused': {
-                                                color: 'var(--color-verde-lima)',
-                                            },
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: 'var(--color-gris-oscuro)',
-                                                },
-                                                '&:hover fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                                '&.Mui-focused fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                            },
-                                        }}
                                     />
                                 </Grid>
 
-                                {/* Lista de ejercicios */}
-                                {workoutDetails.exercises.map((exercise: Exercise, index: number) => (
+                                {workoutDetails.exercises.map((exercise, index) => (
                                     <IonCard key={index} style={{ position: 'relative', borderRadius: '10px', marginBottom: '15px' }}>
                                         <IonGrid style={{ padding: '10px' }}>
                                             <IonRow>
@@ -209,8 +212,8 @@ const AddWorkouts: React.FC = () => {
                                                         onChange={(e) => handleExerciseChange(index, 'name', e.target.value as string)}
                                                     >
                                                         {exercisesList.map((ex) => (
-                                                            <MenuItem key={ex} value={ex}>
-                                                                {ex}
+                                                            <MenuItem key={ex.name} value={ex.name}>
+                                                                {ex.name}
                                                             </MenuItem>
                                                         ))}
                                                     </TextField>
@@ -246,7 +249,6 @@ const AddWorkouts: React.FC = () => {
                                     </IonCard>
                                 ))}
 
-                                {/* Botón para añadir ejercicio */}
                                 <Grid item xs={12} className="ion-text-center">
                                     <Button
                                         onClick={handleAddExercise}
@@ -264,35 +266,6 @@ const AddWorkouts: React.FC = () => {
                                     </Button>
                                 </Grid>
 
-                                {/* Botón para subir imagen o video */}
-                                <Grid item xs={12} className="ion-text-center">
-                                    <Button
-                                        onClick={handleMediaUpload}
-                                        style={{
-                                            border: '1px solid #32CD32',
-                                            backgroundColor: '#FFFFFF',
-                                            color: '#32CD32',
-                                            padding: '3% 0',
-                                            borderRadius: '5px',
-                                            fontSize: '1em',
-                                            minWidth: '100%',
-                                        }}
-                                    >
-                                        <IonIcon icon={cameraOutline} style={{ color: '#fff', marginRight: '10px' }} />
-                                        Upload Image/Video
-                                    </Button>
-
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        style={{ display: 'none' }}
-                                        onChange={handleFileChange}
-                                    />
-
-                                    {media && <img src={media} alt="Preview" style={{ width: '100%', marginTop: '10px' }} />}
-                                </Grid>
-
-                                {/* Botones de Cancelar y Guardar */}
                                 <Grid item xs={12}>
                                     <Grid container spacing={2}>
                                         <Grid item xs={6}>
@@ -313,7 +286,7 @@ const AddWorkouts: React.FC = () => {
                                         </Grid>
                                         <Grid item xs={6}>
                                             <Button
-                                                onClick={handleSave}
+                                                type="submit"
                                                 style={{
                                                     border: '1px solid #32CD32',
                                                     backgroundColor: '#FFFFFF',

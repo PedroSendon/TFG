@@ -12,11 +12,10 @@ class WorkoutExerciseSchema(BaseModel):
 class WorkoutSchema(BaseModel):
     name: str
     description: str
-    exercises: List[WorkoutExerciseSchema]  # Lista de ejercicios con sus detalles (sets, reps, rest)
-    media: Optional[str] = None  # URL para media (opcional)
+    exercises: List[str]  # Esto dependerá de cómo estés manejando la relación con los ejercicios
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class WorkoutSchema(BaseModel):
     name: str
@@ -24,7 +23,7 @@ class WorkoutSchema(BaseModel):
     media: Optional[str] = None  # URL para media (opcional)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class WorkoutExerciseDetailSchema(BaseModel):
     name: constr(max_length=100)
@@ -34,7 +33,7 @@ class WorkoutExerciseDetailSchema(BaseModel):
     completed: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserWorkoutSchema(BaseModel):
     user_id: int
@@ -44,4 +43,4 @@ class UserWorkoutSchema(BaseModel):
     date_completed: Optional[date] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

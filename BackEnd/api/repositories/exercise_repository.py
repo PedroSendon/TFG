@@ -58,6 +58,34 @@ class ExerciseRepository:
         }
     
     @staticmethod
+    def update_exercise(exercise_id: int, data: dict):
+        try:
+            exercise = Exercise.objects.get(id=exercise_id)
+            if 'name' in data:
+                exercise.name = data['name']
+            if 'description' in data:
+                exercise.description = data['description']
+            if 'muscle_groups' in data:
+                exercise.muscle_groups = ','.join(data['muscle_groups'])
+            if 'instructions' in data:
+                exercise.instructions = data['instructions']
+            if 'media' in data:
+                exercise.media = data['media']
+            
+            exercise.save()
+
+            return {
+                "id": exercise.id,
+                "name": exercise.name,
+                "description": exercise.description,
+                "muscle_groups": exercise.muscle_groups.split(","),
+                "instructions": exercise.instructions,
+                "media": exercise.media
+            }
+        except Exercise.DoesNotExist:
+            return None
+
+    @staticmethod
     def list_all_exercises():
         """
         Listar todos los ejercicios disponibles en el sistema.
@@ -68,10 +96,11 @@ class ExerciseRepository:
             "id": exercise.id,
             "name": exercise.name,
             "description": exercise.description,
-            "muscleGroups": exercise.muscle_groups.split(","),
+            "muscleGroups": [muscle.name for muscle in exercise.muscle_groups.all()],  # Corregido para manejar el ManyToMany
             "instructions": exercise.instructions,
             "media": exercise.media
         } for exercise in exercises]
+
     
     @staticmethod
     def get_exercise_by_id(exercise_id):

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     IonPage,
     IonContent,
@@ -8,39 +8,63 @@ import {
     IonCard,
     IonCardContent,
     IonLabel,
-    IonButton,
     IonFab,
-    IonFabButton,
-    IonAlert,  // Para confirmaciones de eliminación
     useIonAlert,
     IonSegment,
     IonSegmentButton
 } from '@ionic/react';
 import { Add } from '@mui/icons-material';
-import Header from '../../Header/Header'; // Componente de header reutilizable
-import Navbar from '../../Navbar/Navbar'; // Componente de la navbar
+import Header from '../../Header/Header'; 
+import Navbar from '../../Navbar/Navbar'; 
 import { useHistory } from 'react-router';
 import { Button } from '@mui/material';
 
-// Datos de ejemplo para entrenamientos y ejercicios
-const workoutsData = [
-    { id: 1, name: 'Full Body Workout', description: 'A full-body workout to improve overall fitness.' },
-    { id: 2, name: 'Leg Day', description: 'A workout focusing on lower body strength.' },
-];
 
-const exercisesData = [
-    { id: 1, name: 'Squats', description: 'An exercise targeting the lower body.' },
-    { id: 2, name: 'Push-ups', description: 'A bodyweight exercise for upper body strength.' },
-];
+interface Workout {
+    id: number;
+    name: string;
+    description: string;
+  }
+  
+  interface Exercise {
+    id: number;
+    name: string;
+    description: string;
+  }
 
 const WorkoutsExercises: React.FC = () => {
-    const history = useHistory();  // Hook para manejar la navegación.
-    const [selectedSection, setSelectedSection] = useState<string>('workouts');  // Para cambiar entre workouts y exercises
-    const [workouts, setWorkouts] = useState(workoutsData);  // Estado local para los entrenamientos
-    const [exercises, setExercises] = useState(exercisesData);  // Estado local para los ejercicios
-    const [presentAlert] = useIonAlert();  // Alerta para confirmación
+    const history = useHistory();
+    const [selectedSection, setSelectedSection] = useState<string>('workouts');
+    const [workouts, setWorkouts] = useState<Workout[]>([]);  // Usa el tipo Workout
+    const [exercises, setExercises] = useState<Exercise[]>([]);  // Usa el tipo Exercise
+    const [presentAlert] = useIonAlert();
 
-    // Función para manejar la eliminación de entrenamientos o ejercicios
+    // Obtener entrenamientos desde el BE
+    useEffect(() => {
+        fetchWorkouts();
+        fetchExercises();
+    }, []);
+
+    const fetchWorkouts = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/workouts/');
+            const data = await response.json();
+            setWorkouts(data); // Ajustar los datos obtenidos
+        } catch (error) {
+            console.error('Error al obtener entrenamientos:', error);
+        }
+    };
+
+    const fetchExercises = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/exercises/all/');
+            const data = await response.json();
+            setExercises(data.data); // Ajustar los datos obtenidos
+        } catch (error) {
+            console.error('Error al obtener ejercicios:', error);
+        }
+    };
+
     const handleDelete = (id: number, type: string) => {
         presentAlert({
             header: 'Confirmar eliminación',
@@ -61,33 +85,28 @@ const WorkoutsExercises: React.FC = () => {
         });
     };
 
-    // Función para manejar la modificación de entrenamientos o ejercicios
     const handleEdit = (id: number, type: string) => {
         const selectedData = type === 'workout'
             ? workouts.find((workout) => workout.id === id)
             : exercises.find((exercise) => exercise.id === id);
 
         history.push({
-            pathname: `/admin/${type}/modify`,  // Ruta dinámica basada en el tipo (workout/exercise)
+            pathname: `/admin/${type}/modify`,
             state: { data: selectedData },
         });
     };
 
-    // Función para añadir un nuevo entrenamiento o ejercicio
     const handleAdd = (type: string) => {
         history.push(`/admin/${type}/add`);
     };
 
     return (
         <IonPage>
-            {/* Header */}
             <Header title={selectedSection === 'workouts' ? 'Workouts' : 'Exercises'} />
-
             <IonContent style={{ backgroundColor: '#000000' }}>
-                {/* Segmento para cambiar entre entrenamientos y ejercicios */}
                 <IonSegment
                     value={selectedSection}
-                    onIonChange={(e: { detail: { value: React.SetStateAction<string>; }; }) => setSelectedSection(e.detail.value!)}
+                    onIonChange={(e: CustomEvent) => setSelectedSection(e.detail.value!)}
                     className="custom-segment"
                     color="success"
                 >
@@ -100,7 +119,6 @@ const WorkoutsExercises: React.FC = () => {
                 </IonSegment>
 
                 <IonGrid>
-                    {/* Mostrar entrenamientos o ejercicios en función de la sección seleccionada */}
                     {selectedSection === 'workouts' ? (
                         <IonRow>
                             {workouts.map((workout) => (
@@ -116,7 +134,6 @@ const WorkoutsExercises: React.FC = () => {
                                         }}
                                     >
                                         <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            {/* Información del entrenamiento */}
                                             <div>
                                                 <IonLabel style={{ color: '#000000', fontWeight: 'bold', fontSize: '1em', display: 'block', marginBottom: '8px' }}>
                                                     {workout.name}
@@ -125,8 +142,6 @@ const WorkoutsExercises: React.FC = () => {
                                                     {workout.description}
                                                 </IonLabel>
                                             </div>
-
-                                            {/* Botones Modificar y Eliminar */}
                                             <div style={{ display: 'flex', gap: '5px' }}>
                                                 <Button
                                                     onClick={() => handleEdit(workout.id, 'workout')}
@@ -177,13 +192,11 @@ const WorkoutsExercises: React.FC = () => {
                                         }}
                                     >
                                         <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            {/* Información del ejercicio */}
                                             <div>
                                                 <IonLabel style={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
                                                     {exercise.name}
                                                 </IonLabel>
                                             </div>
-                                            {/* Botones Modificar y Eliminar */}
                                             <div style={{ display: 'flex', gap: '5px' }}>
                                                 <Button
                                                     onClick={() => handleEdit(exercise.id, 'exercise')}
@@ -222,7 +235,6 @@ const WorkoutsExercises: React.FC = () => {
                     )}
                 </IonGrid>
 
-                {/* Botón flotante para añadir un nuevo entrenamiento o ejercicio */}
                 <IonFab vertical="bottom" horizontal="end" style={{ marginBottom: '15%', position: 'fixed' }}>
                     <Button
                         onClick={() => handleAdd(selectedSection === 'workouts' ? 'workout' : 'exercise')}
@@ -231,8 +243,8 @@ const WorkoutsExercises: React.FC = () => {
                             color: '#32CD32',
                             width: '60px',
                             height: '60px',
-                            borderRadius: '50%', // Hace que el botón sea redondo
-                            border: '2px solid #32CD32', // Borde verde lima
+                            borderRadius: '50%',
+                            border: '2px solid #32CD32',
                             zIndex: 1000,
                             display: 'flex',
                             justifyContent: 'center',
@@ -242,11 +254,7 @@ const WorkoutsExercises: React.FC = () => {
                         <Add style={{ fontSize: '24px', color: '#32CD32' }} />
                     </Button>
                 </IonFab>
-
-
             </IonContent>
-
-            {/* Navbar */}
             <Navbar />
         </IonPage>
     );

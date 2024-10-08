@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     TextField,
     Button,
@@ -19,27 +19,36 @@ import Header from '../../Header/Header';  // Importación del Header
 import '../../../theme/variables.css'; // Archivo de estilos personalizados.
 
 const AddExercises: React.FC = () => {
-    const history = useHistory(); // Inicializa el hook para manejar la navegación.
-    const [media, setMedia] = useState<string | null>(null);  // Estado para manejar la imagen o video.
-    const fileInputRef = useRef<HTMLInputElement>(null);  // Referencia al input de archivos.
+    const history = useHistory(); 
+    const [media, setMedia] = useState<string | null>(null);  
+    const fileInputRef = useRef<HTMLInputElement>(null);  
 
-    // Estado para almacenar los datos del formulario.
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        muscleGroups: [] as string[],  // Grupos musculares seleccionados.
+        muscleGroups: [] as string[], 
         instructions: '',
     });
 
-    // Estado para manejar los errores de validación.
     const [errors, setErrors] = useState<any>({});
 
-    // Lista de grupos musculares.
-    const muscleGroupsList = [
-        'Biceps', 'Triceps', 'Chest', 'Back', 'Shoulders', 'Legs', 'Abs', 'Calves', 'Forearms', 'Glutes'
-    ];
+    const [muscleGroupsList, setMuscleGroupsList] = useState<string[]>([]); // Estado para almacenar los grupos musculares desde la BD
 
-    // Manejar cambios en los campos de texto.
+    // Obtener los grupos musculares desde el backend al cargar la página
+    useEffect(() => {
+        const fetchMuscleGroups = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/exercises/muscle-groups/');
+                const data = await response.json();
+                setMuscleGroupsList(data.data.map((group: { name: string }) => group.name));
+            } catch (error) {
+                console.error('Error al obtener los grupos musculares:', error);
+            }
+        };
+
+        fetchMuscleGroups();
+    }, []);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
         const { name, value } = e.target;
         setFormData({
@@ -48,38 +57,69 @@ const AddExercises: React.FC = () => {
         });
     };
 
-    // Manejar cambios en la selección múltiple de grupos musculares.
     const handleMuscleGroupChange = (event: SelectChangeEvent<string[]>) => {
         setFormData({ ...formData, muscleGroups: event.target.value as string[] });
     };
 
-    // Función para manejar la subida de imágenes o videos.
     const handleMediaUpload = () => {
         fileInputRef.current?.click();
     };
 
-    // Función para manejar la carga de archivos.
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setMedia(reader.result as string);  // Almacena la imagen o video en base64.
+                setMedia(reader.result as string);  
             };
             reader.readAsDataURL(file);
         }
     };
 
-    // Función para manejar el envío del formulario.
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Ejercicio agregado:', formData, media);
-        history.push('/admin/exercises');  // Redirigir a la página de ejercicios después de agregar.
+
+        // Validar los campos antes de enviarlos al backend
+        if (!formData.name || !formData.description || !formData.muscleGroups.length || !formData.instructions) {
+            setErrors({ ...errors, form: 'Todos los campos son obligatorios' });
+            return;
+        }
+
+        // Realizar la solicitud al backend
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/exercises/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Si usas JWT
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    description: formData.description,
+                    muscleGroups: formData.muscleGroups,
+                    instructions: formData.instructions,
+                    media: media,
+                }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                console.log('Ejercicio creado con éxito:', data);
+                history.push('/admin/exercises');  
+            } else {
+                console.error('Error al crear el ejercicio:', data);
+                setErrors({ ...errors, form: 'Error al crear el ejercicio. Verifique los datos.' });
+            }
+        } catch (error) {
+            console.error('Error al conectar con el servidor:', error);
+            setErrors({ ...errors, form: 'Error de conexión. Inténtelo más tarde.' });
+        }
     };
 
     const handleCancel = () => {
-        history.push('/admin/exercises');  // Cancelar y redirigir a la lista de ejercicios
+        history.push('/admin/exercises');  
     };
+
 
     return (
         <IonPage>

@@ -47,6 +47,8 @@ urlpatterns = [
     path('exercises/details/', exercise.get_exercise_details, name='get-exercise-details'),
     path('exercises/all/', exercise.list_all_exercises, name='list-all-exercises'),
     path('exercises/by-train/', exercise.get_exercises_by_training, name='get-exercises-by-training'),
+    path('exercises/muscle-groups/', exercise.get_muscle_groups, name='get-muscle-groups'),
+    path('exercises/<int:exercise_id>/', exercise.update_exercise, name='update-exercise'),
 
     # Macros
     path('macros/<str:category>/<int:id>/', macros.get_macronutrient_recommendation, name='get-macronutrient-recommendation'),

@@ -13,7 +13,7 @@ class UserSchema(BaseModel):
     gender: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserCreate(BaseModel):
@@ -26,7 +26,7 @@ class UserCreate(BaseModel):
     terms_accepted: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserProfileUpdateSchema(BaseModel):
@@ -38,7 +38,7 @@ class UserProfileUpdateSchema(BaseModel):
     trainingFrequency: Optional[int]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class LoginSchema(BaseModel):
@@ -47,7 +47,7 @@ class LoginSchema(BaseModel):
     remember_me: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 
@@ -71,7 +71,7 @@ class UserDetailsSchema(BaseModel):
     custom_medical_condition: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 
@@ -84,7 +84,7 @@ class UserDetailsSchema(BaseModel):
     physical_activity_level: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class DietPreferencesSchema(BaseModel):
     diet_type: str
@@ -94,18 +94,18 @@ class DietPreferencesSchema(BaseModel):
     custom_food_restrictions: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class MedicalConditionsSchema(BaseModel):
     medical_condition: str
     custom_medical_condition: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class TrainingPreferencesSchema(BaseModel):
     available_equipment: str
     training_preference: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

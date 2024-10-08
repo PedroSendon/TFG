@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 
 class ExerciseSchema(BaseModel):
@@ -18,4 +18,14 @@ class ExerciseSchema(BaseModel):
     media: Optional[str] = None
 
     class Config:
-        orm_mode = True  # Esto permite usar objetos ORM con Pydantic
+        from_attributes = True  # Esto permite usar objetos ORM con Pydantic
+
+class ExerciseUpdateSchema(BaseModel):
+    name: Optional[str] = Field(None, min_length=1)
+    description: Optional[str]
+    muscle_groups: Optional[List[str]]  # Lista de grupos musculares
+    instructions: Optional[str]
+    media: Optional[str]  # URL o base64 para la imagen o video
+
+    class Config:
+        from_attributes = True

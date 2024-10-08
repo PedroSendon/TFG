@@ -10,7 +10,7 @@ class MacrosRecommendationSchema(BaseModel):
     description: Optional[str] = Field(None, description="Descripción opcional de la dieta")
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class MealPlanSchema(BaseModel):
     user_id: int
@@ -22,4 +22,4 @@ class MealPlanSchema(BaseModel):
     fats: float
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -10,7 +10,7 @@ class ProgressTrackingSchema(BaseModel):
     completed_workouts: Optional[int]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ExerciseLogSchema(BaseModel):
     user_id: int
@@ -22,4 +22,4 @@ class ExerciseLogSchema(BaseModel):
     rest_time: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
