@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { IonPage, IonContent, IonList, IonItem, IonLabel, IonImg, IonCheckbox, IonButton, IonProgressBar } from '@ionic/react';
-import { useHistory } from 'react-router-dom'; // Hook para manejar la navegación entre páginas
+import { useHistory, useParams } from 'react-router-dom'; // Hook para manejar la navegación entre páginas y obtener parámetros de la URL
 import './WorkoutDay.css'; // Importa los estilos personalizados
 import Header from '../../Header/Header'; // Importa el componente Header para mostrar el encabezado
 
 // Componente funcional WorkoutDay
 const WorkoutDay: React.FC = () => {
   const history = useHistory(); // Hook para redirigir a otras rutas de la app
+  const { day_id } = useParams<{ day_id: string }>();  // Obtener el workout_id de los parámetros de la URL
 
-  // Estado para almacenar los ejercicios obtenidos del backend o simulados
+  // Estado para almacenar los ejercicios obtenidos del backend
   const [exercises, setExercises] = useState<Array<{ name: string; imageUrl: string; sets: number; reps: number; completed: boolean }>>([]);
   
   // Variables de estado para manejar los totales de series, repeticiones y tiempo estimado
@@ -17,34 +18,34 @@ const WorkoutDay: React.FC = () => {
   const [estimatedTime, setEstimatedTime] = useState<number>(0); // Tiempo estimado en minutos para completar el entrenamiento
   const [completedCount, setCompletedCount] = useState<number>(0); // Número de ejercicios completados
 
-  // Función para obtener los datos de los ejercicios (simulación)
-  const fetchExercises = async () => {
+  // Función para obtener los datos de los ejercicios del día
+  const fetchWorkoutDetails = async (day_id: string) => {
     try {
-      // Datos simulados de los ejercicios del día
-      const data = [
-        { name: 'Sentadillas', imageUrl: 'https://via.placeholder.com/150', sets: 4, reps: 12, completed: false },
-        { name: 'Press de banca', imageUrl: 'https://via.placeholder.com/150', sets: 3, reps: 10, completed: false },
-        { name: 'Dominadas', imageUrl: 'https://via.placeholder.com/150', sets: 5, reps: 8, completed: false },
-        { name: 'Peso muerto', imageUrl: 'https://via.placeholder.com/150', sets: 4, reps: 10, completed: false }
-      ];
-      setExercises(data); // Almacena los ejercicios en el estado
+      const response = await fetch(`http://127.0.0.1:8000/api/workout/day/${day_id}/`);
+      if (response.ok) {
+        const data = await response.json();
+        setExercises(data); // Aquí deberías recibir la lista de ejercicios del backend
 
-      // Cálculos para obtener el total de series, repeticiones y tiempo estimado
-      const totalSets = data.reduce((acc, exercise) => acc + exercise.sets, 0);
-      const totalReps = data.reduce((acc, exercise) => acc + exercise.reps * exercise.sets, 0);
-      const estimatedTime = totalSets * 2; // Se estima 2 minutos por serie
-      setTotalSets(totalSets); // Actualiza el estado del total de series
-      setTotalReps(totalReps); // Actualiza el estado del total de repeticiones
-      setEstimatedTime(estimatedTime); // Actualiza el tiempo estimado
+        // Cálculos para obtener el total de series, repeticiones y tiempo estimado
+        const totalSets = data.reduce((acc: number, exercise: any) => acc + exercise.sets, 0);
+        const totalReps = data.reduce((acc: number, exercise: any) => acc + exercise.reps * exercise.sets, 0);
+        const estimatedTime = totalSets * 2; // Se estima 2 minutos por serie
+        setTotalSets(totalSets); // Actualiza el estado del total de series
+        setTotalReps(totalReps); // Actualiza el estado del total de repeticiones
+        setEstimatedTime(estimatedTime); // Actualiza el tiempo estimado
+      } else {
+        console.error('Error fetching workout details');
+      }
     } catch (err) {
-      console.error('Error fetching exercises'); // Muestra un error si algo sale mal
+      console.error('Network error fetching workout details');
     }
   };
 
-  // useEffect para cargar los datos cuando se monta el componente
   useEffect(() => {
-    fetchExercises(); // Llama a la función que obtiene los ejercicios
-  }, []); // Solo se ejecuta una vez cuando el componente se monta
+    if (day_id) {
+      fetchWorkoutDetails(day_id);  // Llamar a la función para obtener los detalles del entrenamiento
+    }
+  }, [day_id]);
 
   // Función para manejar el cambio en el checkbox de completado de un ejercicio
   const handleCheckboxChange = (index: number) => {

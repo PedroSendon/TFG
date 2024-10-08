@@ -9,7 +9,7 @@ const WorkoutOverview: React.FC = () => {
   const history = useHistory(); // Hook para manejar la navegación entre páginas
 
   // Estado para almacenar los datos de los entrenamientos (simulados o del backend)
-  const [workoutDays, setWorkoutDays] = useState<Array<{ day: string; imageUrl: string; workoutName: string }>>([]);
+  const [workoutDays, setWorkoutDays] = useState<Array<{ id: number; day: string; imageUrl: string; workoutName: string }>>([]);
   const [loading, setLoading] = useState<boolean>(true); // Estado para controlar si los datos están cargando
   const [error, setError] = useState<string | null>(null); // Estado para manejar posibles errores
 
@@ -36,8 +36,8 @@ const WorkoutOverview: React.FC = () => {
   }, []); // El array vacío asegura que esto solo se ejecute una vez al montar el componente
 
   // Función que maneja el clic en un día de entrenamiento y navega a la vista de ese día
-  const handleDayClick = (day: string) => {
-    history.push(`/workout/day`); // Redirige a la página específica del día de entrenamiento
+  const handleDayClick = (id: number) => {
+    history.push(`/workout/day/${id}`); // Redirige a la página del entrenamiento, pasando el id en la URL
   };
 
   // Muestra una pantalla de carga mientras se obtienen los entrenamientos
@@ -86,7 +86,7 @@ const WorkoutOverview: React.FC = () => {
               detail={false} // Oculta la flecha de detalle a la derecha del item
               className="workout-item" // Clase CSS para estilizar los items
               lines="none"  // Sin líneas para los items individuales
-              onClick={() => handleDayClick(workout.day)} // Llama a la función cuando se hace clic en el item
+              onClick={() => handleDayClick(workout.id)} // Llama a la función cuando se hace clic en el item
             >
               {/* Contenedor del ítem con imagen y texto */}
               <div className="workout-container">
