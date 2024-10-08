@@ -17,11 +17,31 @@ const AssignPlans: React.FC = () => {
   const workoutOptions = ['Entrenamiento A', 'Entrenamiento B', 'Entrenamiento C'];
   const nutritionPlans = ['Plan Nutricional 1', 'Plan Nutricional 2', 'Plan Nutricional 3'];
 
-  const handleSave = () => {
-    // Aquí iría la lógica para guardar la asignación
-    console.log('Usuario ID:', userId, 'Entrenamiento:', selectedWorkout, 'Plan Nutricional:', selectedPlan);
-    history.push('/admin/users'); // Redirigir a la lista de usuarios
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/users/${userId}/assign-plans/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workout_id: selectedWorkout,  // ID del entrenamiento seleccionado
+          nutrition_plan_id: selectedPlan,  // ID del plan nutricional seleccionado
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Asignación exitosa:', data);
+        history.push('/admin/users');  // Redirigir a la página de usuarios después de guardar
+      } else {
+        console.error('Error al asignar los planes:', await response.json());
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error);
+    }
   };
+
 
   const handleCancel = () => {
     history.push('/admin/users'); // Redirigir a la lista de usuarios al cancelar

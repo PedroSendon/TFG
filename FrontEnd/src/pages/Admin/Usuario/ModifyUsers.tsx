@@ -31,9 +31,35 @@ const ModifyUserPage: React.FC = () => {
     const [showActionSheet, setShowActionSheet] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleSave = () => {
-        console.log('Datos guardados:', profileData);
-        history.push('/admin/users'); // Redirigir a la página de administración después de guardar
+    const handleSave = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/users/update/${userData.id}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Si necesitas un token de autenticación
+                },
+                body: JSON.stringify({
+                    first_name: profileData.firstName,
+                    last_name: profileData.lastName,
+                    currentWeight: profileData.currentWeight,
+                    weightGoal: profileData.weightGoal,
+                    activityLevel: profileData.activityLevel,
+                    trainingFrequency: profileData.trainingFrequency,
+                    role: profileData.role,
+                }),
+            });
+    
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Usuario actualizado exitosamente:', data);
+                history.push('/admin/users'); // Redirigir a la página de administración después de guardar
+            } else {
+                console.error('Error al actualizar el usuario');
+            }
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
+        }
     };
     const handleCancel = () => {
         history.push('/admin/users');  // Cancelar y redirigir a la lista de ejercicios

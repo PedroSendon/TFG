@@ -184,6 +184,65 @@ def update_user_profile(request):
 
     return Response(updated_profile, status=status.HTTP_200_OK)
 
+@api_view(['POST'])
+#@permission_classes([IsAdminUser])
+def create_user_as_admin(request):
+    """
+    Crear un nuevo usuario desde el modo administrador.
+    """
+    try:
+        # Verificar si el usuario tiene permisos de administrador
+        #user = request.user
+        #if user.role != 'administrador':
+        #    return Response({"error": "No tienes permisos para crear usuarios"}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Validar los datos recibidos
+        user_data = UserCreate(**request.data)
+
+        # Verificar si el usuario ya existe por email
+        if UserRepository.user_exists_by_email(user_data.email):
+            return Response({"error": "El usuario con este correo electrónico ya existe."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Hash de la contraseña
+        user_data.password = make_password(user_data.password)
+
+        # Asignar el rol (cliente por defecto si no se proporciona)
+        role = request.data.get('role', 'cliente')
+
+        # Crear el usuario en la base de datos
+        user = UserRepository.create_user({**user_data.dict(), "role": role})
+
+        return Response({"message": "Usuario creado exitosamente"}, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def assign_plans(request, user_id):
+    """
+    Asignar un plan de entrenamiento y un plan nutricional a un usuario.
+    """
+    workout_id = request.data.get('workout_id')
+    nutrition_plan_id = request.data.get('nutrition_plan_id')
+
+    # Llamar al repositorio para asignar el entrenamiento
+    success_workout, message_workout = UserRepository.assign_workout_to_user(user_id, workout_id)
+    
+    if not success_workout:
+        return Response({"error": message_workout}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Llamar al repositorio para asignar el plan nutricional
+    success_plan, message_plan = UserRepository.assign_nutrition_plan_to_user(user_id, nutrition_plan_id)
+
+    if not success_plan:
+        return Response({"error": message_plan}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({
+        "message": "Entrenamiento y plan nutricional asignados exitosamente."
+    }, status=status.HTTP_200_OK)
+
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])
 def update_user_as_admin(request, user_id):
@@ -210,6 +269,23 @@ def update_user_as_admin(request, user_id):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def assign_role(request, user_id):
+    """
+    Asignar un rol específico a un usuario.
+    """
+    role = request.data.get('role')  # Obtener el rol enviado desde el frontend
+    if role not in ['cliente', 'administrador', 'entrenador', 'nutricionista']:
+        return Response({"error": "Rol no válido."}, status=status.HTTP_400_BAD_REQUEST)
+
+    success = UserRepository.assign_role_to_user(user_id, role)
+    if success:
+        return Response({"message": "Rol asignado correctamente."}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['PUT'])
@@ -261,7 +337,7 @@ def get_all_users(request):
     """
     Obtener la lista de usuarios con su información básica.
     """
-    user_data = UserRepository.get_all_users()
+    user_data = UserDetailsRepository.get_all_users()
 
     return Response(user_data, status=status.HTTP_200_OK)
 

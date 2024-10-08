@@ -115,16 +115,46 @@ const AddUsers: React.FC = () => {
     };
 
     // Maneja el envío del formulario.
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (isFormValid()) {
-            console.log('Usuario agregado con éxito:', formData);
-            history.push('/admin/users'); // Redirige de nuevo a la lista de usuarios.
-        } else {
+    
+        if (!isFormValid()) {
             console.log('Errores en el formulario');
+            return;
+        }
+    
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/users/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    first_name: formData.firstName,
+                    last_name: formData.lastName,
+                    email: formData.email,
+                    password: formData.password,
+                    birth_date: formData.birthDate.format('YYYY-MM-DD'),  // Formato de la fecha
+                    gender: formData.gender,
+                    terms_accepted: true  // Si es necesario
+                }),
+            });
+    
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Usuario creado exitosamente:', data);
+                history.push('/admin/users');  // Redirigir a la página de usuarios después de crear
+            } else {
+                const errorData = await response.json();
+                console.error('Error al crear el usuario:', errorData);
+            }
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
         }
     };
+    
+    
+    
     const handleCancel = () => {
         history.push('/admin/users');  // Cancelar y redirigir a la lista de ejercicios
     };

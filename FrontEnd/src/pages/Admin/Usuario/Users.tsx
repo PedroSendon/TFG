@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IonPage,
   IonContent,
@@ -34,10 +34,34 @@ const usersInitialData = [
 ];
 
 const Users: React.FC = () => {
-  const history = useHistory(); // Inicializa el hook para manejar la navegación.
+  const history = useHistory();
+  interface User {
+    id: number;
+    name: string;
+    email: string;
+  }
 
-  const [users, setUsers] = React.useState(usersInitialData);  // Estado local para los usuarios
+  const [users, setUsers] = useState<User[]>([]);  // Estado inicial vacío
   const [presentAlert] = useIonAlert();  // Alerta para confirmación
+
+  // Llamar al backend para obtener los usuarios cuando el componente se monta
+  useEffect(() => {
+    fetchUsers();  // Llama a la función para obtener los usuarios
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/users/');  // Cambia la URL a la correcta de tu backend
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);  // Actualiza el estado con los datos obtenidos
+      } else {
+        console.error('Error al obtener la lista de usuarios');
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+    }
+  };
 
   // Función para manejar la eliminación del usuario
   const handleDelete = (userId: number) => {
@@ -49,11 +73,9 @@ const Users: React.FC = () => {
         {
           text: 'Eliminar',
           handler: () => {
-            // Llamada al backend para eliminar el usuario
-            fetch(`/users/${userId}`, { method: 'DELETE' })
+            fetch(`/api/users/delete/${userId}`, { method: 'DELETE' })
               .then((response) => {
                 if (response.ok) {
-                  // Actualiza la lista de usuarios en el frontend
                   setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
                 } else {
                   console.error('Error al eliminar el usuario');
@@ -66,29 +88,24 @@ const Users: React.FC = () => {
     });
   };
 
-  // Función para manejar la modificación del usuario
   const handleEdit = (userId: number) => {
-    // Buscar los datos del usuario seleccionado
     const selectedUser = users.find((user) => user.id === userId);
-
-    // Redirigir a la página de modificación del usuario y pasar los datos del usuario seleccionado
     history.push({
-      pathname: `/admin/users/modify`, // Ruta de la página de modificación del usuario
-      state: { userData: selectedUser }, // Pasar los datos del usuario seleccionado
+      pathname: `/admin/users/modify`,
+      state: { userData: selectedUser },
     });
   };
 
   const handleAddUser = () => {
-    console.log('Navegando a /admin/nutrition/add');
     history.push(`/admin/users/add`);
   };
+
   const handleAssign = (userId: number) => {
     history.push({
-      pathname: `/admin/users/assign`, // Ruta de la nueva pantalla de asignación
-      state: { userId }, // Pasar el ID del usuario seleccionado
+      pathname: `/admin/users/assign`,
+      state: { userId },
     });
   };
-
 
 
   return (

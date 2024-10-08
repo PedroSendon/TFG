@@ -1,4 +1,6 @@
 from datetime import datetime
+from api.models.macros import MealPlan, UserNutritionPlan
+from api.models.workout import UserWorkout, Workout
 from api.models import User
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import check_password, make_password
@@ -29,6 +31,18 @@ class UserRepository:
             return user
         except Exception as e:
             raise ValueError(f"Error creando usuario: {e}")
+
+    @staticmethod
+    def get_user_by_id(user_id):
+        """
+        Obtener un usuario por su ID.
+        :param user_id: ID del usuario.
+        :return: El objeto usuario si existe, None en caso contrario.
+        """
+        try:
+            return User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return None
 
     @staticmethod
     def get_user_by_email(email):
@@ -110,7 +124,46 @@ class UserRepository:
                 return None
         except User.DoesNotExist:
             return None
+
+    @staticmethod
+    def assign_workout_to_user(user_id, workout_id):
+        """
+        Asigna un plan de entrenamiento a un usuario.
+        """
+        try:
+            user = User.objects.get(id=user_id)
+            workout = Workout.objects.get(id=workout_id)
+
+            # Crear la relación entre el usuario y el entrenamiento
+            UserWorkout.objects.create(user=user, workout=workout)
+            return True, "Plan de entrenamiento asignado exitosamente."
         
+        except User.DoesNotExist:
+            return False, "Usuario no encontrado."
+        except Workout.DoesNotExist:
+            return False, "Plan de entrenamiento no encontrado."
+        except Exception as e:
+            return False, str(e)
+
+    @staticmethod
+    def assign_nutrition_plan_to_user(user_id, plan_id):
+        """
+        Asigna un plan nutricional a un usuario.
+        """
+        try:
+            user = User.objects.get(id=user_id)
+            nutrition_plan = MealPlan.objects.get(id=plan_id)
+
+            # Crear la relación entre el usuario y el plan nutricional
+            UserNutritionPlan.objects.create(user=user, plan=nutrition_plan)
+            return True, "Plan nutricional asignado exitosamente."
+        
+        except User.DoesNotExist:
+            return False, "Usuario no encontrado."
+        except MealPlan.DoesNotExist:
+            return False, "Plan nutricional no encontrado."
+        except Exception as e:
+            return False, str(e)        
 
 class UserDetailsRepository:
     
@@ -384,3 +437,5 @@ class UserDetailsRepository:
         # Convertir el resultado a una lista de diccionarios con el formato deseado
         month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         return [{"month": month_names[entry['month'].month - 1], "newUsers": entry['new_users']} for entry in monthly_growth]
+    
+    

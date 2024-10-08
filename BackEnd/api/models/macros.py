@@ -1,4 +1,5 @@
 from django.db import models
+from .User import User  # Asegúrate de que 'User' esté definido en otro archivo de modelos
 
 class MacrosRecommendation(models.Model):
     DIET_TYPES = [
@@ -28,3 +29,14 @@ class MealPlan(models.Model):
 
     def __str__(self):
         return f"{self.meal_name} for {self.user} ({self.diet_type})"
+
+class UserNutritionPlan(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_nutrition_plans')
+    plan = models.ForeignKey('MealPlan', on_delete=models.CASCADE, related_name='user_nutrition_plans')
+    date_assigned = models.DateField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'plan')
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name} - {self.plan.diet_type}"

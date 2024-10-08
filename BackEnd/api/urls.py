@@ -9,6 +9,7 @@ from .views import workout
 from .views import statistics
 from .views import exercise
 
+
 urlpatterns = [
     # Usuarios
     path('register/', user.register, name='register'),
@@ -17,8 +18,11 @@ urlpatterns = [
     path('user/details/', user.save_user_details, name='user-details'),
     path('users/email/<str:email>/', user.get_user_by_email, name='get-user-by-email'),
     path('users/', user.get_all_users, name='get-all-users'),
-    path('users/update/', user.update_user_as_admin, name='update-user'),
+    path('users/update/<int:user_id>/', user.update_user_as_admin, name='update-user'),
     path('users/delete/<int:user_id>/', user.delete_user, name='delete-user'),
+    path('users/assign-role/<int:user_id>/', user.assign_role, name='assign-role'),
+    path('users/create/', user.create_user_as_admin, name='create-user-as-admin'),
+    path('users/<int:user_id>/assign-plans/', user.assign_plans, name='assign-plans'),
 
     # Perfil de usuario
     path('profile/', user.get_user_profile, name='get-user-profile'),
