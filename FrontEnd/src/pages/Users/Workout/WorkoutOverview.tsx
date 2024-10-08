@@ -13,38 +13,26 @@ const WorkoutOverview: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true); // Estado para controlar si los datos están cargando
   const [error, setError] = useState<string | null>(null); // Estado para manejar posibles errores
 
-  // Función para obtener los entrenamientos del backend (comentada porque está simulada)
-  /* 
+  // Función para obtener los entrenamientos del backend
   const fetchWorkouts = async () => {
-     try {
-       const response = await fetch('https://api.tuapp.com/entrenamientos'); // Reemplaza por tu URL del backend
-       if (!response.ok) {
-         throw new Error('Error al obtener los entrenamientos');
-       }
-       const data = await response.json();
-       setWorkoutDays(data); // Actualiza los entrenamientos con los datos obtenidos
-       setLoading(false); // Desactiva el estado de carga
-     } catch (err) {
-       setError('Hubo un problema al obtener los entrenamientos'); // Maneja el error si falla la solicitud
-       setLoading(false); // Desactiva el estado de carga en caso de error
-     }
-   };
-   */
+    try {
+      const userId = 1; // Reemplaza esto con el ID del usuario actualmente logueado
+      const response = await fetch(`http://127.0.0.1:8000/api/workouts/by-user/?userId=${userId}`); // Reemplaza por tu URL del backend
+      if (!response.ok) {
+        throw new Error('Error al obtener los entrenamientos');
+      }
+      const data = await response.json();
+      setWorkoutDays(data.data); // Actualiza los entrenamientos con los datos obtenidos
+      setLoading(false); // Desactiva el estado de carga
+    } catch (err) {
+      setError('Hubo un problema al obtener los entrenamientos'); // Maneja el error si falla la solicitud
+      setLoading(false); // Desactiva el estado de carga en caso de error
+    }
+  };
 
   // useEffect para cargar los datos cuando el componente se monta
   useEffect(() => {
-    //fetchWorkouts(); // Llama a la función que obtiene los datos (comentada)
-    
-    // Simula los datos de los entrenamientos en lugar de hacer una llamada al backend
-    const simulatedData = [
-      { day: '1', workoutName: 'FULL BODY', imageUrl: 'https://via.placeholder.com/150' },
-      { day: '2', workoutName: 'LEGS', imageUrl: 'https://via.placeholder.com/150' },
-      { day: '3', workoutName: 'ARM', imageUrl: 'https://via.placeholder.com/150' },
-      { day: '4', workoutName: 'CARDIO', imageUrl: 'https://via.placeholder.com/150' }
-    ];
-    setWorkoutDays(simulatedData); // Establece los entrenamientos simulados en el estado
-    setLoading(false); // Desactiva el estado de carga
-    setError(null); // Limpia cualquier error previo
+    fetchWorkouts(); // Llama a la función que obtiene los datos
   }, []); // El array vacío asegura que esto solo se ejecute una vez al montar el componente
 
   // Función que maneja el clic en un día de entrenamiento y navega a la vista de ese día
@@ -88,7 +76,7 @@ const WorkoutOverview: React.FC = () => {
   return (
     <IonPage>
       <Header title="Select the training" />  {/* Componente Header con título pasado como prop */}
-      
+
       <IonContent>
         <IonList lines="none"> {/* Lista de entrenamientos sin líneas entre los items */}
           {workoutDays.map((workout, index) => (
@@ -105,10 +93,10 @@ const WorkoutOverview: React.FC = () => {
                 <IonLabel className="workout-label">
                   <h1>{workout.workoutName}</h1> {/* Muestra el nombre del entrenamiento */}
                 </IonLabel>
-                <IonImg 
-                  className="workout-img" 
-                  src={workout.imageUrl} 
-                  alt={`Imagen del ${workout.workoutName}`} 
+                <IonImg
+                  className="workout-img"
+                  src={workout.imageUrl}
+                  alt={`Imagen del ${workout.workoutName}`}
                 /> {/* Imagen asociada con el entrenamiento */}
               </div>
             </IonItem>
