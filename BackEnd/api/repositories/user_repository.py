@@ -75,7 +75,7 @@ class UserRepository:
                 return user
             else:
                 return None
-        except user.DoesNotExist:
+        except User.DoesNotExist:
             return None
         
 

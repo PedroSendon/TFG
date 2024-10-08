@@ -48,8 +48,9 @@ const Login: React.FC = () => {
     };
 
     // Manejador para el envío del formulario
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault(); // Previene el comportamiento por defecto del formulario
+
         const newErrors: any = {};
 
         // Validación del campo de correo electrónico
@@ -60,12 +61,38 @@ const Login: React.FC = () => {
         // Si hay errores, los mostramos
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors); // Actualiza el estado de errores
-        } else {
-            setErrors({}); // Limpia los errores si no hay ninguno
-            // Aquí puedes realizar la llamada al backend para iniciar sesión
-            console.log('Login data:', formData); // Datos de inicio de sesión que se enviarían
+            return;
+        }
+
+        try {
+            // Hacer la solicitud POST al backend
+            const response = await fetch('http://127.0.0.1:8000/api/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password: formData.password,
+                    remember_me: formData.rememberMe,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Inicio de sesión exitoso:', data);
+                history.push('/home');  // Redirige a la página principal después del inicio de sesión
+            } else {
+                const errorData = await response.json();
+                console.log('Error:', errorData);
+                setErrors({ apiError: errorData.error });
+            }
+        } catch (error) {
+            console.log('Error en la petición:', error);
+            setErrors({ apiError: 'Error de conexión con el servidor.' });
         }
     };
+
 
     return (
         <Container component="main" maxWidth="xs">
@@ -118,7 +145,7 @@ const Login: React.FC = () => {
                                 }}
                             />
                         </Grid>
-                        
+
                         {/* Input para la contraseña con botón para mostrar/ocultar */}
                         <Grid item xs={12}>
                             <TextField
@@ -178,7 +205,7 @@ const Login: React.FC = () => {
                             />
                             {/* Enlace para recuperar la contraseña */}
                             <Link href="#" variant="body2" style={{ color: 'var(--color-verde-lima)' }}>
-                            Have you forgotten your password?
+                                Have you forgotten your password?
                             </Link>
                         </Grid>
                     </Grid>
@@ -201,10 +228,10 @@ const Login: React.FC = () => {
                     <Grid container justifyContent="center" alignItems="center" style={{ marginTop: '1rem', color: 'var(--color-gris-oscuro)' }}>
                         <Grid item>
                             <Typography component="span" variant="body2">
-                            Don't have an account?
+                                Don't have an account?
                             </Typography>
                             <Link href="/register" variant="body2" style={{ marginLeft: '0.5rem', color: 'var(--color-verde-lima)' }}>
-                            Sign up
+                                Sign up
                             </Link>
                         </Grid>
                     </Grid>
