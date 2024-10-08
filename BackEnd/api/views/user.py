@@ -156,7 +156,8 @@ def get_weight_history(request):
     """
     user_id = request.query_params.get('userId') or request.user.id  # Si no se pasa `userId`, tomamos el usuario autenticado
     
-    weight_history = UserRepository.get_weight_history(user_id)
+    # Llamar a `UserDetailsRepository` en lugar de `UserRepository`
+    weight_history = UserDetailsRepository.get_weight_history(user_id)
 
     if weight_history is None:
         return Response({"error": "No se encontró el historial de peso para el usuario."}, status=status.HTTP_404_NOT_FOUND)

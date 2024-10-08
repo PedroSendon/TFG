@@ -52,6 +52,39 @@ class UserRepository:
             return None
         
     @staticmethod
+    def get_user_profile(user_id):
+        """
+        Obtener los datos del perfil del usuario.
+        :param user_id: ID del usuario.
+        :return: Los datos del perfil del usuario.
+        """
+        try:
+            user = User.objects.get(id=user_id)
+            
+            # Intentar obtener los detalles del usuario
+            try:
+                user_details = user.details
+            except UserDetails.DoesNotExist:
+                # Si no existen detalles, devolver valores predeterminados o manejar la ausencia
+                user_details = None
+            
+            profile_data = {
+                "username": f"{user.first_name} {user.last_name}",
+                "email": user.email,
+                "age": UserDetailsRepository.calculate_age(user.birth_date),
+                "height": user_details.height if user_details else 0,
+                "initialWeight": user_details.weight if user_details else 0.0,
+                "currentWeight": user_details.weight if user_details else 0.0,
+                "weightGoal": user_details.weight_goal if user_details else 0.0,
+                "activityLevel": user_details.physical_activity_level if user_details else "No info",
+                "trainingFrequency": user_details.weekly_training_days if user_details else 0
+            }
+            
+            return profile_data
+        except User.DoesNotExist:
+            return None
+        
+    @staticmethod
     def user_exists_by_email(email):
         """
         Verifica si un usuario con el email proporcionado ya existe.

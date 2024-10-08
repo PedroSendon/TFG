@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IonPage, IonItemDivider, IonHeader, IonToolbar, IonTitle, IonContent, IonAvatar, IonLabel, IonButton, IonCard, IonCardContent, IonGrid, IonRow, IonCol, IonIcon } from '@ionic/react';
 import { logOutOutline, pencilOutline } from 'ionicons/icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
@@ -8,80 +8,63 @@ import Header from '../../Header/Header';  // Importamos el componente Header
 
 
 const ProfilePage: React.FC = () => {
-    const history = useHistory();  // Hook para la redirección
+    const history = useHistory();
+    const [userData, setUserData] = useState<any>(null);  // Datos del usuario
+    const [weightData, setWeightData] = useState<any[]>([]);  // Historial de peso
+    const [loading, setLoading] = useState<boolean>(true);  // Controla el estado de carga
 
-    /*
-        // Estado para almacenar los datos del usuario
-        const [userData, setUserData] = useState<any>(null);  // Inicialmente null
-        const [loading, setLoading] = useState<boolean>(true);
-        const [error, setError] = useState<string | null>(null);
-    
-        // Estado para almacenar los datos de entrenamiento y peso
-        const [trainingData, setTrainingData] = useState<any[]>([]);
-        const [weightData, setWeightData] = useState<any[]>([]);
-    
-        // Función para obtener los datos del backend
-        const fetchUserData = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch('https://api.miapp.com/perfil'); // Reemplaza con tu URL del backend
-                if (!response.ok) {
-                    throw new Error('Error al obtener los datos del usuario');
-                }
+    useEffect(() => {
+        const userId = 1; // Replace with the actual user ID
+        fetchUserProfile(userId);  // Llamar a la función para obtener el perfil cuando el componente se monta
+        fetchWeightHistory();  // Llamar a la función para obtener el historial de peso
+    }, []);
+
+    // Función para obtener los datos del perfil del usuario
+    const fetchUserProfile = async (userId: number) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/profile/?userId=${userId}`);
+            if (response.ok) {
                 const data = await response.json();
                 setUserData(data);
-                setTrainingData(data.trainingData);
-                setWeightData(data.weightData);
-            } catch (err) {
-                setError('Hubo un problema al obtener los datos del perfil');
-                console.error(err);
-            } finally {
+                setLoading(false);
+            } else {
+                console.error('Error fetching user profile');
                 setLoading(false);
             }
-        };
-    
-        // Hook para cargar los datos cuando se monta el componente
-        useEffect(() => {
-            fetchUserData();
-        }, []);
-    */
-    // Simulación de los datos del backend
-    const userData = {
-        username: 'Pedro Sendon',
-        email: 'pedro@example.com',
-        age: 25,
-        height: 175,
-        initialWeight: 85,
-        currentWeight: 80,
-        weightGoal: 'Perder peso',
-        activityLevel: 'Moderado',
-        trainingFrequency: 5, // días a la semana
+        } catch (error) {
+            console.error('Network error fetching user profile', error);
+            setLoading(false);
+        }
     };
 
-    const trainingData = [
-        { day: 'Lunes', workouts: 2 },
-        { day: 'Martes', workouts: 3 },
-        { day: 'Miércoles', workouts: 1 },
-        { day: 'Jueves', workouts: 4 },
-        { day: 'Viernes', workouts: 3 },
-    ];
+    // Función para obtener el historial de peso
+    const fetchWeightHistory = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/profile/weight-history/');
+            if (response.ok) {
+                const data = await response.json();
+                setWeightData(data);
+            } else {
+                console.error('Error fetching weight history');
+            }
+        } catch (error) {
+            console.error('Network error fetching weight history', error);
+        }
+    };
 
-    const weightData = [
-        { day: '01/09', weight: 85 },
-        { day: '05/09', weight: 83 },
-        { day: '10/09', weight: 81 },
-        { day: '15/09', weight: 80 },
-    ];
+    if (loading) {
+        return <p>Cargando perfil...</p>;
+    }
 
     const handleLogout = () => {
         // Limpiar datos de autenticación
         localStorage.removeItem('token');
         sessionStorage.clear();
-    
+
         // Redirigir a la página de inicio
         history.replace('/');
     };
-    
+
 
     const handleEdit = () => {
         history.push({
@@ -92,53 +75,6 @@ const ProfilePage: React.FC = () => {
         });
     };
 
-    // Mostrar un mensaje mientras se cargan los datos
-    /*if (loading) {
-        return (
-            <IonPage>
-                <IonHeader>
-                    <IonToolbar>
-                        <IonTitle>Cargando...</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
-                <IonContent>
-                    <p>Cargando datos del perfil...</p>
-                </IonContent>
-            </IonPage>
-        );
-    }
-
-    // Si hay un error, mostrarlo
-    if (error) {
-        return (
-            <IonPage>
-                <IonHeader>
-                    <IonToolbar>
-                        <IonTitle>Error</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
-                <IonContent>
-                    <p>{error}</p>
-                </IonContent>
-            </IonPage>
-        );
-    }
-
-    // Si no hay datos de usuario, mostrar un mensaje por defecto
-    if (!userData) {
-        return (
-            <IonPage>
-                <IonHeader>
-                    <IonToolbar>
-                        <IonTitle>Perfil</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
-                <IonContent>
-                    <p>No se encontraron datos del usuario</p>
-                </IonContent>
-            </IonPage>
-        );
-    }*/
 
     return (
         <IonPage>
