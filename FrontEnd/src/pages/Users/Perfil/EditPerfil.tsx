@@ -6,42 +6,30 @@ import {
     IonTitle,
     IonContent,
     IonAvatar,
-    IonLabel,
     IonButton,
     IonGrid,
     IonRow,
     IonCol,
-    IonInput,
-    IonSelect,
-    IonSelectOption,
-    IonItem,
-    IonIcon,
     IonModal,
     IonToast,
-    IonText
+    IonIcon,
 } from '@ionic/react';
-import { cameraOutline, eyeOffOutline, eyeOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
-import './EditPerfil.css'; // Crea un archivo CSS para personalizar los estilos
-import { useHistory, useLocation } from 'react-router-dom';  // Hook para redirigir
-import Header from '../../Header/Header';  // Importamos el componente Header
-
-
+import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
+import { TextField, Button, MenuItem, Grid } from '@mui/material'; // Importar TextField y otros componentes de MUI
+import './EditPerfil.css';
+import { useHistory, useLocation } from 'react-router-dom';  
+import Header from '../../Header/Header'; 
 
 const EditProfilePage: React.FC = () => {
-    const history = useHistory();  // Hook para la redirección
+    const history = useHistory();  
     const location = useLocation();
-
-    // Accedemos a los datos que fueron pasados desde la página de perfil
     const { userData } = (location.state || {
         userData: {},
-        trainingData: [],
-        weightData: [],
     }) as { userData: any };
 
-    // Estado local para manejar los datos editados (inicializado con userData)
     const [profileData, setProfileData] = useState({
-        firstName: userData?.username?.split(' ')[0] || '',  // Verifica que username exista antes de usar split
-        lastName: userData?.username?.split(' ')[1] || '',   // Verifica que username exista antes de usar split
+        firstName: userData?.username?.split(' ')[0] || '',  
+        lastName: userData?.username?.split(' ')[1] || '',   
         currentWeight: userData.currentWeight || 0,
         weightGoal: userData.weightGoal || '',
         activityLevel: userData.activityLevel || '',
@@ -54,92 +42,49 @@ const EditProfilePage: React.FC = () => {
         confirmPassword: '',
     });
 
-    const [profilePicture, setProfilePicture] = useState('https://via.placeholder.com/150'); // Imagen de perfil
-    const [showPasswordModal, setShowPasswordModal] = useState(false);  // Estado para controlar el modal de cambio de contraseña
-    const [showToast, setShowToast] = useState(false); // Estado para mostrar el toast de confirmación
-    const [showActionSheet, setShowActionSheet] = useState(false);  // Estado para controlar el ActionSheet
-    // Referencia al input de tipo file
+    const [profilePicture, setProfilePicture] = useState('https://via.placeholder.com/150');
+    const [showToast, setShowToast] = useState(false); 
+    const [showActionSheet, setShowActionSheet] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);  // Modal para cambiar la contraseña
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Estados para manejar la visibilidad de las contraseñas
-    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-    const [showNewPassword, setShowNewPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [errors, setErrors] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-    });
-    // Función para manejar el guardado de los cambios
     const handleSave = () => {
         console.log('Datos guardados:', profileData);
-        history.push('/profile'); // Redirigir al perfil después de guardar
+        history.push('/profile');
     };
 
-
-    const validatePassword = (password: string) => {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-        return passwordRegex.test(password);
+    const handleCancel = () => {
+        history.push('/profile'); // Redirige al perfil sin guardar cambios
     };
 
-    const handleChangePassword = () => {
-        const newErrors = {
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: '',
-        };
-
-        // Validación de contraseña actual
-        if (!passwords.currentPassword) {
-            newErrors.currentPassword = 'La contraseña actual es requerida';
-        }
-
-        // Validación de nueva contraseña
-        if (!passwords.newPassword) {
-            newErrors.newPassword = 'La nueva contraseña es requerida';
-        } else if (!validatePassword(passwords.newPassword)) {
-            newErrors.newPassword = 'La nueva contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un signo';
-        }
-
-        // Validación de confirmación de contraseña
-        if (passwords.confirmPassword !== passwords.newPassword) {
-            newErrors.confirmPassword = 'Las contraseñas no coinciden';
-        }
-
-        setErrors(newErrors);
-
-        // Si no hay errores, se procede con el cambio de contraseña
-        if (!newErrors.currentPassword && !newErrors.newPassword && !newErrors.confirmPassword) {
-            console.log('Contraseña cambiada:', passwords);
-            setShowPasswordModal(false); // Cerrar el modal
-        }
-    };
-
-    // Manejar la subida de fotos
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setProfilePicture(reader.result as string); // Actualizamos la imagen con la vista previa
+                setProfilePicture(reader.result as string);
             };
-            reader.readAsDataURL(file); // Leemos el archivo seleccionado
+            reader.readAsDataURL(file); 
         }
     };
 
     const handlePhotoOption = (option: string) => {
         if (option === 'upload') {
-            console.log('Subir una foto');
             fileInputRef.current?.click();
-        } else if (option === 'take') {
-            console.log('Hacer una foto');
-            // Lógica para hacer una foto
         } else if (option === 'delete') {
-            console.log('Eliminar foto');
             setProfilePicture('https://via.placeholder.com/150');
         }
     };
 
+    const handleChangePassword = () => {
+        if (passwords.newPassword !== passwords.confirmPassword) {
+            console.error('Las contraseñas no coinciden');
+            return;
+        }
+        console.log('Contraseña cambiada:', passwords);
+        setShowPasswordModal(false);
+        setShowToast(true);
+    };
 
     return (
         <IonPage>
@@ -147,16 +92,16 @@ const EditProfilePage: React.FC = () => {
 
             <IonContent>
                 <IonGrid>
-                    <IonRow className="ion-text-center" style={{ margin: '0px' }}>
+                    <IonRow className="ion-text-center">
                         <IonCol size="12">
                             <IonAvatar
                                 className="custom-avatar"
                                 style={{
-                                    width: '150px',   // Ancho fijo
-                                    height: '150px',  // Alto fijo
+                                    width: '150px',
+                                    height: '150px',
                                     border: '2px solid var(--color-verde-lima)',
-                                    borderRadius: '50%', // Garantiza que el contenedor sea siempre circular
-                                    overflow: 'hidden', // Asegura que la imagen no se desborde del contenedor redondeado
+                                    borderRadius: '50%',
+                                    overflow: 'hidden',
                                     marginBottom: '0px',
                                 }}
                             >
@@ -164,28 +109,23 @@ const EditProfilePage: React.FC = () => {
                                     src={profilePicture}
                                     alt="Foto de perfil"
                                     style={{
-                                        width: '100%',        // La imagen debe ocupar todo el ancho del contenedor
-                                        height: '100%',       // La imagen debe ocupar todo el alto del contenedor
-                                        objectFit: 'cover',   // Asegura que la imagen se ajuste sin distorsionar su proporción
-                                        borderRadius: '50%',  // Mantiene la imagen en forma circular
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        borderRadius: '50%',
                                     }}
                                 />
                             </IonAvatar>
                             <IonButton
-                                style={{
-                                    color: 'var(--color-verde-lima)',
-                                    margin: '0px',
-                                }}
+                                style={{ color: 'var(--color-verde-lima)' }}
                                 fill="clear"
-                                onClick={() => setShowActionSheet(true)} // Muestra el ActionSheet al hacer clic
+                                onClick={() => setShowActionSheet(true)}
                             >
                                 <IonIcon icon={cameraOutline} /> Change photo
                             </IonButton>
                         </IonCol>
                     </IonRow>
 
-
-                    {/* ActionSheet para seleccionar la opción de la foto */}
                     <IonActionSheet
                         isOpen={showActionSheet}
                         onDidDismiss={() => setShowActionSheet(false)}
@@ -194,11 +134,6 @@ const EditProfilePage: React.FC = () => {
                                 text: 'Subir una foto',
                                 icon: imageOutline,
                                 handler: () => handlePhotoOption('upload'),
-                            },
-                            {
-                                text: 'Hacer una foto',
-                                icon: cameraOutline,
-                                handler: () => handlePhotoOption('take'),
                             },
                             {
                                 text: 'Eliminar foto',
@@ -214,17 +149,13 @@ const EditProfilePage: React.FC = () => {
                         ]}
                     />
 
-                    {/* Input de tipo file oculto */}
                     <input
                         type="file"
                         accept="image/*"
-                        ref={fileInputRef} // Referencia para hacer clic desde JS
-                        style={{ display: 'none' }} // Ocultamos el input
-                        onChange={handleFileChange} // Manejar el cambio de archivo
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileChange}
                     />
-
-                    {/* Divider */}
-                    <hr style={{ margin: '0px', height: '1px', backgroundColor: '#d1d1d6' }} />
 
                     {/* Información Personal */}
                     <IonRow>
@@ -235,48 +166,59 @@ const EditProfilePage: React.FC = () => {
 
                     <IonRow>
                         <IonCol size="12">
-                            <IonItem lines="none">
-                                <IonLabel position="stacked">Name</IonLabel>
-                                <IonInput
-                                    value={profileData.firstName}
-                                    style={{ textIndent: '4%' }}
-                                    onIonChange={(e: { detail: { value: string } }) => setProfileData({ ...profileData, firstName: e.detail.value! })}
-                                />
-                            </IonItem>
+                            <TextField
+                                fullWidth
+                                label="Name"
+                                variant="outlined"
+                                value={profileData.firstName}
+                                onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                            />
                         </IonCol>
                     </IonRow>
 
                     <IonRow>
                         <IonCol size="12">
-                            <IonItem lines="none">
-                                <IonLabel position="stacked">Last name</IonLabel>
-                                <IonInput value={profileData.lastName} style={{ textIndent: '4%' }} onIonChange={(e: { detail: { value: string; }; }) => setProfileData({ ...profileData, lastName: e.detail.value! })}></IonInput>
-                            </IonItem>
+                            <TextField
+                                fullWidth
+                                label="Last name"
+                                variant="outlined"
+                                value={profileData.lastName}
+                                onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                            />
                         </IonCol>
                     </IonRow>
 
                     <IonRow>
                         <IonCol size="12">
-                            <IonItem lines="none">
-                                <IonLabel position="stacked">Current Weight (kg)</IonLabel>
-                                <IonInput type="number" style={{ textIndent: '4%' }} value={profileData.currentWeight} onIonChange={(e: { detail: { value: string; }; }) => setProfileData({ ...profileData, currentWeight: parseFloat(e.detail.value!) })}></IonInput>
-                            </IonItem>
+                            <TextField
+                                fullWidth
+                                label="Current Weight (kg)"
+                                variant="outlined"
+                                type="number"
+                                value={profileData.currentWeight}
+                                onChange={(e) => setProfileData({ ...profileData, currentWeight: parseFloat(e.target.value) })}
+                            />
                         </IonCol>
                     </IonRow>
 
                     <IonRow>
                         <IonCol size="12">
-                            <IonButton
-                                expand="block"
-                                fill="outline"
-                                style={{
-                                    color: 'var(--color-verde-lima)',
-                                    '--border-color': 'var(--color-verde-lima)'
-                                }}
-                                onClick={() => setShowPasswordModal(true)}
-                            >
-                                Change password
-                            </IonButton>
+                            
+                            <Button
+                            type="submit"
+                            style={{
+                                border: '1px solid #32CD32',
+                                backgroundColor: '#FFFFFF',
+                                color: '#32CD32',
+                                padding: '3% 0',
+                                borderRadius: '5px',
+                                fontSize: '1em',
+                                width: '100%',
+                            }}
+                            onClick={() => setShowPasswordModal(true)}
+                        >
+                            Change password
+                        </Button>
                         </IonCol>
                     </IonRow>
 
@@ -292,78 +234,96 @@ const EditProfilePage: React.FC = () => {
 
                     <IonRow>
                         <IonCol size="12">
-                            <IonItem lines="none">
-                                <IonLabel position="stacked">Weight Target</IonLabel>
-                                <IonSelect
-                                    value={profileData.weightGoal}
-                                    onIonChange={(e: { detail: { value: any; }; }) => setProfileData({ ...profileData, weightGoal: e.detail.value })}
-                                    interface="popover"
-                                    style={{ padding: '10px', height: '45px' }}  // Agregamos padding y altura para mejorar la presentación
-                                >
-                                    <IonSelectOption value="Perder peso">Lose weight</IonSelectOption>
-                                    <IonSelectOption value="Ganar masa muscular">Gain muscle mass</IonSelectOption>
-                                    <IonSelectOption value="Mantener el peso actual">Maintain current weight</IonSelectOption>
-                                    <IonSelectOption value="Mejorar resistencia física">Improve physical resistance</IonSelectOption>
-                                    <IonSelectOption value="Aumentar fuerza">Increase strength</IonSelectOption>
-                                </IonSelect>
-                            </IonItem>
-                        </IonCol>
-                    </IonRow>
-
-                    <IonRow>
-                        <IonCol size="12">
-                            <IonItem lines="none">
-                                <IonLabel position="stacked">Activity Level</IonLabel>
-                                <IonSelect
-                                    value={profileData.activityLevel}
-                                    onIonChange={(e: { detail: { value: any; }; }) => setProfileData({ ...profileData, activityLevel: e.detail.value })}
-                                    interface="popover"
-                                    style={{ padding: '10px', height: '45px' }}
-                                >
-                                    <IonSelectOption value="Sedentario">Sedentary</IonSelectOption>
-                                    <IonSelectOption value="Ligera">Light</IonSelectOption>
-                                    <IonSelectOption value="Moderada">Moderate</IonSelectOption>
-                                    <IonSelectOption value="Intensa">Intense</IonSelectOption>
-                                </IonSelect>
-                            </IonItem>
-                        </IonCol>
-                    </IonRow>
-
-                    <IonRow>
-                        <IonCol size="12">
-                            <IonItem lines="none">
-                                <IonLabel position="stacked">Training Frequency (days/week)</IonLabel>
-                                <IonSelect
-                                    value={profileData.trainingFrequency}
-                                    onIonChange={(e: { detail: { value: string; }; }) => setProfileData({ ...profileData, trainingFrequency: parseInt(e.detail.value!) })}
-                                    interface="popover"
-                                    style={{ padding: '10px', height: '45px' }}
-                                >
-                                    <IonSelectOption value="1">1</IonSelectOption>
-                                    <IonSelectOption value="2">2</IonSelectOption>
-                                    <IonSelectOption value="3">3</IonSelectOption>
-                                    <IonSelectOption value="4">4</IonSelectOption>
-                                    <IonSelectOption value="5">5</IonSelectOption>
-                                    <IonSelectOption value="6">6</IonSelectOption>
-                                </IonSelect>
-                            </IonItem>
-                        </IonCol>
-                    </IonRow>
-
-
-                    {/* Botón para guardar cambios */}
-                    <IonRow>
-                        <IonCol size="12">
-                            <IonButton
-                                expand="block"
-                                className="boton-verde"
-                                style={{ marginBottom: '10%' }}
-                                onClick={handleSave}
+                            <TextField
+                                fullWidth
+                                label="Weight Target"
+                                select
+                                variant="outlined"
+                                value={profileData.weightGoal}
+                                onChange={(e) => setProfileData({ ...profileData, weightGoal: e.target.value })}
                             >
-                                Save changes
-                            </IonButton>
+                                <MenuItem value="Perder peso">Lose weight</MenuItem>
+                                <MenuItem value="Ganar masa muscular">Gain muscle mass</MenuItem>
+                                <MenuItem value="Mantener el peso actual">Maintain current weight</MenuItem>
+                                <MenuItem value="Mejorar resistencia física">Improve physical resistance</MenuItem>
+                                <MenuItem value="Aumentar fuerza">Increase strength</MenuItem>
+                            </TextField>
                         </IonCol>
                     </IonRow>
+
+                    <IonRow>
+                        <IonCol size="12">
+                            <TextField
+                                fullWidth
+                                label="Activity Level"
+                                select
+                                variant="outlined"
+                                value={profileData.activityLevel}
+                                onChange={(e) => setProfileData({ ...profileData, activityLevel: e.target.value })}
+                            >
+                                <MenuItem value="Sedentario">Sedentary</MenuItem>
+                                <MenuItem value="Ligera">Light</MenuItem>
+                                <MenuItem value="Moderada">Moderate</MenuItem>
+                                <MenuItem value="Intensa">Intense</MenuItem>
+                            </TextField>
+                        </IonCol>
+                    </IonRow>
+
+                    <IonRow>
+                        <IonCol size="12">
+                            <TextField
+                                fullWidth
+                                label="Training Frequency (days/week)"
+                                select
+                                variant="outlined"
+                                value={profileData.trainingFrequency}
+                                onChange={(e) => setProfileData({ ...profileData, trainingFrequency: parseInt(e.target.value) })}
+                            >
+                                {[1, 2, 3, 4, 5, 6].map((day) => (
+                                    <MenuItem key={day} value={day}>{day}</MenuItem>
+                                ))}
+                            </TextField>
+                        </IonCol>
+                    </IonRow>
+
+                    {/* Botones de Cancelar y Guardar */}
+                    <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <Button
+                                    onClick={handleCancel}
+                                    style={{
+                                        border: '1px solid #FF0000',
+                                        backgroundColor: '#FFFFFF',
+                                        color: '#FF0000',
+                                        padding: '3% 0',
+                                        borderRadius: '5px',
+                                        fontSize: '1em',
+                                        width: '100%',
+                                    }}
+                                >
+                                    CANCEL
+                                </Button>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button
+                                    type="submit"
+                                    style={{
+                                        border: '1px solid #32CD32',
+                                        backgroundColor: '#FFFFFF',
+                                        color: '#32CD32',
+                                        padding: '3% 0',
+                                        borderRadius: '5px',
+                                        fontSize: '1em',
+                                        width: '100%',
+                                    }}
+                                    onClick={handleSave}
+                                >
+                                    SAVE
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </IonGrid>
 
                 {/* Modal para cambiar la contraseña */}
@@ -371,143 +331,90 @@ const EditProfilePage: React.FC = () => {
                     <Header title="Change password" />
                     <IonContent>
                         <IonGrid>
-                            {/* Campo de la contraseña actual */}
                             <IonRow>
                                 <IonCol size="12">
-                                    <IonItem lines="none" className={errors.currentPassword ? 'ion-invalid' : ''}>
-                                        <IonLabel position="stacked">Current Password</IonLabel>
-                                        <IonInput
-                                            type={showCurrentPassword ? 'text' : 'password'}
-                                            value={passwords.currentPassword}
-                                            style={{ textIndent: '4%' }}
-                                            onIonChange={(e: { detail: { value: string; }; }) =>
-                                                setPasswords({ ...passwords, currentPassword: e.detail.value! })
-                                            }
-                                        />
-                                        <IonIcon
-                                            icon={showCurrentPassword ? eyeOutline : eyeOffOutline}
-                                            slot="end"
-                                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                            style={{
-                                                cursor: 'pointer',
-                                                position: 'absolute',
-                                                right: '7%',
-                                                top: '60%',
-                                                transform: 'translateY(-50%)',
-                                                zIndex: 10,
-                                            }}
-                                        />
-                                    </IonItem>
-                                    {errors.currentPassword && (
-                                        <IonText color="danger" className="error-text">
-                                            {errors.currentPassword}
-                                        </IonText>
-                                    )}
+                                    <TextField
+                                        fullWidth
+                                        label="Current Password"
+                                        variant="outlined"
+                                        type="password"
+                                        value={passwords.currentPassword}
+                                        onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+                                    />
                                 </IonCol>
                             </IonRow>
 
-                            {/* Campo de nueva contraseña */}
                             <IonRow>
                                 <IonCol size="12">
-                                    <IonItem lines="none" className={errors.newPassword ? 'ion-invalid' : ''}>
-                                        <IonLabel position="stacked">New Password</IonLabel>
-                                        <IonInput
-                                            type={showNewPassword ? 'text' : 'password'}
-                                            value={passwords.newPassword}
-                                            style={{ textIndent: '4%' }}
-                                            onIonChange={(e: { detail: { value: string; }; }) =>
-                                                setPasswords({ ...passwords, newPassword: e.detail.value! })
-                                            }
-                                        />
-                                        <IonIcon
-                                            icon={showNewPassword ? eyeOutline : eyeOffOutline}
-                                            slot="end"
-                                            onClick={() => setShowNewPassword(!showNewPassword)}
-                                            style={{
-                                                cursor: 'pointer',
-                                                position: 'absolute',
-                                                right: '7%',
-                                                top: '60%',
-                                                transform: 'translateY(-50%)',
-                                                zIndex: 10,
-                                            }}
-                                        />
-                                    </IonItem>
-                                    {errors.newPassword && (
-                                        <IonText color="danger" className="error-text">
-                                            {errors.newPassword}
-                                        </IonText>
-                                    )}
+                                    <TextField
+                                        fullWidth
+                                        label="New Password"
+                                        variant="outlined"
+                                        type="password"
+                                        value={passwords.newPassword}
+                                        onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                                    />
                                 </IonCol>
                             </IonRow>
 
-                            {/* Confirmación de nueva contraseña */}
                             <IonRow>
                                 <IonCol size="12">
-                                    <IonItem lines="none" className={errors.confirmPassword ? 'ion-invalid' : ''}>
-                                        <IonLabel position="stacked">Confirm new Password</IonLabel>
-                                        <IonInput
-                                            type={showConfirmPassword ? 'text' : 'password'}
-                                            value={passwords.confirmPassword}
-                                            style={{ textIndent: '4%' }}
-                                            onIonChange={(e: { detail: { value: string; }; }) =>
-                                                setPasswords({ ...passwords, confirmPassword: e.detail.value! })
-                                            }
-                                        />
-                                        <IonIcon
-                                            icon={showConfirmPassword ? eyeOutline : eyeOffOutline}
-                                            slot="end"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            style={{
-                                                cursor: 'pointer',
-                                                position: 'absolute',
-                                                right: '7%',
-                                                top: '60%',
-                                                transform: 'translateY(-50%)',
-                                                zIndex: 10,
-                                            }}
-                                        />
-                                    </IonItem>
-                                    {errors.confirmPassword && (
-                                        <IonText color="danger" className="error-text">
-                                            {errors.confirmPassword}
-                                        </IonText>
-                                    )}
+                                    <TextField
+                                        fullWidth
+                                        label="Confirm New Password"
+                                        variant="outlined"
+                                        type="password"
+                                        value={passwords.confirmPassword}
+                                        onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+                                    />
                                 </IonCol>
                             </IonRow>
 
-                            {/* Botones de confirmar y cancelar en la misma fila */}
-                            <IonRow className="ion-justify-content-center">
-                                <IonCol size="5">
-                                    <IonButton
-                                        expand="block"
-                                        fill="outline"
-                                        className="cancel-button"  // Aplicamos una clase CSS personalizada para el botón Cancelar
-                                        onClick={() => setShowPasswordModal(false)}
-                                    >
-                                        Cancel
-                                    </IonButton>
-                                </IonCol>
-                                <IonCol size="5">
-                                    <IonButton
-                                        expand="block"
-                                        className="confirm-button"  // Aplicamos una clase CSS personalizada para el botón Confirmar
-                                        onClick={handleChangePassword}
-                                    >
-                                        Confirmar
-                                    </IonButton>
-                                </IonCol>
-                            </IonRow>
+                            <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={6}>
+                                        <Button
+                                            onClick={() => setShowPasswordModal(false)}
+                                            style={{
+                                                border: '1px solid #FF0000',
+                                                backgroundColor: '#FFFFFF',
+                                                color: '#FF0000',
+                                                padding: '3% 0',
+                                                borderRadius: '5px',
+                                                fontSize: '1em',
+                                                width: '100%',
+                                            }}
+                                        >
+                                            CANCEL
+                                        </Button>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Button
+                                            type="submit"
+                                            style={{
+                                                border: '1px solid #32CD32',
+                                                backgroundColor: '#FFFFFF',
+                                                color: '#32CD32',
+                                                padding: '3% 0',
+                                                borderRadius: '5px',
+                                                fontSize: '1em',
+                                                width: '100%',
+                                            }}
+                                            onClick={handleChangePassword}
+                                        >
+                                            SAVE
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
                         </IonGrid>
                     </IonContent>
                 </IonModal>
 
-
-                {/* Toast de confirmación */}
                 <IonToast
                     isOpen={showToast}
                     onDidDismiss={() => setShowToast(false)}
-                    message="Contraseña cambiada exitosamente"
+                    message="Changes saved successfully"
                     duration={2000}
                 />
             </IonContent>
