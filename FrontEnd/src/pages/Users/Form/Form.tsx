@@ -46,10 +46,47 @@ const UserDetailsForm: React.FC = () => {
     };
 
     // Función para finalizar el formulario
-    const handleFinish = () => {
-        console.log('Formulario completo:', formData);
-        history.push('/workout'); // Redirige a una página final, o puedes cambiarlo a lo que prefieras
+    // Función para finalizar el formulario
+    const handleFinish = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/form/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    height: parseInt(formData.height),
+                    weight: parseFloat(formData.weight),
+                    weight_goal: formData.weightGoal,
+                    weekly_training_days: parseInt(formData.weeklyTrainingDays),
+                    daily_training_time: formData.dailyTrainingTime,
+                    physical_activity_level: formData.physicalActivityLevel,
+                    meals_per_day: parseInt(formData.mealsPerDay),
+                    macronutrient_intake: formData.macronutrientIntake,
+                    food_restrictions: formData.foodRestrictions || '',
+                    medical_condition: formData.medicalCondition || 'Ninguno',
+                    available_equipment: formData.availableEquipment,
+                    training_preference: formData.trainingPreference,
+                    // Valores opcionales
+                    weight_change_amount: formData.weightChangeAmount || null,
+                    current_training_days: formData.currentTrainingDays || null
+                }), 
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('User details saved successfully:', data);
+            } else {
+                console.error('Error saving user details:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error saving user details:', error);
+        }
     };
+
+
+
+
 
     // Ventana 1: Introducción
     const Introduction = () => (
@@ -90,8 +127,8 @@ const UserDetailsForm: React.FC = () => {
             sx={{ height: '80vh' }}
         >
             <Typography variant="h5" sx={{ mb: 3 }}>
-            Personal data
-                        </Typography>
+                Personal data
+            </Typography>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
                     <TextField
@@ -294,7 +331,7 @@ const UserDetailsForm: React.FC = () => {
         >
             {/* Título */}
             <Typography variant="h5" align="center" gutterBottom>
-            Physical Activity
+                Physical Activity
             </Typography>
 
             {/* Contenedor de los campos del formulario */}
@@ -423,7 +460,7 @@ const UserDetailsForm: React.FC = () => {
                 sx={{ height: '80vh' }}
             >        {/* Título */}
                 <Typography variant="h5" align="center" gutterBottom>
-                Diet and Nutrition
+                    Diet and Nutrition
                 </Typography>
 
                 {/* Contenedor de los campos del formulario */}
@@ -570,13 +607,13 @@ const UserDetailsForm: React.FC = () => {
         >
             {/* Título */}
             <Typography variant="h5" align="center" gutterBottom>
-            Form Completed!
+                Form Completed!
 
             </Typography>
 
             {/* Mensaje de agradecimiento */}
             <Typography variant="body1" align="center" sx={{ margin: '20px 0' }}>
-            Thank you for completing the form. We have saved your data correctly.
+                Thank you for completing the form. We have saved your data correctly.
             </Typography>
 
             {/* Botón Finalizar */}

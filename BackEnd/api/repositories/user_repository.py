@@ -187,7 +187,7 @@ class UserDetailsRepository:
                     'current_training_days': details_data['current_training_days']
                 }
             )
-            
+
             # Guardar preferencias de dieta
             diet_preferences, created = DietPreferences.objects.update_or_create(
                 user=user,
@@ -199,7 +199,7 @@ class UserDetailsRepository:
                     'custom_food_restrictions': details_data.get('custom_food_restrictions')
                 }
             )
-            
+
             # Guardar condiciones médicas
             medical_conditions, created = MedicalConditions.objects.update_or_create(
                 user=user,
@@ -208,7 +208,7 @@ class UserDetailsRepository:
                     'custom_medical_condition': details_data.get('custom_medical_condition')
                 }
             )
-            
+
             # Guardar preferencias de entrenamiento
             training_preferences, created = TrainingPreferences.objects.update_or_create(
                 user=user,
@@ -219,7 +219,7 @@ class UserDetailsRepository:
             )
 
             return user_details, diet_preferences, medical_conditions, training_preferences
-        
+
         except Exception as e:
             raise ValueError(f"Error al crear o actualizar los detalles del usuario: {e}")
 

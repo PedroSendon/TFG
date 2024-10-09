@@ -358,3 +358,24 @@ def delete_user(request, user_id):
         return Response({"message": "Usuario eliminado exitosamente"}, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    
+from rest_framework.permissions import IsAuthenticated
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # Requiere que el usuario esté autenticado
+def create_user_details(request):
+    try:
+        print(f"Datos recibidos: {request.data}")
+        user_details_data = UserDetailsSchema(**request.data)
+        
+        # Crear o actualizar los detalles del usuario autenticado
+        UserDetailsRepository.create_user_details(request.user, user_details_data.dict())
+        
+        return Response({"message": "Detalles del usuario guardados correctamente."}, status=status.HTTP_200_OK)
+    
+    except ValidationError as e:
+        print(f"Error de validación: {e}")
+        return Response({"error": e.errors()}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(f"Error inesperado: {str(e)}")
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

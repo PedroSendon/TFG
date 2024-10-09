@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel, EmailStr, Field, constr, conint
+from pydantic import BaseModel, EmailStr, Field, constr, PositiveInt, conint
 from typing import Optional, List
 
 
@@ -52,60 +52,54 @@ class LoginSchema(BaseModel):
 
 
 class UserDetailsSchema(BaseModel):
-    height: conint(gt=0) # type: ignore # Validación: debe ser mayor que 0
-    weight: conint(gt=0)# type: ignore
-    weight_goal: conint(gt=0)# type: ignore
-    weight_change_amount: Optional[conint(gt=0)] = None# type: ignore
-    weekly_training_days: conint(ge=1, le=7)# type: ignore
+    height: PositiveInt
+    weight: PositiveInt
+    weight_goal: str  # Cambiado a str porque estás enviando una descripción textual
+    weight_change_amount: Optional[PositiveInt] = None
+    weekly_training_days: conint(ge=1, le=7)
     daily_training_time: str
     physical_activity_level: str
-    current_training_days: Optional[conint(ge=1, le=7)] = None# type: ignore
-    diet_type: str
-    meals_per_day: conint(gt=0)# type: ignore
-    macronutrient_intake: str
-    available_equipment: str
-    training_preference: str
-    food_restrictions: Optional[str] = None
-    custom_food_restrictions: Optional[str] = None
-    medical_condition: str
-    custom_medical_condition: Optional[str] = None
+    current_training_days: Optional[conint(ge=1, le=7)] = None
 
     class Config:
         from_attributes = True
 
 
 
-class UserDetailsSchema(BaseModel):
-    height: int
-    weight: float
-    weight_goal: float
-    weekly_training_days: int
-    daily_training_time: str
-    physical_activity_level: str
-
-    class Config:
-        from_attributes = True
 
 class DietPreferencesSchema(BaseModel):
-    diet_type: str
-    meals_per_day: int
-    macronutrient_intake: str
-    food_restrictions: Optional[str] = None
-    custom_food_restrictions: Optional[str] = None
+    diet_type: str  # Tipo de dieta
+    meals_per_day: conint(gt=0)  # Comidas al día, mayor a 0
+    macronutrient_intake: str  # Ingesta de macronutrientes
+    food_restrictions: Optional[str] = None  # Restricciones alimentarias
+    custom_food_restrictions: Optional[str] = None  # Restricciones alimentarias personalizadas
 
     class Config:
         from_attributes = True
+
 
 class MedicalConditionsSchema(BaseModel):
-    medical_condition: str
-    custom_medical_condition: Optional[str] = None
+    medical_condition: str  # Condición médica
+    custom_medical_condition: Optional[str] = None  # Condición médica personalizada
 
     class Config:
         from_attributes = True
 
+
 class TrainingPreferencesSchema(BaseModel):
-    available_equipment: str
-    training_preference: str
+    available_equipment: str  # Equipamiento disponible
+    training_preference: str  # Preferencia de entrenamiento
+
+    class Config:
+        from_attributes = True
+
+
+# Esquema que combina todos los detalles del usuario
+class CompleteUserDetailsSchema(BaseModel):
+    user_details: UserDetailsSchema
+    diet_preferences: DietPreferencesSchema
+    medical_conditions: MedicalConditionsSchema
+    training_preferences: TrainingPreferencesSchema
 
     class Config:
         from_attributes = True
