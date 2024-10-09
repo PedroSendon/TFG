@@ -48,25 +48,66 @@ const EditProfilePage: React.FC = () => {
     const [showPasswordModal, setShowPasswordModal] = useState(false);  // Modal para cambiar la contraseña
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleSave = () => {
-        console.log('Datos guardados:', profileData);
-        history.push('/profile');
+    const handleSave = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/profile/update/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    firstName: profileData.firstName,
+                    lastName: profileData.lastName,
+                    currentWeight: profileData.currentWeight,
+                    weightGoal: profileData.weightGoal,
+                    activityLevel: profileData.activityLevel,
+                    trainingFrequency: profileData.trainingFrequency,
+                }),
+            });
+    
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Perfil actualizado:', data);
+                history.push('/profile'); // Redirige al perfil
+            } else {
+                console.error('Error al actualizar el perfil:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
+        }
     };
 
     const handleCancel = () => {
         history.push('/profile'); // Redirige al perfil sin guardar cambios
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfilePicture(reader.result as string);
-            };
-            reader.readAsDataURL(file); 
+            const formData = new FormData();
+            formData.append('profilePhoto', file);
+    
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/profile/photo/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Asegúrate de incluir el token de autenticación
+                    },
+                    body: formData,
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    setProfilePicture(data.profilePhotoUrl); // Actualiza la foto en el frontend
+                } else {
+                    console.error('Error al subir la foto:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+            }
         }
     };
+    
 
     const handlePhotoOption = (option: string) => {
         if (option === 'upload') {
@@ -76,15 +117,38 @@ const EditProfilePage: React.FC = () => {
         }
     };
 
-    const handleChangePassword = () => {
+    const handleChangePassword = async () => {
         if (passwords.newPassword !== passwords.confirmPassword) {
             console.error('Las contraseñas no coinciden');
             return;
         }
-        console.log('Contraseña cambiada:', passwords);
-        setShowPasswordModal(false);
-        setShowToast(true);
+    
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/profile/password/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Asegúrate de incluir el token de autenticación
+                },
+                body: JSON.stringify({
+                    currentPassword: passwords.currentPassword,
+                    newPassword: passwords.newPassword,
+                    confirmPassword: passwords.confirmPassword,
+                }),
+            });
+    
+            if (response.ok) {
+                setShowPasswordModal(false);
+                setShowToast(true); // Mostrar un mensaje de éxito
+            } else {
+                const errorData = await response.json();
+                console.error('Error al cambiar la contraseña:', errorData.error);
+            }
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
+        }
     };
+    
 
     return (
         <IonPage>

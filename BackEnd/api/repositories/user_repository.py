@@ -318,8 +318,9 @@ class UserDetailsRepository:
                 "trainingFrequency": user_details.weekly_training_days
             }
 
-        except user.DoesNotExist:
+        except User.DoesNotExist:  # Asegúrate de que `User` esté definido correctamente
             return None
+
 
     @staticmethod
     def change_user_password(user_id, current_password, new_password, confirm_password):

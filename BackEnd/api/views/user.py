@@ -177,7 +177,7 @@ def update_user_profile(request):
         return Response({"error": "No se proporcionaron datos para actualizar."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Actualizar el perfil del usuario
-    updated_profile = UserRepository.update_user_profile(user_id, profile_data)
+    updated_profile = UserDetailsRepository.update_user_profile(user_id, profile_data)
 
     if updated_profile is None:
         return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
@@ -325,7 +325,7 @@ def upload_profile_photo(request):
         return Response({"error": "No se proporcionó una foto."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Actualizar la foto de perfil
-    updated_profile = UserRepository.update_profile_photo(user_id, photo)
+    updated_profile = UserDetailsRepository.update_profile_photo(user_id, photo)
 
     if updated_profile is None:
         return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
