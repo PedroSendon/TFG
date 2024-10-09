@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IonPage,
   IonContent,
@@ -14,12 +14,48 @@ import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts'; // Gráficas ci
 import Header from '../../Header/Header'; // Encabezado
 
 const MacronutrientPage: React.FC = () => {
-  const totalKcal = 2500;
-  const macros = {
-    carbs: { grams: 300, kcal: 1200, percentage: 50, color: '#ff4d4d' }, // Carbohidratos (Rojo)
-    protein: { grams: 150, kcal: 600, percentage: 30, color: '#4d79ff' }, // Proteínas (Azul)
-    fat: { grams: 90, kcal: 700, percentage: 20, color: '#ffd11a' } // Grasas (Amarillo)
-  };
+  const [macros, setMacros] = useState({
+    carbs: { grams: 0, kcal: 0, percentage: 0, color: '#ff4d4d' }, // Carbohidratos (Rojo)
+    protein: { grams: 0, kcal: 0, percentage: 0, color: '#4d79ff' }, // Proteínas (Azul)
+    fat: { grams: 0, kcal: 0, percentage: 0, color: '#ffd11a' } // Grasas (Amarillo)
+  });
+  const [totalKcal, setTotalKcal] = useState(0);
+  const [dietType, setDietType] = useState(''); // Estado para almacenar el tipo de dieta
+
+
+  useEffect(() => {
+    // Función para hacer la llamada al backend y obtener los macronutrientes del usuario
+    const fetchUserMacros = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/macros/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Asegúrate de incluir el token si usas autenticación
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          // Actualizar el estado con los datos obtenidos
+          setTotalKcal(data.totalKcal);
+          setMacros({
+            carbs: { grams: data.macros.carbs.grams, kcal: data.macros.carbs.kcal, percentage: data.macros.carbs.percentage, color: '#ff4d4d' },
+            protein: { grams: data.macros.protein.grams, kcal: data.macros.protein.kcal, percentage: data.macros.protein.percentage, color: '#4d79ff' },
+            fat: { grams: data.macros.fat.grams, kcal: data.macros.fat.kcal, percentage: data.macros.fat.percentage, color: '#ffd11a' }
+          });
+          setDietType(data.dietType || 'High protein diet'); // Usar el tipo de dieta del usuario o un valor por defecto
+        } else {
+          console.error('Error fetching user macros:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching user macros:', error);
+      }
+    };
+
+    fetchUserMacros();
+  }, []);
 
   // Datos para la gráfica circular
   const pieData = [
@@ -37,7 +73,7 @@ const MacronutrientPage: React.FC = () => {
           {/* Tipo de dieta como título principal */}
           <IonRow className="ion-text-center">
             <IonCol size="12">
-              <IonLabel style={{ fontSize: '24px', fontWeight: 'bold' }}>High protein diet</IonLabel>
+              <IonLabel style={{ fontSize: '24px', fontWeight: 'bold' }}>{dietType}</IonLabel>
             </IonCol>
           </IonRow>
 
@@ -50,39 +86,39 @@ const MacronutrientPage: React.FC = () => {
 
           {/* Tarjetas para los macronutrientes centradas */}
           <IonRow className="ion-justify-content-center ion-align-items-center">
-  <IonCol size="4" className="ion-align-self-center">
-    <IonCard style={{ border: '1px solid black', backgroundColor: '#fff', boxShadow: '2px 2px 8px rgba(0,0,0,0.1)' }}>
-      <IonCardHeader className="ion-text-center">
-        <IonLabel>Carbs</IonLabel>
-      </IonCardHeader>
-      <IonCardContent className="ion-text-center">
-        <h3>{macros.carbs.grams}g</h3>
-      </IonCardContent>
-    </IonCard>
-  </IonCol>
+            <IonCol size="4" className="ion-align-self-center">
+              <IonCard style={{ border: '1px solid black', backgroundColor: '#fff', boxShadow: '2px 2px 8px rgba(0,0,0,0.1)' }}>
+                <IonCardHeader className="ion-text-center">
+                  <IonLabel>Carbs</IonLabel>
+                </IonCardHeader>
+                <IonCardContent className="ion-text-center">
+                  <h3>{macros.carbs.grams}g</h3>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
 
-  <IonCol size="4" className="ion-align-self-center">
-    <IonCard style={{ border: '1px solid black', backgroundColor: '#fff', boxShadow: '2px 2px 8px rgba(0,0,0,0.1)' }}>
-      <IonCardHeader className="ion-text-center">
-        <IonLabel>Protein</IonLabel>
-      </IonCardHeader>
-      <IonCardContent className="ion-text-center">
-        <h3>{macros.protein.grams}g</h3>
-      </IonCardContent>
-    </IonCard>
-  </IonCol>
+            <IonCol size="4" className="ion-align-self-center">
+              <IonCard style={{ border: '1px solid black', backgroundColor: '#fff', boxShadow: '2px 2px 8px rgba(0,0,0,0.1)' }}>
+                <IonCardHeader className="ion-text-center">
+                  <IonLabel>Protein</IonLabel>
+                </IonCardHeader>
+                <IonCardContent className="ion-text-center">
+                  <h3>{macros.protein.grams}g</h3>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
 
-  <IonCol size="4" className="ion-align-self-center">
-    <IonCard style={{ border: '1px solid black', backgroundColor: '#fff', boxShadow: '2px 2px 8px rgba(0,0,0,0.1)' }}>
-      <IonCardHeader className="ion-text-center">
-        <IonLabel>Fat</IonLabel>
-      </IonCardHeader>
-      <IonCardContent className="ion-text-center">
-        <h3>{macros.fat.grams}g</h3>
-      </IonCardContent>
-    </IonCard>
-  </IonCol>
-</IonRow>
+            <IonCol size="4" className="ion-align-self-center">
+              <IonCard style={{ border: '1px solid black', backgroundColor: '#fff', boxShadow: '2px 2px 8px rgba(0,0,0,0.1)' }}>
+                <IonCardHeader className="ion-text-center">
+                  <IonLabel>Fat</IonLabel>
+                </IonCardHeader>
+                <IonCardContent className="ion-text-center">
+                  <h3>{macros.fat.grams}g</h3>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
 
 
 
@@ -94,7 +130,7 @@ const MacronutrientPage: React.FC = () => {
                   data={pieData}
                   dataKey="value"
                   outerRadius={80}
-                  innerRadius={60}  
+                  innerRadius={60}
                   label={({ percent, x, y }) => (
                     <text
                       x={x}
@@ -107,7 +143,7 @@ const MacronutrientPage: React.FC = () => {
                       {`${(percent * 100).toFixed(0)}%`}
                     </text>
                   )}
-                  labelLine={false} 
+                  labelLine={false}
                 >
                   {pieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
