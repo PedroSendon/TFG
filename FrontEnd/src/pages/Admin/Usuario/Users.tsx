@@ -56,6 +56,12 @@ const Users: React.FC = () => {
 
   // Función para manejar la eliminación del usuario
   const handleDelete = (userId: number) => {
+    const userExists = users.some(user => user.id === userId);  // Verifica si el usuario está en la lista
+    if (!userExists) {
+      console.error(`Usuario con ID ${userId} no encontrado en el estado.`);
+      return;  // Detiene la función si el usuario no existe
+    }
+
     presentAlert({
       header: t('confirm_delete'),
       message: t('delete_message'),
@@ -63,9 +69,9 @@ const Users: React.FC = () => {
         t('cancel'),
         {
           text: t('delete'),
-          handler: () => { 
-            fetch(`/api/users/delete/${userId}`, { method: 'DELETE' })
-              .then((response) => {
+          handler: () => {
+            fetch(`http://127.0.0.1:8000/api/users/delete/${userId}/`, { method: 'DELETE' })  // Asegúrate de incluir la barra al final
+            .then((response) => {
                 if (response.ok) {
                   setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
                 } else {
@@ -78,7 +84,8 @@ const Users: React.FC = () => {
       ],
     });
   };
-  
+
+
 
   const handleEdit = (userId: number) => {
     const selectedUser = users.find((user) => user.id === userId);
