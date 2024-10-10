@@ -11,7 +11,6 @@ import {
   IonButton,
   IonFab,
   IonFabButton,
-  IonAlert,  // Añadido para la confirmación
   useIonAlert
 } from '@ionic/react';
 import { Add } from '@mui/icons-material';
@@ -20,21 +19,13 @@ import Navbar from '../../Navbar/Navbar'; // Componente de la navbar
 import './Users.css'; // Estilos personalizados
 import { useHistory } from 'react-router';
 import { Button } from '@mui/material';
-
-const usersInitialData = [
-  { id: 1, name: 'John Doe', email: 'john@example.com' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
-  { id: 3, name: 'Alice Johnson', email: 'alice@example.com' },
-  { id: 1, name: 'John Doe', email: 'john@example.com' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
-  { id: 3, name: 'Alice Johnson', email: 'alice@example.com' },
-  { id: 1, name: 'John Doe', email: 'john@example.com' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
-  { id: 3, name: 'Alice Johnson', email: 'alice@example.com' },
-];
+import { useContext } from 'react';
+import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
 
 const Users: React.FC = () => {
   const history = useHistory();
+  const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
+
   interface User {
     id: number;
     name: string;
@@ -56,32 +47,32 @@ const Users: React.FC = () => {
         const data = await response.json();
         setUsers(data);  // Actualiza el estado con los datos obtenidos
       } else {
-        console.error('Error al obtener la lista de usuarios');
+        console.error(t('fetch_error'));
       }
     } catch (error) {
-      console.error('Error de red:', error);
+      console.error(t('network_error'), error);
     }
   };
 
   // Función para manejar la eliminación del usuario
   const handleDelete = (userId: number) => {
     presentAlert({
-      header: 'Confirmar eliminación',
-      message: '¿Estás seguro de que deseas eliminar este usuario?',
+      header: t('confirm_delete'),
+      message: t('delete_message'),
       buttons: [
-        'Cancelar',
+        t('cancel'),
         {
-          text: 'Eliminar',
+          text: t('delete'),
           handler: () => {
             fetch(`/api/users/delete/${userId}`, { method: 'DELETE' })
               .then((response) => {
                 if (response.ok) {
                   setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
                 } else {
-                  console.error('Error al eliminar el usuario');
+                  console.error(t('delete_error'));
                 }
               })
-              .catch((error) => console.error('Error:', error));
+              .catch((error) => console.error(t('network_error'), error));
           },
         },
       ],
@@ -111,7 +102,7 @@ const Users: React.FC = () => {
   return (
     <IonPage>
       {/* Header */}
-      <Header title="Users" />
+      <Header title={t('users')} />
 
       <IonContent style={{ backgroundColor: '#000000' }}>
         <IonGrid>
@@ -176,7 +167,7 @@ const Users: React.FC = () => {
                         }}
                         className="no-focus"
                       >
-                        Assign
+                        {t('assign')}
                       </Button>
 
                       {/* Botón Modificar */}
@@ -193,9 +184,8 @@ const Users: React.FC = () => {
                         }}
                         className="no-focus"
                       >
-                        Modify
+                        {t('modify')}
                       </Button>
-
 
                       {/* Botón Eliminar */}
                       <Button
@@ -211,7 +201,7 @@ const Users: React.FC = () => {
                         }}
                         className="no-focus"
                       >
-                        Delete
+                        {t('delete')}
                       </Button>
                     </div>
                   </IonCardContent>

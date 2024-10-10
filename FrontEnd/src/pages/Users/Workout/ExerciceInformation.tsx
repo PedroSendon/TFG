@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   IonButton,
   IonContent,
@@ -7,9 +7,9 @@ import {
   IonGrid,
   IonRow,
   IonCol,
-  IonPage,
 } from '@ionic/react';
 import Header from '../../Header/Header';  // Importamos el componente Header
+import { LanguageContext } from '../../../context/LanguageContext';  // Importamos el contexto de idioma
 
 interface ExerciseInfoModalProps {
   isOpen: boolean;
@@ -20,10 +20,12 @@ interface ExerciseInfoModalProps {
 }
 
 const ExerciseInfoModal: React.FC<ExerciseInfoModalProps> = ({ isOpen, onClose, exerciseName, description, steps }) => {
+  const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
+
   return (
     <IonModal isOpen={isOpen} onDidDismiss={onClose}>
       {/* Utilizamos el Header ya creado */}
-      <Header title="Exercise information" />
+      <Header title={t('exercise_information')} />  {/* Texto dinámico de título */}
 
       <IonContent>
         {/* Título del ejercicio */}
@@ -42,7 +44,7 @@ const ExerciseInfoModal: React.FC<ExerciseInfoModalProps> = ({ isOpen, onClose, 
 
         {/* Instrucciones paso a paso */}
         <IonLabel>
-          <h2 style={{ color: '#32CD32', marginBottom: '10px' }}>Step by step instructions</h2>
+          <h2 style={{ color: '#32CD32', marginBottom: '10px' }}>{t('step_by_step_instructions')}</h2>  {/* Texto dinámico */}
           <IonGrid>
             {steps.map((step, index) => (
               <IonRow key={index} className="ion-justify-content-center">
@@ -88,7 +90,7 @@ const ExerciseInfoModal: React.FC<ExerciseInfoModalProps> = ({ isOpen, onClose, 
           className="cancel-button"
           onClick={onClose}  // Llama a onClose para cerrar el modal
         >
-          Close
+          {t('close_button')}  {/* Texto dinámico */}
         </IonButton>
       </IonContent>
     </IonModal>

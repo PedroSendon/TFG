@@ -1,49 +1,48 @@
 import React, { useEffect, useState } from 'react';
-import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton } from '@ionic/react';
+import { IonPage, IonContent, IonGrid, IonRow, IonCol } from '@ionic/react';
 import Header from '../../Header/Header';
 import { Select, MenuItem, Button, Grid } from '@mui/material';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useContext } from 'react';
+import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
 
 const AssignPlans: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
-  const { userId } = location.state as { userId: number }; // Obtener el userId pasado
+  const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
+  const { userId } = location.state as { userId: number }; 
 
-  // Estados para manejar los datos
   const [selectedWorkout, setSelectedWorkout] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('');
   const [workoutOptions, setWorkoutOptions] = useState<{ id: number; name: string }[]>([]);
   const [nutritionPlans, setNutritionPlans] = useState<{ id: number; dietType: string }[]>([]);
-  const [showToast, setShowToast] = useState(false); // Para manejar mensajes de error
+  const [showToast, setShowToast] = useState(false); 
 
-  // Obtener los entrenamientos disponibles desde el backend
   const fetchWorkouts = async () => {
     try {
       const response = await fetch('http://127.0.0.1:8000/api/workouts/');
       const data = await response.json();
-      setWorkoutOptions(data.data); // Asignar los datos de entrenamientos
+      setWorkoutOptions(data.data); 
     } catch (error) {
-      console.error('Error fetching workouts:', error);
+      console.error(t('fetch_workouts_error'), error);
       setShowToast(true);
     }
   };
 
-  // Obtener los planes nutricionales desde el backend utilizando el nuevo endpoint
   const fetchNutritionPlans = async () => {
     try {
       const response = await fetch('http://127.0.0.1:8000/api/macros/all/');
       if (!response.ok) {
-        throw new Error('Error fetching nutrition plans');
+        throw new Error(t('fetch_nutrition_plans_error'));
       }
       const data = await response.json();
-      setNutritionPlans(data.data); // Verifica que "data.data" tiene el formato correcto
+      setNutritionPlans(data.data); 
     } catch (error) {
-      console.error('Error fetching nutrition plans:', error);
-      setShowToast(true);  // Muestra el error en la interfaz
+      console.error(t('fetch_nutrition_plans_error'), error);
+      setShowToast(true);  
     }
   };
 
-  // Llamar a las funciones de fetch en useEffect para obtener los datos al cargar el componente
   useEffect(() => {
     fetchWorkouts();
     fetchNutritionPlans();
@@ -57,30 +56,30 @@ const AssignPlans: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          workout_id: selectedWorkout,  // ID del entrenamiento seleccionado
-          nutrition_plan_id: selectedPlan,  // ID del plan nutricional seleccionado
+          workout_id: selectedWorkout, 
+          nutrition_plan_id: selectedPlan,  
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Asignación exitosa:', data);
-        history.push('/admin/users');  // Redirigir a la página de usuarios después de guardar
+        console.log(t('assign_success'), data);
+        history.push('/admin/users');  
       } else {
-        console.error('Error al asignar los planes:', await response.json());
+        console.error(t('assign_error'), await response.json());
       }
     } catch (error) {
-      console.error('Error en la solicitud:', error);
+      console.error(t('request_error'), error);
     }
   };
 
   const handleCancel = () => {
-    history.push('/admin/users'); // Redirigir a la lista de usuarios al cancelar
+    history.push('/admin/users');
   };
 
   return (
     <IonPage>
-      <Header title="Asignar Planes" /> {/* Header reutilizable */}
+      <Header title={t('assign_plans')} /> 
 
       <IonContent>
         <IonGrid>
@@ -95,7 +94,7 @@ const AssignPlans: React.FC = () => {
                 style={{ border: '1px solid #d1d1d6', borderRadius: '8px', padding: '10px' }}
               >
                 <MenuItem value="" disabled>
-                  Seleccionar entrenamiento
+                  {t('select_workout')}
                 </MenuItem>
                 {workoutOptions.map((workout) => (
                   <MenuItem key={workout.id} value={workout.id}>
@@ -117,7 +116,7 @@ const AssignPlans: React.FC = () => {
                 style={{ border: '1px solid #d1d1d6', borderRadius: '8px', padding: '10px' }}
               >
                 <MenuItem value="" disabled>
-                  Seleccionar plan nutricional
+                  {t('select_nutrition_plan')}
                 </MenuItem>
                 {nutritionPlans.map((plan) => (
                   <MenuItem key={plan.id} value={plan.id}>
@@ -144,7 +143,7 @@ const AssignPlans: React.FC = () => {
                     width: '100%',
                   }}
                 >
-                  CANCEL
+                  {t('cancel')}
                 </Button>
               </Grid>
               <Grid item xs={6}>
@@ -160,7 +159,7 @@ const AssignPlans: React.FC = () => {
                     width: '100%',
                   }}
                 >
-                  SAVE
+                  {t('save')}
                 </Button>
               </Grid>
             </Grid>

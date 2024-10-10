@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { IonPage, IonItemDivider, IonHeader, IonToolbar, IonTitle, IonContent, IonAvatar, IonLabel, IonButton, IonCard, IonCardContent, IonGrid, IonRow, IonCol, IonIcon } from '@ionic/react';
 import { logOutOutline, pencilOutline } from 'ionicons/icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
 import './Perfil.css'; // Asegúrate de crear este archivo CSS para aplicar los estilos
 import { useHistory } from 'react-router-dom';  // Hook para redirigir
 import Header from '../../Header/Header';  // Importamos el componente Header
-
+import { LanguageContext } from '../../../context/LanguageContext';  // Importa el contexto de idioma
 
 const ProfilePage: React.FC = () => {
     const history = useHistory();
+    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
     const [userData, setUserData] = useState<any>(null);  // Datos del usuario
     const [weightData, setWeightData] = useState<any[]>([]);  // Historial de peso
     const [loading, setLoading] = useState<boolean>(true);  // Controla el estado de carga
@@ -19,7 +20,6 @@ const ProfilePage: React.FC = () => {
         fetchWeightHistory();  // Llamar a la función para obtener el historial de peso
     }, []);
 
-    // Función para obtener los datos del perfil del usuario
     const fetchUserProfile = async (userId: number) => {
         try {
             const response = await fetch(`http://127.0.0.1:8000/api/profile/?userId=${userId}`);
@@ -37,7 +37,6 @@ const ProfilePage: React.FC = () => {
         }
     };
 
-    // Función para obtener el historial de peso
     const fetchWeightHistory = async () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/api/profile/weight-history/');
@@ -53,35 +52,26 @@ const ProfilePage: React.FC = () => {
     };
 
     if (loading) {
-        return <p>Cargando perfil...</p>;
+        return <p>{t('loading_profile')}</p>;
     }
 
     const handleLogout = () => {
-        // Limpiar datos de autenticación
         localStorage.removeItem('token');
         sessionStorage.clear();
-
-        // Redirigir a la página de inicio
         history.replace('/');
     };
-
 
     const handleEdit = () => {
         history.push({
             pathname: '/profile/edit',
-            state: {
-                userData       // Pasa userData
-            },
+            state: { userData },
         });
     };
 
-
     return (
         <IonPage>
-            <Header title="Profile" />  {/* Pasamos el título como prop */}
-
+            <Header title={t('profile_title')} />  {/* Título dinámico */}
             <IonContent>
-                {/* Botón de edición en la parte superior derecha */}
                 <IonButton
                     fill="clear"
                     size="small"
@@ -91,19 +81,19 @@ const ProfilePage: React.FC = () => {
                         position: 'absolute',
                         top: '10px',
                         right: '10px',
-                        zIndex: 10,  /* Asegura que esté por encima de otros elementos */
-                        padding: '10px'  /* Mejora la capacidad de clic en pantallas táctiles */
+                        zIndex: 10,
+                        padding: '10px',
                     }}
                 >
-                    <IonIcon icon={pencilOutline} /> Edit
+                    <IonIcon icon={pencilOutline} /> {t('edit_button')} {/* Botón dinámico */}
                 </IonButton>
 
                 {/* Avatar y nombre de usuario */}
                 <IonGrid className="ion-text-center">
                     <IonRow>
-                        <IonCol size="12" className="avatar-container" >
+                        <IonCol size="12" className="avatar-container">
                             <IonAvatar className="custom-avatar" style={{ border: '2px solid var(--color-verde-lima)' }}>
-                                <img src="https://via.placeholder.com/150" alt="Foto de perfil" />
+                                <img src="https://via.placeholder.com/150" alt={t('profile_picture_alt')} />
                             </IonAvatar>
                             <h2 className="username">{userData.username}</h2>
                             <p className="user-email">{userData.email}</p>
@@ -111,15 +101,12 @@ const ProfilePage: React.FC = () => {
                     </IonRow>
                 </IonGrid>
 
-
-                {/* Divider (línea horizontal) */}
                 <hr className="thin-divider" />
 
-                {/* Información personal */}
                 <IonGrid>
                     <IonRow>
                         <IonCol size="12" className="ion-text-center">
-                            <h2>Personal Information</h2> {/* Título de la sección */}
+                            <h2>{t('personal_information')}</h2>
                         </IonCol>
                     </IonRow>
 
@@ -128,10 +115,8 @@ const ProfilePage: React.FC = () => {
                             <IonCard className="custom-card">
                                 <IonCardContent className="ion-text-center">
                                     <IonLabel>
-                                        <h3 style={{
-                                            color: 'var(--color-verde-lima)'
-                                        }}>Age</h3>
-                                        <p>{userData.age} years</p>
+                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('age_label')}</h3>
+                                        <p>{userData.age} {t('years')}</p>
                                     </IonLabel>
                                 </IonCardContent>
                             </IonCard>
@@ -140,9 +125,7 @@ const ProfilePage: React.FC = () => {
                             <IonCard className="custom-card">
                                 <IonCardContent className="ion-text-center">
                                     <IonLabel>
-                                        <h3 style={{
-                                            color: 'var(--color-verde-lima)'
-                                        }}>Height</h3>
+                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('height_label')}</h3>
                                         <p>{userData.height} cm</p>
                                     </IonLabel>
                                 </IonCardContent>
@@ -155,9 +138,7 @@ const ProfilePage: React.FC = () => {
                             <IonCard className="custom-card">
                                 <IonCardContent className="ion-text-center">
                                     <IonLabel>
-                                        <h3 style={{
-                                            color: 'var(--color-verde-lima)'
-                                        }}>Starting Weight</h3>
+                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('starting_weight')}</h3>
                                         <p>{userData.initialWeight} kg</p>
                                     </IonLabel>
                                 </IonCardContent>
@@ -167,9 +148,7 @@ const ProfilePage: React.FC = () => {
                             <IonCard className="custom-card">
                                 <IonCardContent className="ion-text-center">
                                     <IonLabel>
-                                        <h3 style={{
-                                            color: 'var(--color-verde-lima)'
-                                        }}>Current Weight</h3>
+                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('current_weight')}</h3>
                                         <p>{userData.currentWeight} kg</p>
                                     </IonLabel>
                                 </IonCardContent>
@@ -178,14 +157,12 @@ const ProfilePage: React.FC = () => {
                     </IonRow>
                 </IonGrid>
 
-                {/* Divider (línea horizontal) */}
                 <hr className="thin-divider" />
 
-                {/* Objetivos de salud */}
                 <IonGrid>
                     <IonRow>
                         <IonCol size="12" className="ion-text-center">
-                            <h2>Health Goals</h2> {/* Título de la sección */}
+                            <h2>{t('health_goals')}</h2>
                         </IonCol>
                     </IonRow>
 
@@ -194,22 +171,16 @@ const ProfilePage: React.FC = () => {
                             <IonCard className="custom-card">
                                 <IonCardContent className="ion-text-center">
                                     <IonLabel>
-                                        <h3 style={{
-                                            color: 'var(--color-verde-lima)'
-                                        }}>Weight goal</h3>
+                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('weight_goal')}</h3>
                                         <p>{userData.weightGoal}</p>
                                     </IonLabel>
                                     <IonLabel>
-                                        <h3 style={{
-                                            color: 'var(--color-verde-lima)'
-                                        }}>Activity level</h3>
+                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('activity_level')}</h3>
                                         <p>{userData.activityLevel}</p>
                                     </IonLabel>
                                     <IonLabel>
-                                        <h3 style={{
-                                            color: 'var(--color-verde-lima)'
-                                        }}>Training frequency</h3>
-                                        <p>{userData.trainingFrequency} days/week</p>
+                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('training_frequency')}</h3>
+                                        <p>{userData.trainingFrequency} {t('days_per_week')}</p>
                                     </IonLabel>
                                 </IonCardContent>
                             </IonCard>
@@ -217,18 +188,15 @@ const ProfilePage: React.FC = () => {
                     </IonRow>
                 </IonGrid>
 
-                {/* Divider (línea horizontal) */}
                 <hr className="thin-divider" />
 
                 <IonGrid>
-                    {/* Gráfica de peso/día */}
                     <IonRow>
                         <IonCol>
-                            <h3>Weight over time</h3>
+                            <h3>{t('weight_over_time')}</h3>
                             <ResponsiveContainer width="100%" height={200}>
                                 <LineChart data={weightData}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    {/* Uso de parámetros predeterminados en lugar de `defaultProps` en los componentes */}
                                     <XAxis dataKey="day" />
                                     <YAxis />
                                     <Tooltip />
@@ -240,16 +208,14 @@ const ProfilePage: React.FC = () => {
                     </IonRow>
                 </IonGrid>
 
-                {/* Botón de cerrar sesión */}
                 <IonButton
                     className="verde-lima"
                     style={{ marginBottom: '15%', color: '#FFFFFF' }}
                     expand="block"
                     onClick={handleLogout}
                 >
-                    <IonIcon icon={logOutOutline} slot="start" /> Log out
+                    <IonIcon icon={logOutOutline} slot="start" /> {t('log_out')}
                 </IonButton>
-
             </IonContent>
         </IonPage>
     );

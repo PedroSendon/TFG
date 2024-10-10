@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
     TextField, Button, Grid, Container, MenuItem
 } from '@mui/material'; // Importación de componentes de Material UI.
 import { useHistory } from 'react-router-dom';
 import Header from '../../Header/Header'; // Componente de header reutilizable
+import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
 
 const AddMacros: React.FC = () => {
+    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
     const history = useHistory(); // Hook para navegación.
 
     // Estado del formulario.
@@ -46,19 +48,19 @@ const AddMacros: React.FC = () => {
     // Validaciones básicas.
     const validateField = (name: string, value: string) => {
         if (!value || isNaN(Number(value))) {
-            return `${name} debe ser un número válido.`;
+            return `${t(name)} ${t('validation_error')}`;
         }
         return '';
     };
 
     const validateForm = () => {
         const newErrors: any = {};
-        newErrors.kcal = validateField('Kcal', formData.kcal);
-        newErrors.proteins = validateField('Proteínas', formData.proteins);
-        newErrors.carbs = validateField('Carbohidratos', formData.carbs);
-        newErrors.fats = validateField('Grasas', formData.fats);
+        newErrors.kcal = validateField('kcal', formData.kcal);
+        newErrors.proteins = validateField('proteins', formData.proteins);
+        newErrors.carbs = validateField('carbs', formData.carbs);
+        newErrors.fats = validateField('fats', formData.fats);
         if (!formData.dietType) {
-            newErrors.dietType = 'Seleccione un tipo de dieta.';
+            newErrors.dietType = t('validation_select_diet_type');
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -92,19 +94,19 @@ const AddMacros: React.FC = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Recomendación agregada:', data);
+                    console.log(t('recommendation_added'), data);
                     history.push('/admin/macros'); // Redirigir después de añadir.
                 } else {
                     const errorData = await response.json();
-                    console.error('Error al añadir la recomendación:', errorData);
-                    setErrors({ submit: errorData.error || 'Error desconocido' });
+                    console.error(t('error_adding_recommendation'), errorData);
+                    setErrors({ submit: errorData.error || t('unknown_error') });
                 }
             } catch (error) {
-                console.error('Error en la conexión:', error);
-                setErrors({ submit: 'Error en la conexión con el servidor' });
+                console.error(t('connection_error'), error);
+                setErrors({ submit: t('server_connection_error') });
             }
         } else {
-            console.log('Errores en el formulario');
+            console.log(t('form_errors'));
         }
     };
 
@@ -112,10 +114,9 @@ const AddMacros: React.FC = () => {
         history.push('/admin/nutrition');  // Cancelar y redirigir a la lista de ejercicios
     };
 
-
     return (
         <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <Header title="Añadir Macronutrientes" />
+            <Header title={t('add_macros_title')} />
             <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
@@ -126,7 +127,7 @@ const AddMacros: React.FC = () => {
                                 required
                                 fullWidth
                                 id="kcal"
-                                label="Kcal"
+                                label={t('kcal')}
                                 name="kcal"
                                 onChange={handleChange}
                                 error={!!errors.kcal}
@@ -141,7 +142,7 @@ const AddMacros: React.FC = () => {
                                 required
                                 fullWidth
                                 id="proteins"
-                                label="Proteínas (g)"
+                                label={t('proteins')}
                                 name="proteins"
                                 onChange={handleChange}
                                 error={!!errors.proteins}
@@ -156,7 +157,7 @@ const AddMacros: React.FC = () => {
                                 required
                                 fullWidth
                                 id="carbs"
-                                label="Carbohidratos (g)"
+                                label={t('carbs')}
                                 name="carbs"
                                 onChange={handleChange}
                                 error={!!errors.carbs}
@@ -171,7 +172,7 @@ const AddMacros: React.FC = () => {
                                 required
                                 fullWidth
                                 id="fats"
-                                label="Grasas (g)"
+                                label={t('fats')}
                                 name="fats"
                                 onChange={handleChange}
                                 error={!!errors.fats}
@@ -187,7 +188,7 @@ const AddMacros: React.FC = () => {
                                 select
                                 fullWidth
                                 id="dietType"
-                                label="Tipo de Dieta"
+                                label={t('diet_type')}
                                 name="dietType"
                                 value={formData.dietType}
                                 onChange={handleChange}
@@ -208,17 +209,16 @@ const AddMacros: React.FC = () => {
                                 variant="outlined"
                                 fullWidth
                                 id="description"
-                                label="Descripción (opcional)"
+                                label={t('description')}
                                 name="description"
                                 onChange={handleChange}
                                 value={formData.description}
-                                helperText="Ej: Dieta alta en proteínas, baja en carbohidratos"
+                                helperText={t('description_helper')}
                             />
                         </Grid>
                     </Grid>
                 </form>
             </div>
-
 
             {/* Botones de Cancelar y Guardar */}
             <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
@@ -236,7 +236,7 @@ const AddMacros: React.FC = () => {
                                 width: '100%',
                             }}
                         >
-                            CANCEL
+                            {t('cancel')}
                         </Button>
                     </Grid>
                     <Grid item xs={6}>
@@ -254,7 +254,7 @@ const AddMacros: React.FC = () => {
                             onClick={handleSubmit}
                             disabled={!formData.kcal || !formData.proteins || !formData.carbs || !formData.fats || !formData.dietType}
                         >
-                            ADD
+                            {t('add')}
                         </Button>
                     </Grid>
                 </Grid>

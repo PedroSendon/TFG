@@ -6,10 +6,13 @@ import { IonActionSheet, IonAvatar, IonButton, IonIcon } from '@ionic/react';
 import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
+import { useContext } from 'react';
+import { LanguageContext } from '../../../context/LanguageContext';
 
 const ModifyUserPage: React.FC = () => {
     const history = useHistory();
     const location = useLocation();
+    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
 
     // Recibir datos del usuario seleccionado desde la lista de usuarios
     const { userData } = (location.state || {
@@ -52,13 +55,13 @@ const ModifyUserPage: React.FC = () => {
     
             if (response.ok) {
                 const data = await response.json();
-                console.log('Usuario actualizado exitosamente:', data);
+                console.log(t('user_updated'), data);
                 history.push('/admin/users'); // Redirigir a la página de administración después de guardar
             } else {
-                console.error('Error al actualizar el usuario');
+                console.error(t('update_error'));
             }
         } catch (error) {
-            console.error('Error en la solicitud:', error);
+            console.error(t('request_error'), error);
         }
     };
     const handleCancel = () => {
@@ -80,7 +83,7 @@ const ModifyUserPage: React.FC = () => {
         if (option === 'upload') {
             fileInputRef.current?.click();
         } else if (option === 'take') {
-            console.log('Tomar una foto');
+            console.log(t('take_photo'));
         } else if (option === 'delete') {
             setProfilePicture('https://via.placeholder.com/150');
         }
@@ -97,16 +100,16 @@ const ModifyUserPage: React.FC = () => {
 
     return (
         <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <Header title="Modificar Usuario" />
+            <Header title={t('modify_user')} />
 
             <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
                 {/* Sección de cambiar imagen de perfil */}
                 <IonAvatar
                     className="custom-avatar"
                     style={{
-                        width: '100px',  // Reducido el tamaño del avatar
-                        height: '100px',  // Reducido el tamaño del avatar
-                        border: '1.5px solid var(--color-verde-lima)',  // Reducido el grosor del borde
+                        width: '100px',  
+                        height: '100px',  
+                        border: '1.5px solid var(--color-verde-lima)',  
                         borderRadius: '50%',
                         overflow: 'hidden',
                         marginBottom: '0px',
@@ -126,14 +129,14 @@ const ModifyUserPage: React.FC = () => {
                 <IonButton
                     style={{
                         color: 'var(--color-verde-lima)',
-                        fontSize: '12px',  // Reducido el tamaño del texto del botón
+                        fontSize: '12px',  
                         margin: '0px'
                     }}
                     fill="clear"
                     onClick={() => setShowActionSheet(true)}
                 >
-                    <IonIcon icon={cameraOutline} style={{ fontSize: '16px' }} /> {/* Reducido el tamaño del ícono */}
-                    Cambiar foto
+                    <IonIcon icon={cameraOutline} style={{ fontSize: '16px' }} /> 
+                    {t('change_photo')}
                 </IonButton>
 
                 {/* Action Sheet para opciones de foto */}
@@ -142,23 +145,23 @@ const ModifyUserPage: React.FC = () => {
                     onDidDismiss={() => setShowActionSheet(false)}
                     buttons={[
                         {
-                            text: 'Subir una foto',
+                            text: t('upload_photo'),
                             icon: imageOutline,
                             handler: () => handlePhotoOption('upload'),
                         },
                         {
-                            text: 'Tomar una foto',
+                            text: t('take_photo'),
                             icon: cameraOutline,
                             handler: () => handlePhotoOption('take'),
                         },
                         {
-                            text: 'Eliminar foto',
+                            text: t('delete_photo'),
                             role: 'destructive',
                             icon: trashOutline,
                             handler: () => handlePhotoOption('delete'),
                         },
                         {
-                            text: 'Cancelar',
+                            text: t('cancel'),
                             icon: closeOutline,
                             role: 'cancel',
                         },
@@ -182,7 +185,7 @@ const ModifyUserPage: React.FC = () => {
                                 required
                                 fullWidth
                                 id="firstName"
-                                label="Nombre"
+                                label={t('first_name')}
                                 name="firstName"
                                 value={profileData.firstName}
                                 onChange={handleChange}
@@ -196,7 +199,7 @@ const ModifyUserPage: React.FC = () => {
                                 required
                                 fullWidth
                                 id="lastName"
-                                label="Apellidos"
+                                label={t('last_name')}
                                 name="lastName"
                                 value={profileData.lastName}
                                 onChange={handleChange}
@@ -211,7 +214,7 @@ const ModifyUserPage: React.FC = () => {
                                 fullWidth
                                 type="number"
                                 id="currentWeight"
-                                label="Peso Actual (kg)"
+                                label={t('current_weight')}
                                 name="currentWeight"
                                 value={profileData.currentWeight}
                                 onChange={handleChange}
@@ -226,14 +229,14 @@ const ModifyUserPage: React.FC = () => {
                                 select
                                 fullWidth
                                 id="weightGoal"
-                                label="Meta de Peso"
+                                label={t('weight_goal')}
                                 name="weightGoal"
                                 value={profileData.weightGoal}
                                 onChange={handleChange}
                             >
-                                <MenuItem value="Perder peso">Perder peso</MenuItem>
-                                <MenuItem value="Ganar masa muscular">Ganar masa muscular</MenuItem>
-                                <MenuItem value="Mantener peso">Mantener peso</MenuItem>
+                                <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
+                                <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
+                                <MenuItem value="Mantener peso">{t('maintain_weight')}</MenuItem>
                             </TextField>
                         </Grid>
 
@@ -245,15 +248,15 @@ const ModifyUserPage: React.FC = () => {
                                 select
                                 fullWidth
                                 id="activityLevel"
-                                label="Nivel de Actividad"
+                                label={t('activity_level')}
                                 name="activityLevel"
                                 value={profileData.activityLevel}
                                 onChange={handleChange}
                             >
-                                <MenuItem value="Sedentario">Sedentario</MenuItem>
-                                <MenuItem value="Ligera">Ligera</MenuItem>
-                                <MenuItem value="Moderada">Moderada</MenuItem>
-                                <MenuItem value="Intensa">Intensa</MenuItem>
+                                <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
+                                <MenuItem value="Ligera">{t('light')}</MenuItem>
+                                <MenuItem value="Moderada">{t('moderate')}</MenuItem>
+                                <MenuItem value="Intensa">{t('intense')}</MenuItem>
                             </TextField>
                         </Grid>
 
@@ -265,17 +268,14 @@ const ModifyUserPage: React.FC = () => {
                                 select
                                 fullWidth
                                 id="trainingFrequency"
-                                label="Frecuencia de Entrenamiento (días/semana)"
+                                label={t('training_frequency')}
                                 name="trainingFrequency"
                                 value={profileData.trainingFrequency}
                                 onChange={handleChange}
                             >
-                                <MenuItem value="1">1</MenuItem>
-                                <MenuItem value="2">2</MenuItem>
-                                <MenuItem value="3">3</MenuItem>
-                                <MenuItem value="4">4</MenuItem>
-                                <MenuItem value="5">5</MenuItem>
-                                <MenuItem value="6">6</MenuItem>
+                                {[1, 2, 3, 4, 5, 6].map((day) => (
+                                    <MenuItem key={day} value={day}>{day}</MenuItem>
+                                ))}
                             </TextField>
                         </Grid>
 
@@ -287,21 +287,20 @@ const ModifyUserPage: React.FC = () => {
                                 select
                                 fullWidth
                                 id="role"
-                                label="Rol"
+                                label={t('role')}
                                 name="role"
                                 value={profileData.role}
                                 onChange={handleSelectChange}
                             >
-                                <MenuItem value="cliente">Cliente</MenuItem>
-                                <MenuItem value="administrador">Administrador</MenuItem>
-                                <MenuItem value="entrenador">Entrenador</MenuItem>
-                                <MenuItem value="nutricionista">Nutricionista</MenuItem>
+                                <MenuItem value="cliente">{t('client')}</MenuItem>
+                                <MenuItem value="administrador">{t('admin')}</MenuItem>
+                                <MenuItem value="entrenador">{t('trainer')}</MenuItem>
+                                <MenuItem value="nutricionista">{t('nutritionist')}</MenuItem>
                             </TextField>
                         </Grid>
                     </Grid>
                 </form>
             </div>
-
 
             {/* Botones de Cancelar y Guardar */}
             <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
@@ -319,7 +318,7 @@ const ModifyUserPage: React.FC = () => {
                                 width: '100%',
                             }}
                         >
-                            CANCEL
+                            {t('cancel')}
                         </Button>
                     </Grid>
                     <Grid item xs={6}>
@@ -336,26 +335,11 @@ const ModifyUserPage: React.FC = () => {
                             }}
                             onClick={handleSave}
                         >
-                            ADD
+                            {t('save')}
                         </Button>
                     </Grid>
                 </Grid>
             </Grid>
-            {/* Botón de guardar cambios */}
-            <div style={{ padding: '1rem 0', marginTop: 'auto', marginBottom: '15%' }}>
-                <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    style={{
-                        backgroundColor: 'var(--color-verde-lima)',
-                        color: 'var(--color-blanco)',
-                    }}
-                    onClick={handleSave}
-                >
-                    Guardar cambios
-                </Button>
-            </div>
         </Container>
     );
 };

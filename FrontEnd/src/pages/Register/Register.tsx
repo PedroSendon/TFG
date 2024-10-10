@@ -1,51 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   TextField, IconButton, Button, Grid, Typography, Container,
   FormControlLabel, Checkbox, Link, MenuItem
-} from '@mui/material'; // Importación de componentes de Material UI.
-import { useHistory } from 'react-router-dom'; // Hook para redirección.
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // Componente de selector de fecha.
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; // Proveedor de localización para el selector de fechas.
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'; // Adaptador para el manejo de fechas con Day.js.
-import dayjs from 'dayjs'; // Librería para manipular fechas.
-import '../../theme/variables.css'; // Archivo de estilos personalizados.
+} from '@mui/material';
+import { useHistory } from 'react-router-dom';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import { LanguageContext } from '../../context/LanguageContext'; // Importamos el contexto de idioma
+import '../../theme/variables.css';
 
 const Register: React.FC = () => {
-  const history = useHistory(); // Inicializa el hook para manejar la navegación.
+  const history = useHistory();
+  const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
 
-  // Estado para almacenar los datos del formulario.
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
-    birthDate: dayjs(), // Se inicializa con la fecha actual.
+    birthDate: dayjs(),
     gender: '',
     termsAccepted: false,
   });
 
-  // Estado para manejar los errores de validación.
   const [errors, setErrors] = useState<any>({});
 
-  // Validación de correo electrónico.
   const validateEmail = (email: string) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return re.test(email);
   };
 
-  // Validación de contraseña.
   const validatePassword = (password: string) => {
     const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     return re.test(password);
   };
 
-  // Validación de nombres (solo letras).
   const validateName = (name: string) => {
     const re = /^[A-Za-zÀ-ÿ\s]+$/;
     return re.test(name);
   };
 
-  // Validación de edad, entre 18 y 120 años.
   const validateAge = (date: any) => {
     const today = dayjs();
     const birthDate = dayjs(date);
@@ -53,47 +49,43 @@ const Register: React.FC = () => {
     return age >= 18 && age <= 120;
   };
 
-  // Maneja cambios en los campos de texto y valida los valores en tiempo real.
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    // Actualiza el estado del formulario.
     setFormData({
       ...formData,
       [name]: value,
     });
 
-    // Realiza la validación en el campo correspondiente y actualiza los errores.
     const newErrors: any = { ...errors };
 
     if (name === 'email' && !validateEmail(value)) {
-      newErrors.email = 'Correo electrónico no válido.';
+      newErrors.email = t('invalid_email'); // Mensaje de error traducido
     } else if (name === 'email') {
       delete newErrors.email;
     }
 
     if (name === 'firstName' && !validateName(value)) {
-      newErrors.firstName = 'Nombre no debe contener números o símbolos.';
+      newErrors.firstName = t('invalid_name'); // Mensaje de error traducido
     } else if (name === 'firstName') {
       delete newErrors.firstName;
     }
 
     if (name === 'lastName' && !validateName(value)) {
-      newErrors.lastName = 'Apellido no debe contener números o símbolos.';
+      newErrors.lastName = t('invalid_lastname'); // Mensaje de error traducido
     } else if (name === 'lastName') {
       delete newErrors.lastName;
     }
 
     if (name === 'password' && !validatePassword(value)) {
-      newErrors.password = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.';
+      newErrors.password = t('invalid_password'); // Mensaje de error traducido
     } else if (name === 'password') {
       delete newErrors.password;
     }
 
-    setErrors(newErrors); // Actualiza el estado de errores.
+    setErrors(newErrors);
   };
 
-  // Maneja el cambio de la fecha de nacimiento y realiza la validación.
   const handleDateChange = (date: any) => {
     setFormData({
       ...formData,
@@ -102,14 +94,13 @@ const Register: React.FC = () => {
 
     const newErrors: any = { ...errors };
     if (!validateAge(date)) {
-      newErrors.birthDate = 'Debe tener al menos 18 años y no más de 120 años.';
+      newErrors.birthDate = t('invalid_age'); // Mensaje de error traducido
     } else {
       delete newErrors.birthDate;
     }
     setErrors(newErrors);
   };
 
-  // Maneja cambios en el checkbox de términos y condiciones.
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -117,7 +108,6 @@ const Register: React.FC = () => {
     });
   };
 
-  // Verifica si el formulario es válido para habilitar el botón de enviar.
   const isFormValid = () => {
     return Object.keys(errors).length === 0 &&
       formData.firstName &&
@@ -128,8 +118,6 @@ const Register: React.FC = () => {
       formData.termsAccepted;
   };
 
-  // Maneja el envío del formulario.
-  // Función para hacer la petición al backend (POST /register/)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -158,7 +146,7 @@ const Register: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Usuario registrado:', data);
-        history.push('/form');  // Redirige al usuario al login después del registro
+        history.push('/form');
       } else {
         const errorData = await response.json();
         console.log('Error:', errorData);
@@ -166,23 +154,19 @@ const Register: React.FC = () => {
       }
     } catch (error) {
       console.log('Error en la petición:', error);
-      setErrors({ apiError: 'Error de conexión con el servidor.' });
+      setErrors({ apiError: t('connection_error') }); // Mensaje de error traducido
     }
   };
 
   return (
     <Container component="main" maxWidth="xs">
-      {/* Contenedor principal del formulario */}
       <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-        {/* Logo o imagen principal */}
         <img src="https://via.placeholder.com/150" alt="logo" style={{ marginBottom: '1.5rem' }} />
 
-        {/* Título de bienvenida */}
         <Typography component="h1" variant="h5" marginBottom={"3%"} style={{ color: 'var(--color-verde-lima)' }}>
-          ¡Welcome!
+          {t('welcome')}
         </Typography>
 
-        {/* Formulario de registro */}
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             {/* Campo de nombre */}
@@ -192,7 +176,7 @@ const Register: React.FC = () => {
                 required
                 fullWidth
                 id="firstName"
-                label="Name"
+                label={t('name')}
                 name="firstName"
                 autoComplete="given-name"
                 onChange={handleChange}
@@ -201,26 +185,8 @@ const Register: React.FC = () => {
                 InputLabelProps={{
                   style: { color: 'var(--color-gris-oscuro)' }
                 }}
-                sx={{
-                  '& label.Mui-focused': {
-                    color: 'var(--color-verde-lima)', // Cambia el color del label cuando está enfocado
-                  },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'var(--color-gris-oscuro)', // Color del borde por defecto
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando se pasa el mouse
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando está enfocado
-                    },
-                  },
-                }}
               />
             </Grid>
-
-
 
             {/* Campo de apellidos */}
             <Grid item xs={12}>
@@ -229,7 +195,7 @@ const Register: React.FC = () => {
                 required
                 fullWidth
                 id="lastName"
-                label="Last name"
+                label={t('last_name')}
                 name="lastName"
                 autoComplete="family-name"
                 onChange={handleChange}
@@ -237,22 +203,6 @@ const Register: React.FC = () => {
                 helperText={errors.lastName}
                 InputLabelProps={{
                   style: { color: 'var(--color-gris-oscuro)' }
-                }}
-                sx={{
-                  '& label.Mui-focused': {
-                    color: 'var(--color-verde-lima)', // Cambia el color del label cuando está enfocado
-                  },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'var(--color-gris-oscuro)', // Color del borde por defecto
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando se pasa el mouse
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando está enfocado
-                    },
-                  },
                 }}
               />
             </Grid>
@@ -264,7 +214,7 @@ const Register: React.FC = () => {
                 required
                 fullWidth
                 id="email"
-                label="Email"
+                label={t('email')}
                 name="email"
                 autoComplete="email"
                 onChange={handleChange}
@@ -272,22 +222,6 @@ const Register: React.FC = () => {
                 helperText={errors.email}
                 InputLabelProps={{
                   style: { color: 'var(--color-gris-oscuro)' }
-                }}
-                sx={{
-                  '& label.Mui-focused': {
-                    color: 'var(--color-verde-lima)', // Cambia el color del label cuando está enfocado
-                  },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'var(--color-gris-oscuro)', // Color del borde por defecto
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando se pasa el mouse
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando está enfocado
-                    },
-                  },
                 }}
               />
             </Grid>
@@ -299,7 +233,7 @@ const Register: React.FC = () => {
                 required
                 fullWidth
                 name="password"
-                label="Password"
+                label={t('password')}
                 type="password"
                 id="password"
                 autoComplete="current-password"
@@ -308,22 +242,6 @@ const Register: React.FC = () => {
                 helperText={errors.password}
                 InputLabelProps={{
                   style: { color: 'var(--color-gris-oscuro)' }
-                }}
-                sx={{
-                  '& label.Mui-focused': {
-                    color: 'var(--color-verde-lima)', // Cambia el color del label cuando está enfocado
-                  },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'var(--color-gris-oscuro)', // Color del borde por defecto
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando se pasa el mouse
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando está enfocado
-                    },
-                  },
                 }}
               />
             </Grid>
@@ -336,7 +254,7 @@ const Register: React.FC = () => {
                 select
                 fullWidth
                 name="gender"
-                label="Gender"
+                label={t('gender')}
                 id="gender"
                 value={formData.gender}
                 onChange={handleChange}
@@ -345,26 +263,10 @@ const Register: React.FC = () => {
                 InputLabelProps={{
                   style: { color: 'var(--color-gris-oscuro)' }
                 }}
-                sx={{
-                  '& label.Mui-focused': {
-                    color: 'var(--color-verde-lima)', // Cambia el color del label cuando está enfocado
-                  },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'var(--color-gris-oscuro)', // Color del borde por defecto
-                    },
-                    '&:hover fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando se pasa el mouse
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'var(--color-verde-lima)', // Color del borde cuando está enfocado
-                    },
-                  },
-                }}
               >
-                <MenuItem value="M">Male</MenuItem>
-                <MenuItem value="F">Female</MenuItem>
-                <MenuItem value="Otro">Other</MenuItem>
+                <MenuItem value="M">{t('male')}</MenuItem>
+                <MenuItem value="F">{t('female')}</MenuItem>
+                <MenuItem value="Otro">{t('other')}</MenuItem>
               </TextField>
             </Grid>
 
@@ -372,7 +274,7 @@ const Register: React.FC = () => {
             <Grid item xs={12}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
-                  label="Birthdate"
+                  label={t('birthdate')}
                   value={formData.birthDate}
                   onChange={handleDateChange}
                   renderInput={(params) => (
@@ -382,30 +284,13 @@ const Register: React.FC = () => {
                       error={!!errors.birthDate}
                       helperText={errors.birthDate}
                       InputLabelProps={{
-                        style: { color: 'var(--color-gris-oscuro)' } // Cambia el color de la etiqueta
-                      }}
-                      sx={{
-                        '& label.Mui-focused': {
-                          color: 'var(--color-verde-lima)', // Cambia el color del label cuando está enfocado
-                        },
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': {
-                            borderColor: 'var(--color-gris-oscuro)', // Color del borde por defecto
-                          },
-                          '&:hover fieldset': {
-                            borderColor: 'var(--color-verde-lima)', // Color del borde cuando se pasa el mouse
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: 'var(--color-verde-lima)', // Color del borde cuando está enfocado
-                          },
-                        },
+                        style: { color: 'var(--color-gris-oscuro)' }
                       }}
                     />
                   )}
                 />
               </LocalizationProvider>
             </Grid>
-
 
             {/* Checkbox de términos y condiciones */}
             <Grid item xs={12}>
@@ -418,7 +303,7 @@ const Register: React.FC = () => {
                     name="termsAccepted"
                   />
                 }
-                label="I accept the terms and conditions"
+                label={t('terms_and_conditions')}
               />
               {errors.termsAccepted && (
                 <Typography color="error">{errors.termsAccepted}</Typography>
@@ -436,21 +321,21 @@ const Register: React.FC = () => {
               color: 'var(--color-blanco)',
               marginTop: '1rem'
             }}
-            disabled={!isFormValid()} // Desactiva el botón si el formulario no es válido.
+            disabled={!isFormValid()}
           >
-            Register
+            {t('register_button')}
           </Button>
 
           {errors.apiError && <Typography color="error">{errors.apiError}</Typography>}
 
-          {/* Enlace para iniciar sesión si ya tienes una cuenta */}
+          {/* Enlace para iniciar sesión */}
           <Grid container justifyContent="center" alignItems="center" style={{ marginTop: '1rem' }}>
             <Grid item>
               <Typography component="span" variant="body2" style={{ color: 'var(--color-gris-oscuro)' }}>
-                Do you already have an account?
+                {t('already_have_account')}
               </Typography>
               <Link href="/login" variant="body2" style={{ marginLeft: '0.5rem', color: 'var(--color-verde-lima)' }}>
-                Sign in
+                {t('login_button')}
               </Link>
             </Grid>
           </Grid>

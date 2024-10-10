@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
     IonPage,
     IonContent,
@@ -9,25 +9,26 @@ import {
     IonCardContent,
     IonLabel,
     IonFab,
-    IonFabButton,
+    IonAlert,
     IonSegment,
     IonSegmentButton,
-    IonAlert, // Añadido para la confirmación
 } from '@ionic/react';
 import { Add } from '@mui/icons-material';
-import Header from '../../Header/Header'; // Componente de header reutilizable
-import Navbar from '../../Navbar/Navbar'; // Componente de la navbar
+import Header from '../../Header/Header';
+import Navbar from '../../Navbar/Navbar';
 import { Button } from '@mui/material';
 import { useHistory } from 'react-router';
+import { LanguageContext } from '../../../context/LanguageContext';  // Importar el contexto de idioma
 
 // Definir un tipo para las categorías
-// Definir un tipo para la categoría que se obtiene desde el backend
 interface Category {
     id: number;
     name: string;
     description: string;
 }
+
 const MacrosAdmin: React.FC = () => {
+    const { t } = useContext(LanguageContext);  // Usamos el contexto de idioma
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [macros, setMacros] = useState<Record<string, any[]>>({});
@@ -38,11 +39,11 @@ const MacrosAdmin: React.FC = () => {
     // Función para obtener las categorías de dieta desde el BE
     const fetchCategories = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/diet-categories/`);  // Asegúrate de que el endpoint es correcto
+            const response = await fetch(`http://127.0.0.1:8000/api/diet-categories/`);
             const data = await response.json();
             if (response.ok) {
                 setCategories(data.categories);
-                setSelectedCategory(data.categories[0]?.name || ''); // Selecciona la primera categoría por defecto
+                setSelectedCategory(data.categories[0]?.name || '');  // Seleccionar la primera categoría por defecto
             } else {
                 console.error('Error fetching categories:', data);
             }
@@ -66,12 +67,10 @@ const MacrosAdmin: React.FC = () => {
         }
     };
 
-    // Obtener las categorías al cargar el componente
     useEffect(() => {
         fetchCategories();
     }, []);
 
-    // Actualizar las recomendaciones según la categoría seleccionada
     useEffect(() => {
         if (selectedCategory) {
             fetchMacros(selectedCategory);
@@ -107,11 +106,11 @@ const MacrosAdmin: React.FC = () => {
         });
     };
 
-
     return (
         <IonPage>
             {/* Header */}
-            <Header title="Nutrition Management" />
+            <Header title={t('nutrition_management_title')} />  {/* Uso de la variable de texto */}
+
             <IonContent style={{ backgroundColor: '#000000' }}>
                 {/* Navbar superior con categorías obtenidas desde el backend */}
                 <IonSegment
@@ -159,10 +158,10 @@ const MacrosAdmin: React.FC = () => {
                                                     marginBottom: '8px',
                                                 }}
                                             >
-                                                {macro.kcal} Kcal
+                                                {macro.kcal} {t('kcal')}
                                             </IonLabel>
                                             <IonLabel style={{ color: '#6b6b6b', fontSize: '0.9em' }}>
-                                                Proteins: {macro.proteins}g, Carbs: {macro.carbs}g, Fats: {macro.fats}g
+                                                {t('proteins')}: {macro.proteins}g, {t('carbs')}: {macro.carbs}g, {t('fats')}: {macro.fats}g
                                             </IonLabel>
                                         </div>
 
@@ -179,9 +178,8 @@ const MacrosAdmin: React.FC = () => {
                                                     fontSize: '0.7em',
                                                     minWidth: '55px',
                                                 }}
-                                                className="no-focus"
                                             >
-                                                Modify
+                                                {t('modify_button')}
                                             </Button>
 
                                             <Button
@@ -195,9 +193,8 @@ const MacrosAdmin: React.FC = () => {
                                                     fontSize: '0.7em',
                                                     minWidth: '55px',
                                                 }}
-                                                className="no-focus"
                                             >
-                                                Delete
+                                                {t('delete_button')}
                                             </Button>
                                         </div>
                                     </IonCardContent>
@@ -232,25 +229,24 @@ const MacrosAdmin: React.FC = () => {
                 <IonAlert
                     isOpen={showAlert}
                     onDidDismiss={() => setShowAlert(false)}
-                    header={'Confirmar eliminación'}
-                    message={'¿Estás seguro de que deseas eliminar este macro?'}
+                    header={t('confirm_delete_alert_title')}
+                    message={t('confirm_delete_alert_message')}
                     buttons={[
                         {
-                            text: 'Cancelar',
+                            text: t('cancel_button'),
                             role: 'cancel',
                             handler: () => {
-                                setShowAlert(false); // Cerrar alerta si se cancela
+                                setShowAlert(false);
                             },
                         },
                         {
-                            text: 'Eliminar',
-                            handler: handleDelete, // Eliminar macro al confirmar
+                            text: t('delete_button'),
+                            handler: handleDelete,
                         },
                     ]}
                 />
             </IonContent>
 
-            {/* Navbar */}
             <Navbar />
         </IonPage>
     );

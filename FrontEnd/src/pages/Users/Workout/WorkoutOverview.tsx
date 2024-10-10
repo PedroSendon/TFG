@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { IonPage, IonButton, IonIcon, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonImg } from '@ionic/react';
 import { useHistory } from 'react-router-dom'; // Hook para manejar la navegación en Ionic/React Router
 import './WorkoutOverview.css'; // Archivo CSS para los estilos personalizados
 import Header from '../../Header/Header';  // Importa el componente Header
+import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
 
 // Componente funcional WorkoutOverview
 const WorkoutOverview: React.FC = () => {
   const history = useHistory(); // Hook para manejar la navegación entre páginas
+  const { t } = useContext(LanguageContext); // Obtiene la función de traducción del contexto
 
   // Estado para almacenar los datos de los entrenamientos (simulados o del backend)
   const [workoutDays, setWorkoutDays] = useState<Array<{ id: number; day: string; imageUrl: string; workoutName: string }>>([]);
@@ -25,7 +27,7 @@ const WorkoutOverview: React.FC = () => {
       setWorkoutDays(data.data); // Actualiza los entrenamientos con los datos obtenidos
       setLoading(false); // Desactiva el estado de carga
     } catch (err) {
-      setError('Hubo un problema al obtener los entrenamientos'); // Maneja el error si falla la solicitud
+      setError(t('error_fetching_workouts')); // Maneja el error si falla la solicitud
       setLoading(false); // Desactiva el estado de carga en caso de error
     }
   };
@@ -46,11 +48,11 @@ const WorkoutOverview: React.FC = () => {
       <IonPage>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Cargando entrenamientos...</IonTitle> {/* Título mientras carga */}
+            <IonTitle>{t('loading_workouts')}</IonTitle> {/* Texto traducido de "Cargando entrenamientos..." */}
           </IonToolbar>
         </IonHeader>
         <IonContent>
-          <p>Cargando...</p> {/* Texto que indica que está cargando */}
+          <p>{t('loading')}...</p> {/* Texto traducido de "Cargando..." */}
         </IonContent>
       </IonPage>
     );
@@ -62,11 +64,11 @@ const WorkoutOverview: React.FC = () => {
       <IonPage>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Error</IonTitle> {/* Título en caso de error */}
+            <IonTitle>{t('error')}</IonTitle> {/* Texto traducido de "Error" */}
           </IonToolbar>
         </IonHeader>
         <IonContent>
-          <p>{error}</p> {/* Muestra el mensaje de error */}
+          <p>{error}</p> {/* Muestra el mensaje de error traducido */}
         </IonContent>
       </IonPage>
     );
@@ -75,7 +77,7 @@ const WorkoutOverview: React.FC = () => {
   // Renderiza la página con la lista de entrenamientos
   return (
     <IonPage>
-      <Header title="Select the training" />  {/* Componente Header con título pasado como prop */}
+      <Header title={t('select_training')} />  {/* Componente Header con título traducido */}
 
       <IonContent>
         <IonList lines="none"> {/* Lista de entrenamientos sin líneas entre los items */}
@@ -96,7 +98,7 @@ const WorkoutOverview: React.FC = () => {
                 <IonImg
                   className="workout-img"
                   src={workout.imageUrl}
-                  alt={`Imagen del ${workout.workoutName}`}
+                  alt={`${t('workout_image_alt')} ${workout.workoutName}`} // Texto alternativo traducido
                 /> {/* Imagen asociada con el entrenamiento */}
               </div>
             </IonItem>

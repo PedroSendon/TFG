@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     TextField, Button, Grid, Container, MenuItem
 } from '@mui/material'; // Importación de componentes de Material UI.
 import { useHistory, useLocation } from 'react-router-dom'; // Hook para redirección y obtener datos.
 import Header from '../../Header/Header'; // Componente de header reutilizable
+import { LanguageContext } from '../../../context/LanguageContext';  // Importar el contexto de idioma
 
 const ModifyMacros: React.FC = () => {
-
+    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
     const history = useHistory(); // Hook para redirección.
     interface LocationState {
         recommendation?: {
@@ -73,19 +74,19 @@ const ModifyMacros: React.FC = () => {
     // Validaciones básicas.
     const validateField = (name: string, value: string) => {
         if (!value || isNaN(Number(value))) {
-            return `${name} debe ser un número válido.`;
+            return `${t(name)} ${t('validation_error')}`;
         }
         return '';
     };
 
     const validateForm = () => {
         const newErrors: any = {};
-        newErrors.kcal = validateField('Kcal', formData.kcal);
-        newErrors.proteins = validateField('Proteínas', formData.proteins);
-        newErrors.carbs = validateField('Carbohidratos', formData.carbs);
-        newErrors.fats = validateField('Grasas', formData.fats);
+        newErrors.kcal = validateField('kcal', formData.kcal);
+        newErrors.proteins = validateField('proteins', formData.proteins);
+        newErrors.carbs = validateField('carbs', formData.carbs);
+        newErrors.fats = validateField('fats', formData.fats);
         if (!formData.dietType) {
-            newErrors.dietType = 'Seleccione un tipo de dieta.';
+            newErrors.dietType = t('validation_select_diet_type');
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -127,7 +128,7 @@ const ModifyMacros: React.FC = () => {
                 console.error('Error al modificar la recomendación:', error);
             }
         } else {
-            console.log('Errores en el formulario');
+            console.log(t('form_errors'));
         }
     };
 
@@ -137,7 +138,7 @@ const ModifyMacros: React.FC = () => {
 
     return (
         <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <Header title="Modificar Macronutrientes" />
+            <Header title={t('modify_macros_title')} />
             <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
@@ -148,7 +149,7 @@ const ModifyMacros: React.FC = () => {
                                 required
                                 fullWidth
                                 id="kcal"
-                                label="Kcal"
+                                label={t('kcal')}
                                 name="kcal"
                                 value={formData.kcal}
                                 onChange={handleChange}
@@ -164,7 +165,7 @@ const ModifyMacros: React.FC = () => {
                                 required
                                 fullWidth
                                 id="proteins"
-                                label="Proteínas (g)"
+                                label={t('proteins')}
                                 name="proteins"
                                 value={formData.proteins}
                                 onChange={handleChange}
@@ -180,7 +181,7 @@ const ModifyMacros: React.FC = () => {
                                 required
                                 fullWidth
                                 id="carbs"
-                                label="Carbohidratos (g)"
+                                label={t('carbs')}
                                 name="carbs"
                                 value={formData.carbs}
                                 onChange={handleChange}
@@ -196,7 +197,7 @@ const ModifyMacros: React.FC = () => {
                                 required
                                 fullWidth
                                 id="fats"
-                                label="Grasas (g)"
+                                label={t('fats')}
                                 name="fats"
                                 value={formData.fats}
                                 onChange={handleChange}
@@ -213,7 +214,7 @@ const ModifyMacros: React.FC = () => {
                                 select
                                 fullWidth
                                 id="dietType"
-                                label="Tipo de Dieta"
+                                label={t('diet_type')}
                                 name="dietType"
                                 value={formData.dietType}
                                 onChange={handleChange}
@@ -234,11 +235,11 @@ const ModifyMacros: React.FC = () => {
                                 variant="outlined"
                                 fullWidth
                                 id="description"
-                                label="Descripción (opcional)"
+                                label={t('description')}
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
-                                helperText="Ej: Dieta alta en proteínas, baja en carbohidratos"
+                                helperText={t('description_helper')}
                             />
                         </Grid>
                     </Grid>
@@ -247,24 +248,24 @@ const ModifyMacros: React.FC = () => {
 
             {/* Botones de Cancelar y Guardar */}
             <Grid item xs={12} style={{ marginBottom: '15%' }}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                            <Button
-                                onClick={handleCancel}
-                                style={{
-                                    border: '1px solid #FF0000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#FF0000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                            >
-                                CANCEL
-                            </Button>
-                        </Grid>
-                        <Grid item xs={6}>
+                <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                        <Button
+                            onClick={handleCancel}
+                            style={{
+                                border: '1px solid #FF0000',
+                                backgroundColor: '#FFFFFF',
+                                color: '#FF0000',
+                                padding: '3% 0',
+                                borderRadius: '5px',
+                                fontSize: '1em',
+                                width: '100%',
+                            }}
+                        >
+                            {t('cancel')}
+                        </Button>
+                    </Grid>
+                    <Grid item xs={6}>
                         <Button
                             onClick={handleSubmit}
                             style={{
@@ -278,12 +279,11 @@ const ModifyMacros: React.FC = () => {
                             }}
                             disabled={!formData.kcal || !formData.proteins || !formData.carbs || !formData.fats || !formData.dietType}
                         >
-                            SAVE
+                            {t('save')}
                         </Button>
-                        </Grid>
                     </Grid>
                 </Grid>
-           
+            </Grid>
         </Container>
     );
 };

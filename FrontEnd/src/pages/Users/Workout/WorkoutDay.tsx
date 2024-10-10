@@ -1,38 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { IonPage, IonContent, IonList, IonItem, IonLabel, IonImg, IonCheckbox, IonButton, IonProgressBar } from '@ionic/react';
-import { useHistory, useParams } from 'react-router-dom'; // Hook para manejar la navegación entre páginas y obtener parámetros de la URL
-import './WorkoutDay.css'; // Importa los estilos personalizados
-import Header from '../../Header/Header'; // Importa el componente Header para mostrar el encabezado
+import { useHistory, useParams } from 'react-router-dom'; 
+import './WorkoutDay.css'; 
+import Header from '../../Header/Header'; 
+import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
 
-// Componente funcional WorkoutDay
 const WorkoutDay: React.FC = () => {
-  const history = useHistory(); // Hook para redirigir a otras rutas de la app
-  const { day_id } = useParams<{ day_id: string }>();  // Obtener el workout_id de los parámetros de la URL
+  const history = useHistory();
+  const { day_id } = useParams<{ day_id: string }>();
+  const { t } = useContext(LanguageContext); // Usar el contexto de idioma
 
-  // Estado para almacenar los ejercicios obtenidos del backend
   const [exercises, setExercises] = useState<Array<{ name: string; imageUrl: string; sets: number; reps: number; completed: boolean }>>([]);
-  
-  // Variables de estado para manejar los totales de series, repeticiones y tiempo estimado
   const [totalSets, setTotalSets] = useState<number>(0);
   const [totalReps, setTotalReps] = useState<number>(0);
-  const [estimatedTime, setEstimatedTime] = useState<number>(0); // Tiempo estimado en minutos para completar el entrenamiento
-  const [completedCount, setCompletedCount] = useState<number>(0); // Número de ejercicios completados
+  const [estimatedTime, setEstimatedTime] = useState<number>(0);
+  const [completedCount, setCompletedCount] = useState<number>(0);
 
-  // Función para obtener los datos de los ejercicios del día
   const fetchWorkoutDetails = async (day_id: string) => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/workout/day/${day_id}/`);
       if (response.ok) {
         const data = await response.json();
-        setExercises(data); // Aquí deberías recibir la lista de ejercicios del backend
+        setExercises(data);
 
-        // Cálculos para obtener el total de series, repeticiones y tiempo estimado
         const totalSets = data.reduce((acc: number, exercise: any) => acc + exercise.sets, 0);
         const totalReps = data.reduce((acc: number, exercise: any) => acc + exercise.reps * exercise.sets, 0);
-        const estimatedTime = totalSets * 2; // Se estima 2 minutos por serie
-        setTotalSets(totalSets); // Actualiza el estado del total de series
-        setTotalReps(totalReps); // Actualiza el estado del total de repeticiones
-        setEstimatedTime(estimatedTime); // Actualiza el tiempo estimado
+        const estimatedTime = totalSets * 2; 
+        setTotalSets(totalSets);
+        setTotalReps(totalReps);
+        setEstimatedTime(estimatedTime);
       } else {
         console.error('Error fetching workout details');
       }
@@ -43,97 +39,83 @@ const WorkoutDay: React.FC = () => {
 
   useEffect(() => {
     if (day_id) {
-      fetchWorkoutDetails(day_id);  // Llamar a la función para obtener los detalles del entrenamiento
+      fetchWorkoutDetails(day_id);
     }
   }, [day_id]);
 
-  // Función para manejar el cambio en el checkbox de completado de un ejercicio
   const handleCheckboxChange = (index: number) => {
-    const updatedExercises = [...exercises]; // Copia el array de ejercicios
-    updatedExercises[index].completed = !updatedExercises[index].completed; // Cambia el estado de completado del ejercicio
-    setExercises(updatedExercises); // Actualiza los ejercicios con el nuevo estado
+    const updatedExercises = [...exercises];
+    updatedExercises[index].completed = !updatedExercises[index].completed;
+    setExercises(updatedExercises);
 
-    const completedCount = updatedExercises.filter(ex => ex.completed).length; // Cuenta cuántos ejercicios han sido completados
-    setCompletedCount(completedCount); // Actualiza el número de ejercicios completados
+    const completedCount = updatedExercises.filter(ex => ex.completed).length;
+    setCompletedCount(completedCount);
   };
 
-  // Función para manejar el clic en un ejercicio, excepto si es en el checkbox
   const handleExerciseClick = (index: number, e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName !== 'ION-CHECKBOX' && target.tagName !== 'ION-LABEL') {
-      history.push(`/workout/day/exercise`); // Redirige a la página de detalles del ejercicio
+      history.push(`/workout/day/exercise`);
     }
   };
 
-  // Función que se llama cuando el usuario marca el entrenamiento como completado
   const handleCompleteWorkout = () => {
-    console.log('Entrenamiento completado'); // Aquí podrías hacer algo como guardar los datos en el backend
+    console.log('Entrenamiento completado');
   };
 
-  // Cálculo del progreso de los ejercicios completados
-  const progress = exercises.length > 0 ? completedCount / exercises.length : 0; // Progreso basado en el número de ejercicios completados
-  const progressPercentage = Math.round(progress * 100); // Convierte el progreso en un porcentaje redondeado
+  const progress = exercises.length > 0 ? completedCount / exercises.length : 0;
+  const progressPercentage = Math.round(progress * 100);
 
   return (
     <IonPage>
-      <Header title="Training of the day" /> {/* Encabezado con el título del día de entrenamiento */}
+      <Header title={t('training_of_the_day')} />
 
       <IonContent>
-        {/* Lista de ejercicios */}
         <IonList className="no-lines">
           {exercises.map((exercise, index) => (
             <IonItem key={index} className="workout-item no-lines">
-              {/* Contenedor del ejercicio */}
               <div className="workout-container" onClick={(e) => handleExerciseClick(index, e)}>
                 <IonLabel className="workout-label">
-                  {/* Nombre del ejercicio y descripción de las series y repeticiones */}
                   <h1>{exercise.name}</h1>
-                  <p>{`${exercise.sets} sets of ${exercise.reps} repetitions`}</p>
+                  <p>{`${exercise.sets} ${t('sets')} ${t('of')} ${exercise.reps} ${t('repetitions')}`}</p>
                 </IonLabel>
-                {/* Imagen del ejercicio */}
-                <IonImg className="workout-img" src={exercise.imageUrl} alt={`Imagen del ${exercise.name}`} />
-                {/* Checkbox para marcar el ejercicio como completado */}
+                <IonImg className="workout-img" src={exercise.imageUrl} alt={`${t('image_of')} ${exercise.name}`} />
                 <IonCheckbox
                   slot="end"
-                  checked={exercise.completed} // Controla si el checkbox está marcado o no
+                  checked={exercise.completed}
                   onIonChange={(e: { stopPropagation: () => void; }) => {
-                    e.stopPropagation(); // Evita que el clic en el checkbox active el evento del contenedor
-                    handleCheckboxChange(index); // Cambia el estado del checkbox
+                    e.stopPropagation();
+                    handleCheckboxChange(index);
                   }}
-                  color="success" // Estilo del checkbox (verde para éxito)
-                  className="checkbox-right"  // Clase personalizada para posicionar el checkbox
+                  color="success"
+                  className="checkbox-right"
                 />
               </div>
             </IonItem>
           ))}
         </IonList>
 
-        {/* Línea divisoria visual */}
         <hr className="divider" />
 
-        {/* Resumen del entrenamiento */}
         <div className="summary-container">
-          <h3>Training Summary</h3>
-          <p><strong>{totalSets}</strong> sets | <strong>{totalReps}</strong> repetitions | <strong>{estimatedTime}</strong> minutes</p>
+          <h3>{t('training_summary')}</h3>
+          <p><strong>{totalSets}</strong> {t('sets')} | <strong>{totalReps}</strong> {t('repetitions')} | <strong>{estimatedTime}</strong> {t('minutes')}</p>
         </div>
 
-        {/* Línea divisoria visual */}
         <hr className="divider" />
 
-        {/* Progreso del entrenamiento */}
         <div className="progress-container">
-          <p className="progress-percentage">{progressPercentage}% completed</p> {/* Porcentaje completado */}
-          <IonProgressBar value={progress} color="success" style={{ height: '10px' }}></IonProgressBar> {/* Barra de progreso */}
+          <p className="progress-percentage">{progressPercentage}% {t('completed')}</p>
+          <IonProgressBar value={progress} color="success" style={{ height: '10px' }}></IonProgressBar>
         </div>
 
-        {/* Botón para marcar el entrenamiento como completado */}
         <IonButton
           expand="block"
           color="success"
           onClick={handleCompleteWorkout}
           className="custom-button"
         >
-          Mark training as completed
+          {t('mark_training_completed')}
         </IonButton>
       </IonContent>
     </IonPage>

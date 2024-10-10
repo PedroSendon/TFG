@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
     IonPage,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
     IonGrid,
     IonRow,
@@ -11,31 +8,31 @@ import {
     IonButton,
     IonLabel,
     IonIcon,
-    IonModal,
     IonToast,
 } from '@ionic/react';
 import { arrowBackOutline, arrowForwardOutline, informationCircleOutline } from 'ionicons/icons';
-import Header from '../../Header/Header'; // Encabezado
-import ExerciseInfoModal from './ExerciceInformation'; // Modal con la información del ejercicio
+import Header from '../../Header/Header';
+import ExerciseInfoModal from './ExerciceInformation';
 import { useParams } from 'react-router';
+import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
 
 const ExerciseDetailPage: React.FC = () => {
-    const { exerciseId } = useParams<{ exerciseId: string }>(); // Obtener el ID desde la URL
+    const { exerciseId } = useParams<{ exerciseId: string }>();
     const [showModal, setShowModal] = useState(false);
-    const [exerciseInfo, setExerciseInfo] = useState<any>(null); // Para almacenar los detalles del ejercicio
-    const [currentImageIndex, setCurrentImageIndex] = useState(0); // Control de las imágenes del ejercicio
-    const [showToast, setShowToast] = useState(false); // Para manejar errores de fetch
+    const [exerciseInfo, setExerciseInfo] = useState<any>(null);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [showToast, setShowToast] = useState(false);
+    const { t } = useContext(LanguageContext); // Usar el contexto de idioma
 
-    // Función para obtener los detalles del ejercicio desde el backend
     const fetchExerciseDetails = async (id: string) => {
         try {
             const response = await fetch(`http://127.0.0.1:8000/api/exercises/details/?id=${id}`);
             const data = await response.json();
 
             if (response.ok) {
-                setExerciseInfo(data); // Almacenar los detalles en el estado
+                setExerciseInfo(data);
                 if (data.media && data.media.length > 0) {
-                    setCurrentImageIndex(0); // Resetear el índice de la imagen si hay media
+                    setCurrentImageIndex(0);
                 }
             } else {
                 setShowToast(true);
@@ -49,11 +46,10 @@ const ExerciseDetailPage: React.FC = () => {
 
     useEffect(() => {
         if (exerciseId) {
-            fetchExerciseDetails(exerciseId); // Llamar a la API al cargar la página
+            fetchExerciseDetails(exerciseId);
         }
     }, [exerciseId]);
 
-    // Funciones para cambiar la imagen actual
     const handleNextImage = () => {
         if (exerciseInfo?.media && currentImageIndex < exerciseInfo.media.length - 1) {
             setCurrentImageIndex(currentImageIndex + 1);
@@ -67,12 +63,12 @@ const ExerciseDetailPage: React.FC = () => {
     };
 
     if (!exerciseInfo) {
-        return <p>Loading exercise details...</p>;
+        return <p>{t('loading_exercise_details')}</p>;
     }
     return (
         <IonPage>
             {/* Encabezado del ejercicio */}
-            <Header title="Training X" />
+            <Header title={t('exercise_details')} />
 
             <IonContent>
                 <IonGrid>
@@ -89,14 +85,14 @@ const ExerciseDetailPage: React.FC = () => {
                                     top: '50%',
                                     transform: 'translateY(-50%)',
                                     zIndex: 1,
-                                    color: '#1C1C1E', // Color gris oscuro para las flechas
+                                    color: '#1C1C1E',
                                 }}
                             >
                                 <IonIcon icon={arrowBackOutline} style={{ fontSize: '2rem' }} />
                             </IonButton>
                             <img
                                 src={exerciseInfo.media[currentImageIndex]}
-                                alt="Exercise"
+                                alt={t('exercise_image')}
                                 style={{ width: '100%', height: 'auto', borderRadius: '10px' }}
                             />
                             <IonButton
@@ -108,7 +104,7 @@ const ExerciseDetailPage: React.FC = () => {
                                     top: '50%',
                                     transform: 'translateY(-50%)',
                                     zIndex: 1,
-                                    color: '#1C1C1E', // Color gris oscuro para las flechas
+                                    color: '#1C1C1E',
                                 }}
                             >
                                 <IonIcon icon={arrowForwardOutline} style={{ fontSize: '2rem' }} />
@@ -120,17 +116,17 @@ const ExerciseDetailPage: React.FC = () => {
                     <IonRow>
                         <IonCol size="10">
                             <IonLabel style={{ fontWeight: 'bold', fontSize: '20px', display: 'flex', alignItems: 'center' }}>
-                                Exercise name
+                                {exerciseInfo.name}
                             </IonLabel>
                         </IonCol>
                         <IonCol size="2" className="ion-text-right" style={{ display: 'flex', alignItems: 'center' }}>
                             <IonButton fill="clear" onClick={() => setShowModal(true)}>
-                                <IonIcon icon={informationCircleOutline} style={{ fontSize: '28px', color: '#32CD32' }} /> {/* Icono más grande */}
+                                <IonIcon icon={informationCircleOutline} style={{ fontSize: '28px', color: '#32CD32' }} />
                             </IonButton>
                         </IonCol>
                     </IonRow>
 
-                    {/* Etiquetas de los músculos trabajados con estilo personalizado */}
+                    {/* Etiquetas de los músculos trabajados */}
                     <IonRow>
                         {exerciseInfo.muscleGroups.map((muscle: string, index: number) => (
                             <IonCol key={index} size="auto">
@@ -151,7 +147,7 @@ const ExerciseDetailPage: React.FC = () => {
                         ))}
                     </IonRow>
 
-                    {/* Parámetros del ejercicio dentro de círculos más grandes */}
+                    {/* Parámetros del ejercicio */}
                     <IonRow className="ion-text-center">
                         <IonCol>
                             <div style={{
@@ -165,8 +161,8 @@ const ExerciseDetailPage: React.FC = () => {
                                 alignItems: 'center',
                                 margin: '10px auto',
                             }}>
-                                <IonLabel style={{ fontSize: '14px' }}>Sets</IonLabel>
-                                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>4</p>
+                                <IonLabel style={{ fontSize: '14px' }}>{t('sets')}</IonLabel>
+                                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>{exerciseInfo.sets}</p>
                             </div>
                         </IonCol>
                         <IonCol>
@@ -181,8 +177,8 @@ const ExerciseDetailPage: React.FC = () => {
                                 alignItems: 'center',
                                 margin: '10px auto',
                             }}>
-                                <IonLabel style={{ fontSize: '14px' }}>Repetitions</IonLabel>
-                                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>12</p>
+                                <IonLabel style={{ fontSize: '14px' }}>{t('repetitions')}</IonLabel>
+                                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>{exerciseInfo.reps}</p>
                             </div>
                         </IonCol>
                         <IonCol>
@@ -197,8 +193,8 @@ const ExerciseDetailPage: React.FC = () => {
                                 alignItems: 'center',
                                 margin: '10px auto',
                             }}>
-                                <IonLabel style={{ fontSize: '14px' }}>Rest</IonLabel>
-                                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>60s</p>
+                                <IonLabel style={{ fontSize: '14px' }}>{t('rest')}</IonLabel>
+                                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>{exerciseInfo.restTime}</p>
                             </div>
                         </IonCol>
                     </IonRow>
@@ -206,20 +202,19 @@ const ExerciseDetailPage: React.FC = () => {
                 </IonGrid>
 
                 {/* Modal con la información detallada del ejercicio */}
-
                 <ExerciseInfoModal
                     isOpen={showModal}
                     onClose={() => setShowModal(false)}
                     exerciseName={exerciseInfo.name}
                     description={exerciseInfo.description}
-                    steps={exerciseInfo.instructions}  // Pasos del ejercicio
+                    steps={exerciseInfo.instructions}
                 />
 
                 {/* Toast para mostrar errores */}
                 <IonToast
                     isOpen={showToast}
                     onDidDismiss={() => setShowToast(false)}
-                    message="Error fetching exercise details"
+                    message={t('error_fetching_exercise_details')}
                     duration={2000}
                 />
             </IonContent>

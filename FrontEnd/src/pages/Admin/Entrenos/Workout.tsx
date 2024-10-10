@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     IonPage,
     IonContent,
@@ -18,25 +18,26 @@ import Header from '../../Header/Header';
 import Navbar from '../../Navbar/Navbar'; 
 import { useHistory } from 'react-router';
 import { Button } from '@mui/material';
-
+import { LanguageContext } from '../../../context/LanguageContext'; // Importamos el contexto de idioma
 
 interface Workout {
     id: number;
     name: string;
     description: string;
-  }
+}
   
-  interface Exercise {
+interface Exercise {
     id: number;
     name: string;
     description: string;
-  }
+}
 
 const WorkoutsExercises: React.FC = () => {
+    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
     const history = useHistory();
     const [selectedSection, setSelectedSection] = useState<string>('workouts');
-    const [workouts, setWorkouts] = useState<Workout[]>([]);  // Usa el tipo Workout
-    const [exercises, setExercises] = useState<Exercise[]>([]);  // Usa el tipo Exercise
+    const [workouts, setWorkouts] = useState<Workout[]>([]);  
+    const [exercises, setExercises] = useState<Exercise[]>([]);  
     const [presentAlert] = useIonAlert();
 
     // Obtener entrenamientos desde el BE
@@ -49,8 +50,6 @@ const WorkoutsExercises: React.FC = () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/api/workouts/');
             const data = await response.json();
-    
-            // Asegúrate de que los datos están dentro de la clave 'data'
             setWorkouts(data.data.map((workout: any) => ({
                 id: workout.id,
                 name: workout.name,
@@ -58,30 +57,28 @@ const WorkoutsExercises: React.FC = () => {
                 media: workout.media,
             })));
         } catch (error) {
-            console.error('Error fetching workouts:', error);
+            console.error(t('error_fetching_workouts'), error);
         }
     };
-    
-    
 
     const fetchExercises = async () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/api/exercises/all/');
             const data = await response.json();
-            setExercises(data.data); // Ajustar los datos obtenidos
+            setExercises(data.data);
         } catch (error) {
-            console.error('Error al obtener ejercicios:', error);
+            console.error(t('error_fetching_exercises'), error);
         }
     };
 
     const handleDelete = (id: number, type: string) => {
         presentAlert({
-            header: 'Confirmar eliminación',
-            message: `¿Estás seguro de que deseas eliminar este ${type}?`,
+            header: t('confirm_delete'),
+            message: t('confirm_delete_message'),
             buttons: [
-                'Cancelar',
+                t('cancel'),
                 {
-                    text: 'Eliminar',
+                    text: t('delete'),
                     handler: () => {
                         if (type === 'workout') {
                             setWorkouts((prev) => prev.filter((workout) => workout.id !== id));
@@ -96,24 +93,19 @@ const WorkoutsExercises: React.FC = () => {
 
     const handleEdit = (id: number, type: string) => {
         const selectedData = type === 'workout'
-            ? workouts.find((workout) => workout.id === id)  // Aquí asegúrate de que el workout tiene el id
+            ? workouts.find((workout) => workout.id === id)
             : exercises.find((exercise) => exercise.id === id);
-        console.log(selectedData?.id);
+
         if (!selectedData) {
-            console.error(`No ${type} found with id:`, id);
+            console.error(t('not_found'));
             return;
         }
     
-        // Asegúrate de que estás pasando el 'id' correctamente junto con los datos del entrenamiento
         history.push({
             pathname: `/admin/${type}/modify`,
-            state: { data: { ...selectedData, id } },  // Aquí estás asignando el 'id'
+            state: { data: { ...selectedData, id } },
         });
     };
-    
-    
-    
-    
 
     const handleAdd = (type: string) => {
         history.push(`/admin/${type}/add`);
@@ -121,7 +113,7 @@ const WorkoutsExercises: React.FC = () => {
 
     return (
         <IonPage>
-            <Header title={selectedSection === 'workouts' ? 'Workouts' : 'Exercises'} />
+            <Header title={t(selectedSection === 'workouts' ? 'workouts' : 'exercises')} />
             <IonContent style={{ backgroundColor: '#000000' }}>
                 <IonSegment
                     value={selectedSection}
@@ -130,10 +122,10 @@ const WorkoutsExercises: React.FC = () => {
                     color="success"
                 >
                     <IonSegmentButton value="workouts">
-                        <IonLabel>Workouts</IonLabel>
+                        <IonLabel>{t('workouts')}</IonLabel>
                     </IonSegmentButton>
                     <IonSegmentButton value="exercises">
-                        <IonLabel>Exercises</IonLabel>
+                        <IonLabel>{t('exercises')}</IonLabel>
                     </IonSegmentButton>
                 </IonSegment>
 
@@ -174,7 +166,7 @@ const WorkoutsExercises: React.FC = () => {
                                                         minWidth: '55px',
                                                     }}
                                                 >
-                                                    Modify
+                                                    {t('modify')}
                                                 </Button>
                                                 <Button
                                                     onClick={() => handleDelete(workout.id, 'workout')}
@@ -188,7 +180,7 @@ const WorkoutsExercises: React.FC = () => {
                                                         minWidth: '55px',
                                                     }}
                                                 >
-                                                    Delete
+                                                    {t('delete')}
                                                 </Button>
                                             </div>
                                         </IonCardContent>
@@ -229,7 +221,7 @@ const WorkoutsExercises: React.FC = () => {
                                                         minWidth: '55px',
                                                     }}
                                                 >
-                                                    Modify
+                                                    {t('modify')}
                                                 </Button>
                                                 <Button
                                                     onClick={() => handleDelete(exercise.id, 'exercise')}
@@ -243,7 +235,7 @@ const WorkoutsExercises: React.FC = () => {
                                                         minWidth: '55px',
                                                     }}
                                                 >
-                                                    Delete
+                                                    {t('delete')}
                                                 </Button>
                                             </div>
                                         </IonCardContent>

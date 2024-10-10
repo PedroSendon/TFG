@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import {
     IonPage,
     IonHeader,
@@ -17,19 +17,21 @@ import {
 import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { TextField, Button, MenuItem, Grid } from '@mui/material'; // Importar TextField y otros componentes de MUI
 import './EditPerfil.css';
-import { useHistory, useLocation } from 'react-router-dom';  
-import Header from '../../Header/Header'; 
+import { useHistory, useLocation } from 'react-router-dom';
+import Header from '../../Header/Header';
+import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
 
 const EditProfilePage: React.FC = () => {
-    const history = useHistory();  
+    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
+    const history = useHistory();
     const location = useLocation();
     const { userData } = (location.state || {
         userData: {},
     }) as { userData: any };
 
     const [profileData, setProfileData] = useState({
-        firstName: userData?.username?.split(' ')[0] || '',  
-        lastName: userData?.username?.split(' ')[1] || '',   
+        firstName: userData?.username?.split(' ')[0] || '',
+        lastName: userData?.username?.split(' ')[1] || '',
         currentWeight: userData.currentWeight || 0,
         weightGoal: userData.weightGoal || '',
         activityLevel: userData.activityLevel || '',
@@ -43,7 +45,7 @@ const EditProfilePage: React.FC = () => {
     });
 
     const [profilePicture, setProfilePicture] = useState('https://via.placeholder.com/150');
-    const [showToast, setShowToast] = useState(false); 
+    const [showToast, setShowToast] = useState(false);
     const [showActionSheet, setShowActionSheet] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);  // Modal para cambiar la contraseña
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -64,16 +66,16 @@ const EditProfilePage: React.FC = () => {
                     trainingFrequency: profileData.trainingFrequency,
                 }),
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
-                console.log('Perfil actualizado:', data);
+                console.log(t('profile_updated'), data);
                 history.push('/profile'); // Redirige al perfil
             } else {
-                console.error('Error al actualizar el perfil:', response.statusText);
+                console.error(t('profile_update_error'), response.statusText);
             }
         } catch (error) {
-            console.error('Error en la solicitud:', error);
+            console.error(t('request_error'), error);
         }
     };
 
@@ -86,7 +88,7 @@ const EditProfilePage: React.FC = () => {
         if (file) {
             const formData = new FormData();
             formData.append('profilePhoto', file);
-    
+
             try {
                 const response = await fetch('http://127.0.0.1:8000/api/profile/photo/', {
                     method: 'POST',
@@ -95,19 +97,18 @@ const EditProfilePage: React.FC = () => {
                     },
                     body: formData,
                 });
-    
+
                 if (response.ok) {
                     const data = await response.json();
                     setProfilePicture(data.profilePhotoUrl); // Actualiza la foto en el frontend
                 } else {
-                    console.error('Error al subir la foto:', response.statusText);
+                    console.error(t('photo_upload_error'), response.statusText);
                 }
             } catch (error) {
-                console.error('Error en la solicitud:', error);
+                console.error(t('request_error'), error);
             }
         }
     };
-    
 
     const handlePhotoOption = (option: string) => {
         if (option === 'upload') {
@@ -119,10 +120,10 @@ const EditProfilePage: React.FC = () => {
 
     const handleChangePassword = async () => {
         if (passwords.newPassword !== passwords.confirmPassword) {
-            console.error('Las contraseñas no coinciden');
+            console.error(t('password_mismatch'));
             return;
         }
-    
+
         try {
             const response = await fetch('http://127.0.0.1:8000/api/profile/password/', {
                 method: 'PUT',
@@ -136,23 +137,22 @@ const EditProfilePage: React.FC = () => {
                     confirmPassword: passwords.confirmPassword,
                 }),
             });
-    
+
             if (response.ok) {
                 setShowPasswordModal(false);
                 setShowToast(true); // Mostrar un mensaje de éxito
             } else {
                 const errorData = await response.json();
-                console.error('Error al cambiar la contraseña:', errorData.error);
+                console.error(t('password_change_error'), errorData.error);
             }
         } catch (error) {
-            console.error('Error en la solicitud:', error);
+            console.error(t('request_error'), error);
         }
     };
-    
 
     return (
         <IonPage>
-            <Header title="Edit profile" />
+            <Header title={t('edit_profile')} />
 
             <IonContent>
                 <IonGrid>
@@ -171,7 +171,7 @@ const EditProfilePage: React.FC = () => {
                             >
                                 <img
                                     src={profilePicture}
-                                    alt="Foto de perfil"
+                                    alt={t('profile_picture')}
                                     style={{
                                         width: '100%',
                                         height: '100%',
@@ -185,7 +185,7 @@ const EditProfilePage: React.FC = () => {
                                 fill="clear"
                                 onClick={() => setShowActionSheet(true)}
                             >
-                                <IonIcon icon={cameraOutline} /> Change photo
+                                <IonIcon icon={cameraOutline} /> {t('change_photo')}
                             </IonButton>
                         </IonCol>
                     </IonRow>
@@ -195,24 +195,25 @@ const EditProfilePage: React.FC = () => {
                         onDidDismiss={() => setShowActionSheet(false)}
                         buttons={[
                             {
-                                text: 'Subir una foto',
+                                text: t('upload_photo'),
                                 icon: imageOutline,
                                 handler: () => handlePhotoOption('upload'),
                             },
                             {
-                                text: 'Eliminar foto',
+                                text: t('delete_photo'),
                                 role: 'destructive',
                                 icon: trashOutline,
                                 handler: () => handlePhotoOption('delete'),
                             },
                             {
-                                text: 'Cancelar',
+                                text: t('cancel'),
                                 icon: closeOutline,
                                 role: 'cancel',
                             },
                         ]}
                     />
 
+                    <hr style={{ height: '1px', backgroundColor: '#d1d1d6' }} />
                     <input
                         type="file"
                         accept="image/*"
@@ -221,10 +222,9 @@ const EditProfilePage: React.FC = () => {
                         onChange={handleFileChange}
                     />
 
-                    {/* Información Personal */}
                     <IonRow>
                         <IonCol size="12">
-                            <h3>Personal Information</h3>
+                            <h3>{t('personal_information')}</h3>
                         </IonCol>
                     </IonRow>
 
@@ -232,7 +232,7 @@ const EditProfilePage: React.FC = () => {
                         <IonCol size="12">
                             <TextField
                                 fullWidth
-                                label="Name"
+                                label={t('first_name')}
                                 variant="outlined"
                                 value={profileData.firstName}
                                 onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
@@ -244,7 +244,7 @@ const EditProfilePage: React.FC = () => {
                         <IonCol size="12">
                             <TextField
                                 fullWidth
-                                label="Last name"
+                                label={t('last_name')}
                                 variant="outlined"
                                 value={profileData.lastName}
                                 onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
@@ -256,7 +256,7 @@ const EditProfilePage: React.FC = () => {
                         <IonCol size="12">
                             <TextField
                                 fullWidth
-                                label="Current Weight (kg)"
+                                label={t('current_weight')}
                                 variant="outlined"
                                 type="number"
                                 value={profileData.currentWeight}
@@ -267,32 +267,29 @@ const EditProfilePage: React.FC = () => {
 
                     <IonRow>
                         <IonCol size="12">
-                            
                             <Button
-                            type="submit"
-                            style={{
-                                border: '1px solid #32CD32',
-                                backgroundColor: '#FFFFFF',
-                                color: '#32CD32',
-                                padding: '3% 0',
-                                borderRadius: '5px',
-                                fontSize: '1em',
-                                width: '100%',
-                            }}
-                            onClick={() => setShowPasswordModal(true)}
-                        >
-                            Change password
-                        </Button>
+                                type="submit"
+                                style={{
+                                    border: '1px solid #32CD32',
+                                    backgroundColor: '#FFFFFF',
+                                    color: '#32CD32',
+                                    padding: '3% 0',
+                                    borderRadius: '5px',
+                                    fontSize: '1em',
+                                    width: '100%',
+                                }}
+                                onClick={() => setShowPasswordModal(true)}
+                            >
+                                {t('change_password')}
+                            </Button>
                         </IonCol>
                     </IonRow>
 
-                    {/* Divider */}
                     <hr style={{ height: '1px', backgroundColor: '#d1d1d6' }} />
 
-                    {/* Información Deportiva */}
                     <IonRow>
                         <IonCol size="12">
-                            <h3>Sports Information</h3>
+                            <h3>{t('sports_information')}</h3>
                         </IonCol>
                     </IonRow>
 
@@ -300,17 +297,17 @@ const EditProfilePage: React.FC = () => {
                         <IonCol size="12">
                             <TextField
                                 fullWidth
-                                label="Weight Target"
+                                label={t('weight_goal')}
                                 select
                                 variant="outlined"
                                 value={profileData.weightGoal}
                                 onChange={(e) => setProfileData({ ...profileData, weightGoal: e.target.value })}
                             >
-                                <MenuItem value="Perder peso">Lose weight</MenuItem>
-                                <MenuItem value="Ganar masa muscular">Gain muscle mass</MenuItem>
-                                <MenuItem value="Mantener el peso actual">Maintain current weight</MenuItem>
-                                <MenuItem value="Mejorar resistencia física">Improve physical resistance</MenuItem>
-                                <MenuItem value="Aumentar fuerza">Increase strength</MenuItem>
+                                <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
+                                <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
+                                <MenuItem value="Mantener el peso actual">{t('maintain_weight')}</MenuItem>
+                                <MenuItem value="Mejorar resistencia física">{t('improve_resistance')}</MenuItem>
+                                <MenuItem value="Aumentar fuerza">{t('increase_strength')}</MenuItem>
                             </TextField>
                         </IonCol>
                     </IonRow>
@@ -319,16 +316,16 @@ const EditProfilePage: React.FC = () => {
                         <IonCol size="12">
                             <TextField
                                 fullWidth
-                                label="Activity Level"
+                                label={t('activity_level')}
                                 select
                                 variant="outlined"
                                 value={profileData.activityLevel}
                                 onChange={(e) => setProfileData({ ...profileData, activityLevel: e.target.value })}
                             >
-                                <MenuItem value="Sedentario">Sedentary</MenuItem>
-                                <MenuItem value="Ligera">Light</MenuItem>
-                                <MenuItem value="Moderada">Moderate</MenuItem>
-                                <MenuItem value="Intensa">Intense</MenuItem>
+                                <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
+                                <MenuItem value="Ligera">{t('light')}</MenuItem>
+                                <MenuItem value="Moderada">{t('moderate')}</MenuItem>
+                                <MenuItem value="Intensa">{t('intense')}</MenuItem>
                             </TextField>
                         </IonCol>
                     </IonRow>
@@ -337,7 +334,7 @@ const EditProfilePage: React.FC = () => {
                         <IonCol size="12">
                             <TextField
                                 fullWidth
-                                label="Training Frequency (days/week)"
+                                label={t('training_frequency')}
                                 select
                                 variant="outlined"
                                 value={profileData.trainingFrequency}
@@ -350,7 +347,6 @@ const EditProfilePage: React.FC = () => {
                         </IonCol>
                     </IonRow>
 
-                    {/* Botones de Cancelar y Guardar */}
                     <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
@@ -366,7 +362,7 @@ const EditProfilePage: React.FC = () => {
                                         width: '100%',
                                     }}
                                 >
-                                    CANCEL
+                                    {t('cancel')}
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
@@ -383,23 +379,22 @@ const EditProfilePage: React.FC = () => {
                                     }}
                                     onClick={handleSave}
                                 >
-                                    SAVE
+                                    {t('save')}
                                 </Button>
                             </Grid>
                         </Grid>
                     </Grid>
                 </IonGrid>
 
-                {/* Modal para cambiar la contraseña */}
                 <IonModal isOpen={showPasswordModal} onDidDismiss={() => setShowPasswordModal(false)}>
-                    <Header title="Change password" />
+                    <Header title={t('change_password')} />
                     <IonContent>
                         <IonGrid>
                             <IonRow>
                                 <IonCol size="12">
                                     <TextField
                                         fullWidth
-                                        label="Current Password"
+                                        label={t('current_password')}
                                         variant="outlined"
                                         type="password"
                                         value={passwords.currentPassword}
@@ -412,7 +407,7 @@ const EditProfilePage: React.FC = () => {
                                 <IonCol size="12">
                                     <TextField
                                         fullWidth
-                                        label="New Password"
+                                        label={t('new_password')}
                                         variant="outlined"
                                         type="password"
                                         value={passwords.newPassword}
@@ -425,7 +420,7 @@ const EditProfilePage: React.FC = () => {
                                 <IonCol size="12">
                                     <TextField
                                         fullWidth
-                                        label="Confirm New Password"
+                                        label={t('confirm_password')}
                                         variant="outlined"
                                         type="password"
                                         value={passwords.confirmPassword}
@@ -449,7 +444,7 @@ const EditProfilePage: React.FC = () => {
                                                 width: '100%',
                                             }}
                                         >
-                                            CANCEL
+                                            {t('cancel')}
                                         </Button>
                                     </Grid>
                                     <Grid item xs={6}>
@@ -466,7 +461,7 @@ const EditProfilePage: React.FC = () => {
                                             }}
                                             onClick={handleChangePassword}
                                         >
-                                            SAVE
+                                            {t('save')}
                                         </Button>
                                     </Grid>
                                 </Grid>
@@ -478,7 +473,7 @@ const EditProfilePage: React.FC = () => {
                 <IonToast
                     isOpen={showToast}
                     onDidDismiss={() => setShowToast(false)}
-                    message="Changes saved successfully"
+                    message={t('changes_saved')}
                     duration={2000}
                 />
             </IonContent>

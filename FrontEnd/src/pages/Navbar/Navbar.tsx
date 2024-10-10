@@ -7,8 +7,11 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';  // Perfil ic
 import GroupIcon from '@mui/icons-material/Group';  // Usuarios (para administrador)
 import BarChartIcon from '@mui/icons-material/BarChart';  // Estadísticas (para administrador)
 import { useHistory, useLocation } from 'react-router-dom';  // Para manejar la navegación y obtener la ruta actual
+import { useContext } from 'react';  // Importar el hook useContext
+import { LanguageContext } from '../../context/LanguageContext';  // Importar el contexto de idioma
 
 const Navbar: React.FC = () => {
+    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
     const history = useHistory();  
     const location = useLocation();  // Obtener la ubicación/ruta actual
 
@@ -99,7 +102,7 @@ const Navbar: React.FC = () => {
             }}
         >
             <BottomNavigationAction
-                label="Workout"
+                label={t(isAdmin ? 'navbar_admin_workout' : 'navbar_workout')}
                 icon={<FitnessCenterIcon />}
                 sx={{
                     color: value === 0 ? '#32CD32' : '#6b6b6b',
@@ -109,7 +112,7 @@ const Navbar: React.FC = () => {
                 }}
             />
             <BottomNavigationAction
-                label={isAdmin ? "Nutrition" : "Macros"}
+                label={t(isAdmin ? 'navbar_admin_nutrition' : 'navbar_macros')}
                 icon={<FastfoodIcon />}
                 sx={{
                     color: value === 1 ? '#32CD32' : '#6b6b6b',
@@ -119,7 +122,7 @@ const Navbar: React.FC = () => {
                 }}
             />
             <BottomNavigationAction
-                label={isAdmin ? "Statistics" : "Progress"}
+                label={t(isAdmin ? 'navbar_admin_statistics' : 'navbar_progress')}
                 icon={isAdmin ? <BarChartIcon /> : <TrendingUpIcon />}
                 sx={{
                     color: value === 2 ? '#32CD32' : '#6b6b6b',
@@ -129,7 +132,7 @@ const Navbar: React.FC = () => {
                 }}
             />
             <BottomNavigationAction
-                label={isAdmin ? "Users" : "Profile"}
+                label={t(isAdmin ? 'navbar_admin_users' : 'navbar_profile')}
                 icon={isAdmin ? <GroupIcon /> : <AccountCircleIcon />}
                 sx={{
                     color: value === 3 ? '#32CD32' : '#6b6b6b',

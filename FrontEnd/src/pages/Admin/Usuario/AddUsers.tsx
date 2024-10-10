@@ -1,33 +1,32 @@
 import React, { useState } from 'react';
 import {
-    TextField, IconButton, Button, Grid, Typography, Container,
-    MenuItem
-} from '@mui/material'; // Importación de componentes de Material UI.
-import { useHistory } from 'react-router-dom'; // Hook para redirección.
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // Componente de selector de fecha.
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; // Proveedor de localización para el selector de fechas.
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'; // Adaptador para el manejo de fechas con Day.js.
-import dayjs from 'dayjs'; // Librería para manipular fechas.
-import Header from '../../Header/Header'; // Componente de header reutilizable
+    TextField, Button, Grid, MenuItem, Container
+} from '@mui/material';
+import { useHistory } from 'react-router-dom';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import Header from '../../Header/Header';
+import { useContext } from 'react';
+import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
 
 const AddUsers: React.FC = () => {
-    const history = useHistory(); // Inicializa el hook para manejar la navegación.
+    const history = useHistory(); 
+    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
 
-    // Estado para almacenar los datos del formulario.
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
         password: '',
-        birthDate: dayjs(), // Se inicializa con la fecha actual.
+        birthDate: dayjs(),
         gender: '',
-        role: '', // Nuevo estado para el rol.
+        role: '', 
     });
 
-    // Estado para manejar los errores de validación.
     const [errors, setErrors] = useState<any>({});
 
-    // Validaciones (similar al registro original).
     const validateEmail = (email: string) => {
         const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return re.test(email);
@@ -50,7 +49,6 @@ const AddUsers: React.FC = () => {
         return age >= 18 && age <= 120;
     };
 
-    // Manejar cambios en el formulario.
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
@@ -62,30 +60,30 @@ const AddUsers: React.FC = () => {
         const newErrors: any = { ...errors };
 
         if (name === 'email' && !validateEmail(value)) {
-            newErrors.email = 'Correo electrónico no válido.';
+            newErrors.email = t('invalid_email');
         } else if (name === 'email') {
             delete newErrors.email;
         }
 
         if (name === 'firstName' && !validateName(value)) {
-            newErrors.firstName = 'Nombre no debe contener números o símbolos.';
+            newErrors.firstName = t('invalid_firstname');
         } else if (name === 'firstName') {
             delete newErrors.firstName;
         }
 
         if (name === 'lastName' && !validateName(value)) {
-            newErrors.lastName = 'Apellido no debe contener números o símbolos.';
+            newErrors.lastName = t('invalid_lastname');
         } else if (name === 'lastName') {
             delete newErrors.lastName;
         }
 
         if (name === 'password' && !validatePassword(value)) {
-            newErrors.password = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.';
+            newErrors.password = t('invalid_password');
         } else if (name === 'password') {
             delete newErrors.password;
         }
 
-        setErrors(newErrors); // Actualiza el estado de errores.
+        setErrors(newErrors);
     };
 
     const handleDateChange = (date: any) => {
@@ -96,14 +94,13 @@ const AddUsers: React.FC = () => {
 
         const newErrors: any = { ...errors };
         if (!validateAge(date)) {
-            newErrors.birthDate = 'Debe tener al menos 18 años y no más de 120 años.';
+            newErrors.birthDate = t('invalid_age');
         } else {
             delete newErrors.birthDate;
         }
         setErrors(newErrors);
     };
 
-    // Verifica si el formulario es válido para habilitar el botón de enviar.
     const isFormValid = () => {
         return Object.keys(errors).length === 0 &&
             formData.firstName &&
@@ -111,15 +108,14 @@ const AddUsers: React.FC = () => {
             formData.email &&
             formData.password &&
             formData.gender &&
-            formData.role; // Verificamos que se haya seleccionado un rol.
+            formData.role;
     };
 
-    // Maneja el envío del formulario.
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
     
         if (!isFormValid()) {
-            console.log('Errores en el formulario');
+            console.log(t('form_errors'));
             return;
         }
     
@@ -134,46 +130,42 @@ const AddUsers: React.FC = () => {
                     last_name: formData.lastName,
                     email: formData.email,
                     password: formData.password,
-                    birth_date: formData.birthDate.format('YYYY-MM-DD'),  // Formato de la fecha
+                    birth_date: formData.birthDate.format('YYYY-MM-DD'),
                     gender: formData.gender,
-                    terms_accepted: true  // Si es necesario
+                    terms_accepted: true 
                 }),
             });
     
             if (response.ok) {
                 const data = await response.json();
-                console.log('Usuario creado exitosamente:', data);
-                history.push('/admin/users');  // Redirigir a la página de usuarios después de crear
+                console.log(t('user_created'), data);
+                history.push('/admin/users'); 
             } else {
                 const errorData = await response.json();
-                console.error('Error al crear el usuario:', errorData);
+                console.error(t('create_user_error'), errorData);
             }
         } catch (error) {
-            console.error('Error en la solicitud:', error);
+            console.error(t('request_error'), error);
         }
     };
-    
-    
-    
+
     const handleCancel = () => {
-        history.push('/admin/users');  // Cancelar y redirigir a la lista de ejercicios
+        history.push('/admin/users');
     };
 
     return (
         <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <Header title="Add User" />
+            <Header title={t('add_user')} />
             <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
-                {/* Formulario de agregar usuario */}
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
-                        {/* Campo de nombre */}
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
                                 required
                                 fullWidth
                                 id="firstName"
-                                label="Nombre"
+                                label={t('first_name')}
                                 name="firstName"
                                 onChange={handleChange}
                                 error={!!errors.firstName}
@@ -181,14 +173,13 @@ const AddUsers: React.FC = () => {
                             />
                         </Grid>
 
-                        {/* Campo de apellidos */}
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
                                 required
                                 fullWidth
                                 id="lastName"
-                                label="Apellidos"
+                                label={t('last_name')}
                                 name="lastName"
                                 onChange={handleChange}
                                 error={!!errors.lastName}
@@ -196,14 +187,13 @@ const AddUsers: React.FC = () => {
                             />
                         </Grid>
 
-                        {/* Campo de correo electrónico */}
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
                                 required
                                 fullWidth
                                 id="email"
-                                label="Correo electrónico"
+                                label={t('email')}
                                 name="email"
                                 onChange={handleChange}
                                 error={!!errors.email}
@@ -211,14 +201,13 @@ const AddUsers: React.FC = () => {
                             />
                         </Grid>
 
-                        {/* Campo de contraseña */}
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
                                 required
                                 fullWidth
                                 name="password"
-                                label="Contraseña"
+                                label={t('password')}
                                 type="password"
                                 id="password"
                                 onChange={handleChange}
@@ -227,7 +216,6 @@ const AddUsers: React.FC = () => {
                             />
                         </Grid>
 
-                        {/* Selector de género */}
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
@@ -235,20 +223,19 @@ const AddUsers: React.FC = () => {
                                 select
                                 fullWidth
                                 name="gender"
-                                label="Género"
+                                label={t('gender')}
                                 id="gender"
                                 value={formData.gender}
                                 onChange={handleChange}
                                 error={!!errors.gender}
                                 helperText={errors.gender}
                             >
-                                <MenuItem value="M">Masculino</MenuItem>
-                                <MenuItem value="F">Femenino</MenuItem>
-                                <MenuItem value="Otro">Otro</MenuItem>
+                                <MenuItem value="M">{t('male')}</MenuItem>
+                                <MenuItem value="F">{t('female')}</MenuItem>
+                                <MenuItem value="Otro">{t('other')}</MenuItem>
                             </TextField>
                         </Grid>
 
-                        {/* Selector de rol */}
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
@@ -256,25 +243,24 @@ const AddUsers: React.FC = () => {
                                 select
                                 fullWidth
                                 name="role"
-                                label="Rol"
+                                label={t('role')}
                                 id="role"
                                 value={formData.role}
                                 onChange={handleChange}
                                 error={!!errors.role}
                                 helperText={errors.role}
                             >
-                                <MenuItem value="cliente">Cliente</MenuItem>
-                                <MenuItem value="administrador">Administrador</MenuItem>
-                                <MenuItem value="entrenador">Entrenador</MenuItem>
-                                <MenuItem value="nutricionista">Nutricionista</MenuItem>
+                                <MenuItem value="cliente">{t('client')}</MenuItem>
+                                <MenuItem value="administrador">{t('admin')}</MenuItem>
+                                <MenuItem value="entrenador">{t('trainer')}</MenuItem>
+                                <MenuItem value="nutricionista">{t('nutritionist')}</MenuItem>
                             </TextField>
                         </Grid>
 
-                        {/* Selector de fecha de nacimiento */}
                         <Grid item xs={12}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DatePicker
-                                    label="Fecha de nacimiento"
+                                    label={t('birthdate')}
                                     value={formData.birthDate}
                                     onChange={handleDateChange}
                                 />
@@ -283,7 +269,6 @@ const AddUsers: React.FC = () => {
                     </Grid>
                 </form>
             </div>
-            {/* Botones de Cancelar y Guardar */}
             <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
@@ -299,7 +284,7 @@ const AddUsers: React.FC = () => {
                                 width: '100%',
                             }}
                         >
-                            CANCEL
+                            {t('cancel')}
                         </Button>
                     </Grid>
                     <Grid item xs={6}>
@@ -316,7 +301,7 @@ const AddUsers: React.FC = () => {
                             }}
                             onClick={handleSubmit}
                             disabled={!isFormValid()}                        >
-                            ADD
+                            {t('add')}
                         </Button>
                     </Grid>
                 </Grid>
