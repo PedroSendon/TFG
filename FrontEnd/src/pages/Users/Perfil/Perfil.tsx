@@ -6,6 +6,7 @@ import './Perfil.css'; // Asegúrate de crear este archivo CSS para aplicar los 
 import { useHistory } from 'react-router-dom';  // Hook para redirigir
 import Header from '../../Header/Header';  // Importamos el componente Header
 import { LanguageContext } from '../../../context/LanguageContext';  // Importa el contexto de idioma
+import { Button } from '@mui/material';
 
 const ProfilePage: React.FC = () => {
     const history = useHistory();
@@ -208,14 +209,27 @@ const ProfilePage: React.FC = () => {
                     </IonRow>
                 </IonGrid>
 
-                <IonButton
-                    className="verde-lima"
-                    style={{ marginBottom: '15%', color: '#FFFFFF' }}
-                    expand="block"
-                    onClick={handleLogout}
-                >
-                    <IonIcon icon={logOutOutline} slot="start" /> {t('log_out')}
-                </IonButton>
+                {/* Botón de cerrar sesión actualizado */}
+                <IonGrid style={{ marginBottom: '15%' }}>
+                    <IonRow>
+                        <IonCol size="12">
+                            <Button
+                                style={{
+                                    border: '1px solid #32CD32',
+                                    backgroundColor: '#FFFFFF',
+                                    color: '#32CD32',
+                                    padding: '3% 0',
+                                    borderRadius: '5px',
+                                    fontSize: '1em',
+                                    width: '100%',
+                                }}
+                                onClick={handleLogout}
+                            >
+                                {t('log_out')}
+                            </Button>
+                        </IonCol>
+                    </IonRow>
+                </IonGrid>
             </IonContent>
         </IonPage>
     );

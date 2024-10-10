@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { IonPage, IonContent, IonList, IonItem, IonLabel, IonImg, IonCheckbox, IonButton, IonProgressBar } from '@ionic/react';
+import { IonPage, IonContent, IonList, IonItem, IonLabel, IonImg, IonCheckbox, IonButton, IonProgressBar, IonRow, IonCol, IonGrid } from '@ionic/react';
 import { useHistory, useParams } from 'react-router-dom'; 
 import './WorkoutDay.css'; 
 import Header from '../../Header/Header'; 
 import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
+import { Button } from '@mui/material';
 
 const WorkoutDay: React.FC = () => {
   const history = useHistory();
@@ -109,14 +110,28 @@ const WorkoutDay: React.FC = () => {
           <IonProgressBar value={progress} color="success" style={{ height: '10px' }}></IonProgressBar>
         </div>
 
-        <IonButton
-          expand="block"
-          color="success"
-          onClick={handleCompleteWorkout}
-          className="custom-button"
-        >
-          {t('mark_training_completed')}
-        </IonButton>
+          {/* Botón de cerrar sesión actualizado */}
+          <IonGrid style={{ marginBottom: '15%' }}>
+                    <IonRow>
+                        <IonCol size="12">
+                            <Button
+                                style={{
+                                    border: '1px solid #32CD32',
+                                    backgroundColor: '#FFFFFF',
+                                    color: '#32CD32',
+                                    padding: '3% 0',
+                                    borderRadius: '5px',
+                                    fontSize: '1em',
+                                    width: '100%',
+                                }}
+                                onClick={handleCompleteWorkout}
+                            >
+                                {t('mark_training_completed')}
+                            </Button>
+                        </IonCol>
+                    </IonRow>
+                </IonGrid>
+
       </IonContent>
     </IonPage>
   );
