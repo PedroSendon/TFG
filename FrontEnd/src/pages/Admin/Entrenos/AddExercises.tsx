@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
     TextField,
     Button,
@@ -17,11 +17,13 @@ import { IonFabButton, IonIcon, IonContent, IonPage } from '@ionic/react';
 import { cameraOutline } from 'ionicons/icons';  // Icono de cámara para subir imágenes/videos.
 import Header from '../../Header/Header';  // Importación del Header
 import '../../../theme/variables.css'; // Archivo de estilos personalizados.
+import { LanguageContext } from '../../../context/LanguageContext';
 
 const AddExercises: React.FC = () => {
     const history = useHistory(); 
     const [media, setMedia] = useState<string | null>(null);  
     const fileInputRef = useRef<HTMLInputElement>(null);  
+    const { t } = useContext(LanguageContext); // Usar el contexto de idioma
 
     const [formData, setFormData] = useState({
         name: '',
@@ -124,8 +126,8 @@ const AddExercises: React.FC = () => {
     return (
         <IonPage>
             {/* Header reutilizable */}
-            <Header title="Add Exercise" />
-
+            <Header title={t('add_exercise_title')} /> {/* Reemplaza el título con la variable de idioma */}
+    
             <IonContent>
                 <Container component="main" maxWidth="xs" style={{ paddingBottom: '80px' }}>
                     <div style={{ marginTop: '1rem', textAlign: 'center' }}>
@@ -139,7 +141,7 @@ const AddExercises: React.FC = () => {
                                         required
                                         fullWidth
                                         id="name"
-                                        label="Exercise Name"
+                                        label={t('exercise_name')} 
                                         name="name"
                                         onChange={handleChange}
                                         error={!!errors.name}
@@ -165,14 +167,14 @@ const AddExercises: React.FC = () => {
                                         }}
                                     />
                                 </Grid>
-
+    
                                 {/* Campo de descripción */}
                                 <Grid item xs={12}>
                                     <TextField
                                         variant="outlined"
                                         fullWidth
                                         id="description"
-                                        label="Description"
+                                        label={t('description')} 
                                         name="description"
                                         multiline
                                         rows={3}
@@ -198,14 +200,14 @@ const AddExercises: React.FC = () => {
                                         }}
                                     />
                                 </Grid>
-
+    
                                 {/* Selección múltiple de grupos musculares */}
                                 <Grid item xs={12}>
                                     <TextField
                                         variant="outlined"
                                         fullWidth
                                         select
-                                        label="Muscle Groups"
+                                        label={t('muscle_groups')} 
                                         value={formData.muscleGroups}
                                         onChange={(event) => handleMuscleGroupChange(event as SelectChangeEvent<string[]>)}
                                         SelectProps={{
@@ -239,14 +241,14 @@ const AddExercises: React.FC = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-
+    
                                 {/* Campo de instrucciones */}
                                 <Grid item xs={12}>
                                     <TextField
                                         variant="outlined"
                                         fullWidth
                                         id="instructions"
-                                        label="Instructions"
+                                        label={t('instructions')}
                                         name="instructions"
                                         multiline
                                         rows={4}
@@ -272,7 +274,7 @@ const AddExercises: React.FC = () => {
                                         }}
                                     />
                                 </Grid>
-
+    
                                 {/* Botón para subir imagen o video */}
                                 <Grid item xs={12} className="ion-text-center">
                                     <Button
@@ -289,24 +291,24 @@ const AddExercises: React.FC = () => {
                                         }}
                                     >
                                         <IonIcon icon={cameraOutline} style={{ color: '#32CD32', marginRight: '10px' }} />
-                                        Upload Image/Video
+                                        {t('upload_image_video')} {/* Texto traducido */}
                                     </Button>
-
+    
                                     <input
                                         type="file"
                                         ref={fileInputRef}
                                         style={{ display: 'none' }}
                                         onChange={handleFileChange}
                                     />
-
+    
                                     {media && <img src={media} alt="Preview" style={{ width: '100%', marginTop: '10px' }} />}
                                 </Grid>
-
+    
                             </Grid>
                         </form>
                     </div>
                 </Container>
-
+    
                 {/* Botones de Cancelar y Guardar */}
                 <Grid item xs={12}>
                     <Grid container spacing={2}>
@@ -323,12 +325,12 @@ const AddExercises: React.FC = () => {
                                     width: '100%',
                                 }}
                             >
-                                CANCEL
+                                {t('cancel')} {/* Texto traducido */}
                             </Button>
                         </Grid>
                         <Grid item xs={6}>
                             <Button
-                                onClick={handleSubmit}
+                                type="submit"
                                 style={{
                                     border: '1px solid #32CD32',
                                     backgroundColor: '#FFFFFF',
@@ -339,7 +341,7 @@ const AddExercises: React.FC = () => {
                                     width: '100%',
                                 }}
                             >
-                                SAVE
+                                {t('save')} {/* Texto traducido */}
                             </Button>
                         </Grid>
                     </Grid>
@@ -348,5 +350,4 @@ const AddExercises: React.FC = () => {
         </IonPage>
     );
 };
-
 export default AddExercises;

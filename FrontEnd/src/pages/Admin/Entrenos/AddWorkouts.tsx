@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 
 interface Exercise {
     name: string;
@@ -26,6 +26,8 @@ import { IonFabButton, IonIcon, IonContent, IonPage, IonCol, IonRow, IonGrid, Io
 import { cameraOutline, trashOutline } from 'ionicons/icons';
 import Header from '../../Header/Header';
 import '../../../theme/variables.css';
+import { LanguageContext } from '../../../context/LanguageContext';
+
 interface Exercise {
     name: string;
     sets: number;
@@ -37,6 +39,8 @@ const AddWorkouts: React.FC = () => {
     const history = useHistory();
     const [media, setMedia] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { t } = useContext(LanguageContext); // Usar el contexto de idioma
+
 
     const [formData, setFormData] = useState({
         name: '',
@@ -154,7 +158,7 @@ const AddWorkouts: React.FC = () => {
 
     return (
         <IonPage>
-            <Header title="Add Workout" />
+            <Header title={t('add_workout_title')} /> {/* Reemplaza el título */}
             <IonContent>
                 <Container component="main" maxWidth="xs" style={{ paddingBottom: '80px' }}>
                     <div style={{ marginTop: '1rem', textAlign: 'center' }}>
@@ -166,7 +170,7 @@ const AddWorkouts: React.FC = () => {
                                         required
                                         fullWidth
                                         id="name"
-                                        label="Workout Name"
+                                        label={t('workout_name')}
                                         name="name"
                                         onChange={handleChange}
                                         error={!!errors.name}
@@ -179,7 +183,7 @@ const AddWorkouts: React.FC = () => {
                                         variant="outlined"
                                         fullWidth
                                         id="description"
-                                        label="Description"
+                                        label={t('description')}
                                         name="description"
                                         multiline
                                         rows={3}
@@ -192,7 +196,7 @@ const AddWorkouts: React.FC = () => {
                                         <IonGrid style={{ padding: '10px' }}>
                                             <IonRow>
                                                 <IonCol size="10">
-                                                    <IonLabel style={{ fontWeight: 'bold' }}>Exercise {index + 1}</IonLabel>
+                                                    <IonLabel style={{ fontWeight: 'bold' }}>{t('exercise')} {index + 1}</IonLabel>
                                                 </IonCol>
                                                 <IonCol size="2" className="ion-text-end">
                                                     <IonIcon
@@ -207,7 +211,7 @@ const AddWorkouts: React.FC = () => {
                                                     <TextField
                                                         select
                                                         fullWidth
-                                                        label="Exercise Name"
+                                                        label={t('exercise_name')}
                                                         value={exercise.name}
                                                         onChange={(e) => handleExerciseChange(index, 'name', e.target.value as string)}
                                                     >
@@ -222,7 +226,7 @@ const AddWorkouts: React.FC = () => {
                                             <IonRow>
                                                 <IonCol size="4">
                                                     <TextField
-                                                        label="Sets"
+                                                        label={t('sets')}
                                                         type="number"
                                                         value={exercise.sets}
                                                         onChange={(e) => handleExerciseChange(index, 'sets', e.target.value)}
@@ -230,7 +234,7 @@ const AddWorkouts: React.FC = () => {
                                                 </IonCol>
                                                 <IonCol size="4">
                                                     <TextField
-                                                        label="Reps"
+                                                        label={t('reps')}
                                                         type="number"
                                                         value={exercise.reps}
                                                         onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
@@ -238,7 +242,7 @@ const AddWorkouts: React.FC = () => {
                                                 </IonCol>
                                                 <IonCol size="4">
                                                     <TextField
-                                                        label="Rest (s)"
+                                                        label={t('rest')}
                                                         type="number"
                                                         value={exercise.rest}
                                                         onChange={(e) => handleExerciseChange(index, 'rest', e.target.value)}
@@ -262,7 +266,7 @@ const AddWorkouts: React.FC = () => {
                                             minWidth: '100%',
                                         }}
                                     >
-                                        Add Exercise
+                                        {t('add_exercise')}
                                     </Button>
                                 </Grid>
 
@@ -281,7 +285,7 @@ const AddWorkouts: React.FC = () => {
                                                     width: '100%',
                                                 }}
                                             >
-                                                CANCEL
+                                                {t('cancel')}
                                             </Button>
                                         </Grid>
                                         <Grid item xs={6}>
@@ -297,7 +301,7 @@ const AddWorkouts: React.FC = () => {
                                                     width: '100%',
                                                 }}
                                             >
-                                                SAVE
+                                                {t('save')}
                                             </Button>
                                         </Grid>
                                     </Grid>
@@ -310,5 +314,6 @@ const AddWorkouts: React.FC = () => {
         </IonPage>
     );
 };
+
 
 export default AddWorkouts;

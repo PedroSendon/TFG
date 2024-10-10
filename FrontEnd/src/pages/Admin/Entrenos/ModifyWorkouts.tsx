@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   IonPage,
   IonActionSheet,
@@ -19,6 +19,7 @@ import Header from '../../Header/Header';
 import TextField from '@mui/material/TextField';  // Importar TextField de Material UI
 import MenuItem from '@mui/material/MenuItem';  // Importar MenuItem de Material UI
 import { Button } from '@mui/material';
+import { LanguageContext } from '../../../context/LanguageContext';
 
 interface Exercise {
   id: number;
@@ -32,9 +33,9 @@ interface Exercise {
 const ModifyWorkoutPage: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
+  const { t } = useContext(LanguageContext); // Usar el contexto de idioma
 
   const { data } = (location.state || { data: {} }) as { data: any };
-  console.log("Data received from location state:", data);
   
   const [workoutDetails, setWorkoutDetails] = useState<{
     name: string;
@@ -194,195 +195,196 @@ const ModifyWorkoutPage: React.FC = () => {
 
   return (
     <IonPage>
-      <Header title="Modify Workout" />
-      <IonContent>
-        <IonGrid>
-          {/* Sección de Imagen */}
-          <IonRow className="ion-text-center">
-            <IonCol size="12">
-              <IonAvatar style={{ width: '150px', height: '150px', margin: '10px auto', borderRadius: '10px', border: '2px solid #32CD32' }}>
-                {media ? (
-                  <img src={media} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <div style={{ width: '100%', height: '100%', backgroundColor: '#f2f2f2' }} />
-                )}
-              </IonAvatar>
-              <IonButton fill="clear" onClick={() => setShowActionSheet(true)} style={{ color: '#32CD32', borderColor: '#32CD32' }}>
-                <IonIcon icon={cameraOutline} /> Cambiar imagen/video
-              </IonButton>
-            </IonCol>
-          </IonRow>
+        <Header title={t('modify_workout_title')} /> {/* Reemplazamos el título */}
 
-          <IonActionSheet
-            isOpen={showActionSheet}
-            onDidDismiss={() => setShowActionSheet(false)}
-            buttons={[
-              { text: 'Subir imagen/video', icon: imageOutline, handler: () => handlePhotoOption('upload') },
-              { text: 'Eliminar imagen/video', icon: trashOutline, role: 'destructive', handler: () => handlePhotoOption('delete') },
-              { text: 'Cancelar', icon: closeOutline, role: 'cancel' },
-            ]}
-          />
-
-          <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-
-          {/* Campos de modificación */}
-          <IonRow style={{ marginTop: '20px' }}>
-            <IonCol size="12">
-              <TextField
-                variant="outlined"
-                fullWidth
-                label="Workout Name"
-                name="name"
-                value={workoutDetails.name}
-                onChange={handleChange}
-              />
-            </IonCol>
-          </IonRow>
-
-          <IonRow style={{ marginTop: '20px' }}>
-            <IonCol size="12">
-              <TextField
-                variant="outlined"
-                fullWidth
-                label="Description"
-                name="description"
-                value={workoutDetails.description}
-                onChange={handleChange}
-              />
-            </IonCol>
-          </IonRow>
-
-          {/* Lista de ejercicios */}
-          {Array.isArray(workoutDetails.exercises) && workoutDetails.exercises.map((exercise, index) => (
-            <IonCard key={exercise.id || index}>
-              <IonGrid style={{ padding: '10px' }}>
-                <IonRow>
-                  <IonCol size="10">
-                    <IonLabel style={{ fontWeight: 'bold' }}>Exercise {index + 1}</IonLabel>
-                  </IonCol>
-                  <IonCol size="2" className="ion-text-end">
-                    <IonIcon
-                      icon={trashOutline}
-                      style={{ color: 'red', cursor: 'pointer', fontSize: '20px' }}
-                      onClick={() => handleDeleteExercise(index)}
-                    />
-                  </IonCol>
+        <IonContent>
+            <IonGrid>
+                {/* Sección de Imagen */}
+                <IonRow className="ion-text-center">
+                    <IonCol size="12">
+                        <IonAvatar style={{ width: '150px', height: '150px', margin: '10px auto', borderRadius: '10px', border: '2px solid #32CD32' }}>
+                            {media ? (
+                                <img src={media} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <div style={{ width: '100%', height: '100%', backgroundColor: '#f2f2f2' }} />
+                            )}
+                        </IonAvatar>
+                        <IonButton fill="clear" onClick={() => setShowActionSheet(true)} style={{ color: '#32CD32', borderColor: '#32CD32' }}>
+                            <IonIcon icon={cameraOutline} /> {t('change_image_video')} {/* Texto traducido */}
+                        </IonButton>
+                    </IonCol>
                 </IonRow>
-                <IonRow>
-                  <IonCol size="12">
-                    <TextField
-                      select
-                      fullWidth
-                      label="Exercise Name"
-                      value={exercise.name}  // Asegúrate de que 'exercise.name' es una cadena
-                      onChange={(e) => handleExerciseChange(index, 'name', e.target.value as string)}
-                    >
-                      {availableExercises.map((ex) => (
-                        <MenuItem key={ex.id} value={ex.name}>
-                          {ex.name}
-                        </MenuItem>
-                      ))}
-                    </TextField>
 
-                  </IonCol>
+                <IonActionSheet
+                    isOpen={showActionSheet}
+                    onDidDismiss={() => setShowActionSheet(false)}
+                    buttons={[
+                        { text: t('upload_image_video'), icon: imageOutline, handler: () => handlePhotoOption('upload') }, 
+                        { text: t('delete_image_video'), icon: trashOutline, role: 'destructive', handler: () => handlePhotoOption('delete') }, 
+                        { text: t('cancel'), icon: closeOutline, role: 'cancel' }, 
+                    ]}
+                />
+
+                <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
+
+                {/* Campos de modificación */}
+                <IonRow style={{ marginTop: '20px' }}>
+                    <IonCol size="12">
+                        <TextField
+                            variant="outlined"
+                            fullWidth
+                            label={t('workout_name')}
+                            name="name"
+                            value={workoutDetails.name}
+                            onChange={handleChange}
+                        />
+                    </IonCol>
                 </IonRow>
-                <IonRow>
-                  <IonCol size="4">
-                    <TextField
-                      label="Sets"
-                      type="number"
-                      value={exercise.sets}
-                      onChange={(e) => handleExerciseChange(index, 'sets', e.target.value)}
-                    />
-                  </IonCol>
-                  <IonCol size="4">
-                    <TextField
-                      label="Reps"
-                      type="number"
-                      value={exercise.reps}
-                      onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
-                    />
-                  </IonCol>
-                  <IonCol size="4">
-                    <TextField
-                      label="Rest (s)"
-                      type="number"
-                      value={exercise.rest}
-                      onChange={(e) => handleExerciseChange(index, 'rest', e.target.value)}
-                    />
-                  </IonCol>
+
+                <IonRow style={{ marginTop: '20px' }}>
+                    <IonCol size="12">
+                        <TextField
+                            variant="outlined"
+                            fullWidth
+                            label={t('description')}
+                            name="description"
+                            value={workoutDetails.description}
+                            onChange={handleChange}
+                        />
+                    </IonCol>
                 </IonRow>
-              </IonGrid>
-            </IonCard>
-          ))}
 
-          {/* Botón para añadir ejercicio */}
-          <IonRow>
-            <IonCol size="12" className="ion-text-center">
-              <Button
-                onClick={handleAddExercise}
-                style={{
-                  border: '1px solid #32CD32',
-                  backgroundColor: '#FFFFFF',
-                  color: '#32CD32',
-                  padding: '3% 0',
-                  borderRadius: '5px',
-                  fontSize: '1em',
-                  minWidth: '100%',
-                }}
-              >
-                Add Exercise
-              </Button>
-            </IonCol>
-          </IonRow>
+                {/* Lista de ejercicios */}
+                {Array.isArray(workoutDetails.exercises) && workoutDetails.exercises.map((exercise, index) => (
+                    <IonCard key={exercise.id || index}>
+                        <IonGrid style={{ padding: '10px' }}>
+                            <IonRow>
+                                <IonCol size="10">
+                                    <IonLabel style={{ fontWeight: 'bold' }}>{t('exercise')} {index + 1}</IonLabel> {/* Texto traducido */}
+                                </IonCol>
+                                <IonCol size="2" className="ion-text-end">
+                                    <IonIcon
+                                        icon={trashOutline}
+                                        style={{ color: 'red', cursor: 'pointer', fontSize: '20px' }}
+                                        onClick={() => handleDeleteExercise(index)}
+                                    />
+                                </IonCol>
+                            </IonRow>
+                            <IonRow>
+                                <IonCol size="12">
+                                    <TextField
+                                        select
+                                        fullWidth
+                                        label={t('exercise_name')} 
+                                        value={exercise.name}
+                                        onChange={(e) => handleExerciseChange(index, 'name', e.target.value as string)}
+                                    >
+                                        {availableExercises.map((ex) => (
+                                            <MenuItem key={ex.id} value={ex.name}>
+                                                {ex.name}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </IonCol>
+                            </IonRow>
+                            <IonRow>
+                                <IonCol size="4">
+                                    <TextField
+                                        label={t('sets')} 
+                                        type="number"
+                                        value={exercise.sets}
+                                        onChange={(e) => handleExerciseChange(index, 'sets', e.target.value)}
+                                    />
+                                </IonCol>
+                                <IonCol size="4">
+                                    <TextField
+                                        label={t('reps')} 
+                                        type="number"
+                                        value={exercise.reps}
+                                        onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
+                                    />
+                                </IonCol>
+                                <IonCol size="4">
+                                    <TextField
+                                        label={t('rest')} 
+                                        type="number"
+                                        value={exercise.rest}
+                                        onChange={(e) => handleExerciseChange(index, 'rest', e.target.value)}
+                                    />
+                                </IonCol>
+                            </IonRow>
+                        </IonGrid>
+                    </IonCard>
+                ))}
 
-          {/* Botones de Cancelar y Guardar */}
-          <IonRow style={{ marginTop: '20px', marginBottom:'15%' }}>
-            <IonCol size="6" className="ion-text-center">
-              <Button
-                onClick={handleCancel}
-                style={{
-                  border: '1px solid #FF0000',
-                  backgroundColor: '#FFFFFF',
-                  color: '#FF0000',
-                  padding: '3% 0',
-                  borderRadius: '5px',
-                  fontSize: '1em',
-                  width: '100%',
-                }}
-              >
-                CANCEL
-              </Button>
-            </IonCol>
-            <IonCol size="6" className="ion-text-center">
-              <Button
-                onClick={handleSave}
-                style={{
-                  border: '1px solid #32CD32',
-                  backgroundColor: '#FFFFFF',
-                  color: '#32CD32',
-                  padding: '3% 0',
-                  borderRadius: '5px',
-                  fontSize: '1em',
-                  width: '100%',
-                }}
-              >
-                SAVE
-              </Button>
-            </IonCol>
-          </IonRow>
-        </IonGrid>
+                {/* Botón para añadir ejercicio */}
+                <IonRow>
+                    <IonCol size="12" className="ion-text-center">
+                        <Button
+                            onClick={handleAddExercise}
+                            style={{
+                                border: '1px solid #32CD32',
+                                backgroundColor: '#FFFFFF',
+                                color: '#32CD32',
+                                padding: '3% 0',
+                                borderRadius: '5px',
+                                fontSize: '1em',
+                                minWidth: '100%',
+                            }}
+                        >
+                            {t('add_exercise')} {/* Texto traducido */}
+                        </Button>
+                    </IonCol>
+                </IonRow>
 
-        {/* Toast de confirmación */}
-        <IonToast
-          isOpen={showToast}
-          onDidDismiss={() => setShowToast(false)}
-          message="Cambios guardados exitosamente"
-          duration={2000}
-        />
-      </IonContent>
+                {/* Botones de Cancelar y Guardar */}
+                <IonRow style={{ marginTop: '20px', marginBottom: '15%' }}>
+                    <IonCol size="6" className="ion-text-center">
+                        <Button
+                            onClick={handleCancel}
+                            style={{
+                                border: '1px solid #FF0000',
+                                backgroundColor: '#FFFFFF',
+                                color: '#FF0000',
+                                padding: '3% 0',
+                                borderRadius: '5px',
+                                fontSize: '1em',
+                                width: '100%',
+                            }}
+                        >
+                            {t('cancel')} {/* Texto traducido */}
+                        </Button>
+                    </IonCol>
+                    <IonCol size="6" className="ion-text-center">
+                        <Button
+                            onClick={handleSave}
+                            style={{
+                                border: '1px solid #32CD32',
+                                backgroundColor: '#FFFFFF',
+                                color: '#32CD32',
+                                padding: '3% 0',
+                                borderRadius: '5px',
+                                fontSize: '1em',
+                                width: '100%',
+                            }}
+                        >
+                            {t('save')} {/* Texto traducido */}
+                        </Button>
+                    </IonCol>
+                </IonRow>
+            </IonGrid>
+
+            {/* Toast de confirmación */}
+            <IonToast
+                isOpen={showToast}
+                onDidDismiss={() => setShowToast(false)}
+                message={t('toast_success')}
+                duration={2000}
+            />
+        </IonContent>
     </IonPage>
-  );
+);
+
 };
 
 export default ModifyWorkoutPage;

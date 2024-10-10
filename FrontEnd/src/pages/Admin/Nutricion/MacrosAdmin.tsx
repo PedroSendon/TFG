@@ -123,11 +123,15 @@ const MacrosAdmin: React.FC = () => {
                     className="custom-segment"
                     color="success"
                 >
-                    {categories.map((category) => (
-                        <IonSegmentButton key={category.id} value={category.name}>
-                            <IonLabel>{category.name}</IonLabel>
-                        </IonSegmentButton>
-                    ))}
+                    <IonSegmentButton value="weightLoss">
+                        <IonLabel>{t('weight_loss')}</IonLabel>  {/* Texto traducido */}
+                    </IonSegmentButton>
+                    <IonSegmentButton value="muscleGain">
+                        <IonLabel>{t('muscle_gain')}</IonLabel>  {/* Texto traducido */}
+                    </IonSegmentButton>
+                    <IonSegmentButton value="maintenance">
+                        <IonLabel>{t('maintenance')}</IonLabel>  {/* Texto traducido */}
+                    </IonSegmentButton>
                 </IonSegment>
 
                 <IonGrid>
