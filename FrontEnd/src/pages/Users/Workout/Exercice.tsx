@@ -12,6 +12,7 @@ import {
     IonLabel,
     IonIcon,
     IonModal,
+    IonToast,
 } from '@ionic/react';
 import { arrowBackOutline, arrowForwardOutline, informationCircleOutline } from 'ionicons/icons';
 import Header from '../../Header/Header'; // Encabezado
@@ -25,12 +26,6 @@ const ExerciseDetailPage: React.FC = () => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0); // Control de las imágenes del ejercicio
     const [showToast, setShowToast] = useState(false); // Para manejar errores de fetch
 
-    const images = [
-        'https://via.placeholder.com/300x300', // Imagen 1 (esto puede cambiarse por media del backend)
-        'https://via.placeholder.com/300x300', // Imagen 2
-        'https://via.placeholder.com/300x300', // Imagen 3
-    ];
-
     // Función para obtener los detalles del ejercicio desde el backend
     const fetchExerciseDetails = async (id: string) => {
         try {
@@ -39,6 +34,9 @@ const ExerciseDetailPage: React.FC = () => {
 
             if (response.ok) {
                 setExerciseInfo(data); // Almacenar los detalles en el estado
+                if (data.media && data.media.length > 0) {
+                    setCurrentImageIndex(0); // Resetear el índice de la imagen si hay media
+                }
             } else {
                 setShowToast(true);
                 console.error('Error fetching exercise details:', data.error);
@@ -57,7 +55,7 @@ const ExerciseDetailPage: React.FC = () => {
 
     // Funciones para cambiar la imagen actual
     const handleNextImage = () => {
-        if (currentImageIndex < images.length - 1) {
+        if (exerciseInfo?.media && currentImageIndex < exerciseInfo.media.length - 1) {
             setCurrentImageIndex(currentImageIndex + 1);
         }
     };
@@ -97,7 +95,7 @@ const ExerciseDetailPage: React.FC = () => {
                                 <IonIcon icon={arrowBackOutline} style={{ fontSize: '2rem' }} />
                             </IonButton>
                             <img
-                                src={images[currentImageIndex]}
+                                src={exerciseInfo.media[currentImageIndex]}
                                 alt="Exercise"
                                 style={{ width: '100%', height: 'auto', borderRadius: '10px' }}
                             />
@@ -214,7 +212,15 @@ const ExerciseDetailPage: React.FC = () => {
                     onClose={() => setShowModal(false)}
                     exerciseName={exerciseInfo.name}
                     description={exerciseInfo.description}
-                    steps={exerciseInfo.steps}
+                    steps={exerciseInfo.instructions}  // Pasos del ejercicio
+                />
+
+                {/* Toast para mostrar errores */}
+                <IonToast
+                    isOpen={showToast}
+                    onDidDismiss={() => setShowToast(false)}
+                    message="Error fetching exercise details"
+                    duration={2000}
                 />
             </IonContent>
         </IonPage>
