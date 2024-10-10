@@ -1,12 +1,12 @@
 import React, { useContext } from 'react';
-import { Button, Container, Typography, Select, MenuItem } from '@mui/material';
+import { Select, MenuItem, Container, Button, Typography } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { LanguageContext } from '../../context/LanguageContext'; // Importar el contexto de idioma
 import '../../theme/variables.css';
 
 const MainScreen: React.FC = () => {
   const history = useHistory();
-  const { t, language, changeLanguage } = useContext(LanguageContext); // Usar el contexto de idioma
+  const { language, changeLanguage } = useContext(LanguageContext); // Usar el contexto de idioma
 
   const handleRegister = () => {
     history.push('/register');
@@ -26,8 +26,63 @@ const MainScreen: React.FC = () => {
         alignItems: 'center',
         minHeight: '100vh',
         textAlign: 'center',
+        position: 'relative', // Esto es importante para posicionar el dropdown en relación al container
       }}
     >
+      {/* Desplegable de selección de idioma con banderas y sin flecha */}
+      <Select
+        value={language}
+        onChange={(e) => changeLanguage(e.target.value as 'en' | 'es' | 'ca')}
+        disableUnderline // Desactiva la línea de subrayado del select
+        IconComponent={() => null} // Elimina la flecha del select
+        style={{
+          position: 'absolute',
+          top: '20px', // Ajusta según sea necesario
+          right: '20px', // Ajusta según sea necesario
+          width: '50px', // Tamaño del cuadradito
+          height: '50px',
+          padding: 0, // Sin padding para que se vea cuadrado
+        }}
+        renderValue={() => (
+          <img
+            src={
+              language === 'en'
+                ? 'https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg'
+                : language === 'es'
+                ? 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg'
+                : 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Estelada_blava.svg/1024px-Estelada_blava.svg.png'
+            }
+            alt={language}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        )}
+      >
+        <MenuItem value="en">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg"
+            alt="English"
+            style={{ width: '50px', height: '30px', marginRight: '10px' }} // Tamaño ajustado de la bandera
+          />
+          English
+        </MenuItem>
+        <MenuItem value="es">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg"
+            alt="Español"
+            style={{ width: '50px', height: '30px', marginRight: '10px' }} // Tamaño ajustado de la bandera
+          />
+          Español
+        </MenuItem>
+        <MenuItem value="ca">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Catalonia.svg"
+            alt="Català"
+            style={{ width: '50px', height: '30px', marginRight: '10px' }} // Tamaño ajustado de la bandera
+          />
+          Català
+        </MenuItem>
+      </Select>
+
       <div style={{ width: '100%', marginBottom: '1.5rem' }}>
         <img
           src="https://via.placeholder.com/300x150"
@@ -36,20 +91,8 @@ const MainScreen: React.FC = () => {
         />
       </div>
 
-      {/* Desplegable de selección de idioma */}
-      <Select
-        value={language}
-        onChange={(e) => changeLanguage(e.target.value as 'en' | 'es' | 'ca')}
-        fullWidth
-        style={{ marginBottom: '1rem' }}
-      >
-        <MenuItem value="en">English</MenuItem>
-        <MenuItem value="es">Español</MenuItem>
-        <MenuItem value="ca">Català</MenuItem>
-      </Select>
-
       <Typography variant="h5" style={{ marginBottom: '1.5rem' }}>
-        {t('welcome_message')}
+        {language === 'en' ? 'Welcome!' : language === 'es' ? '¡Bienvenido!' : 'Benvingut!'}
       </Typography>
 
       <Button
@@ -65,7 +108,7 @@ const MainScreen: React.FC = () => {
         }}
         onClick={handleRegister}
       >
-        {t('register_button')}
+        {language === 'en' ? 'Register' : language === 'es' ? 'Registrarse' : 'Registrar-se'}
       </Button>
 
       <Button
@@ -81,7 +124,7 @@ const MainScreen: React.FC = () => {
         }}
         onClick={handleLogin}
       >
-        {t('login_button')}
+        {language === 'en' ? 'Login' : language === 'es' ? 'Iniciar sesión' : 'Iniciar sessió'}
       </Button>
     </Container>
   );
