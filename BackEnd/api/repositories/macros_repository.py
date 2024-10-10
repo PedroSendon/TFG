@@ -12,6 +12,31 @@ class MacrosRepository:
         return list(DietCategory.objects.values_list('name', flat=True))
 
     @staticmethod
+    def get_all_macronutrients():
+        """
+        Obtener todos los planes de macronutrientes.
+        """
+        try:
+            # Recuperar todos los planes de macronutrientes
+            macros = MacrosRecommendation.objects.all()
+
+            # Serializa los datos
+            return [
+                {
+                    "id": macro.id,
+                    "dietType": macro.diet_type,  # Aquí es importante que el campo exista
+                    "kcal": macro.kcal,
+                    "proteins": macro.proteins,
+                    "carbs": macro.carbs,
+                    "fats": macro.fats
+                } for macro in macros
+            ]
+
+        except Exception as e:
+            # En caso de error, retorna None o lanza una excepción
+            print(f"Error al obtener los macronutrientes: {e}")
+            return None
+    @staticmethod
     def get_user_macronutrients(user_id):
         """
         Obtener los datos de macronutrientes del usuario.

@@ -19,6 +19,25 @@ def get_user_macronutrients(request):
     return Response(macros_data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+def get_all_macronutrients(request):
+    """
+    Obtener todos los planes de macronutrientes disponibles en la base de datos.
+    """
+    try:
+        # Obtener todos los planes de macronutrientes desde el repositorio
+        macros = MacrosRepository.get_all_macronutrients()
+
+        # Verifica que haya datos
+        if not macros:
+            return Response({"error": "No se encontraron planes de macronutrientes."}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({"data": macros}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        # Retorna un error genérico si algo falla
+        return Response({"error": f"Error al obtener los planes de macronutrientes: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
 def get_macronutrient_by_id(request):
     """
     Obtener los detalles de una recomendación de macronutrientes por ID.

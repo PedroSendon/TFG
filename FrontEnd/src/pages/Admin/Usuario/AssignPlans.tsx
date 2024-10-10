@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IonPage, IonContent, IonGrid, IonRow, IonCol, IonButton } from '@ionic/react';
 import Header from '../../Header/Header';
 import { Select, MenuItem, Button, Grid } from '@mui/material';
@@ -9,13 +9,45 @@ const AssignPlans: React.FC = () => {
   const location = useLocation();
   const { userId } = location.state as { userId: number }; // Obtener el userId pasado
 
-  // Estados para manejar los seleccionados
+  // Estados para manejar los datos
   const [selectedWorkout, setSelectedWorkout] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('');
+  const [workoutOptions, setWorkoutOptions] = useState<{ id: number; name: string }[]>([]);
+  const [nutritionPlans, setNutritionPlans] = useState<{ id: number; dietType: string }[]>([]);
+  const [showToast, setShowToast] = useState(false); // Para manejar mensajes de error
 
-  // Datos simulados de entrenamientos y planes nutricionales
-  const workoutOptions = ['Entrenamiento A', 'Entrenamiento B', 'Entrenamiento C'];
-  const nutritionPlans = ['Plan Nutricional 1', 'Plan Nutricional 2', 'Plan Nutricional 3'];
+  // Obtener los entrenamientos disponibles desde el backend
+  const fetchWorkouts = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/workouts/');
+      const data = await response.json();
+      setWorkoutOptions(data.data); // Asignar los datos de entrenamientos
+    } catch (error) {
+      console.error('Error fetching workouts:', error);
+      setShowToast(true);
+    }
+  };
+
+  // Obtener los planes nutricionales desde el backend utilizando el nuevo endpoint
+  const fetchNutritionPlans = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/macros/all/');
+      if (!response.ok) {
+        throw new Error('Error fetching nutrition plans');
+      }
+      const data = await response.json();
+      setNutritionPlans(data.data); // Verifica que "data.data" tiene el formato correcto
+    } catch (error) {
+      console.error('Error fetching nutrition plans:', error);
+      setShowToast(true);  // Muestra el error en la interfaz
+    }
+  };
+
+  // Llamar a las funciones de fetch en useEffect para obtener los datos al cargar el componente
+  useEffect(() => {
+    fetchWorkouts();
+    fetchNutritionPlans();
+  }, []);
 
   const handleSave = async () => {
     try {
@@ -42,7 +74,6 @@ const AssignPlans: React.FC = () => {
     }
   };
 
-
   const handleCancel = () => {
     history.push('/admin/users'); // Redirigir a la lista de usuarios al cancelar
   };
@@ -67,8 +98,8 @@ const AssignPlans: React.FC = () => {
                   Seleccionar entrenamiento
                 </MenuItem>
                 {workoutOptions.map((workout) => (
-                  <MenuItem key={workout} value={workout}>
-                    {workout}
+                  <MenuItem key={workout.id} value={workout.id}>
+                    {workout.name}
                   </MenuItem>
                 ))}
               </Select>
@@ -89,8 +120,8 @@ const AssignPlans: React.FC = () => {
                   Seleccionar plan nutricional
                 </MenuItem>
                 {nutritionPlans.map((plan) => (
-                  <MenuItem key={plan} value={plan}>
-                    {plan}
+                  <MenuItem key={plan.id} value={plan.id}>
+                    {plan.dietType}
                   </MenuItem>
                 ))}
               </Select>
