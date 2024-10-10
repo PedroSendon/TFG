@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   IonPage,
   IonActionSheet,
@@ -23,28 +23,77 @@ const ModifyExercises: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
 
-  const { exerciseData } = (location.state || { exerciseData: {} }) as { exerciseData: any };
+  const data = (location.state as { data: any })?.data || null;
 
   const [exerciseDetails, setExerciseDetails] = useState({
-    name: exerciseData?.name || '',
-    description: exerciseData?.description || '',
-    muscleGroups: exerciseData?.muscleGroups || [] as string[],
-    instructions: exerciseData?.instructions || '',
+    name: data?.name || '',
+    description: data?.description || '',
+    muscleGroups: data?.muscleGroups || [] as string[],
+    instructions: data?.instructions || '',
   });
 
-  const [media, setMedia] = useState<string | null>(exerciseData?.media || null);
+  const [media, setMedia] = useState<string | null>(data?.media || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [muscleGroupsList, setMuscleGroupsList] = useState<string[]>([]); // Lista de grupos musculares
 
-  const muscleGroupsList = [
-    'Biceps', 'Triceps', 'Chest', 'Back', 'Shoulders', 'Legs', 'Abs', 'Calves', 'Forearms', 'Glutes'
-  ];
+  // Cargar los grupos musculares desde el backend al iniciar el componente
+  useEffect(() => {
+    const fetchMuscleGroups = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/exercises/muscle-groups/'); // Cambia la URL según tu configuración
+        const data = await response.json();
+        const groups = data.data.map((group: any) => group.name); // Ajusta según el formato de la respuesta
+        setMuscleGroupsList(groups);
+      } catch (error) {
+        console.error('Error fetching muscle groups:', error);
+      }
+    };
 
-  const handleSave = () => {
-    console.log('Datos del ejercicio guardados:', exerciseDetails, media);
-    history.push('/admin/workout');
+    fetchMuscleGroups();
+  }, []);
+
+  const handleSave = async () => {
+    const exerciseId = data?.id; // Obtener el ID del ejercicio
+    if (!exerciseId) {
+        console.error('No se encontró el ID del ejercicio');
+        history.push('/admin/exercises');
+        return;
+    }
+
+
+    const updatedExercise = {
+      ...exerciseDetails,
+      muscle_groups: exerciseDetails.muscleGroups,
+      media,
+    };
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/exercises/${exerciseId}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedExercise),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Datos del ejercicio guardados:', data);
+        setShowToast(true);
+        history.push('/admin/workout');
+      } else {
+        const errorData = await response.json();
+        console.error('Error al modificar el ejercicio:', errorData);
+        setShowToast(true);
+      }
+    } catch (error) {
+      console.error('Error en la conexión:', error);
+      setShowToast(true);
+    }
   };
+
 
   const handleCancel = () => {
     history.push('/admin/workout');
