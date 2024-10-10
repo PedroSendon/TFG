@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     IonPage,
     IonHeader,
@@ -16,29 +16,44 @@ import {
 import { arrowBackOutline, arrowForwardOutline, informationCircleOutline } from 'ionicons/icons';
 import Header from '../../Header/Header'; // Encabezado
 import ExerciseInfoModal from './ExerciceInformation'; // Modal con la información del ejercicio
+import { useParams } from 'react-router';
 
 const ExerciseDetailPage: React.FC = () => {
+    const { exerciseId } = useParams<{ exerciseId: string }>(); // Obtener el ID desde la URL
     const [showModal, setShowModal] = useState(false);
-
-    const exerciseInfo = {
-        name: 'Sentadillas',
-        description: 'Un ejercicio fundamental que trabaja las piernas y el core.',
-        muscles: ['Cuádriceps', 'Glúteos', 'Abdomen'],
-        steps: [
-            'Párate derecho con los pies separados a la altura de los hombros.',
-            'Baja lentamente flexionando las rodillas.',
-            'Mantén la espalda recta y baja hasta que tus muslos estén paralelos al suelo.',
-            'Vuelve a la posición inicial empujando con los talones.'
-        ]
-    };
+    const [exerciseInfo, setExerciseInfo] = useState<any>(null); // Para almacenar los detalles del ejercicio
     const [currentImageIndex, setCurrentImageIndex] = useState(0); // Control de las imágenes del ejercicio
+    const [showToast, setShowToast] = useState(false); // Para manejar errores de fetch
+
     const images = [
-        'https://via.placeholder.com/300x300', // Imagen 1
+        'https://via.placeholder.com/300x300', // Imagen 1 (esto puede cambiarse por media del backend)
         'https://via.placeholder.com/300x300', // Imagen 2
         'https://via.placeholder.com/300x300', // Imagen 3
     ];
 
-    const muscleGroups = ['Biceps', 'Dorsal', 'Trapecio']; // Grupos musculares involucrados
+    // Función para obtener los detalles del ejercicio desde el backend
+    const fetchExerciseDetails = async (id: string) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/exercises/details/?id=${id}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                setExerciseInfo(data); // Almacenar los detalles en el estado
+            } else {
+                setShowToast(true);
+                console.error('Error fetching exercise details:', data.error);
+            }
+        } catch (error) {
+            setShowToast(true);
+            console.error('Error fetching exercise details:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (exerciseId) {
+            fetchExerciseDetails(exerciseId); // Llamar a la API al cargar la página
+        }
+    }, [exerciseId]);
 
     // Funciones para cambiar la imagen actual
     const handleNextImage = () => {
@@ -53,6 +68,9 @@ const ExerciseDetailPage: React.FC = () => {
         }
     };
 
+    if (!exerciseInfo) {
+        return <p>Loading exercise details...</p>;
+    }
     return (
         <IonPage>
             {/* Encabezado del ejercicio */}
@@ -116,7 +134,7 @@ const ExerciseDetailPage: React.FC = () => {
 
                     {/* Etiquetas de los músculos trabajados con estilo personalizado */}
                     <IonRow>
-                        {muscleGroups.map((muscle, index) => (
+                        {exerciseInfo.muscleGroups.map((muscle: string, index: number) => (
                             <IonCol key={index} size="auto">
                                 <div style={{
                                     padding: '4px 8px',
