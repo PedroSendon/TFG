@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   IonPage,
   IonActionSheet,
@@ -21,39 +21,114 @@ import MenuItem from '@mui/material/MenuItem';  // Importar MenuItem de Material
 import { Button } from '@mui/material';
 
 interface Exercise {
+  id: number;
   name: string;
   sets: number;
   reps: number;
   rest: number;
 }
 
+
 const ModifyWorkoutPage: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
 
-  const { workoutData } = (location.state || { workoutData: {} }) as { workoutData: any };
-
+  const { data } = (location.state || { data: {} }) as { data: any };
+  console.log("Data received from location state:", data);
+  
   const [workoutDetails, setWorkoutDetails] = useState<{
     name: string;
     description: string;
     exercises: Exercise[];
   }>({
-    name: workoutData?.name || '',
-    description: workoutData?.description || '',
-    exercises: workoutData?.exercises || [],
+    name: data?.name || '',
+    description: data?.description || '',
+    exercises: data?.exercises || [],  // Asegúrate de que 'exercises' sea un array vacío
   });
 
-  const [media, setMedia] = useState<string | null>(workoutData?.media || null);
+
+
+  const [media, setMedia] = useState<string | null>(data?.media || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  const availableExercises = ['Squats', 'Push Ups', 'Deadlifts', 'Bench Press', 'Pull Ups'];
+  interface AvailableExercise {
+    id: string;
+    name: string;
+  }
 
-  const handleSave = () => {
-    console.log('Datos del entrenamiento guardados:', workoutDetails, media);
-    history.push('/admin/workout');
+  const [availableExercises, setAvailableExercises] = useState<AvailableExercise[]>([]);  // Lista de ejercicios disponibles
+
+
+
+
+  // Fetch exercises and set available exercises properly inside the fetch function
+  const fetchExercises = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/exercises/all/');
+      const data = await response.json();
+
+      // Verifica que data.data esté definido antes de usarlo
+      if (data && data.data) {
+        setAvailableExercises(data.data.map((exercise: any) => ({
+          id: exercise.id,
+          name: exercise.name,
+        })));
+      } else {
+        console.error('Datos no disponibles en la respuesta:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching exercises:', error);
+    }
   };
+
+  // Llama a fetchExercises en el useEffect para que se ejecute al cargar el componente
+  useEffect(() => {
+    fetchExercises();
+  }, []);
+
+
+
+  const handleSave = async () => {
+    const workoutId = data?.id;  // Obtener el ID del entrenamiento
+
+    const updatedWorkout = {
+        name: workoutDetails.name,
+        description: workoutDetails.description,
+        exercises: workoutDetails.exercises.map((exercise) => ({
+            name: exercise.name,
+            sets: exercise.sets,
+            reps: exercise.reps,
+            rest: exercise.rest,
+        })),
+        media,
+    };
+
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/api/workouts/${workoutId}/update/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedWorkout),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Entrenamiento actualizado con éxito:', data);
+            setShowToast(true);
+            history.push('/admin/workout');
+        } else {
+            const errorData = await response.json();
+            console.error('Error al actualizar el entrenamiento:', errorData);
+        }
+    } catch (error) {
+        console.error('Error en la conexión:', error);
+    }
+};
+
+
 
   const handleCancel = () => {
     history.push('/admin/workout');  // Volver a la lista de entrenamientos
@@ -87,18 +162,30 @@ const ModifyWorkoutPage: React.FC = () => {
     setWorkoutDetails({ ...workoutDetails, [name]: value });
   };
 
-  const handleExerciseChange = (index: number, field: string, value: string | number) => {
+  const handleExerciseChange = (index: number, field: string, value: string) => {
     const updatedExercises = [...workoutDetails.exercises];
-    updatedExercises[index] = { ...updatedExercises[index], [field]: value };
+    updatedExercises[index] = { ...updatedExercises[index], [field]: value };  // Actualiza solo el campo 'name'
     setWorkoutDetails({ ...workoutDetails, exercises: updatedExercises });
   };
+
+
 
   const handleAddExercise = () => {
     setWorkoutDetails({
       ...workoutDetails,
-      exercises: [...workoutDetails.exercises, { name: '', sets: 0, reps: 0, rest: 0 }],
+      exercises: [
+        ...workoutDetails.exercises,
+        {
+          id: Date.now(),  // Generamos un id único basado en el timestamp actual
+          name: '',
+          sets: 0,
+          reps: 0,
+          rest: 0
+        }
+      ]
     });
   };
+
 
   const handleDeleteExercise = (index: number) => {
     const updatedExercises = workoutDetails.exercises.filter((_, i) => i !== index);
@@ -166,8 +253,8 @@ const ModifyWorkoutPage: React.FC = () => {
           </IonRow>
 
           {/* Lista de ejercicios */}
-          {workoutDetails.exercises.map((exercise: Exercise, index: number) => (
-            <IonCard key={index} style={{ position: 'relative', borderRadius: '10px', marginBottom: '15px' }}>
+          {Array.isArray(workoutDetails.exercises) && workoutDetails.exercises.map((exercise, index) => (
+            <IonCard key={exercise.id || index}>
               <IonGrid style={{ padding: '10px' }}>
                 <IonRow>
                   <IonCol size="10">
@@ -187,15 +274,16 @@ const ModifyWorkoutPage: React.FC = () => {
                       select
                       fullWidth
                       label="Exercise Name"
-                      value={exercise.name}
+                      value={exercise.name}  // Asegúrate de que 'exercise.name' es una cadena
                       onChange={(e) => handleExerciseChange(index, 'name', e.target.value as string)}
                     >
                       {availableExercises.map((ex) => (
-                        <MenuItem key={ex} value={ex}>
-                          {ex}
+                        <MenuItem key={ex.id} value={ex.name}>
+                          {ex.name}
                         </MenuItem>
                       ))}
                     </TextField>
+
                   </IonCol>
                 </IonRow>
                 <IonRow>
@@ -249,7 +337,7 @@ const ModifyWorkoutPage: React.FC = () => {
           </IonRow>
 
           {/* Botones de Cancelar y Guardar */}
-          <IonRow style={{ marginTop: '20px' }}>
+          <IonRow style={{ marginTop: '20px', marginBottom:'15%' }}>
             <IonCol size="6" className="ion-text-center">
               <Button
                 onClick={handleCancel}

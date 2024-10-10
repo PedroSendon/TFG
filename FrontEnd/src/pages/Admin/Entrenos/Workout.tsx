@@ -49,11 +49,20 @@ const WorkoutsExercises: React.FC = () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/api/workouts/');
             const data = await response.json();
-            setWorkouts(data); // Ajustar los datos obtenidos
+    
+            // Asegúrate de que los datos están dentro de la clave 'data'
+            setWorkouts(data.data.map((workout: any) => ({
+                id: workout.id,
+                name: workout.name,
+                description: workout.description,
+                media: workout.media,
+            })));
         } catch (error) {
-            console.error('Error al obtener entrenamientos:', error);
+            console.error('Error fetching workouts:', error);
         }
     };
+    
+    
 
     const fetchExercises = async () => {
         try {
@@ -87,14 +96,24 @@ const WorkoutsExercises: React.FC = () => {
 
     const handleEdit = (id: number, type: string) => {
         const selectedData = type === 'workout'
-            ? workouts.find((workout) => workout.id === id)
+            ? workouts.find((workout) => workout.id === id)  // Aquí asegúrate de que el workout tiene el id
             : exercises.find((exercise) => exercise.id === id);
-
+        console.log(selectedData?.id);
+        if (!selectedData) {
+            console.error(`No ${type} found with id:`, id);
+            return;
+        }
+    
+        // Asegúrate de que estás pasando el 'id' correctamente junto con los datos del entrenamiento
         history.push({
             pathname: `/admin/${type}/modify`,
-            state: { data: selectedData },
+            state: { data: { ...selectedData, id } },  // Aquí estás asignando el 'id'
         });
     };
+    
+    
+    
+    
 
     const handleAdd = (type: string) => {
         history.push(`/admin/${type}/add`);

@@ -10,6 +10,7 @@ class WorkoutExerciseSchema(BaseModel):
     rest: int
 
 class WorkoutSchema(BaseModel):
+    id: int
     name: str
     description: str
     exercises: List[str]  # Esto dependerá de cómo estés manejando la relación con los ejercicios

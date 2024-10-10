@@ -16,10 +16,7 @@ def get_workouts(request):
     # Obtener los entrenamientos desde el repositorio
     workouts = WorkoutRepository.get_workouts(user_id)
 
-    # Serializar los entrenamientos utilizando el esquema WorkoutSchema
-    workout_data = [WorkoutSchema.from_orm(workout).dict() for workout in workouts]
-    
-    return Response(workout_data, status=status.HTTP_200_OK)
+    return Response({"data": workouts}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def get_workout_by_day(request, day):

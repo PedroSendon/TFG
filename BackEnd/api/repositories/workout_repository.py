@@ -11,17 +11,23 @@ class WorkoutRepository:
         """
         Obtener la lista de entrenamientos. Si se proporciona un user_id, filtrar por entrenamientos personalizados.
         :param user_id: ID del usuario (opcional).
-        :return: Lista de entrenamientos.
+        :return: Lista de diccionarios con los datos de cada entrenamiento.
         """
         if user_id:
             # Si hay lógica para entrenamientos personalizados, implementarla aquí.
-            # Por ejemplo, filtrar entrenamientos basados en el historial o preferencias del usuario.
             workouts = Workout.objects.filter(user__id=user_id)
         else:
             # Obtener todos los entrenamientos disponibles
             workouts = Workout.objects.all()
 
-        return workouts
+        # Serializamos los datos de los entrenamientos de la misma manera que list_all_exercises
+        return [{
+            "id": workout.id,
+            "name": workout.name,
+            "description": workout.description,
+            "media": workout.media,
+            # Puedes incluir más campos según tu modelo de Workout si es necesario
+        } for workout in workouts]
 
     @staticmethod
     def get_workouts_by_user(user_id):
