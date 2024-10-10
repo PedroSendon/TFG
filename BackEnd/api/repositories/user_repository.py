@@ -406,13 +406,14 @@ class UserDetailsRepository:
         Eliminar un usuario y sus relaciones.
         """
         try:
+            
             user = User.objects.get(id=user_id)
-            # Si hay alguna relación `on_delete=models.CASCADE`, esto se hará automáticamente.
-            # Si tienes relaciones `on_delete=models.PROTECT` o `SET_NULL`, deberás manejarlo manualmente.
-            user.delete()
+            user.delete()  # Eliminar el usuario
             return True
         except User.DoesNotExist:
             return False
+
+
 
         
     @staticmethod

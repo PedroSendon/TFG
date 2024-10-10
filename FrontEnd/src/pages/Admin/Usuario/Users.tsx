@@ -63,13 +63,13 @@ const Users: React.FC = () => {
         t('cancel'),
         {
           text: t('delete'),
-          handler: () => {
+          handler: () => { 
             fetch(`/api/users/delete/${userId}`, { method: 'DELETE' })
               .then((response) => {
                 if (response.ok) {
                   setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
                 } else {
-                  console.error(t('delete_error'));
+                  console.error(`Error en la eliminación del usuario: ${response.statusText}`);
                 }
               })
               .catch((error) => console.error(t('network_error'), error));
@@ -78,6 +78,7 @@ const Users: React.FC = () => {
       ],
     });
   };
+  
 
   const handleEdit = (userId: number) => {
     const selectedUser = users.find((user) => user.id === userId);

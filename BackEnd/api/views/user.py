@@ -2,7 +2,7 @@ from rest_framework.response import Response # type: ignore
 from rest_framework.decorators import api_view, parser_classes, permission_classes # type: ignore
 from rest_framework import status # type: ignore
 from api.repositories.user_repository import UserRepository
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from api.schemas.user import UserCreate, UserDetailsSchema,LoginSchema
 from django.contrib.auth.hashers import make_password
@@ -347,19 +347,19 @@ def delete_user(request, user_id):
     """
     Eliminar un usuario por su ID.
     """
-    user = request.user
-    if user.role != 'administrador':
-        return Response({"error": "No tienes permisos para eliminar usuarios"}, status=status.HTTP_403_FORBIDDEN)
-    
-    # Intentar eliminar el usuario
-    success = UserRepository.delete_user_by_id(user_id)
+    # Obtener el usuario autenticado desde el repositorio
+    authenticated_user = UserRepository.get_user_by_id(request.user.id)  # Asegúrate de que tienes un método para esto
 
-    if success:
-        return Response({"message": "Usuario eliminado exitosamente"}, status=status.HTTP_200_OK)
+    if authenticated_user and authenticated_user.role == 'administrador':
+        success = UserDetailsRepository.delete_user_by_id(user_id)
+
+        if success:
+            return Response({"message": "Usuario eliminado exitosamente"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
     else:
-        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-    
-from rest_framework.permissions import IsAuthenticated
+        return Response({"error": "No tienes permisos para eliminar usuarios"}, status=status.HTTP_403_FORBIDDEN)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])  # Requiere que el usuario esté autenticado
