@@ -31,6 +31,27 @@ class UserRepository:
             return user
         except Exception as e:
             raise ValueError(f"Error creando usuario: {e}")
+        
+    @staticmethod
+    def create_user_admin(user_data):
+        """
+        Crear un nuevo usuario en la base de datos.
+        :param user_data: Diccionario con los datos del usuario.
+        :return: El objeto usuario creado.
+        """
+        try:
+            user = User.objects.create(
+                first_name=user_data['first_name'],
+                last_name=user_data['last_name'],
+                email=user_data['email'],
+                password=user_data['password'],  # Asegúrate de que la contraseña esté hasheada
+                birth_date=user_data['birth_date'],
+                gender=user_data['gender'],
+                role=user_data['role'] 
+            )
+            return user
+        except Exception as e:
+            raise ValueError(f"Error creando usuario: {e}")
 
     @staticmethod
     def get_user_by_id(user_id):

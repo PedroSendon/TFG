@@ -28,6 +28,16 @@ class UserCreate(BaseModel):
     class Config:
         from_attributes = True
 
+class UserAdminCreate(BaseModel):
+    first_name: str = Field(..., min_length=1)
+    last_name: str = Field(..., min_length=1)
+    email: EmailStr
+    password: str = Field(..., min_length=8)
+    birth_date: date
+    gender: str = Field(..., pattern=r'^(M|F|Otro)$')
+    role: str = Field(..., description="Role of the user")  # Agregar validación si es necesario
+
+
 
 class UserProfileUpdateSchema(BaseModel):
     firstName: Optional[constr(min_length=1)]# type: ignore

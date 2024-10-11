@@ -57,9 +57,10 @@ const ProfilePage: React.FC = () => {
     }
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         sessionStorage.clear();
-        history.replace('/');
+        history.push('/');
     };
 
     const handleEdit = () => {

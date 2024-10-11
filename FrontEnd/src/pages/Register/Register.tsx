@@ -146,6 +146,9 @@ const Register: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Usuario registrado:', data);
+        // Almacenar tokens
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh); // Opcional
         history.push('/form');
       } else {
         const errorData = await response.json();
@@ -156,7 +159,8 @@ const Register: React.FC = () => {
       console.log('Error en la petición:', error);
       setErrors({ apiError: t('connection_error') }); // Mensaje de error traducido
     }
-  };
+};
+
 
   return (
     <Container component="main" maxWidth="xs">

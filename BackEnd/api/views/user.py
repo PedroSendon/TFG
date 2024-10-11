@@ -1,17 +1,20 @@
-from rest_framework.response import Response # type: ignore
-from rest_framework.decorators import api_view, parser_classes, permission_classes # type: ignore
-from rest_framework import status # type: ignore
+from rest_framework.response import Response  # type: ignore
+from rest_framework.decorators import api_view, parser_classes, permission_classes  # type: ignore
+from rest_framework import status  # type: ignore
 from api.repositories.user_repository import UserRepository
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
-from api.schemas.user import UserCreate, UserDetailsSchema,LoginSchema
+from api.schemas.user import UserCreate, UserDetailsSchema, LoginSchema, UserAdminCreate
 from django.contrib.auth.hashers import make_password
 from api.repositories.user_repository import UserDetailsRepository
 from django.contrib.auth.decorators import login_required
 from pydantic import ValidationError
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])  # Permitir a cualquier usuario registrar
 def register(request):
     """
     Registrar un nuevo usuario.
@@ -19,7 +22,7 @@ def register(request):
     try:
         print(request.data)  # Esto imprimirá los datos que están llegando
         user_data = UserCreate(**request.data)
-        
+
         # Verificar si el usuario ya existe por su email
         if UserRepository.user_exists_by_email(user_data.email):
             return Response({"error": "El usuario con este correo electrónico ya existe."}, status=status.HTTP_400_BAD_REQUEST)
@@ -32,51 +35,63 @@ def register(request):
         user_data.password = make_password(user_data.password)
 
         # Crear usuario usando el repositorio, asignando rol "cliente"
-        user = UserRepository.create_user({**user_data.dict(), "role": "cliente"})
+        user = UserRepository.create_user(
+            {**user_data.dict(), "role": "cliente"})
 
-        return Response({"message": "Usuario registrado exitosamente"}, status=status.HTTP_201_CREATED)
+        # Generar token
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "message": "Usuario registrado exitosamente",
+            "refresh": str(refresh),  # El token de refresco
+            "access": str(refresh.access_token)  # El token de acceso
+        }, status=status.HTTP_201_CREATED)
 
     except ValidationError as e:
-        print(f"Error de validación: {e}")  # Esto imprimirá el error exacto en la consola
+        # Esto imprimirá el error exacto en la consola
+        print(f"Error de validación: {e}")
         return Response({"error": f"Error de validación en los datos proporcionados: {e}"}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        print(f"Error inesperado: {e}")  # Agrega esto para más detalles en la consola
+        # Agrega esto para más detalles en la consola
+        print(f"Error inesperado: {e}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+# @permission_classes([IsAdminUser])
 def create_user_as_admin(request):
     """
     Crear un nuevo usuario desde el modo administrador.
     """
     try:
-        user = request.user
-        if user.role != 'administrador':
-            return Response({"error": "No tienes permisos para crear usuarios"}, status=status.HTTP_403_FORBIDDEN)
-        
-        user_data = UserCreate(**request.data)
+        # Verificar si el usuario tiene permisos de administrador
+        # user = request.user
+        # if user.role != 'administrador':
+        #    return Response({"error": "No tienes permisos para crear usuarios"}, status=status.HTTP_403_FORBIDDEN)
 
+        # Validar los datos recibidos
+        user_data = UserAdminCreate(**request.data)
+
+        # Verificar si el usuario ya existe por email
         if UserRepository.user_exists_by_email(user_data.email):
             return Response({"error": "El usuario con este correo electrónico ya existe."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Asegurarse de que los términos fueron aceptados
-        if not user_data.terms_accepted:
-            return Response({"error": "Debes aceptar los términos y condiciones."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Hash de la contraseña
         user_data.password = make_password(user_data.password)
 
-        # Asignar el rol si se proporciona, o "cliente" por defecto
+        # Asignar el rol (cliente por defecto si no se proporciona)
         role = request.data.get('role', 'cliente')
 
-        # Crear usuario usando el repositorio
-        user = UserRepository.create_user({**user_data.dict(), "role": role})
+        # Crear el usuario en la base de datos
+        user = UserRepository.create_user_admin(
+            {**user_data.dict(), "role": role})
 
         return Response({"message": "Usuario creado exitosamente"}, status=status.HTTP_201_CREATED)
 
+    except ValidationError as e:
+        return Response({"error": f"Error de validación: {e.errors()}"}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 def get_user_by_email(request, email):
@@ -90,7 +105,9 @@ def get_user_by_email(request, email):
     else:
         return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
+
 @api_view(['POST'])
+@permission_classes([AllowAny])  # Permitir a cualquier usuario iniciar sesión
 def login(request):
     """
     Autenticar un usuario.
@@ -105,14 +122,17 @@ def login(request):
         if not user:
             return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # En este punto, puedes generar un token o manejar la sesión como prefieras.
-        # Por ejemplo, podrías generar un JWT o usar las sesiones de Django.
-        # Para este ejemplo, solo devolvemos un mensaje de éxito.
-
-        return Response({"message": "Inicio de sesión exitoso"}, status=status.HTTP_200_OK)
+        # Generar token
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "message": "Inicio de sesión exitoso",
+            "refresh": str(refresh),  # El token de refresco
+            "access": str(refresh.access_token)  # El token de acceso
+        }, status=status.HTTP_200_OK)
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @login_required  # Asegúrate de que el usuario esté autenticado
@@ -123,25 +143,28 @@ def save_user_details(request):
     try:
         # Obtener el usuario autenticado
         user = request.user
-        
+
         # Validar los datos de la solicitud
         user_details_data = UserDetailsSchema(**request.data)
-        
+
         # Guardar los detalles del usuario usando el repositorio
-        UserDetailsRepository.create_user_details(user, user_details_data.dict())
-        
+        UserDetailsRepository.create_user_details(
+            user, user_details_data.dict())
+
         return Response({"message": "Detalles del usuario guardados correctamente"}, status=status.HTTP_200_OK)
-    
+
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 @api_view(['GET'])
 def get_user_profile(request):
     """
     Obtener los datos del perfil del usuario.
     """
-    user_id = request.query_params.get('userId') or request.user.id  # Si no se pasa `userId`, tomamos el usuario autenticado
-    
+    user_id = request.query_params.get(
+        'userId') or request.user.id  # Si no se pasa `userId`, tomamos el usuario autenticado
+
     profile_data = UserRepository.get_user_profile(user_id)
 
     if not profile_data:
@@ -149,13 +172,15 @@ def get_user_profile(request):
 
     return Response(profile_data, status=status.HTTP_200_OK)
 
+
 @api_view(['GET'])
 def get_weight_history(request):
     """
     Obtener el historial de peso del usuario a lo largo del tiempo.
     """
-    user_id = request.query_params.get('userId') or request.user.id  # Si no se pasa `userId`, tomamos el usuario autenticado
-    
+    user_id = request.query_params.get(
+        'userId') or request.user.id  # Si no se pasa `userId`, tomamos el usuario autenticado
+
     # Llamar a `UserDetailsRepository` en lugar de `UserRepository`
     weight_history = UserDetailsRepository.get_weight_history(user_id)
 
@@ -163,6 +188,7 @@ def get_weight_history(request):
         return Response({"error": "No se encontró el historial de peso para el usuario."}, status=status.HTTP_404_NOT_FOUND)
 
     return Response(weight_history, status=status.HTTP_200_OK)
+
 
 @api_view(['PUT'])
 def update_user_profile(request):
@@ -177,45 +203,13 @@ def update_user_profile(request):
         return Response({"error": "No se proporcionaron datos para actualizar."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Actualizar el perfil del usuario
-    updated_profile = UserDetailsRepository.update_user_profile(user_id, profile_data)
+    updated_profile = UserDetailsRepository.update_user_profile(
+        user_id, profile_data)
 
     if updated_profile is None:
         return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
     return Response(updated_profile, status=status.HTTP_200_OK)
-
-@api_view(['POST'])
-#@permission_classes([IsAdminUser])
-def create_user_as_admin(request):
-    """
-    Crear un nuevo usuario desde el modo administrador.
-    """
-    try:
-        # Verificar si el usuario tiene permisos de administrador
-        #user = request.user
-        #if user.role != 'administrador':
-        #    return Response({"error": "No tienes permisos para crear usuarios"}, status=status.HTTP_403_FORBIDDEN)
-        
-        # Validar los datos recibidos
-        user_data = UserCreate(**request.data)
-
-        # Verificar si el usuario ya existe por email
-        if UserRepository.user_exists_by_email(user_data.email):
-            return Response({"error": "El usuario con este correo electrónico ya existe."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Hash de la contraseña
-        user_data.password = make_password(user_data.password)
-
-        # Asignar el rol (cliente por defecto si no se proporciona)
-        role = request.data.get('role', 'cliente')
-
-        # Crear el usuario en la base de datos
-        user = UserRepository.create_user({**user_data.dict(), "role": role})
-
-        return Response({"message": "Usuario creado exitosamente"}, status=status.HTTP_201_CREATED)
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -228,13 +222,15 @@ def assign_plans(request, user_id):
     nutrition_plan_id = request.data.get('nutrition_plan_id')
 
     # Llamar al repositorio para asignar el entrenamiento
-    success_workout, message_workout = UserRepository.assign_workout_to_user(user_id, workout_id)
-    
+    success_workout, message_workout = UserRepository.assign_workout_to_user(
+        user_id, workout_id)
+
     if not success_workout:
         return Response({"error": message_workout}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     # Llamar al repositorio para asignar el plan nutricional
-    success_plan, message_plan = UserRepository.assign_nutrition_plan_to_user(user_id, nutrition_plan_id)
+    success_plan, message_plan = UserRepository.assign_nutrition_plan_to_user(
+        user_id, nutrition_plan_id)
 
     if not success_plan:
         return Response({"error": message_plan}, status=status.HTTP_400_BAD_REQUEST)
@@ -242,6 +238,7 @@ def assign_plans(request, user_id):
     return Response({
         "message": "Entrenamiento y plan nutricional asignados exitosamente."
     }, status=status.HTTP_200_OK)
+
 
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])
@@ -253,7 +250,7 @@ def update_user_as_admin(request, user_id):
         user = request.user
         if user.role != 'administrador':
             return Response({"error": "No tienes permisos para modificar usuarios"}, status=status.HTTP_403_FORBIDDEN)
-        
+
         user = UserRepository.get_user_by_id(user_id)
         if not user:
             return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
@@ -262,7 +259,8 @@ def update_user_as_admin(request, user_id):
         user.first_name = request.data.get('first_name', user.first_name)
         user.last_name = request.data.get('last_name', user.last_name)
         user.email = request.data.get('email', user.email)
-        user.role = request.data.get('role', user.role)  # Permitir cambiar el rol
+        user.role = request.data.get(
+            'role', user.role)  # Permitir cambiar el rol
         user.save()
 
         return Response({"message": "Usuario actualizado exitosamente."}, status=status.HTTP_200_OK)
@@ -303,7 +301,8 @@ def change_password(request):
         return Response({"error": "Todos los campos son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Cambiar la contraseña
-    result = UserRepository.change_user_password(user_id, current_password, new_password, confirm_password)
+    result = UserRepository.change_user_password(
+        user_id, current_password, new_password, confirm_password)
 
     if 'error' in result:
         return Response({"error": result['error']}, status=status.HTTP_400_BAD_REQUEST)
@@ -312,7 +311,8 @@ def change_password(request):
 
 
 @api_view(['PUT'])
-@parser_classes([MultiPartParser, FormParser])  # Permitir el manejo de archivos
+# Permitir el manejo de archivos
+@parser_classes([MultiPartParser, FormParser])
 def upload_profile_photo(request):
     """
     Subir o actualizar la foto de perfil del usuario.
@@ -325,12 +325,14 @@ def upload_profile_photo(request):
         return Response({"error": "No se proporcionó una foto."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Actualizar la foto de perfil
-    updated_profile = UserDetailsRepository.update_profile_photo(user_id, photo)
+    updated_profile = UserDetailsRepository.update_profile_photo(
+        user_id, photo)
 
     if updated_profile is None:
         return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
     return Response(updated_profile, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 def get_all_users(request):
@@ -341,6 +343,7 @@ def get_all_users(request):
 
     return Response(user_data, status=status.HTTP_200_OK)
 
+
 @api_view(['DELETE'])
 @permission_classes([IsAdminUser])
 def delete_user(request, user_id):
@@ -348,7 +351,8 @@ def delete_user(request, user_id):
     Eliminar un usuario por su ID.
     """
     # Obtener el usuario autenticado desde el repositorio
-    authenticated_user = UserRepository.get_user_by_id(request.user.id)  # Asegúrate de que tienes un método para esto
+    authenticated_user = UserRepository.get_user_by_id(
+        request.user.id)  # Asegúrate de que tienes un método para esto
 
     if authenticated_user and authenticated_user.role == 'administrador':
         success = UserDetailsRepository.delete_user_by_id(user_id)
@@ -362,17 +366,19 @@ def delete_user(request, user_id):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])  # Requiere que el usuario esté autenticado
+# Requiere que el usuario esté autenticado
+@permission_classes([IsAuthenticated])
 def create_user_details(request):
     try:
         print(f"Datos recibidos: {request.data}")
         user_details_data = UserDetailsSchema(**request.data)
-        
+
         # Crear o actualizar los detalles del usuario autenticado
-        UserDetailsRepository.create_user_details(request.user, user_details_data.dict())
-        
+        UserDetailsRepository.create_user_details(
+            request.user, user_details_data.dict())
+
         return Response({"message": "Detalles del usuario guardados correctamente."}, status=status.HTTP_200_OK)
-    
+
     except ValidationError as e:
         print(f"Error de validación: {e}")
         return Response({"error": e.errors()}, status=status.HTTP_400_BAD_REQUEST)

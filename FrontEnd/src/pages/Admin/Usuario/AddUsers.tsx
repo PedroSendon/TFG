@@ -130,9 +130,9 @@ const AddUsers: React.FC = () => {
                     last_name: formData.lastName,
                     email: formData.email,
                     password: formData.password,
-                    birth_date: formData.birthDate.format('YYYY-MM-DD'),
+                    birth_date: formData.birthDate.format('YYYY-MM-DD'),  // Asegúrate de que esto esté correcto
                     gender: formData.gender,
-                    terms_accepted: true 
+                    role: formData.role,  // Asegúrate de que este campo tenga un valor válido
                 }),
             });
     
@@ -142,13 +142,14 @@ const AddUsers: React.FC = () => {
                 history.push('/admin/users'); 
             } else {
                 const errorData = await response.json();
-                console.error(t('create_user_error'), errorData);
+                console.error('Error en la creación del usuario:', errorData);
             }
         } catch (error) {
-            console.error(t('request_error'), error);
+            console.error('Error en la petición:', error);
         }
     };
-
+    
+    
     const handleCancel = () => {
         history.push('/admin/users');
     };

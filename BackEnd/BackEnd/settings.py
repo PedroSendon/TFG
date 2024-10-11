@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'api',
     'drf_yasg', 
     'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt',
 
 ]
 
@@ -58,6 +60,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 ROOT_URLCONF = 'BackEnd.urls'
 

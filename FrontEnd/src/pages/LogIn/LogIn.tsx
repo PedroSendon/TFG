@@ -45,20 +45,20 @@ const Login: React.FC = () => {
         return re.test(email);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => { 
         e.preventDefault();
-
+    
         const newErrors: any = {};
-
+    
         if (!validateEmail(formData.email)) {
             newErrors.email = t('invalid_email'); // Mensaje de error traducido
         }
-
+    
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
-
+    
         try {
             const response = await fetch('http://127.0.0.1:8000/api/login/', {
                 method: 'POST',
@@ -71,11 +71,15 @@ const Login: React.FC = () => {
                     remember_me: formData.rememberMe,
                 }),
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
                 console.log('Inicio de sesión exitoso:', data);
-                history.push('/home');
+                // Almacenar tokens
+                console.log('Access token:', data.access);  
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh); // Opcional
+                history.push('/workout');
             } else {
                 const errorData = await response.json();
                 console.log('Error:', errorData);
@@ -86,7 +90,7 @@ const Login: React.FC = () => {
             setErrors({ apiError: 'Error de conexión con el servidor.' });
         }
     };
-
+    
     return (
         <Container component="main" maxWidth="xs">
             <div style={{ marginTop: '2rem', textAlign: 'center' }}>
