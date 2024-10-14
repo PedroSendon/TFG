@@ -247,5 +247,10 @@
   "toast_success": "Changes saved successfully",
   "modify_workout_title": "Modify Workout",
   "weight_loss": "Weight Loss",
-  "muscle_gain": "Muscle Gain"
+  "muscle_gain": "Muscle Gain",
+  "duration_minutes": "Duration (minutes)",
+    "difficulty": "Difficulty",
+    "equipment": "Equipment",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced"
 }

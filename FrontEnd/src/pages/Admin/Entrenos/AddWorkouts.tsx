@@ -22,8 +22,8 @@ import {
     SelectChangeEvent
 } from '@mui/material';
 import { useHistory } from 'react-router-dom';
-import { IonFabButton, IonIcon, IonContent, IonPage, IonCol, IonRow, IonGrid, IonCard, IonLabel } from '@ionic/react';
-import { cameraOutline, trashOutline } from 'ionicons/icons';
+import { IonFabButton, IonIcon, IonContent, IonPage, IonCol, IonRow, IonGrid, IonCard, IonLabel, IonActionSheet } from '@ionic/react';
+import { cameraOutline, closeOutline, imageOutline, trashOutline } from 'ionicons/icons';
 import Header from '../../Header/Header';
 import '../../../theme/variables.css';
 import { LanguageContext } from '../../../context/LanguageContext';
@@ -40,12 +40,18 @@ const AddWorkouts: React.FC = () => {
     const [media, setMedia] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useContext(LanguageContext); // Usar el contexto de idioma
+    const [showActionSheet, setShowActionSheet] = useState(false);
 
 
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         exercises: [] as { name: string; series: number; reps: number; rest: number }[],
+        days_per_week: 1, // Nuevo campo
+        duration: 30, // Nuevo campo
+        difficulty: 'Ligero', // Nuevo campo
+        equipment: '', // Nuevo campo
+        training_preference: '', // Nuevo campo
     });
 
     const [errors, setErrors] = useState<any>({});
@@ -75,6 +81,11 @@ const AddWorkouts: React.FC = () => {
                     description: formData.description,
                     exercises: workoutDetails.exercises,
                     media: media,
+                    days_per_week: formData.days_per_week, // Añadido
+                    duration: formData.duration, // Añadido
+                    difficulty: formData.difficulty, // Añadido
+                    equipment: formData.equipment, // Añadido
+                    training_preference: formData.training_preference, // Añadido
                 }),
             });
 
@@ -124,10 +135,26 @@ const AddWorkouts: React.FC = () => {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setMedia(reader.result as string);
+                setMedia(reader.result as string); // Guardar la imagen subida
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const handlePhotoOption = (option: string) => {
+        if (option === 'upload') {
+            handleMediaUpload();
+        } else if (option === 'delete') {
+            setMedia(null); // Eliminar imagen
+        }
+    };
+
+    const handleSelectChange = (event: SelectChangeEvent<string>) => {
+        const { name, value } = event.target;
+        setFormData({
+            ...formData,
+            [name as string]: value,
+        });
     };
 
     const handleDeleteExercise = (index: number) => {
@@ -155,6 +182,27 @@ const AddWorkouts: React.FC = () => {
     useEffect(() => {
         fetchExercises();
     }, []);
+
+// Opciones para los menús desplegables
+const difficultyOptions = [
+    { value: 'Ligero', label: t('light') },
+    { value: 'Moderado', label: t('moderate') },
+    { value: 'Intermedio', label: t('intermediate') },
+    { value: 'Avanzado', label: t('advanced') },
+];
+
+const trainingPreferenceOptions = [
+    { value: 'Entrenamiento en casa', label: t('home_training') },
+    { value: 'Entrenamiento en gimnasio', label: t('gym_training') },
+    { value: 'Ejercicios al aire libre', label: t('outdoor_training') },
+    { value: 'Clases grupales', label: t('group_classes') },
+];
+
+const equipmentOptions = [
+    { value: 'Gimnasio completo', label: t('full_gym') },
+    { value: 'Pesas libres', label: t('free_weights') },
+    { value: 'Sin equipamiento', label: t('no_equipment') },
+];
 
     return (
         <IonPage>
@@ -188,6 +236,144 @@ const AddWorkouts: React.FC = () => {
                                         multiline
                                         rows={3}
                                         onChange={handleChange}
+                                    />
+                                </Grid>
+
+                                {/* Nuevos campos */}
+                                <Grid item xs={12}>
+                                    <TextField
+                                        variant="outlined"
+                                        fullWidth
+                                        id="days_per_week"
+                                        label={t('days_per_week')}
+                                        name="days_per_week"
+                                        type="number"
+                                        value={formData.days_per_week}
+                                        onChange={handleChange}
+                                    />
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    <TextField
+                                        variant="outlined"
+                                        fullWidth
+                                        id="duration"
+                                        label={t('duration_minutes')}
+                                        name="duration"
+                                        type="number"
+                                        value={formData.duration}
+                                        onChange={handleChange}
+                                    />
+                                </Grid>
+
+                                {/* Campo de dificultad como menú desplegable */}
+                                <Grid item xs={12}>
+                                    <InputLabel id="difficulty-label">{t('difficulty')}</InputLabel>
+                                    <Select
+                                        labelId="difficulty-label"
+                                        id="difficulty"
+                                        name="difficulty"
+                                        value={formData.difficulty}
+                                        onChange={handleSelectChange}
+                                        fullWidth
+                                    >
+                                        {difficultyOptions.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </Grid>
+
+                                {/* Campo de equipo como menú desplegable */}
+                                <Grid item xs={12}>
+                                    <InputLabel id="equipment-label">{t('equipment')}</InputLabel>
+                                    <Select
+                                        labelId="equipment-label"
+                                        id="equipment"
+                                        name="equipment"
+                                        value={formData.equipment}
+                                        onChange={handleSelectChange}
+                                        fullWidth
+                                    >
+                                        {equipmentOptions.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </Grid>
+
+                                {/* Campo de preferencia de entrenamiento como menú desplegable */}
+                                <Grid item xs={12}>
+                                    <InputLabel id="training_preference-label">{t('training_preference')}</InputLabel>
+                                    <Select
+                                        labelId="training_preference-label"
+                                        id="training_preference"
+                                        name="training_preference"
+                                        value={formData.training_preference}
+                                        onChange={handleSelectChange}
+                                        fullWidth
+                                    >
+                                        {trainingPreferenceOptions.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    {/* Subida de imagen */}
+                                    <Button
+                                        onClick={() => setShowActionSheet(true)}
+                                        style={{
+                                            border: '1px solid #32CD32',
+                                            backgroundColor: '#FFFFFF',
+                                            color: '#32CD32',
+                                            padding: '3% 0',
+                                            borderRadius: '5px',
+                                            fontSize: '1em',
+                                            minWidth: '100%',
+                                        }}
+                                    >
+                                        {t('upload_image')}
+                                    </Button>
+
+                                    {/* Mostrar vista previa de la imagen subida */}
+                                    {media && (
+                                        <div>
+                                            <img src={media} alt="Vista previa" style={{ width: '100%', marginTop: '10px' }} />
+                                        </div>
+                                    )}
+
+                                    <IonActionSheet
+                                        isOpen={showActionSheet}
+                                        onDidDismiss={() => setShowActionSheet(false)}
+                                        buttons={[
+                                            {
+                                                text: t('upload_photo'),
+                                                icon: imageOutline,
+                                                handler: () => handlePhotoOption('upload'),
+                                            },
+                                            {
+                                                text: t('delete_photo'),
+                                                icon: trashOutline,
+                                                handler: () => handlePhotoOption('delete'),
+                                            },
+                                            {
+                                                text: t('cancel'),
+                                                icon: closeOutline,
+                                                role: 'cancel',
+                                            },
+                                        ]}
+                                    />
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        ref={fileInputRef}
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileChange}
                                     />
                                 </Grid>
 

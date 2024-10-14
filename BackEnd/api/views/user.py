@@ -1,8 +1,9 @@
 from rest_framework.response import Response  # type: ignore
-from rest_framework.decorators import api_view, parser_classes, permission_classes  # type: ignore
+from rest_framework.decorators import api_view, parser_classes, permission_classes, authentication_classes  # type: ignore
 from rest_framework import status  # type: ignore
 from api.repositories.user_repository import UserRepository
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
 from api.schemas.user import UserCreate, UserDetailsSchema, LoginSchema, UserAdminCreate
 from django.contrib.auth.hashers import make_password
@@ -11,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from pydantic import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
-
+from rest_framework.authtoken.models import Token
 
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Permitir a cualquier usuario registrar
@@ -39,11 +40,10 @@ def register(request):
             {**user_data.dict(), "role": "cliente"})
 
         # Generar token
-        refresh = RefreshToken.for_user(user)
+        token = Token.objects.create(user=user)
         return Response({
             "message": "Usuario registrado exitosamente",
-            "refresh": str(refresh),  # El token de refresco
-            "access": str(refresh.access_token)  # El token de acceso
+            "token": str(token.key),  # El token de refresco
         }, status=status.HTTP_201_CREATED)
 
     except ValidationError as e:
@@ -113,9 +113,10 @@ def login(request):
     Autenticar un usuario.
     """
     try:
+        print('Data', **request.data)
         # Validar los datos de la solicitud
         login_data = LoginSchema(**request.data)
-
+        
         # Autenticar al usuario
         user = UserRepository.authenticate_user(
             login_data.email, login_data.password)
@@ -123,11 +124,10 @@ def login(request):
             return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Generar token
-        refresh = RefreshToken.for_user(user)
+        token = Token.objects.get_or_create(user=user)
         return Response({
             "message": "Inicio de sesión exitoso",
-            "refresh": str(refresh),  # El token de refresco
-            "access": str(refresh.access_token)  # El token de acceso
+            "token": str(token.key),  # El token
         }, status=status.HTTP_200_OK)
 
     except Exception as e:
@@ -335,6 +335,8 @@ def upload_profile_photo(request):
 
 
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def get_all_users(request):
     """
     Obtener la lista de usuarios con su información básica.

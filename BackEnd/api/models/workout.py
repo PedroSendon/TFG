@@ -3,10 +3,23 @@ from .User import User  # Asegúrate de que 'User' esté definido en otro archiv
 from .exercise import Exercise  # Asegúrate de que 'Exercise' esté definido en otro archivo de modelos
 
 class Workout(models.Model):
+    DIFFICULTY_LEVELS = [
+        ('ligero', 'Ligero'),
+        ('moderado', 'Moderado'),
+        ('intermedio', 'Intermedio'),
+        ('avanzado', 'Avanzado'),
+    ]
     name = models.CharField(max_length=100)
     description = models.TextField()
     exercises = models.ManyToManyField(Exercise, through='WorkoutExercise', related_name='workouts')
     media = models.URLField(blank=True, null=True)
+
+    days_per_week = models.PositiveIntegerField(default=3)
+    duration = models.PositiveIntegerField(default=60)  # Duración promedio del entrenamiento en minutos
+    difficulty = models.CharField(max_length=10, choices=DIFFICULTY_LEVELS, default='moderado')  # Nivel de dificultad
+    equipment = models.CharField(max_length=255, blank=True)  # Equipo necesario (puede ser una lista separada por comas)
+    training_preference = models.CharField(max_length=50, default="gimnasio")  # Preferencias de entrenamiento (casa, gimnasio, etc.)
+
 
     def __str__(self):
         return self.name

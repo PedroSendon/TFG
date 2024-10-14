@@ -9,19 +9,22 @@ class WorkoutExerciseSchema(BaseModel):
     reps: int
     rest: int
 
+    class Config:
+        from_attributes = True
+
 class WorkoutSchema(BaseModel):
     id: int
     name: str
     description: str
-    exercises: List[str]  # Esto dependerá de cómo estés manejando la relación con los ejercicios
-
-    class Config:
-        from_attributes = True 
-
-class WorkoutSchema(BaseModel):
-    name: str
-    description: str
+    exercises: List[WorkoutExerciseSchema]  # Cambiado para incluir la relación con los ejercicios
     media: Optional[str] = None  # URL para media (opcional)
+    
+    # Nuevos campos añadidos
+    days_per_week: int
+    duration: int
+    difficulty: str  # Ligero, Moderado, Intermedio, Avanzado
+    equipment: str  # Equipo necesario
+    training_preference: str  # Preferencias de entrenamiento (casa, gimnasio, etc.)
 
     class Config:
         from_attributes = True
@@ -38,7 +41,7 @@ class WorkoutExerciseDetailSchema(BaseModel):
 
 class UserWorkoutSchema(BaseModel):
     user_id: int
-    workout: WorkoutSchema  # Relaciona el entrenamiento con el esquema simplificado
+    workout: WorkoutSchema  # Relaciona el entrenamiento con el esquema actualizado de Workout
     progress: Optional[int] = 0  # Porcentaje de progreso en el entrenamiento
     date_started: date
     date_completed: Optional[date] = None

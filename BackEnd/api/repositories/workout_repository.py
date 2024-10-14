@@ -154,20 +154,30 @@ class WorkoutRepository:
             return None
         
     @staticmethod
-    def create_workout(name, description, exercises, media=None):
+    def create_workout(name, description, exercises, media=None, days_per_week=None, duration=None, difficulty=None, equipment=None, training_preference=None):
         """
         Crear un nuevo entrenamiento en el sistema.
         :param name: Nombre del entrenamiento.
         :param description: Descripción del entrenamiento.
         :param exercises: Lista de ejercicios asociados al entrenamiento.
         :param media: URL o base64 de la imagen o video asociado al entrenamiento (opcional).
+        :param days_per_week: Número de días a la semana que se realiza el entrenamiento.
+        :param duration: Duración total del entrenamiento en minutos.
+        :param difficulty: Nivel de dificultad del entrenamiento.
+        :param equipment: Equipos necesarios para realizar el entrenamiento.
+        :param training_preference: Preferencia del lugar para realizar el entrenamiento (gimnasio, casa, etc.).
         :return: Un diccionario con los datos del entrenamiento creado.
         """
         # Crear el entrenamiento
         workout = Workout.objects.create(
             name=name,
             description=description,
-            media=media
+            media=media,
+            days_per_week=days_per_week,
+            duration=duration,
+            difficulty=difficulty,
+            equipment=equipment,
+            training_preference=training_preference
         )
 
         # Añadir los ejercicios al entrenamiento
@@ -177,7 +187,7 @@ class WorkoutRepository:
                 WorkoutExercise.objects.create(
                     workout=workout,
                     exercise=existing_exercise,
-                    sets=exercise['series'],
+                    sets=exercise['sets'],
                     reps=exercise['reps'],
                     rest=exercise['rest']
                 )
@@ -187,7 +197,7 @@ class WorkoutRepository:
         # Recopilar los datos de los ejercicios añadidos
         exercises_data = [{
             "name": ex['name'],
-            "series": ex['series'],
+            "sets": ex['sets'],
             "reps": ex['reps'],
             "rest": ex['rest']
         } for ex in exercises]
@@ -197,9 +207,14 @@ class WorkoutRepository:
             "name": workout.name,
             "description": workout.description,
             "exercises": exercises_data,
-            "media": workout.media
+            "media": workout.media,
+            "days_per_week": workout.days_per_week,
+            "duration": workout.duration,
+            "difficulty": workout.difficulty,
+            "equipment": workout.equipment,
+            "training_preference": workout.training_preference
         }
-    
+
     @staticmethod
     def update_workout(workout_id, name, description, exercises, media=None):
         """

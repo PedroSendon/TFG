@@ -8,6 +8,7 @@ from api.models.User import  User, UserDetails, DietPreferences, MedicalConditio
 from api.models.process import ProgressTracking
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
+from django.db.models import Q
 
 
 class UserRepository:
@@ -184,7 +185,86 @@ class UserRepository:
         except MealPlan.DoesNotExist:
             return False, "Plan nutricional no encontrado."
         except Exception as e:
-            return False, str(e)        
+            return False, str(e)      
+
+    @staticmethod
+    def complete_user_registration(user):
+        """
+        Completa el proceso de registro del usuario asignando entrenamiento y plan nutricional.
+        """
+        workout_assigned, workout_message = UserRepository.assign_workout_to_user(user)
+        nutrition_assigned, nutrition_message = UserRepository.assign_nutrition_plan_to_user(user)
+
+        if workout_assigned and nutrition_assigned:
+            return True, f"Registro completado. {workout_message} {nutrition_message}"
+        else:
+            return False, f"Error durante la asignación. {workout_message} {nutrition_message}"
+    
+    @staticmethod
+    def assign_nutrition_plan_to_user(user):
+        """
+        Asigna un plan nutricional adecuado basado en el peso, objetivo de calorías y preferencias del usuario.
+        """
+        try:
+            # Calcular los gramos de proteínas que necesita el usuario (por ejemplo, 2-2.2g por kg de peso)
+            proteins_needed = user.details.weight * 2
+
+            # Filtrar los planes nutricionales basados en las calorías y proteínas calculadas
+            nutrition_plans = MealPlan.objects.filter(
+                Q(kcal__gte=user.details.daily_calories - 200, kcal__lte=user.details.daily_calories + 200),  # Calorías aproximadas
+                Q(proteins__gte=proteins_needed - 10, proteins__lte=proteins_needed + 10),  # Proteínas adecuadas
+                diet_type=user.preferences.diet_type  # Tipo de dieta del usuario
+            )
+
+            # Seleccionar el plan nutricional más adecuado
+            if nutrition_plans.exists():
+                plan = nutrition_plans.first()
+                UserNutritionPlan.objects.create(user=user, plan=plan)
+                return True, f"Plan nutricional '{plan.diet_type}' asignado exitosamente al usuario {user.first_name}."
+            else:
+                return False, "No se encontró un plan nutricional adecuado para el usuario."
+        
+        except Exception as e:
+            return False, str(e)
+        
+    @staticmethod
+    def assign_workout_to_user(user):
+        """
+        Asigna un plan de entrenamiento adecuado a un usuario basándose en su actividad física,
+        preferencias de entrenamiento, y equipo disponible.
+        """
+        try:
+            # Filtrar entrenamientos según los días semanales, la duración diaria, el equipo disponible y la preferencia de entrenamiento
+            workouts = Workout.objects.filter(
+                days_per_week__lte=user.details.weekly_training_days,  # Filtrar entrenamientos de igual o menor días por semana
+                duration__lte=user.details.daily_training_time,  # Filtrar entrenamientos de igual o menor duración diaria
+                equipment__in=user.preferences.available_equipment,  # Filtrar entrenamientos según el equipo disponible
+                training_preference=user.preferences.training_preference  # Filtrar por preferencias de entrenamiento
+            )
+            
+           # Asignar entrenamiento basado en la actividad física del usuario
+            if user.details.physical_activity_level == 'sedentario':
+                workout = workouts.filter(difficulty='Ligero').first()
+            elif user.details.physical_activity_level == 'ligero':
+                workout = workouts.filter(difficulty='Moderado').first()
+            elif user.details.physical_activity_level == 'moderado':
+                workout = workouts.filter(difficulty='Intermedio').first()
+            else:
+                workout = workouts.filter(difficulty='Avanzado').first()
+
+            
+            # Asignar el entrenamiento encontrado al usuario
+            if workout:
+                UserWorkout.objects.create(user=user, workout=workout)
+                return True, f"Entrenamiento '{workout.name}' asignado exitosamente al usuario {user.first_name}."
+            else:
+                return False, "No se encontró un entrenamiento adecuado para las preferencias del usuario."
+        
+        except Exception as e:
+            return False, str(e)
+
+
+
 
 class UserDetailsRepository:
     

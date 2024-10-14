@@ -153,9 +153,14 @@ def create_workout(request):
     description = request.data.get('description')
     exercises = request.data.get('exercises')
     media = request.data.get('media', None)
+    days_per_week = request.data.get('days_per_week')  # Nuevo campo
+    duration = request.data.get('duration')  # Nuevo campo
+    difficulty = request.data.get('difficulty')  # Nuevo campo
+    equipment = request.data.get('equipment')  # Nuevo campo
+    training_preference = request.data.get('training_preference')  # Nuevo campo
 
     # Validar que todos los campos obligatorios están presentes
-    if not all([name, description, exercises]):
+    if not all([name, description, exercises, days_per_week, duration, difficulty, equipment, training_preference]):
         return Response({"error": "Faltan parámetros obligatorios o hay valores no válidos."},
                         status=status.HTTP_400_BAD_REQUEST)
 
@@ -169,7 +174,12 @@ def create_workout(request):
         name=name,
         description=description,
         exercises=exercises,
-        media=media
+        media=media,
+        days_per_week=days_per_week,
+        duration=duration,
+        difficulty=difficulty,
+        equipment=equipment,
+        training_preference=training_preference
     )
 
     return Response({

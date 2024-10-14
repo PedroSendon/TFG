@@ -247,5 +247,10 @@
   "toast_success": "Canvis desats amb èxit",
   "modify_workout_title": "Modificar Entrenament",
   "weight_loss": "Pèrdua de Pes",
-  "muscle_gain": "Guany Muscular"
+  "muscle_gain": "Guany Muscular",
+  "duration_minutes": "Duració (minuts)",
+    "difficulty": "Dificultat",
+    "equipment": "Equip",
+    "intermediate": "Intermedi",
+    "advanced": "Avançat"
 }
