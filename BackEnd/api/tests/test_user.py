@@ -2,7 +2,8 @@ from BackEnd.api.models.process import ProgressTracking
 from rest_framework.test import APITestCase # type: ignore
 from rest_framework import status # type: ignore
 from django.urls import reverse
-from api.models import User, UserDetails, DietPreferences, MedicalConditions, TrainingPreferences
+from api.models.User import User, UserDetails, DietPreferences, TrainingPreferences
+from api.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 
@@ -125,9 +126,7 @@ class UserDetailsTestCase(APITestCase):
             "macronutrient_intake": "Balanceado",
             "available_equipment": "Gym equipment",
             "food_restrictions": "No dairy",
-            "custom_food_restrictions": None,
-            "medical_condition": "Diabetes",
-            "custom_medical_condition": None
+            "custom_food_restrictions": None
         }
 
         # Autenticar al usuario en los tests
@@ -155,8 +154,6 @@ class UserDetailsTestCase(APITestCase):
         self.assertEqual(diet_preferences.meals_per_day, self.user_details_data['meals_per_day'])
 
         # Verificar que las condiciones médicas se guarden
-        medical_conditions = MedicalConditions.objects.get(user=self.user)
-        self.assertEqual(medical_conditions.medical_condition, self.user_details_data['medical_condition'])
 
         # Verificar que las preferencias de entrenamiento se guarden
         self.assertEqual(training_preferences.available_equipment, self.user_details_data['available_equipment'])

@@ -4,7 +4,7 @@ from api.models.workout import TrainingPlan, UserWorkout, Workout
 from api.models import User
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import check_password, make_password
-from api.models.User import  User, UserDetails, DietPreferences, MedicalConditions, TrainingPreferences
+from api.models.User import  User, UserDetails, DietPreferences, TrainingPreferences
 from api.models.process import ProgressTracking
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
@@ -297,20 +297,10 @@ class UserDetailsRepository:
                 defaults={
                     'diet_type': details_data['diet_type'],
                     'meals_per_day': details_data['meals_per_day'],
-                    'macronutrient_intake': details_data['macronutrient_intake'],
-                    'food_restrictions': details_data.get('food_restrictions'),
-                    'custom_food_restrictions': details_data.get('custom_food_restrictions')
+                    'macronutrient_intake': details_data['macronutrient_intake']
                 }
             )
 
-            # Guardar condiciones médicas
-            medical_conditions, created = MedicalConditions.objects.update_or_create(
-                user=user,
-                defaults={
-                    'medical_condition': details_data['medical_condition'],
-                    'custom_medical_condition': details_data.get('custom_medical_condition')
-                }
-            )
 
             # Guardar preferencias de entrenamiento
             training_preferences, created = TrainingPreferences.objects.update_or_create(
@@ -320,7 +310,7 @@ class UserDetailsRepository:
                 }
             )
 
-            return user_details, diet_preferences, medical_conditions, training_preferences
+            return user_details, diet_preferences, training_preferences
 
         except Exception as e:
             raise ValueError(f"Error al crear o actualizar los detalles del usuario: {e}")

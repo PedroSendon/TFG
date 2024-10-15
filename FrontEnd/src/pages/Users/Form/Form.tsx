@@ -12,21 +12,14 @@ const UserDetailsForm: React.FC = () => {
     const [formData, setFormData] = useState({
         height: '',
         weight: '',
-        weightChangeAmount: '',
         weeklyTrainingDays: '',
         dailyTrainingTime: '',
         weightGoal: '',
         physicalActivityLevel: '',
         currentTrainingDays: '',
-        dietType: '',
         mealsPerDay: '',
         macronutrientIntake: '',
         availableEquipment: '',
-        trainingPreference: '',
-        foodRestrictions: '',
-        customMedicalCondition: '',
-        medicalCondition: '',
-        customFoodRestrictions: '',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,10 +51,7 @@ const UserDetailsForm: React.FC = () => {
                     physical_activity_level: formData.physicalActivityLevel,
                     meals_per_day: parseInt(formData.mealsPerDay),
                     macronutrient_intake: formData.macronutrientIntake,
-                    food_restrictions: formData.foodRestrictions || '',
-                    medical_condition: formData.medicalCondition || t('none'),
                     available_equipment: formData.availableEquipment,
-                    weight_change_amount: formData.weightChangeAmount || null,
                 }),
             });
 
@@ -170,7 +160,6 @@ const UserDetailsForm: React.FC = () => {
     );
 
     const Goals = () => {
-        const [showWeightChangeInput, setShowWeightChangeInput] = useState(false);
 
         const handleGoalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const { value } = e.target;
@@ -178,12 +167,6 @@ const UserDetailsForm: React.FC = () => {
                 ...formData,
                 weightGoal: value,
             });
-
-            if (value === t('gain_muscle') || value === t('lose_weight')) {
-                setShowWeightChangeInput(true);
-            } else {
-                setShowWeightChangeInput(false);
-            }
         };
 
         return (
@@ -214,18 +197,7 @@ const UserDetailsForm: React.FC = () => {
                         </TextField>
                     </Grid>
 
-                    {showWeightChangeInput && (
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                label={formData.weightGoal === t('gain_muscle') ? t('gain_weight_change') : t('lose_weight_change')}
-                                name="weightChangeAmount"
-                                value={formData.weightChangeAmount || ''}
-                                onChange={handleChange}
-                                fullWidth
-                            />
-                        </Grid>
-                    )}
+                   
 
                     <Grid item xs={12}>
                         <TextField
@@ -382,27 +354,7 @@ const UserDetailsForm: React.FC = () => {
     };
 
     const DietAndNutrition = () => {
-        const [showFoodRestrictions, setShowFoodRestrictions] = useState(false);
-        const [showMedicalConditionInput, setShowMedicalConditionInput] = useState(false);
-      
-        const handleFoodRestrictionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-          const value = event.target.value;
-          setFormData({
-            ...formData,
-            foodRestrictions: value,
-          });
-          setShowFoodRestrictions(value !== t('none'));
-        };
-      
-        const handleMedicalConditionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-          const value = event.target.value;
-          setFormData({
-            ...formData,
-            medicalCondition: value,
-          });
-          setShowMedicalConditionInput(value === t('others'));
-        };
-      
+            
         return (
           <Box
             display="flex"
@@ -447,69 +399,6 @@ const UserDetailsForm: React.FC = () => {
                   <MenuItem value="No lo sé">{t('dont_know')}</MenuItem>
                 </TextField>
               </Grid>
-      
-              {/* Restricciones alimentarias */}
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  label={t('food_restrictions')}
-                  name="foodRestrictions"
-                  select
-                  value={formData.foodRestrictions}
-                  onChange={handleFoodRestrictionChange}
-                  fullWidth
-                >
-                  <MenuItem value="Alergias alimentarias">{t('food_allergies')}</MenuItem>
-                  <MenuItem value="Intolerancias">{t('intolerances')}</MenuItem>
-                  <MenuItem value="Preferencias dietéticas">{t('dietary_preferences')}</MenuItem>
-                  <MenuItem value={t('none')}>{t('none')}</MenuItem>
-                </TextField>
-              </Grid>
-      
-              {showFoodRestrictions && (
-                <Grid item xs={12}>
-                  <TextField
-                    variant="outlined"
-                    label={t('describe_food_restrictions')}
-                    name="customFoodRestrictions"
-                    value={formData.customFoodRestrictions}
-                    onChange={handleChange}
-                    fullWidth
-                  />
-                </Grid>
-              )}
-      
-              {/* Condiciones médicas */}
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  label={t('medical_conditions')}
-                  name="medicalCondition"
-                  select
-                  value={formData.medicalCondition}
-                  onChange={handleMedicalConditionChange}
-                  fullWidth
-                >
-                  <MenuItem value="Diabetes">{t('diabetes')}</MenuItem>
-                  <MenuItem value="Hipertensión">{t('hypertension')}</MenuItem>
-                  <MenuItem value="Problemas articulares">{t('joint_problems')}</MenuItem>
-                  <MenuItem value={t('others')}>{t('others')}</MenuItem>
-                  <MenuItem value={t('none')}>{t('none')}</MenuItem>
-                </TextField>
-              </Grid>
-      
-              {showMedicalConditionInput && (
-                <Grid item xs={12}>
-                  <TextField
-                    variant="outlined"
-                    label={t('describe_medical_conditions')}
-                    name="customMedicalCondition"
-                    value={formData.customMedicalCondition}
-                    onChange={handleChange}
-                    fullWidth
-                  />
-                </Grid>
-              )}
             </Grid>
       
             <Box

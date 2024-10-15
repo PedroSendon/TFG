@@ -87,14 +87,6 @@ class DietPreferencesSchema(BaseModel):
         from_attributes = True
 
 
-class MedicalConditionsSchema(BaseModel):
-    medical_condition: str  # Condición médica
-    custom_medical_condition: Optional[str] = None  # Condición médica personalizada
-
-    class Config:
-        from_attributes = True
-
-
 class TrainingPreferencesSchema(BaseModel):
     available_equipment: str  # Equipamiento disponible
 
@@ -106,7 +98,6 @@ class TrainingPreferencesSchema(BaseModel):
 class CompleteUserDetailsSchema(BaseModel):
     user_details: UserDetailsSchema
     diet_preferences: DietPreferencesSchema
-    medical_conditions: MedicalConditionsSchema
 
     class Config:
         from_attributes = True

@@ -49,13 +49,6 @@ class DietPreferences(models.Model):
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - Diet Preferences'
 
-class MedicalConditions(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='medical_conditions')
-    medical_condition = models.CharField(max_length=255)  # Ejemplo: 'Diabetes'
-    custom_medical_condition = models.CharField(max_length=255, blank=True, null=True)
-
-    def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name} - Medical Conditions'
 
 class TrainingPreferences(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='available_equipment')
