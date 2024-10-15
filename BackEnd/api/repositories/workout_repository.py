@@ -32,20 +32,38 @@ class WorkoutRepository:
         } for workout in workouts]
 
     @staticmethod
-    def get_workouts_by_user(user_id):
+    def get_training_plans_by_user(user_id):
         """
-        Obtener todos los entrenamientos disponibles de un usuario.
+        Obtener todos los planes de entrenamiento asignados a un usuario.
         :param user_id: ID del usuario.
-        :return: Una lista de diccionarios con los detalles de cada entrenamiento.
+        :return: Una lista de diccionarios con los detalles de cada plan de entrenamiento y sus entrenamientos.
         """
-        user_workouts = UserWorkout.objects.filter(user_id=user_id).select_related('workout')
+        user_training_plans = UserWorkout.objects.filter(user_id=user_id).select_related('training_plan')
 
-        return [{
-            "id": workout.workout.id,
-            "name": workout.workout.name,
-            "description": workout.workout.description,
-            "media": workout.workout.media
-        } for workout in user_workouts]
+        training_plans_data = []
+        
+        for user_plan in user_training_plans:
+            plan = user_plan.training_plan
+            # Obtener los entrenamientos dentro de cada plan
+            workouts = plan.workouts.all()
+
+            workouts_data = [{
+                "id": workout.id,
+                "name": workout.name,
+                "description": workout.description,
+                "media": workout.media
+            } for workout in workouts]
+
+            training_plans_data.append({
+                "plan_id": plan.id,
+                "plan_name": plan.name,
+                "plan_description": plan.description,
+                "plan_media": plan.media,
+                "workouts": workouts_data
+            })
+
+        return training_plans_data
+
 
     @staticmethod
     def get_workout_by_day(day):

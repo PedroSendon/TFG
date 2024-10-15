@@ -116,7 +116,6 @@ class UserDetailsTestCase(APITestCase):
             "height": 180,
             "weight": 75,
             "weight_goal": 70,
-            "weight_change_amount": 5,
             "weekly_training_days": 4,
             "daily_training_time": "1-2 horas",
             "physical_activity_level": "Moderate activity",
@@ -124,9 +123,7 @@ class UserDetailsTestCase(APITestCase):
             "diet_type": "High protein",
             "meals_per_day": 3,
             "macronutrient_intake": "Balanceado",
-            "available_equipment": "Gym equipment",
-            "food_restrictions": "No dairy",
-            "custom_food_restrictions": None
+            "available_equipment": "Gym equipment"
         }
 
         # Autenticar al usuario en los tests

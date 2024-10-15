@@ -148,21 +148,22 @@ class UserRepository:
             return None
 
     @staticmethod
-    def assign_workout_to_user(user_id, workout_id):
+    def assign_training_plan_to_user(user_id, training_plan_id):
         """
         Asigna un plan de entrenamiento a un usuario.
         """
         try:
             user = User.objects.get(id=user_id)
-            workout = Workout.objects.get(id=workout_id)
+            training_plan = TrainingPlan.objects.get(id=training_plan_id)
 
-            # Crear la relación entre el usuario y el entrenamiento
-            UserWorkout.objects.create(user=user, workout=workout)
+            # Crear la relación entre el usuario y el plan de entrenamiento
+            UserWorkout.objects.create(user=user, training_plan=training_plan)
+            
             return True, "Plan de entrenamiento asignado exitosamente."
         
         except User.DoesNotExist:
             return False, "Usuario no encontrado."
-        except Workout.DoesNotExist:
+        except TrainingPlan.DoesNotExist:
             return False, "Plan de entrenamiento no encontrado."
         except Exception as e:
             return False, str(e)
@@ -253,20 +254,15 @@ class UserRepository:
 
             # Asignar el plan de entrenamiento encontrado al usuario
             if plan:
-                # Asignar todos los entrenamientos del plan al usuario
-                for workout in plan.workouts.all():
-                    UserWorkout.objects.create(user=user, workout=workout)
+                # Crear una instancia de UserWorkout asignando el TrainingPlan completo
+                UserWorkout.objects.create(user=user, training_plan=plan)
 
                 return True, f"Plan de entrenamiento '{plan.name}' asignado exitosamente al usuario {user.first_name}."
             else:
                 return False, "No se encontró un plan de entrenamiento adecuado para las preferencias del usuario."
-        
+
         except Exception as e:
             return False, str(e)
-
-
-
-
 
 class UserDetailsRepository:
     
@@ -283,7 +279,6 @@ class UserDetailsRepository:
                     'height': details_data['height'],
                     'weight': details_data['weight'],
                     'weight_goal': details_data['weight_goal'],
-                    'weight_change_amount': details_data.get('weight_change_amount'),
                     'weekly_training_days': details_data['weekly_training_days'],
                     'daily_training_time': details_data['daily_training_time'],
                     'physical_activity_level': details_data['physical_activity_level'],

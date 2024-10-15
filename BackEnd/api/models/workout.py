@@ -33,18 +33,19 @@ class WorkoutExercise(models.Model):
 
 class UserWorkout(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_workouts')
-    workout = models.ForeignKey(Workout, on_delete=models.CASCADE, related_name='user_workouts')
+    training_plan = models.ForeignKey('TrainingPlan', on_delete=models.CASCADE, related_name='user_workouts', default=1 )  # Relación con el plan de entrenamiento
     
     # Campos adicionales
-    date_started = models.DateField(auto_now_add=True)  # Fecha en la que el usuario comenzó el entrenamiento
+    date_started = models.DateField(auto_now_add=True)  # Fecha en la que el usuario comenzó el plan de entrenamiento
     date_completed = models.DateField(null=True, blank=True)  # Fecha de finalización (si aplica)
-    progress = models.PositiveIntegerField(default=0)  # Porcentaje de progreso en el entrenamiento
+    progress = models.PositiveIntegerField(default=0)  # Porcentaje de progreso en el plan de entrenamiento
 
     class Meta:
-        unique_together = ('user', 'workout')  # Para evitar duplicados en la relación
+        unique_together = ('user', 'training_plan')  # Para evitar duplicados en la relación
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name} - {self.workout.name}"
+        return f"{self.user.first_name} {self.user.last_name} - {self.training_plan.name}"
+
     
 class TrainingPlan(models.Model):
     name = models.CharField(max_length=100)

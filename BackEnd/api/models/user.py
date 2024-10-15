@@ -29,7 +29,6 @@ class UserDetails(models.Model):
     height = models.PositiveIntegerField()  # En cm
     weight = models.DecimalField(max_digits=5, decimal_places=2)  # En kg
     weight_goal = models.DecimalField(max_digits=5, decimal_places=2)  # Peso deseado
-    weight_change_amount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Opcional según objetivo
     weekly_training_days = models.PositiveIntegerField()
     daily_training_time = models.CharField(max_length=50)  # Ejemplo: '1-2 horas'
     physical_activity_level = models.CharField(max_length=50)  # Ejemplo: 'Moderate activity'
@@ -43,8 +42,6 @@ class DietPreferences(models.Model):
     diet_type = models.CharField(max_length=100)  # Tipo de dieta
     meals_per_day = models.PositiveIntegerField()
     macronutrient_intake = models.CharField(max_length=100)  # Ejemplo: 'Balanceado'
-    food_restrictions = models.CharField(max_length=255, blank=True, null=True)
-    custom_food_restrictions = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - Diet Preferences'

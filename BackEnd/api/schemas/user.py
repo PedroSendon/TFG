@@ -65,7 +65,6 @@ class UserDetailsSchema(BaseModel):
     height: PositiveInt
     weight: PositiveInt
     weight_goal: str 
-    weight_change_amount: Optional[PositiveInt] = None
     weekly_training_days: conint(ge=1, le=7)
     daily_training_time: str
     physical_activity_level: str
@@ -80,8 +79,6 @@ class DietPreferencesSchema(BaseModel):
     diet_type: str  # Tipo de dieta
     meals_per_day: conint(gt=0)  # Comidas al día, mayor a 0
     macronutrient_intake: str  # Ingesta de macronutrientes
-    food_restrictions: Optional[str] = None  # Restricciones alimentarias
-    custom_food_restrictions: Optional[str] = None  # Restricciones alimentarias personalizadas
 
     class Config:
         from_attributes = True
