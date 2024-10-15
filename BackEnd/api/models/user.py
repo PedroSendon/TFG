@@ -33,7 +33,6 @@ class UserDetails(models.Model):
     weekly_training_days = models.PositiveIntegerField()
     daily_training_time = models.CharField(max_length=50)  # Ejemplo: '1-2 horas'
     physical_activity_level = models.CharField(max_length=50)  # Ejemplo: 'Moderate activity'
-    current_training_days = models.PositiveIntegerField(null=True, blank=True)  # Opcional, días de entrenamiento actual
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - Details'
@@ -59,9 +58,8 @@ class MedicalConditions(models.Model):
         return f'{self.user.first_name} {self.user.last_name} - Medical Conditions'
 
 class TrainingPreferences(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='training_preferences')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='available_equipment')
     available_equipment = models.CharField(max_length=100)  # Ejemplo: 'Sin equipamiento'
-    training_preference = models.CharField(max_length=100)  # Ejemplo: 'Home training'
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - Training Preferences'

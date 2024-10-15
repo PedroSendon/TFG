@@ -44,7 +44,6 @@ const ModifyWorkoutPage: React.FC = () => {
     duration: data?.duration || 30,
     difficulty: data?.difficulty || 'Ligero',
     equipment: data?.equipment || '',
-    training_preference: data?.training_preference || '',
   });
 
   const [media, setMedia] = useState<string | null>(data?.media || null);
@@ -92,7 +91,6 @@ const ModifyWorkoutPage: React.FC = () => {
       duration: workoutDetails.duration,
       difficulty: workoutDetails.difficulty,
       equipment: workoutDetails.equipment,
-      training_preference: workoutDetails.training_preference,
     };
 
     try {
@@ -320,25 +318,6 @@ const ModifyWorkoutPage: React.FC = () => {
                 fullWidth
               >
                 {equipmentOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Grid>
-
-            {/* Campo de preferencia de entrenamiento */}
-            <Grid item xs={12}>
-              <InputLabel id="training_preference-label">{t('training_preference')}</InputLabel>
-              <Select
-                labelId="training_preference-label"
-                id="training_preference"
-                name="training_preference"
-                value={workoutDetails.training_preference}
-                onChange={handleSelectChange}
-                fullWidth
-              >
-                {trainingPreferenceOptions.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
                   </MenuItem>

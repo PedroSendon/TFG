@@ -64,12 +64,11 @@ class LoginSchema(BaseModel):
 class UserDetailsSchema(BaseModel):
     height: PositiveInt
     weight: PositiveInt
-    weight_goal: str  # Cambiado a str porque estás enviando una descripción textual
+    weight_goal: str 
     weight_change_amount: Optional[PositiveInt] = None
     weekly_training_days: conint(ge=1, le=7)
     daily_training_time: str
     physical_activity_level: str
-    current_training_days: Optional[conint(ge=1, le=7)] = None
 
     class Config:
         from_attributes = True
@@ -98,7 +97,6 @@ class MedicalConditionsSchema(BaseModel):
 
 class TrainingPreferencesSchema(BaseModel):
     available_equipment: str  # Equipamiento disponible
-    training_preference: str  # Preferencia de entrenamiento
 
     class Config:
         from_attributes = True
@@ -109,7 +107,6 @@ class CompleteUserDetailsSchema(BaseModel):
     user_details: UserDetailsSchema
     diet_preferences: DietPreferencesSchema
     medical_conditions: MedicalConditionsSchema
-    training_preferences: TrainingPreferencesSchema
 
     class Config:
         from_attributes = True

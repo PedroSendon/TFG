@@ -44,7 +44,8 @@ const CreateTrainingPlan: React.FC = () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/api/workouts/');
             const data = await response.json();
-            setTrainings(data.trainings);
+            console.log('Entrenamientos:', data);
+            setTrainings(data.data);
         } catch (error) {
             console.error('Error fetching trainings:', error);
         }
@@ -138,9 +139,11 @@ const CreateTrainingPlan: React.FC = () => {
     ];
 
     const difficultyOptions = [
+        { value: 'Sedentario', label: t('sedentary') },
         { value: 'Ligero', label: t('light') },
         { value: 'Moderado', label: t('moderate') },
         { value: 'Avanzado', label: t('advanced') },
+
     ];
 
     return (

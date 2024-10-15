@@ -365,15 +365,16 @@ def delete_user(request, user_id):
 
 @api_view(['POST'])
 # Requiere que el usuario esté autenticado
-@permission_classes([IsAuthenticated])
 def create_user_details(request):
     try:
         print(f"Datos recibidos: {request.data}")
         user_details_data = UserDetailsSchema(**request.data)
-
+        
         # Crear o actualizar los detalles del usuario autenticado
         UserDetailsRepository.create_user_details(
             request.user, user_details_data.dict())
+        UserRepository.assign_workout_to_user(request.user.id)
+        UserRepository.assign_nutrition_plan_to_user(request.user.id)
 
         return Response({"message": "Detalles del usuario guardados correctamente."}, status=status.HTTP_200_OK)
 

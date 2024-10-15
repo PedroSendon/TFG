@@ -4,6 +4,7 @@ from api.models.User import User
 from api.models.process import ProgressTracking, ExerciseLog
 from django.utils import timezone
 from typing import List
+from api.schemas.workout import TrainingPlanSchema  # Import TrainingPlanSchema
 
 class WorkoutRepository:
 
@@ -155,7 +156,7 @@ class WorkoutRepository:
             return None
         
     @staticmethod
-    def create_workout(name, description, exercises, media=None, days_per_week=None, duration=None, difficulty=None, equipment=None, training_preference=None):
+    def create_workout(name, description, exercises, media=None, days_per_week=None, duration=None, difficulty=None, equipment=None):
         """
         Crear un nuevo entrenamiento en el sistema.
         :param name: Nombre del entrenamiento.
@@ -166,7 +167,6 @@ class WorkoutRepository:
         :param duration: Duración total del entrenamiento en minutos.
         :param difficulty: Nivel de dificultad del entrenamiento.
         :param equipment: Equipos necesarios para realizar el entrenamiento.
-        :param training_preference: Preferencia del lugar para realizar el entrenamiento (gimnasio, casa, etc.).
         :return: Un diccionario con los datos del entrenamiento creado.
         """
         # Crear el entrenamiento
@@ -178,7 +178,6 @@ class WorkoutRepository:
             duration=duration,
             difficulty=difficulty,
             equipment=equipment,
-            training_preference=training_preference
         )
 
         # Añadir los ejercicios al entrenamiento
@@ -213,7 +212,6 @@ class WorkoutRepository:
             "duration": workout.duration,
             "difficulty": workout.difficulty,
             "equipment": workout.equipment,
-            "training_preference": workout.training_preference
         }
 
     @staticmethod
@@ -324,3 +322,25 @@ class TrainingPlanRepository:
             "duration": training_plan.duration,
             "workouts": [workout.id for workout in training_plan.workouts.all()]
         }
+    
+    @staticmethod
+    def get_all_training_plans() -> List[TrainingPlanSchema]:
+        """
+        Obtener todos los planes de entrenamiento.
+        :return: Una lista de esquemas de planes de entrenamiento.
+        """
+        training_plans = TrainingPlan.objects.all()  # Suponiendo que usas un ORM como Django ORM
+        return [TrainingPlanSchema.from_orm(plan) for plan in training_plans]
+    
+    @staticmethod
+    def get_training_plan_by_id(training_plan_id: int) -> TrainingPlanSchema:
+        """
+        Obtener un plan de entrenamiento por su ID.
+        :param training_plan_id: El identificador del plan de entrenamiento.
+        :return: Un esquema del plan de entrenamiento o None si no existe.
+        """
+        try:
+            training_plan = TrainingPlan.objects.get(id=training_plan_id)
+            return TrainingPlanSchema.from_orm(training_plan)
+        except TrainingPlan.DoesNotExist:
+            return None

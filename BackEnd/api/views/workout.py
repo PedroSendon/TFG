@@ -181,7 +181,6 @@ def create_workout(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def create_training_plan(request):
     """
     Endpoint para crear un nuevo plan de entrenamiento.
@@ -194,7 +193,7 @@ def create_training_plan(request):
         plan = TrainingPlanRepository.create_training_plan(
             name=schema.name,
             description=schema.description,
-            workout_ids=schema.workout_ids,
+            workout_ids=schema.workouts,
             media=schema.media,
             difficulty=schema.difficulty,
             equipment=schema.equipment,
@@ -210,6 +209,29 @@ def create_training_plan(request):
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"error": "Ocurrió un error inesperado."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def get_training_plans(request):
+    """
+    Obtener todos los planes de entrenamiento.
+    """
+    # Llamar al repositorio para obtener todos los planes de entrenamiento
+    training_plans = TrainingPlanRepository.get_all_training_plans()
+
+    # Si no hay planes de entrenamiento, retornar un mensaje vacío
+    if not training_plans:
+        return Response({"message": "No training plans found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Crear la respuesta con los datos de los planes de entrenamiento
+    training_plan_data = []
+    for plan in training_plans:
+        training_plan_data.append({
+            "id": plan.id,
+            "name": plan.name,
+            "description": plan.description
+        })
+
+    return Response(training_plan_data, status=status.HTTP_200_OK)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])

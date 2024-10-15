@@ -32,18 +32,26 @@ interface Exercise {
     description: string;
 }
 
+interface TrainingPlan {
+    id: number;
+    name: string;
+    description: string;
+}
+
 const WorkoutsExercises: React.FC = () => {
     const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
     const history = useHistory();
     const [selectedSection, setSelectedSection] = useState<string>('workouts');
     const [workouts, setWorkouts] = useState<Workout[]>([]);
     const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [trainingPlans, setTrainingPlans] = useState<TrainingPlan[]>([]); // Nueva constante
     const [presentAlert] = useIonAlert();
 
     // Obtener entrenamientos desde el BE
     useEffect(() => {
         fetchWorkouts();
         fetchExercises();
+        fetchTrainingPlans(); // Obtener los planes de entrenamiento
     }, []);
 
     const fetchWorkouts = async () => {
@@ -58,6 +66,19 @@ const WorkoutsExercises: React.FC = () => {
             })));
         } catch (error) {
             console.error(t('error_fetching_workouts'), error);
+        }
+    };
+    const fetchTrainingPlans = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/trainingplans/');
+            const data = await response.json();
+            setTrainingPlans(data.data.map((plan: any) => ({
+                id: plan.id,
+                name: plan.name,
+                description: plan.description,
+            })));
+        } catch (error) {
+            console.error(t('error_fetching_training_plans'), error);
         }
     };
 
@@ -86,8 +107,10 @@ const WorkoutsExercises: React.FC = () => {
                     handler: () => {
                         if (type === 'workout') {
                             setWorkouts((prev) => prev.filter((workout) => workout.id !== id));
-                        } else {
+                        } else if (type === 'exercise') {
                             setExercises((prev) => prev.filter((exercise) => exercise.id !== id));
+                        } else if (type === 'plan') {
+                            setTrainingPlans((prev) => prev.filter((plan) => plan.id !== id));
                         }
                     },
                 },
@@ -130,6 +153,9 @@ const WorkoutsExercises: React.FC = () => {
                     </IonSegmentButton>
                     <IonSegmentButton value="exercises">
                         <IonLabel>{t('exercises')}</IonLabel>
+                    </IonSegmentButton>
+                    <IonSegmentButton value="trainingPlans"> {/* Nueva opción */}
+                        <IonLabel>{t('training_plans')}</IonLabel> {/* Planes de entrenamiento */}
                     </IonSegmentButton>
                 </IonSegment>
 
@@ -174,6 +200,64 @@ const WorkoutsExercises: React.FC = () => {
                                                 </Button>
                                                 <Button
                                                     onClick={() => handleDelete(workout.id, 'workout')}
+                                                    style={{
+                                                        border: '1px solid #FF0000',
+                                                        backgroundColor: '#FFFFFF',
+                                                        color: '#FF0000',
+                                                        padding: '4px 8px',
+                                                        borderRadius: '5px',
+                                                        fontSize: '0.7em',
+                                                        minWidth: '55px',
+                                                    }}
+                                                >
+                                                    {t('delete')}
+                                                </Button>
+                                            </div>
+                                        </IonCardContent>
+                                    </IonCard>
+                                </IonCol>
+                            ))}
+                        </IonRow>
+                    ) : selectedSection === 'trainingPlans' ? (
+                        <IonRow>
+                            {trainingPlans.map((plan) => (
+                                <IonCol size="12" key={plan.id}>
+                                    <IonCard
+                                        style={{
+                                            backgroundColor: '#FFFFFF',
+                                            borderRadius: '10px',
+                                            padding: '8px',
+                                            margin: '10px auto',
+                                            maxWidth: '95%',
+                                            boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
+                                        }}
+                                    >
+                                        <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div>
+                                                <IonLabel style={{ color: '#000000', fontWeight: 'bold', fontSize: '1em', display: 'block', marginBottom: '8px' }}>
+                                                    {plan.name}
+                                                </IonLabel>
+                                                <IonLabel style={{ color: '#6b6b6b', fontSize: '0.9em' }}>
+                                                    {plan.description}
+                                                </IonLabel>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '5px' }}>
+                                                <Button
+                                                    onClick={() => handleEdit(plan.id, 'plan')}
+                                                    style={{
+                                                        border: '1px solid #32CD32',
+                                                        backgroundColor: '#FFFFFF',
+                                                        color: '#32CD32',
+                                                        padding: '4px 8px',
+                                                        borderRadius: '5px',
+                                                        fontSize: '0.7em',
+                                                        minWidth: '55px',
+                                                    }}
+                                                >
+                                                    {t('modify')}
+                                                </Button>
+                                                <Button
+                                                    onClick={() => handleDelete(plan.id, 'plan')}
                                                     style={{
                                                         border: '1px solid #FF0000',
                                                         backgroundColor: '#FFFFFF',
@@ -270,26 +354,28 @@ const WorkoutsExercises: React.FC = () => {
                     </Button>
                 </IonFab>
 
-                {/* Nuevo FAB para añadir un plan de entrenamiento */}
-                <IonFab vertical="bottom" horizontal="start" style={{ marginBottom: '15%', marginLeft: '15px', position: 'fixed' }}>
-                    <Button
-                        onClick={handleAddTrainingPlan}
-                        style={{
-                            backgroundColor: '#FFFFFF',
-                            color: '#32CD32',
-                            width: '60px',
-                            height: '60px',
-                            borderRadius: '50%',
-                            border: '2px solid #32CD32',
-                            zIndex: 1000,
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <AssignmentOutlined style={{ fontSize: '24px', color: '#32CD32' }} /> {/* Ícono de plan de entrenamiento */}
-                    </Button>
-                </IonFab>
+                {selectedSection === 'trainingPlans' && (
+                    <IonFab vertical="bottom" horizontal="end" style={{ marginBottom: '15%', position: 'fixed' }}>
+                        <Button
+                            onClick={handleAddTrainingPlan}
+                            style={{
+                                backgroundColor: '#FFFFFF',
+                                color: '#32CD32',
+                                width: '60px',
+                                height: '60px',
+                                borderRadius: '50%',
+                                border: '2px solid #32CD32',
+                                zIndex: 1000,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <AssignmentOutlined style={{ fontSize: '24px', color: '#32CD32' }} /> {/* Icono de plan de entrenamiento */}
+                        </Button>
+                    </IonFab>
+                )}
+
             </IonContent>
             <Navbar />
         </IonPage>

@@ -61,9 +61,7 @@ const UserDetailsForm: React.FC = () => {
                     food_restrictions: formData.foodRestrictions || '',
                     medical_condition: formData.medicalCondition || t('none'),
                     available_equipment: formData.availableEquipment,
-                    training_preference: formData.trainingPreference,
                     weight_change_amount: formData.weightChangeAmount || null,
-                    current_training_days: formData.currentTrainingDays || null
                 }),
             });
 
@@ -346,24 +344,6 @@ const UserDetailsForm: React.FC = () => {
                             <MenuItem value="Gimnasio completo">{t('full_gym')}</MenuItem>
                             <MenuItem value="Pesas libres">{t('free_weights')}</MenuItem>
                             <MenuItem value="Sin equipamiento">{t('no_equipment')}</MenuItem>
-                        </TextField>
-                    </Grid>
-
-                    {/* Pregunta: ¿Qué tipo de entrenamiento prefieres? */}
-                    <Grid item xs={12}>
-                        <TextField
-                            variant="outlined"
-                            label={t('training_preference')}
-                            name="trainingPreference"
-                            select
-                            value={formData.trainingPreference}
-                            onChange={handleChange}
-                            fullWidth
-                        >
-                            <MenuItem value="Entrenamiento en casa">{t('home_training')}</MenuItem>
-                            <MenuItem value="Entrenamiento en gimnasio">{t('gym_training')}</MenuItem>
-                            <MenuItem value="Ejercicios al aire libre">{t('outdoor_training')}</MenuItem>
-                            <MenuItem value="Clases grupales">{t('group_classes')}</MenuItem>
                         </TextField>
                     </Grid>
                 </Grid>

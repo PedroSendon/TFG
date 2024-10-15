@@ -1,6 +1,6 @@
 from datetime import datetime
 from api.models.macros import MealPlan, UserNutritionPlan
-from api.models.workout import UserWorkout, Workout
+from api.models.workout import TrainingPlan, UserWorkout, Workout
 from api.models import User
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import check_password, make_password
@@ -228,40 +228,42 @@ class UserRepository:
             return False, str(e)
         
     @staticmethod
-    def assign_workout_to_user(user):
+    def assign_training_plan_to_user(user):
         """
         Asigna un plan de entrenamiento adecuado a un usuario basándose en su actividad física,
-        preferencias de entrenamiento, y equipo disponible.
+        preferencias de entrenamiento y equipo disponible.
         """
+        print("Assigning training plan to user...")
         try:
-            # Filtrar entrenamientos según los días semanales, la duración diaria, el equipo disponible y la preferencia de entrenamiento
-            workouts = Workout.objects.filter(
-                days_per_week__lte=user.details.weekly_training_days,  # Filtrar entrenamientos de igual o menor días por semana
-                duration__lte=user.details.daily_training_time,  # Filtrar entrenamientos de igual o menor duración diaria
-                equipment__in=user.preferences.available_equipment,  # Filtrar entrenamientos según el equipo disponible
-                training_preference=user.preferences.training_preference  # Filtrar por preferencias de entrenamiento
+            # Filtrar planes de entrenamiento según los días semanales, la duración diaria, el equipo disponible y la preferencia de entrenamiento
+            training_plans = TrainingPlan.objects.filter(
+                duration__lte=user.details.daily_training_time,  # Filtrar planes de igual o menor duración diaria
+                equipment__in=user.training_preferences.available_equipment,  # Filtrar planes según el equipo disponible
             )
             
-           # Asignar entrenamiento basado en la actividad física del usuario
+            # Asignar el plan de entrenamiento basado en el nivel de actividad física del usuario
             if user.details.physical_activity_level == 'sedentario':
-                workout = workouts.filter(difficulty='Ligero').first()
+                plan = training_plans.filter(difficulty='ligero').first()
             elif user.details.physical_activity_level == 'ligero':
-                workout = workouts.filter(difficulty='Moderado').first()
+                plan = training_plans.filter(difficulty='moderado').first()
             elif user.details.physical_activity_level == 'moderado':
-                workout = workouts.filter(difficulty='Intermedio').first()
+                plan = training_plans.filter(difficulty='intermedio').first()
             else:
-                workout = workouts.filter(difficulty='Avanzado').first()
+                plan = training_plans.filter(difficulty='avanzado').first()
 
-            
-            # Asignar el entrenamiento encontrado al usuario
-            if workout:
-                UserWorkout.objects.create(user=user, workout=workout)
-                return True, f"Entrenamiento '{workout.name}' asignado exitosamente al usuario {user.first_name}."
+            # Asignar el plan de entrenamiento encontrado al usuario
+            if plan:
+                # Asignar todos los entrenamientos del plan al usuario
+                for workout in plan.workouts.all():
+                    UserWorkout.objects.create(user=user, workout=workout)
+
+                return True, f"Plan de entrenamiento '{plan.name}' asignado exitosamente al usuario {user.first_name}."
             else:
-                return False, "No se encontró un entrenamiento adecuado para las preferencias del usuario."
+                return False, "No se encontró un plan de entrenamiento adecuado para las preferencias del usuario."
         
         except Exception as e:
             return False, str(e)
+
 
 
 
@@ -285,7 +287,7 @@ class UserDetailsRepository:
                     'weekly_training_days': details_data['weekly_training_days'],
                     'daily_training_time': details_data['daily_training_time'],
                     'physical_activity_level': details_data['physical_activity_level'],
-                    'current_training_days': details_data['current_training_days']
+                    
                 }
             )
 
@@ -315,7 +317,6 @@ class UserDetailsRepository:
                 user=user,
                 defaults={
                     'available_equipment': details_data['available_equipment'],
-                    'training_preference': details_data['training_preference']
                 }
             )
 

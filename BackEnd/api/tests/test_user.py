@@ -119,12 +119,11 @@ class UserDetailsTestCase(APITestCase):
             "weekly_training_days": 4,
             "daily_training_time": "1-2 horas",
             "physical_activity_level": "Moderate activity",
-            "current_training_days": 4,
+            
             "diet_type": "High protein",
             "meals_per_day": 3,
             "macronutrient_intake": "Balanceado",
             "available_equipment": "Gym equipment",
-            "training_preference": "Gym",
             "food_restrictions": "No dairy",
             "custom_food_restrictions": None,
             "medical_condition": "Diabetes",
@@ -160,7 +159,6 @@ class UserDetailsTestCase(APITestCase):
         self.assertEqual(medical_conditions.medical_condition, self.user_details_data['medical_condition'])
 
         # Verificar que las preferencias de entrenamiento se guarden
-        training_preferences = TrainingPreferences.objects.get(user=self.user)
         self.assertEqual(training_preferences.available_equipment, self.user_details_data['available_equipment'])
 
     def test_save_user_details_missing_required_field(self):
