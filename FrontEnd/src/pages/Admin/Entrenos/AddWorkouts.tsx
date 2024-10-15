@@ -47,11 +47,7 @@ const AddWorkouts: React.FC = () => {
         name: '',
         description: '',
         exercises: [] as { name: string; series: number; reps: number; rest: number }[],
-        days_per_week: 1, // Nuevo campo
         duration: 30, // Nuevo campo
-        difficulty: 'Ligero', // Nuevo campo
-        equipment: '', // Nuevo campo
-        training_preference: '', // Nuevo campo
     });
 
     const [errors, setErrors] = useState<any>({});
@@ -81,11 +77,7 @@ const AddWorkouts: React.FC = () => {
                     description: formData.description,
                     exercises: workoutDetails.exercises,
                     media: media,
-                    days_per_week: formData.days_per_week, // Añadido
                     duration: formData.duration, // Añadido
-                    difficulty: formData.difficulty, // Añadido
-                    equipment: formData.equipment, // Añadido
-                    training_preference: formData.training_preference, // Añadido
                 }),
             });
 
@@ -239,19 +231,6 @@ const equipmentOptions = [
                                     />
                                 </Grid>
 
-                                {/* Nuevos campos */}
-                                <Grid item xs={12}>
-                                    <TextField
-                                        variant="outlined"
-                                        fullWidth
-                                        id="days_per_week"
-                                        label={t('days_per_week')}
-                                        name="days_per_week"
-                                        type="number"
-                                        value={formData.days_per_week}
-                                        onChange={handleChange}
-                                    />
-                                </Grid>
 
                                 <Grid item xs={12}>
                                     <TextField
@@ -264,63 +243,6 @@ const equipmentOptions = [
                                         value={formData.duration}
                                         onChange={handleChange}
                                     />
-                                </Grid>
-
-                                {/* Campo de dificultad como menú desplegable */}
-                                <Grid item xs={12}>
-                                    <InputLabel id="difficulty-label">{t('difficulty')}</InputLabel>
-                                    <Select
-                                        labelId="difficulty-label"
-                                        id="difficulty"
-                                        name="difficulty"
-                                        value={formData.difficulty}
-                                        onChange={handleSelectChange}
-                                        fullWidth
-                                    >
-                                        {difficultyOptions.map((option) => (
-                                            <MenuItem key={option.value} value={option.value}>
-                                                {option.label}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </Grid>
-
-                                {/* Campo de equipo como menú desplegable */}
-                                <Grid item xs={12}>
-                                    <InputLabel id="equipment-label">{t('equipment')}</InputLabel>
-                                    <Select
-                                        labelId="equipment-label"
-                                        id="equipment"
-                                        name="equipment"
-                                        value={formData.equipment}
-                                        onChange={handleSelectChange}
-                                        fullWidth
-                                    >
-                                        {equipmentOptions.map((option) => (
-                                            <MenuItem key={option.value} value={option.value}>
-                                                {option.label}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </Grid>
-
-                                {/* Campo de preferencia de entrenamiento como menú desplegable */}
-                                <Grid item xs={12}>
-                                    <InputLabel id="training_preference-label">{t('training_preference')}</InputLabel>
-                                    <Select
-                                        labelId="training_preference-label"
-                                        id="training_preference"
-                                        name="training_preference"
-                                        value={formData.training_preference}
-                                        onChange={handleSelectChange}
-                                        fullWidth
-                                    >
-                                        {trainingPreferenceOptions.map((option) => (
-                                            <MenuItem key={option.value} value={option.value}>
-                                                {option.label}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
                                 </Grid>
 
                                 <Grid item xs={12}>

@@ -2,8 +2,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from api.repositories.workout_repository import WorkoutRepository
-from api.schemas.workout import WorkoutSchema
+from api.repositories.workout_repository import WorkoutRepository, TrainingPlanRepository
+from api.schemas.workout import WorkoutSchema, TrainingPlanSchema
 from api.schemas.exercise import ExerciseSchema
 
 @api_view(['GET'])
@@ -153,14 +153,10 @@ def create_workout(request):
     description = request.data.get('description')
     exercises = request.data.get('exercises')
     media = request.data.get('media', None)
-    days_per_week = request.data.get('days_per_week')  # Nuevo campo
     duration = request.data.get('duration')  # Nuevo campo
-    difficulty = request.data.get('difficulty')  # Nuevo campo
-    equipment = request.data.get('equipment')  # Nuevo campo
-    training_preference = request.data.get('training_preference')  # Nuevo campo
 
     # Validar que todos los campos obligatorios están presentes
-    if not all([name, description, exercises, days_per_week, duration, difficulty, equipment, training_preference]):
+    if not all([name, description, exercises, duration]):
         return Response({"error": "Faltan parámetros obligatorios o hay valores no válidos."},
                         status=status.HTTP_400_BAD_REQUEST)
 
@@ -175,11 +171,7 @@ def create_workout(request):
         description=description,
         exercises=exercises,
         media=media,
-        days_per_week=days_per_week,
-        duration=duration,
-        difficulty=difficulty,
-        equipment=equipment,
-        training_preference=training_preference
+        duration=duration
     )
 
     return Response({
@@ -187,6 +179,37 @@ def create_workout(request):
         "data": workout_data
     }, status=status.HTTP_201_CREATED)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_training_plan(request):
+    """
+    Endpoint para crear un nuevo plan de entrenamiento.
+    """
+    try:
+        # Validar los datos de la solicitud usando el schema
+        schema = TrainingPlanSchema(**request.data)
+        
+        # Crear el plan de entrenamiento usando el repositorio
+        plan = TrainingPlanRepository.create_training_plan(
+            name=schema.name,
+            description=schema.description,
+            workout_ids=schema.workout_ids,
+            media=schema.media,
+            difficulty=schema.difficulty,
+            equipment=schema.equipment,
+            duration=schema.duration
+        )
+
+        return Response({
+            "message": "Plan de entrenamiento creado con éxito.",
+            "data": plan
+        }, status=status.HTTP_201_CREATED)
+
+    except ValueError as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"error": "Ocurrió un error inesperado."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])

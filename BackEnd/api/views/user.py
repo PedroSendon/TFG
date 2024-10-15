@@ -12,7 +12,6 @@ from django.contrib.auth.decorators import login_required
 from pydantic import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
-from rest_framework.authtoken.models import Token
 
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Permitir a cualquier usuario registrar
@@ -40,10 +39,8 @@ def register(request):
             {**user_data.dict(), "role": "cliente"})
 
         # Generar token
-        token = Token.objects.create(user=user)
         return Response({
             "message": "Usuario registrado exitosamente",
-            "token": str(token.key),  # El token de refresco
         }, status=status.HTTP_201_CREATED)
 
     except ValidationError as e:
@@ -124,10 +121,8 @@ def login(request):
             return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Generar token
-        token = Token.objects.get_or_create(user=user)
         return Response({
             "message": "Inicio de sesión exitoso",
-            "token": str(token.key),  # El token
         }, status=status.HTTP_200_OK)
 
     except Exception as e:
@@ -150,7 +145,8 @@ def save_user_details(request):
         # Guardar los detalles del usuario usando el repositorio
         UserDetailsRepository.create_user_details(
             user, user_details_data.dict())
-
+        UserRepository.assign_nutrition_plan_to_user(user.id)
+        UserRepository.assign_workout_to_user(user.id)
         return Response({"message": "Detalles del usuario guardados correctamente"}, status=status.HTTP_200_OK)
 
     except Exception as e:

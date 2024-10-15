@@ -252,5 +252,10 @@
     "difficulty": "Difficulty",
     "equipment": "Equipment",
     "intermediate": "Intermediate",
-    "advanced": "Advanced"
+    "advanced": "Advanced",
+    "add_training_plan": "Add Training Plan",
+  "training_name": "Training Name",
+  "equipment_type": "Equipment Type",
+  "upload_image": "Upload Image",
+  "no_trainings_available": "No trainings available"
 }

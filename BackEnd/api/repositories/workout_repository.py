@@ -1,8 +1,9 @@
-from api.models.workout import Workout, WorkoutExercise, Exercise, UserWorkout
+from api.models.workout import Workout, WorkoutExercise, Exercise, UserWorkout, TrainingPlan
 from api.models.exercise import Exercise
 from api.models.User import User
 from api.models.process import ProgressTracking, ExerciseLog
 from django.utils import timezone
+from typing import List
 
 class WorkoutRepository:
 
@@ -281,3 +282,45 @@ class WorkoutRepository:
             return True
         except Workout.DoesNotExist:
             return False
+        
+class TrainingPlanRepository:
+
+    @staticmethod
+    def create_training_plan(name: str, description: str, workout_ids: List[int], media: str, difficulty: str, equipment: str, duration: int):
+        """
+        Crear un nuevo plan de entrenamiento.
+        :param name: Nombre del plan.
+        :param description: Descripción del plan.
+        :param workout_ids: Lista de IDs de entrenamientos asociados.
+        :param media: URL del media (imagen/video).
+        :param difficulty: Dificultad del plan.
+        :param equipment: Equipamiento necesario.
+        :param duration: Duración del plan.
+        :return: Un diccionario con los detalles del plan creado.
+        """
+        workouts = Workout.objects.filter(id__in=workout_ids)
+        
+        if not workouts.exists():
+            raise ValueError("Los entrenamientos asociados no existen.")
+        
+        training_plan = TrainingPlan.objects.create(
+            name=name,
+            description=description,
+            media=media,
+            difficulty=difficulty,
+            equipment=equipment,
+            duration=duration
+        )
+        training_plan.workouts.set(workouts)  # Asignamos los entrenamientos al plan
+        training_plan.save()
+
+        return {
+            "id": training_plan.id,
+            "name": training_plan.name,
+            "description": training_plan.description,
+            "media": training_plan.media,
+            "difficulty": training_plan.difficulty,
+            "equipment": training_plan.equipment,
+            "duration": training_plan.duration,
+            "workouts": [workout.id for workout in training_plan.workouts.all()]
+        }

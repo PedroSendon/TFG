@@ -38,6 +38,7 @@ urlpatterns = [
     # Workouts
     path('workouts/', workout.get_workouts, name='get-workouts'),
     path('workouts/create/', workout.create_workout, name='create-workout'),
+    path('workouts/create/plan', workout.create_training_plan, name='create-training-plan'),
     path('workouts/<int:workout_id>/update/', workout.update_workout, name='update-workout'),
     path('workouts/<int:workout_id>/delete/', workout.delete_workout, name='delete-workout'),
     path('workouts/by-user/', workout.get_workouts_by_user, name='get-workouts-by-user'),

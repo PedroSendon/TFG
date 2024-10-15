@@ -13,9 +13,9 @@ import {
     IonSegment,
     IonSegmentButton
 } from '@ionic/react';
-import { Add } from '@mui/icons-material';
-import Header from '../../Header/Header'; 
-import Navbar from '../../Navbar/Navbar'; 
+import { Add, AssignmentOutlined, FitnessCenter } from '@mui/icons-material';
+import Header from '../../Header/Header';
+import Navbar from '../../Navbar/Navbar';
 import { useHistory } from 'react-router';
 import { Button } from '@mui/material';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importamos el contexto de idioma
@@ -25,7 +25,7 @@ interface Workout {
     name: string;
     description: string;
 }
-  
+
 interface Exercise {
     id: number;
     name: string;
@@ -36,8 +36,8 @@ const WorkoutsExercises: React.FC = () => {
     const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
     const history = useHistory();
     const [selectedSection, setSelectedSection] = useState<string>('workouts');
-    const [workouts, setWorkouts] = useState<Workout[]>([]);  
-    const [exercises, setExercises] = useState<Exercise[]>([]);  
+    const [workouts, setWorkouts] = useState<Workout[]>([]);
+    const [exercises, setExercises] = useState<Exercise[]>([]);
     const [presentAlert] = useIonAlert();
 
     // Obtener entrenamientos desde el BE
@@ -71,6 +71,10 @@ const WorkoutsExercises: React.FC = () => {
         }
     };
 
+    const handleAddTrainingPlan = () => {
+        history.push('/admin/workout/plan'); // Redirige a la vista de añadir plan de entrenamiento
+    };
+
     const handleDelete = (id: number, type: string) => {
         presentAlert({
             header: t('confirm_delete'),
@@ -100,7 +104,7 @@ const WorkoutsExercises: React.FC = () => {
             console.error(t('not_found'));
             return;
         }
-    
+
         history.push({
             pathname: `/admin/${type}/modify`,
             state: { data: { ...selectedData, id } },
@@ -262,7 +266,28 @@ const WorkoutsExercises: React.FC = () => {
                             alignItems: 'center',
                         }}
                     >
-                        <Add style={{ fontSize: '24px', color: '#32CD32' }} />
+                        <FitnessCenter style={{ fontSize: '24px', color: '#32CD32' }} /> {/* Icono de mancuerna */}
+                    </Button>
+                </IonFab>
+
+                {/* Nuevo FAB para añadir un plan de entrenamiento */}
+                <IonFab vertical="bottom" horizontal="start" style={{ marginBottom: '15%', marginLeft: '15px', position: 'fixed' }}>
+                    <Button
+                        onClick={handleAddTrainingPlan}
+                        style={{
+                            backgroundColor: '#FFFFFF',
+                            color: '#32CD32',
+                            width: '60px',
+                            height: '60px',
+                            borderRadius: '50%',
+                            border: '2px solid #32CD32',
+                            zIndex: 1000,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <AssignmentOutlined style={{ fontSize: '24px', color: '#32CD32' }} /> {/* Ícono de plan de entrenamiento */}
                     </Button>
                 </IonFab>
             </IonContent>

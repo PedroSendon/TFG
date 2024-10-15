@@ -252,5 +252,10 @@
     "difficulty": "Dificultat",
     "equipment": "Equip",
     "intermediate": "Intermedi",
-    "advanced": "Avançat"
+    "advanced": "Avançat",
+    "add_training_plan": "Afegir Pla d'Entrenament",
+  "training_name": "Nom de l'Entrenament",
+  "equipment_type": "Tipus d'Equip",
+  "upload_image": "Pujar Imatge",
+  "no_trainings_available": "No hi ha entrenaments disponibles"
 }

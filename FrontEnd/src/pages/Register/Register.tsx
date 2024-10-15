@@ -146,9 +146,6 @@ const Register: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Usuario registrado:', data);
-        // Almacenar tokens
-        localStorage.setItem('access_token', data.access);
-        localStorage.setItem('refresh_token', data.refresh); // Opcional
         history.push('/form');
       } else {
         const errorData = await response.json();
