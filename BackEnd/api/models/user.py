@@ -32,7 +32,7 @@ class UserDetails(models.Model):
     weekly_training_days = models.PositiveIntegerField()
     daily_training_time = models.CharField(max_length=50)  # Ejemplo: '1-2 horas'
     physical_activity_level = models.CharField(max_length=50)  # Ejemplo: 'Moderate activity'
-    available_equipment = models.CharField(max_length=100)  # Ejemplo: 'Sin equipamiento'
+    available_equipment = models.CharField(max_length=100, default="None")  # Ejemplo: 'Sin equipamiento'
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - Details'

@@ -19,12 +19,21 @@ import '../../../theme/variables.css';
 import { Box, Chip, InputLabel, MenuItem, OutlinedInput, Select, TextField, Button } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material';
 import { LanguageContext } from '../../../context/LanguageContext';
+import musclesCa from '../../../locales/muscles_ca.json';
+import musclesEs from '../../../locales/muscles_es.json';
+import musclesEn from '../../../locales/muscles_en.json';
+
+interface MuscleGroupsData {
+    muscleGroups: string[];
+}
 
 const ModifyExercises: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
-  const { t } = useContext(LanguageContext); // Usar el contexto de idioma
-
+  const { t, language } = useContext(LanguageContext); // Usar el contexto de idioma
+  const muscleGroupsCa: MuscleGroupsData = musclesCa;
+  const muscleGroupsEs: MuscleGroupsData = musclesEs;
+  const muscleGroupsEn: MuscleGroupsData = musclesEn;
   const data = (location.state as { data: any })?.data || null;
 
   const [exerciseDetails, setExerciseDetails] = useState({
@@ -40,21 +49,27 @@ const ModifyExercises: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [muscleGroupsList, setMuscleGroupsList] = useState<string[]>([]); // Lista de grupos musculares
 
-  // Cargar los grupos musculares desde el backend al iniciar el componente
   useEffect(() => {
-    const fetchMuscleGroups = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:8000/api/exercises/muscle-groups/'); // Cambia la URL según tu configuración
-        const data = await response.json();
-        const groups = data.data.map((group: any) => group.name); // Ajusta según el formato de la respuesta
-        setMuscleGroupsList(groups);
-      } catch (error) {
-        console.error('Error fetching muscle groups:', error);
-      }
-    };
+    let muscleData: MuscleGroupsData;
 
-    fetchMuscleGroups();
-  }, []);
+    // Determinar el archivo JSON correcto en función del idioma seleccionado
+    switch (language) {
+        case 'ca':
+            muscleData = musclesCa;
+            break;
+        case 'es':
+            muscleData = musclesEs;
+            break;
+        case 'en':
+        default:
+            muscleData = musclesEn;
+            break;
+    }
+
+    // Establecer la lista de grupos musculares
+    setMuscleGroupsList(muscleData.muscleGroups);
+}, [language]); // Escuchar los cambios en el idioma
+
 
   const handleSave = async () => {
     const exerciseId = data?.id; // Obtener el ID del ejercicio

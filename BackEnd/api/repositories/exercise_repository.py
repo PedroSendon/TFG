@@ -43,19 +43,23 @@ class ExerciseRepository:
         exercise = Exercise.objects.create(
             name=name,
             description=description,
-            muscle_groups=",".join(muscle_groups),  # Guardar los grupos musculares como una cadena separada por comas
             instructions=instructions,
             media=media
         )
+        
+        # Usar el método set_muscle_groups para almacenar la lista como una cadena separada por comas
+        exercise.set_muscle_groups(muscle_groups)
+        exercise.save()
 
         return {
             "id": exercise.id,
             "name": exercise.name,
             "description": exercise.description,
-            "muscleGroups": muscle_groups,
+            "muscleGroups": exercise.get_muscle_groups(),
             "instructions": exercise.instructions,
             "media": exercise.media
         }
+
     
     @staticmethod
     def update_exercise(exercise_id: int, data: dict):
@@ -96,10 +100,11 @@ class ExerciseRepository:
             "id": exercise.id,
             "name": exercise.name,
             "description": exercise.description,
-            "muscleGroups": [muscle.name for muscle in exercise.muscle_groups.all()],  # Corregido para manejar el ManyToMany
+            "muscleGroups": exercise.get_muscle_groups(),  # Acceder directamente a la lista de grupos musculares
             "instructions": exercise.instructions,
             "media": exercise.media
         } for exercise in exercises]
+
 
     
     @staticmethod
@@ -115,12 +120,13 @@ class ExerciseRepository:
                 "id": exercise.id,
                 "name": exercise.name,
                 "description": exercise.description,
-                "muscleGroups": exercise.muscle_groups.split(","),
+                "muscleGroups": exercise.get_muscle_groups(),  # Acceder directamente a la lista de grupos musculares
                 "instructions": exercise.instructions,
                 "media": exercise.media
             }
         except Exercise.DoesNotExist:
             return None
+
         
     @staticmethod
     def get_exercises_by_training(training_id):
@@ -139,7 +145,7 @@ class ExerciseRepository:
             "id": exercise.exercise.id,
             "name": exercise.exercise.name,
             "description": exercise.exercise.description,
-            "muscleGroups": exercise.exercise.muscle_groups.split(","),
+            "muscleGroups": exercise.exercise.get_muscle_groups(),  # Acceder directamente a la lista de grupos musculares
             "instructions": exercise.exercise.instructions,
             "media": exercise.exercise.media,
             "sets": exercise.sets,

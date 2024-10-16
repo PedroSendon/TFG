@@ -1,21 +1,18 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
-
-class MuscleGroup(models.Model):
-    """
-    Modelo que representa un grupo muscular.
-    """
-    name = models.CharField(max_length=100, unique=True)  # Nombre del grupo muscular (por ejemplo, 'Biceps', 'Triceps', etc.)
-
-    def __str__(self):
-        return self.name
 
 class Exercise(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
-    muscle_groups = models.ManyToManyField(MuscleGroup, related_name='exercises')
+    muscleGroups = models.TextField(blank=True, default="")  # Almacena los grupos musculares como una cadena
     media = models.URLField(blank=True, null=True)
     instructions = models.TextField(default="No instructions available")
 
     def __str__(self):
         return self.name
 
+    def get_muscle_groups(self):
+        return self.muscleGroups.split(',') if self.muscleGroups else []
+
+    def set_muscle_groups(self, muscle_groups):
+        self.muscleGroups = ','.join(muscle_groups)

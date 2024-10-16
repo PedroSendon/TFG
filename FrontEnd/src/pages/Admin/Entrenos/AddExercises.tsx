@@ -18,38 +18,54 @@ import { cameraOutline } from 'ionicons/icons';  // Icono de cámara para subir 
 import Header from '../../Header/Header';  // Importación del Header
 import '../../../theme/variables.css'; // Archivo de estilos personalizados.
 import { LanguageContext } from '../../../context/LanguageContext';
+import musclesCa from '../../../locales/muscles_ca.json';
+import musclesEs from '../../../locales/muscles_es.json';
+import musclesEn from '../../../locales/muscles_en.json';
+
+interface MuscleGroupsData {
+    muscleGroups: string[];
+}
 
 const AddExercises: React.FC = () => {
-    const history = useHistory(); 
-    const [media, setMedia] = useState<string | null>(null);  
-    const fileInputRef = useRef<HTMLInputElement>(null);  
-    const { t } = useContext(LanguageContext); // Usar el contexto de idioma
+    const history = useHistory();
+    const [media, setMedia] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { t, language  } = useContext(LanguageContext); // Usar el contexto de idioma
+    const muscleGroupsCa: MuscleGroupsData = musclesCa;
+    const muscleGroupsEs: MuscleGroupsData = musclesEs;
+    const muscleGroupsEn: MuscleGroupsData = musclesEn;
 
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        muscleGroups: [] as string[], 
+        muscleGroups: [] as string[],
         instructions: '',
     });
 
     const [errors, setErrors] = useState<any>({});
 
-    const [muscleGroupsList, setMuscleGroupsList] = useState<string[]>([]); // Estado para almacenar los grupos musculares desde la BD
-
-    // Obtener los grupos musculares desde el backend al cargar la página
+    const [muscleGroupsList, setMuscleGroupsList] = useState<string[]>([]);
+    // Cambiar el useEffect para que se base en la variable "language" y no en "t"
     useEffect(() => {
-        const fetchMuscleGroups = async () => {
-            try {
-                const response = await fetch('http://127.0.0.1:8000/api/exercises/muscle-groups/');
-                const data = await response.json();
-                setMuscleGroupsList(data.data.map((group: { name: string }) => group.name));
-            } catch (error) {
-                console.error('Error al obtener los grupos musculares:', error);
-            }
-        };
+        let muscleData: MuscleGroupsData;
 
-        fetchMuscleGroups();
-    }, []);
+        // Determinar el archivo JSON correcto en función del idioma seleccionado
+        switch (language) {
+            case 'ca':
+                muscleData = musclesCa;
+                break;
+            case 'es':
+                muscleData = musclesEs;
+                break;
+            case 'en':
+            default:
+                muscleData = musclesEn;
+                break;
+        }
+
+        // Establecer la lista de grupos musculares
+        setMuscleGroupsList(muscleData.muscleGroups);
+    }, [language]); // Escuchar los cambios en el idioma
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
         const { name, value } = e.target;
@@ -72,7 +88,7 @@ const AddExercises: React.FC = () => {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setMedia(reader.result as string);  
+                setMedia(reader.result as string);
             };
             reader.readAsDataURL(file);
         }
@@ -107,7 +123,7 @@ const AddExercises: React.FC = () => {
             const data = await response.json();
             if (response.ok) {
                 console.log('Ejercicio creado con éxito:', data);
-                history.push('/admin/exercises');  
+                history.push('/admin/exercises');
             } else {
                 console.error('Error al crear el ejercicio:', data);
                 setErrors({ ...errors, form: 'Error al crear el ejercicio. Verifique los datos.' });
@@ -119,7 +135,7 @@ const AddExercises: React.FC = () => {
     };
 
     const handleCancel = () => {
-        history.push('/admin/exercises');  
+        history.push('/admin/exercises');
     };
 
 
@@ -127,7 +143,7 @@ const AddExercises: React.FC = () => {
         <IonPage>
             {/* Header reutilizable */}
             <Header title={t('add_exercise_title')} /> {/* Reemplaza el título con la variable de idioma */}
-    
+
             <IonContent>
                 <Container component="main" maxWidth="xs" style={{ paddingBottom: '80px' }}>
                     <div style={{ marginTop: '1rem', textAlign: 'center' }}>
@@ -141,7 +157,7 @@ const AddExercises: React.FC = () => {
                                         required
                                         fullWidth
                                         id="name"
-                                        label={t('exercise_name')} 
+                                        label={t('exercise_name')}
                                         name="name"
                                         onChange={handleChange}
                                         error={!!errors.name}
@@ -167,14 +183,14 @@ const AddExercises: React.FC = () => {
                                         }}
                                     />
                                 </Grid>
-    
+
                                 {/* Campo de descripción */}
                                 <Grid item xs={12}>
                                     <TextField
                                         variant="outlined"
                                         fullWidth
                                         id="description"
-                                        label={t('description')} 
+                                        label={t('description')}
                                         name="description"
                                         multiline
                                         rows={3}
@@ -200,14 +216,14 @@ const AddExercises: React.FC = () => {
                                         }}
                                     />
                                 </Grid>
-    
+
                                 {/* Selección múltiple de grupos musculares */}
                                 <Grid item xs={12}>
                                     <TextField
                                         variant="outlined"
                                         fullWidth
                                         select
-                                        label={t('muscle_groups')} 
+                                        label={t('muscle_groups')}
                                         value={formData.muscleGroups}
                                         onChange={(event) => handleMuscleGroupChange(event as SelectChangeEvent<string[]>)}
                                         SelectProps={{
@@ -241,7 +257,7 @@ const AddExercises: React.FC = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-    
+
                                 {/* Campo de instrucciones */}
                                 <Grid item xs={12}>
                                     <TextField
@@ -274,7 +290,7 @@ const AddExercises: React.FC = () => {
                                         }}
                                     />
                                 </Grid>
-    
+
                                 {/* Botón para subir imagen o video */}
                                 <Grid item xs={12} className="ion-text-center">
                                     <Button
@@ -293,22 +309,22 @@ const AddExercises: React.FC = () => {
                                         <IonIcon icon={cameraOutline} style={{ color: '#32CD32', marginRight: '10px' }} />
                                         {t('upload_image_video')} {/* Texto traducido */}
                                     </Button>
-    
+
                                     <input
                                         type="file"
                                         ref={fileInputRef}
                                         style={{ display: 'none' }}
                                         onChange={handleFileChange}
                                     />
-    
+
                                     {media && <img src={media} alt="Preview" style={{ width: '100%', marginTop: '10px' }} />}
                                 </Grid>
-    
+
                             </Grid>
                         </form>
                     </div>
                 </Container>
-    
+
                 {/* Botones de Cancelar y Guardar */}
                 <Grid item xs={12}>
                     <Grid container spacing={2}>

@@ -6,7 +6,7 @@ class ExerciseSchema(BaseModel):
     name: str
     
     # Lista de grupos musculares asociados
-    muscle_groups: List[str]
+    muscleGroups: List[str]
     
     # Descripción del ejercicio
     description: str
@@ -23,7 +23,7 @@ class ExerciseSchema(BaseModel):
 class ExerciseUpdateSchema(BaseModel):
     name: Optional[str] = Field(None, min_length=1)
     description: Optional[str]
-    muscle_groups: Optional[List[str]]  # Lista de grupos musculares
+    muscleGroups: Optional[List[str]]  # Lista de grupos musculares
     instructions: Optional[str]
     media: Optional[str]  # URL o base64 para la imagen o video
 

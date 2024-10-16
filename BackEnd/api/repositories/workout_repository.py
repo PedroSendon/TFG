@@ -154,7 +154,7 @@ class WorkoutRepository:
                 "id": exercise.exercise.id,
                 "name": exercise.exercise.name,
                 "description": exercise.exercise.description,
-                "muscleGroups": exercise.exercise.muscle_groups.split(","),
+                "muscleGroups": exercise.exercise.get_muscle_groups(),  # Acceder directamente a la lista de grupos musculares
                 "instructions": exercise.exercise.instructions,
                 "media": exercise.exercise.media,
                 "sets": exercise.sets,
@@ -172,6 +172,7 @@ class WorkoutRepository:
 
         except Workout.DoesNotExist:
             return None
+
         
     @staticmethod
     def create_workout(name, description, exercises, media=None, days_per_week=None, duration=None, difficulty=None, equipment=None):

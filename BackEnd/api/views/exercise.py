@@ -2,7 +2,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from api.repositories.exercise_repository import ExerciseRepository
-from api.models.exercise import MuscleGroup
 from api.schemas.exercise import ExerciseUpdateSchema
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
@@ -16,13 +15,20 @@ from drf_yasg import openapi
         properties={
             'name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre del ejercicio'),
             'description': openapi.Schema(type=openapi.TYPE_STRING, description='Descripción del ejercicio'),
-            'muscleGroups': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING), description='Lista de grupos musculares trabajados'),
+            'muscleGroups': openapi.Schema(
+                type=openapi.TYPE_ARRAY, 
+                items=openapi.Items(type=openapi.TYPE_STRING), 
+                description='Lista de grupos musculares trabajados (se almacenarán como una cadena separada por comas)'
+            ),
             'instructions': openapi.Schema(type=openapi.TYPE_STRING, description='Instrucciones para realizar el ejercicio'),
             'media': openapi.Schema(type=openapi.TYPE_STRING, description='URL o base64 de la imagen o video del ejercicio (opcional)', nullable=True),
         },
     ),
     responses={201: 'Ejercicio creado con éxito', 400: 'Faltan parámetros obligatorios o hay valores no válidos'}
 )
+
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_exercise(request):
@@ -30,7 +36,7 @@ def create_exercise(request):
     Crear un nuevo ejercicio en el sistema.
     """
     user = request.user
-    if user.role != 'entrenador' and user.role != 'administrador':
+    if user.role not in ['entrenador', 'administrador']:
         return Response({"error": "No tienes permisos para crear entrenamientos"}, status=status.HTTP_403_FORBIDDEN)
     
     # Obtener los datos del cuerpo de la solicitud
@@ -45,16 +51,19 @@ def create_exercise(request):
         return Response({"error": "Faltan parámetros obligatorios o hay valores no válidos."},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    # Validar que muscle_groups sea una lista
+    # Validar que muscle_groups sea una lista de cadenas de texto
     if not isinstance(muscle_groups, list) or not all(isinstance(group, str) for group in muscle_groups):
         return Response({"error": "El parámetro 'muscleGroups' debe ser una lista de cadenas de texto."},
                         status=status.HTTP_400_BAD_REQUEST)
+
+    # Convertir la lista de muscle_groups a una cadena separada por comas
+    muscle_groups_str = ','.join(muscle_groups)
 
     # Crear el ejercicio
     exercise_data = ExerciseRepository.create_exercise(
         name=name,
         description=description,
-        muscle_groups=muscle_groups,
+        muscle_groups=muscle_groups_str,  # Guardamos la cadena de grupos musculares
         instructions=instructions,
         media=media
     )
@@ -64,15 +73,6 @@ def create_exercise(request):
         "data": exercise_data
     }, status=status.HTTP_201_CREATED)
 
-@api_view(['GET'])
-def get_muscle_groups(request):
-    """
-    Endpoint para obtener la lista de todos los grupos musculares.
-    """
-    muscle_groups = MuscleGroup.objects.all()
-    muscle_groups_data = [{"id": muscle.id, "name": muscle.name} for muscle in muscle_groups]
-
-    return Response({"data": muscle_groups_data}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def list_all_exercises(request):

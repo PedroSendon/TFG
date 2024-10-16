@@ -1,7 +1,6 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models.exercise import MuscleGroup
 from django.contrib import admin
 from .models.User import User, DietPreferences
 from .models.workout import Workout, WorkoutExercise
@@ -9,26 +8,12 @@ from .models.macros import MealPlan, DietCategory
 from .models.exercise import Exercise
 
 
-@admin.register(MuscleGroup)
-class MuscleGroupAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
+
 
 # Modelo intermedio WorkoutExercise para gestionar los ejercicios de cada entrenamiento
 class WorkoutExerciseInline(admin.TabularInline):
     model = WorkoutExercise
     extra = 1  # Permite añadir ejercicios adicionales al crear/editar un entrenamiento
-
-# Registrar el modelo de Ejercicio (Exercise)
-@admin.register(Exercise)
-class ExerciseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'display_muscle_groups')
-    search_fields = ('name', 'description')
-    list_filter = ('muscle_groups',)
-
-    # Función para convertir los grupos musculares en una cadena de texto
-    def display_muscle_groups(self, obj):
-        return ", ".join([muscle.name for muscle in obj.muscle_groups.all()])
-    display_muscle_groups.short_description = 'Muscle Groups'
 
 # Registrar el modelo de Usuario (User)
 @admin.register(User)
