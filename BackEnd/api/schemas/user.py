@@ -68,6 +68,7 @@ class UserDetailsSchema(BaseModel):
     weekly_training_days: conint(ge=1, le=7)
     daily_training_time: str
     physical_activity_level: str
+    available_equipment: str  # Equipamiento disponible
 
     class Config:
         from_attributes = True
@@ -82,14 +83,6 @@ class DietPreferencesSchema(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-class TrainingPreferencesSchema(BaseModel):
-    available_equipment: str  # Equipamiento disponible
-
-    class Config:
-        from_attributes = True
-
 
 # Esquema que combina todos los detalles del usuario
 class CompleteUserDetailsSchema(BaseModel):

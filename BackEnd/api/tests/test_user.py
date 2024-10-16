@@ -2,7 +2,7 @@ from BackEnd.api.models.process import ProgressTracking
 from rest_framework.test import APITestCase # type: ignore
 from rest_framework import status # type: ignore
 from django.urls import reverse
-from api.models.User import User, UserDetails, DietPreferences, TrainingPreferences
+from api.models.User import User, UserDetails, DietPreferences
 from api.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -153,7 +153,6 @@ class UserDetailsTestCase(APITestCase):
         # Verificar que las condiciones médicas se guarden
 
         # Verificar que las preferencias de entrenamiento se guarden
-        self.assertEqual(training_preferences.available_equipment, self.user_details_data['available_equipment'])
 
     def test_save_user_details_missing_required_field(self):
         """

@@ -4,7 +4,7 @@ from api.models.workout import TrainingPlan, UserWorkout, Workout
 from api.models import User
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import check_password, make_password
-from api.models.User import  User, UserDetails, DietPreferences, TrainingPreferences
+from api.models.User import  User, UserDetails, DietPreferences
 from api.models.process import ProgressTracking
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
@@ -239,7 +239,7 @@ class UserRepository:
             # Filtrar planes de entrenamiento según los días semanales, la duración diaria, el equipo disponible y la preferencia de entrenamiento
             training_plans = TrainingPlan.objects.filter(
                 duration__lte=user.details.daily_training_time,  # Filtrar planes de igual o menor duración diaria
-                equipment__in=user.training_preferences.available_equipment,  # Filtrar planes según el equipo disponible
+                equipment__in=user.details.available_equipment,  # Filtrar planes según el equipo disponible
             )
             
             # Asignar el plan de entrenamiento basado en el nivel de actividad física del usuario
@@ -282,7 +282,7 @@ class UserDetailsRepository:
                     'weekly_training_days': details_data['weekly_training_days'],
                     'daily_training_time': details_data['daily_training_time'],
                     'physical_activity_level': details_data['physical_activity_level'],
-                    
+                    'available_equipment': details_data['available_equipment'],
                 }
             )
 
@@ -297,15 +297,9 @@ class UserDetailsRepository:
             )
 
 
-            # Guardar preferencias de entrenamiento
-            training_preferences, created = TrainingPreferences.objects.update_or_create(
-                user=user,
-                defaults={
-                    'available_equipment': details_data['available_equipment'],
-                }
-            )
+            
 
-            return user_details, diet_preferences, training_preferences
+            return user_details, diet_preferences
 
         except Exception as e:
             raise ValueError(f"Error al crear o actualizar los detalles del usuario: {e}")

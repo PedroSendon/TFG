@@ -62,14 +62,7 @@ class Migration(migrations.Migration):
                 ('muscle_groups', models.ManyToManyField(related_name='exercises', to='api.musclegroup')),
             ],
         ),
-        migrations.CreateModel(
-            name='TrainingPreferences',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('available_equipment', models.CharField(max_length=100)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='available_equipment', to='api.user')),
-            ],
-        ),
+
         migrations.CreateModel(
             name='ProgressTracking',
             fields=[
