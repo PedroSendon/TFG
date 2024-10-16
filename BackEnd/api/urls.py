@@ -57,14 +57,14 @@ urlpatterns = [
     path('exercises/<int:exercise_id>/', exercise.update_exercise, name='update-exercise'),
 
     # Macros
-    path('macros/<str:category>/<int:id>/', macros.get_macronutrient_recommendation, name='get-macronutrient-recommendation'),
-    path('macros/<str:category>/<int:id>/update/', macros.update_macronutrient_recommendation, name='update-macronutrient-recommendation'),
-    path('macros/<str:category>/<int:id>/delete/', macros.delete_macronutrient_recommendation, name='delete-macronutrient-recommendation'),
-    path('macros/create/', macros.add_macronutrient_recommendation, name='add-macronutrient-recommendation'),
-    path('macros/', macros.get_user_macronutrients, name='get-macronutrients'),
-    path('macros/<str:category>/', macros.get_macros_by_category, name='get-macros-by-category'),
+    path('mealplans/<str:category>/<int:id>/', macros.get_mealplan, name='get-mealplan'),
+    path('mealplans/<str:category>/<int:id>/update/', macros.update_mealplan, name='update-mealplan'),
+    path('mealplans/<str:category>/<int:id>/delete/', macros.delete_mealplan, name='delete-mealplan'),
+    path('mealplans/create/', macros.add_mealplan, name='add-mealplan'),
+    path('mealplans/', macros.get_user_mealplan, name='get-mealplans'),
+    path('mealplans/<str:category>/', macros.get_mealplans_by_category, name='get-mealplans-by-category'),
     path('diet-categories/', macros.list_diet_categories, name='get-diet-categories'),
-    path('macros/all/', macros.get_all_macronutrients, name='get-all-macronutrients'),
+    path('mealplans/all/', macros.get_all_mealplans, name='get-all-mealplans'),
 
     # Estadísticas
     path('statistics/exercises/', statistics.get_exercise_popularity, name='get-exercise-popularity'),

@@ -5,13 +5,13 @@ from rest_framework import status
 from api.repositories.macros_repository import MacrosRepository, DietCategoryRepository
 
 @api_view(['GET'])
-def get_user_macronutrients(request):
+def get_user_mealplan(request):
     """
     Obtener los datos de macronutrientes del usuario.
     """
     user_id = request.query_params.get('userId') or request.user.id  # Obtener el ID del usuario autenticado o proporcionado
 
-    macros_data = MacrosRepository.get_user_macronutrients(user_id)
+    macros_data = MacrosRepository.get_user_mealplan(user_id)
 
     if not macros_data:
         return Response({"error": "No se encontraron datos de macronutrientes para el usuario."}, status=status.HTTP_404_NOT_FOUND)
@@ -19,23 +19,23 @@ def get_user_macronutrients(request):
     return Response(macros_data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def get_all_macronutrients(request):
+def get_all_mealplans(request):
     """
-    Obtener todos los planes de macronutrientes disponibles en la base de datos.
+    Obtener todos los planes de comida disponibles en la base de datos.
     """
     try:
-        # Obtener todos los planes de macronutrientes desde el repositorio
-        macros = MacrosRepository.get_all_macronutrients()
+        # Obtener todos los planes de comida desde el repositorio
+        meal_plans = MacrosRepository.get_all_mealplans()
 
         # Verifica que haya datos
-        if not macros:
-            return Response({"error": "No se encontraron planes de macronutrientes."}, status=status.HTTP_404_NOT_FOUND)
+        if not meal_plans:
+            return Response({"error": "No se encontraron planes de comida."}, status=status.HTTP_404_NOT_FOUND)
 
-        return Response({"data": macros}, status=status.HTTP_200_OK)
+        return Response({"data": meal_plans}, status=status.HTTP_200_OK)
 
     except Exception as e:
         # Retorna un error genérico si algo falla
-        return Response({"error": f"Error al obtener los planes de macronutrientes: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": f"Error al obtener los planes de comida: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def get_macronutrient_by_id(request):
@@ -52,7 +52,7 @@ def get_macronutrient_by_id(request):
     except ValueError:
         return Response({"error": "El parámetro 'id' debe ser un número."}, status=status.HTTP_400_BAD_REQUEST)
 
-    recommendation = MacrosRepository.get_macronutrient_by_id(recommendation_id)
+    recommendation = MacrosRepository.get_mealplan_by_id(recommendation_id)
 
     if recommendation:
         return Response(recommendation, status=status.HTTP_200_OK)
@@ -62,25 +62,24 @@ def get_macronutrient_by_id(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def add_macronutrient_recommendation(request):
+def add_mealplan(request):
     """
-    Añadir una nueva recomendación de macronutrientes.
+    Añadir un nuevo plan de comidas (MealPlan).
     """
     user = request.user
     if user.role != 'nutricionista' and user.role != 'administrador':
-        return Response({"error": "No tienes permisos para crear planes de nutricion"}, status=status.HTTP_403_FORBIDDEN)
-    
+        return Response({"error": "No tienes permisos para crear planes de nutrición"}, status=status.HTTP_403_FORBIDDEN)
+
     # Obtener los datos del cuerpo de la solicitud
     kcal = request.data.get('kcal')
     proteins = request.data.get('proteins')
     carbs = request.data.get('carbs')
     fats = request.data.get('fats')
     diet_type = request.data.get('dietType')
-    description = request.data.get('description', None)
 
     # Validar que todos los campos requeridos están presentes
-    if not all([kcal, proteins, carbs, fats, diet_type]):
-        return Response({"error": "Todos los campos (kcal, proteins, carbs, fats, dietType) son obligatorios."},
+    if not all([ kcal, proteins, carbs, fats, diet_type]):
+        return Response({"error": "Todos los campos ( kcal, proteins, carbs, fats, dietType) son obligatorios."},
                         status=status.HTTP_400_BAD_REQUEST)
 
     # Validar que el diet_type es válido
@@ -89,125 +88,131 @@ def add_macronutrient_recommendation(request):
         return Response({"error": "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance."},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    # Añadir la recomendación de macronutrientes
-    recommendation_data = MacrosRepository.add_macronutrient_recommendation(
+    # Añadir el plan de comidas
+    meal_plan_data = MacrosRepository.add_mealplan(
+        user=user,
         kcal=kcal,
         proteins=proteins,
         carbs=carbs,
         fats=fats,
-        diet_type=diet_type,
-        description=description
+        diet_type=diet_type
     )
 
+    if meal_plan_data is None:
+        return Response({"error": "Error al agregar el plan de comidas."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     return Response({
-        "message": "Recomendación de macronutrientes añadida exitosamente",
-        "data": recommendation_data
+        "message": "Plan de comidas añadido exitosamente",
+        "data": meal_plan_data
     }, status=status.HTTP_201_CREATED)
+
 
 
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def update_macronutrient_recommendation(request, category, id):
+def update_mealplan(request, id):
     """
-    Modificar una recomendación de macronutrientes existente en la categoría seleccionada.
+    Modificar un plan de comidas existente.
     """
     user = request.user
     if user.role != 'nutricionista' and user.role != 'administrador':
-        return Response({"error": "No tienes permisos para actualizar planes de nutricion"}, status=status.HTTP_403_FORBIDDEN)
-    
-    # Validar que la categoría es válida
-    valid_categories = ['weightLoss', 'muscleGain', 'maintenance']
-    if category not in valid_categories:
-        return Response({"error": "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance."},
-                        status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "No tienes permisos para actualizar planes de nutrición"}, status=status.HTTP_403_FORBIDDEN)
 
     # Obtener los datos del cuerpo de la solicitud
     kcal = request.data.get('kcal')
     proteins = request.data.get('proteins')
     carbs = request.data.get('carbs')
     fats = request.data.get('fats')
+    diet_type = request.data.get('dietType')
 
     # Validar que todos los campos requeridos están presentes
-    if not all([kcal, proteins, carbs, fats]):
-        return Response({"error": "Todos los campos (kcal, proteins, carbs, fats) son obligatorios."},
+    if not all([kcal, proteins, carbs, fats, diet_type]):
+        return Response({"error": "Todos los campos (kcal, proteins, carbs, fats, dietType) son obligatorios."},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    # Modificar la recomendación de macronutrientes
-    success = MacrosRepository.update_macronutrient_recommendation(category, id, kcal, proteins, carbs, fats)
+    # Modificar el plan de comidas
+    success = MacrosRepository.update_mealplan(user, id, kcal, proteins, carbs, fats, diet_type)
 
     if success:
-        return Response({"message": "Recommendation updated successfully"}, status=status.HTTP_200_OK)
+        return Response({"message": "Plan de comidas actualizado correctamente"}, status=status.HTTP_200_OK)
     else:
-        return Response({"error": "Recommendation not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Plan de comidas no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
     
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def delete_macronutrient_recommendation(request, category, id):
+def delete_mealplan(request, category, id):
     """
-    Eliminar una recomendación de macronutrientes de la categoría seleccionada.
+    Eliminar un plan de comidas de la categoría seleccionada.
     """
     user = request.user
     if user.role != 'nutricionista' and user.role != 'administrador':
-        return Response({"error": "No tienes permisos para eliminar planes de nutricion"}, status=status.HTTP_403_FORBIDDEN)
-    
+        return Response({"error": "No tienes permisos para eliminar planes de nutrición"}, status=status.HTTP_403_FORBIDDEN)
+
     # Validar que la categoría es válida
     valid_categories = ['weightLoss', 'muscleGain', 'maintenance']
     if category not in valid_categories:
         return Response({"error": "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance."},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    # Eliminar la recomendación de macronutrientes
-    success = MacrosRepository.delete_macronutrient_recommendation(category, id)
+    # Eliminar el plan de comidas
+    success = MacrosRepository.delete_mealplan(user, id, category)
 
     if success:
-        return Response({"message": "Recommendation deleted successfully"}, status=status.HTTP_200_OK)
+        return Response({"message": "Plan de comidas eliminado correctamente"}, status=status.HTTP_200_OK)
     else:
-        return Response({"error": "Recommendation not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Plan de comidas no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
     
 @api_view(['GET'])
-def get_macronutrient_recommendation(request, category, id):
+def get_mealplan(request, category, id):
     """
-    Obtener los detalles de una recomendación de macronutrientes de la categoría seleccionada.
+    Obtener los detalles de un plan de comidas de la categoría seleccionada.
     """
-    valid_categories = MacrosRepository.get_all_diet_categories()
+    # Validar que la categoría es válida
+    valid_categories = ['weightLoss', 'muscleGain', 'maintenance']
     if category not in valid_categories:
         return Response({"error": "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance."},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    # Obtener los detalles de la recomendación desde el repositorio
-    recommendation = MacrosRepository.get_macronutrient_recommendation(category, id)
+    # Obtener los detalles del plan de comidas desde el repositorio
+    mealplan = MacrosRepository.get_mealplan(request.user, id, category)
 
-    if recommendation:
-        return Response(recommendation, status=status.HTTP_200_OK)
+    if mealplan:
+        return Response(mealplan, status=status.HTTP_200_OK)
     else:
-        return Response({"error": "Recommendation not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Plan de comidas no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
 
     
 
 @api_view(['GET'])
-def get_macros_by_category(request, category):
+def get_mealplans_by_category(request, category):
     """
-    Obtener todas las recomendaciones de macronutrientes por categoría.
+    Obtener todos los planes de comidas por categoría.
     """
     valid_categories = ['weightLoss', 'muscleGain', 'maintenance']
     if category not in valid_categories:
         return Response({"error": "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Obtener las recomendaciones de macronutrientes de la categoría seleccionada
-    recommendations = MacrosRepository.get_macros_by_category(category)
+    # Obtener los planes de comidas de la categoría seleccionada
+    meal_plans = MacrosRepository.get_mealplans_by_category(category)
 
-    if recommendations:
-        return Response(recommendations, status=status.HTTP_200_OK)
+    if meal_plans:
+        return Response(meal_plans, status=status.HTTP_200_OK)
     else:
-        return Response({"error": "No se encontraron recomendaciones"}, status=status.HTTP_404_NOT_FOUND)
-
+        return Response({"error": "No se encontraron planes de comidas"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
 def list_diet_categories(request):
     """
-    Endpoint para listar las categorías de dieta.
+    Endpoint para listar las categorías de dieta hardcodeadas.
     """
-    categories = DietCategoryRepository.list_all_categories()
-    return Response({"categories": list(categories)})
+    categories = [
+        {"name": "weightLoss", "description": "Pérdida de Peso"},
+        {"name": "muscleGain", "description": "Ganancia Muscular"},
+        {"name": "maintenance", "description": "Mantenimiento"}
+    ]
+    return Response({"categories": categories}, status=status.HTTP_200_OK)
 

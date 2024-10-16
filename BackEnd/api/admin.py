@@ -5,7 +5,7 @@ from .models.exercise import MuscleGroup
 from django.contrib import admin
 from .models.User import User, DietPreferences
 from .models.workout import Workout, WorkoutExercise
-from .models.macros import MacrosRecommendation, MealPlan, DietCategory
+from .models.macros import MealPlan, DietCategory
 from .models.exercise import Exercise
 
 
@@ -47,8 +47,8 @@ class WorkoutAdmin(admin.ModelAdmin):
 # Registrar el modelo de Plan Nutricional (MealPlan)
 @admin.register(MealPlan)
 class MealPlanAdmin(admin.ModelAdmin):
-    list_display = ('user', 'diet_type', 'meal_name', 'calories')
-    search_fields = ('meal_name', 'diet_type')
+    list_display = ('user', 'diet_type', 'calories')
+    search_fields = ('diet_type', '')
     list_filter = ('diet_type',)
 
 # Registrar el modelo de Preferencias de Dieta (DietPreferences)
@@ -57,12 +57,6 @@ class DietPreferencesAdmin(admin.ModelAdmin):
     list_display = ('user', 'diet_type', 'macronutrient_intake')
     search_fields = ('diet_type', 'user__first_name', 'user__last_name')
 
-# Registrar el modelo de Recomendación de Macronutrientes (MacrosRecommendation)
-@admin.register(MacrosRecommendation)
-class MacrosRecommendationAdmin(admin.ModelAdmin):
-    list_display = ('category', 'kcal', 'proteins', 'carbs', 'fats', 'description')  # Mostrar la descripción también
-    search_fields = ('category__name', 'kcal', 'description')  # Búsqueda por el nombre de la categoría y la descripción
-    list_filter = ('category',)  # Filtro por categoría
 
 # Registrar el modelo intermedio de WorkoutExercise para administrar las relaciones
 @admin.register(WorkoutExercise)

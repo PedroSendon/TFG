@@ -55,7 +55,7 @@ const MacrosAdmin: React.FC = () => {
     // Función para obtener las recomendaciones de macronutrientes desde el BE
     const fetchMacros = async (category: string) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/macros/${category}/`);
+            const response = await fetch(`http://127.0.0.1:8000/api/mealplans/${category}/`);
             const data = await response.json();
             if (response.ok) {
                 setMacros((prev) => ({ ...prev, [category]: data }));

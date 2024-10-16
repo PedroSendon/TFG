@@ -63,7 +63,7 @@ class WorkoutExerciseDetailSchema(BaseModel):
 
 class UserWorkoutSchema(BaseModel):
     user_id: int
-    trainingPlan: TrainingPlanSchema  # Relaciona el entrenamiento con el esquema actualizado de Workout
+    training_plan: TrainingPlanSchema  # Relaciona el entrenamiento con el esquema actualizado de Workout
     progress: Optional[int] = 0  # Porcentaje de progreso en el entrenamiento
     date_started: date
     date_completed: Optional[date] = None

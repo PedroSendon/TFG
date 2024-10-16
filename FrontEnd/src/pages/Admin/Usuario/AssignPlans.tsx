@@ -31,7 +31,7 @@ const AssignPlans: React.FC = () => {
 
   const fetchNutritionPlans = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/macros/all/');
+      const response = await fetch('http://127.0.0.1:8000/api/mealplans/all/');
       if (!response.ok) {
         throw new Error(t('fetch_nutrition_plans_error'));
       }

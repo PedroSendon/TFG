@@ -29,11 +29,10 @@ const MacronutrientPage: React.FC = () => {
     // Función para hacer la llamada al backend y obtener los macronutrientes del usuario
     const fetchUserMacros = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/macros/', {
+        const response = await fetch('http://127.0.0.1:8000/api/mealplans/', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // Asegúrate de incluir el token si usas autenticación
           }
         });
 

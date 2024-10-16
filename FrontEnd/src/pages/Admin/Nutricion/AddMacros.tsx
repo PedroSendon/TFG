@@ -30,20 +30,24 @@ const AddMacros: React.FC = () => {
     useEffect(() => {
         const fetchDietTypes = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/diet-categories/'); // Cambia la URL según tu configuración
+                const response = await fetch('http://127.0.0.1:8000/api/diet-categories/');
                 const data = await response.json();
+                
+                // Mapeamos las categorías
                 const types = data.categories.map((category: any) => ({
                     value: category.name,
-                    label: category.description || category.name, // Ajusta según tu modelo
+                    label: category.description || category.name, // Ajusta según el formato de tu backend
                 }));
-                setDietTypes(types);
+                
+                setDietTypes(types); // Guardar en el estado
             } catch (error) {
                 console.error('Error fetching diet types:', error);
             }
         };
-
+    
         fetchDietTypes();
     }, []);
+    
 
     // Validaciones básicas.
     const validateField = (name: string, value: string) => {
@@ -77,7 +81,7 @@ const AddMacros: React.FC = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/macros/create/', {
+                const response = await fetch('http://127.0.0.1:8000/api/mealplans/create/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

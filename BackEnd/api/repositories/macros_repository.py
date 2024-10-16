@@ -1,4 +1,4 @@
-from api.models.macros import MacrosRecommendation, MealPlan, DietCategory
+from api.models.macros import MealPlan, DietCategory
 
 
 class MacrosRepository:
@@ -12,32 +12,34 @@ class MacrosRepository:
         return list(DietCategory.objects.values_list('name', flat=True))
 
     @staticmethod
-    def get_all_macronutrients():
+    def get_all_mealplans():
         """
-        Obtener todos los planes de macronutrientes.
+        Obtener todos los planes de comida (MealPlans).
         """
         try:
-            # Recuperar todos los planes de macronutrientes
-            macros = MacrosRecommendation.objects.all()
+            # Recuperar todos los planes de comida
+            meal_plans = MealPlan.objects.all()
 
             # Serializa los datos
             return [
                 {
-                    "id": macro.id,
-                    "dietType": macro.diet_type,  # Aquí es importante que el campo exista
-                    "kcal": macro.kcal,
-                    "proteins": macro.proteins,
-                    "carbs": macro.carbs,
-                    "fats": macro.fats
-                } for macro in macros
+                    "id": meal_plan.id,
+                    "dietType": meal_plan.diet_type,  # Tipo de dieta asociado al MealPlan
+                    "kcal": meal_plan.calories,
+                    "proteins": meal_plan.proteins,
+                    "carbs": meal_plan.carbs,
+                    "fats": meal_plan.fats
+                } for meal_plan in meal_plans
             ]
 
         except Exception as e:
             # En caso de error, retorna None o lanza una excepción
-            print(f"Error al obtener los macronutrientes: {e}")
+            print(f"Error al obtener los planes de comida: {e}")
             return None
+
+    
     @staticmethod
-    def get_user_macronutrients(user_id):
+    def get_user_mealplan(user_id):
         """
         Obtener los datos de macronutrientes del usuario.
         :param user_id: ID del usuario.
@@ -92,139 +94,153 @@ class MacrosRepository:
             return None
 
     @staticmethod
-    def get_macronutrient_by_id(recommendation_id):
+    def get_mealplan_by_id(mealplan_id):
         """
-        Obtener los detalles de una recomendación de macronutrientes específica por ID.
-        :param recommendation_id: ID de la recomendación.
-        :return: Un diccionario con los detalles de la recomendación o None si no se encontró.
+        Obtener los detalles de un plan de comida específico por ID.
+        :param mealplan_id: ID del plan de comida.
+        :return: Un diccionario con los detalles del plan de comida o None si no se encontró.
         """
         try:
-            recommendation = MacrosRecommendation.objects.get(
-                id=recommendation_id)
+            # Buscar el MealPlan por su ID
+            mealplan = MealPlan.objects.get(id=mealplan_id)
             return {
-                "id": recommendation.id,
-                "kcal": recommendation.kcal,
-                "proteins": float(recommendation.proteins),
-                "carbs": float(recommendation.carbs),
-                "fats": float(recommendation.fats),
-                "dietType": recommendation.diet_type,
-                "description": recommendation.description
+                "id": mealplan.id,
+                "kcal": mealplan.calories,
+                "proteins": float(mealplan.proteins),
+                "carbs": float(mealplan.carbs),
+                "fats": float(mealplan.fats),
+                "dietType": mealplan.diet_type,  # Tipo de dieta asociado al MealPlan
+                "description": None  # Si deseas agregar un campo de descripción más adelante
             }
-        except MacrosRecommendation.DoesNotExist:
+        except MealPlan.DoesNotExist:
             return None
 
+
     @staticmethod
-    def add_macronutrient_recommendation(kcal, proteins, carbs, fats, diet_type, description=None):
+    def add_mealplan(user, kcal, proteins, carbs, fats, diet_type):
         """
-        Añadir una nueva recomendación de macronutrientes.
+        Añadir un nuevo plan de comidas (MealPlan).
+        :param user: El usuario asociado al plan de comida.
+        :param kcal: Calorías de la comida.
+        :param proteins: Gramos de proteínas.
+        :param carbs: Gramos de carbohidratos.
+        :param fats: Gramos de grasas.
+        :param diet_type: Tipo de dieta (weightLoss, muscleGain, maintenance).
+        :return: Un diccionario con los detalles del plan de comida o None si ocurrió un error.
         """
         try:
-            recommendation = MacrosRecommendation.objects.create(
-                kcal=kcal,
+            meal_plan = MealPlan.objects.create(
+                user=user,  # Relación con el usuario
+                calories=kcal,
                 proteins=proteins,
                 carbs=carbs,
                 fats=fats,
-                category=diet_type,  # Asegúrate de que `diet_type` sea una instancia de DietCategory
-                description=description
+                diet_type=diet_type  # Asegúrate de que diet_type sea uno de los valores permitidos en MealPlan
             )
             return {
-                "id": recommendation.id,
-                "kcal": recommendation.kcal,
-                "proteins": float(recommendation.proteins),
-                "carbs": float(recommendation.carbs),
-                "fats": float(recommendation.fats),
-                # Asegúrate de obtener el nombre de la categoría
-                "dietType": recommendation.category.name,
-                "description": recommendation.description
+                "id": meal_plan.id,
+                "kcal": meal_plan.calories,
+                "proteins": float(meal_plan.proteins),
+                "carbs": float(meal_plan.carbs),
+                "fats": float(meal_plan.fats),
+                "dietType": meal_plan.diet_type,
             }
         except Exception as e:
             # Manejo de errores
-            print(f"Error al agregar la recomendación de macronutrientes: {e}")
+            print(f"Error al agregar el plan de comidas: {e}")
             return None
 
+
     @staticmethod
-    def update_macronutrient_recommendation(category, recommendation_id, kcal, proteins, carbs, fats):
+    def update_mealplan(user, mealplan_id, kcal, proteins, carbs, fats, diet_type):
         """
-        Modificar una recomendación de macronutrientes existente en la categoría seleccionada.
-        :param category: La categoría de la dieta (weightLoss, muscleGain, maintenance).
-        :param recommendation_id: El ID de la recomendación a modificar.
+        Modificar un plan de comidas existente.
+        :param user: El usuario que posee el plan.
+        :param mealplan_id: El ID del plan de comidas a modificar.
         :param kcal: Calorías recomendadas.
         :param proteins: Gramos de proteínas.
         :param carbs: Gramos de carbohidratos.
         :param fats: Gramos de grasas.
-        :return: True si se actualizó correctamente, False si no se encontró la recomendación.
+        :param diet_type: Tipo de dieta (weightLoss, muscleGain, maintenance).
+        :return: True si se actualizó correctamente, False si no se encontró el plan de comidas.
         """
         try:
-            recommendation = MacrosRecommendation.objects.get(
-                id=recommendation_id, diet_type=category)
+            # Buscar el MealPlan por ID y el usuario
+            meal_plan = MealPlan.objects.get(id=mealplan_id, user=user, diet_type=diet_type)
 
-            # Actualizar los valores de la recomendación
-            recommendation.kcal = kcal
-            recommendation.proteins = proteins
-            recommendation.carbs = carbs
-            recommendation.fats = fats
-            recommendation.save()
+            # Actualizar los valores del plan de comidas
+            meal_plan.calories = kcal
+            meal_plan.proteins = proteins
+            meal_plan.carbs = carbs
+            meal_plan.fats = fats
+            meal_plan.save()
 
             return True
-        except MacrosRecommendation.DoesNotExist:
+        except MealPlan.DoesNotExist:
             return False
 
+
     @staticmethod
-    def delete_macronutrient_recommendation(category, recommendation_id):
+    def delete_mealplan(user, mealplan_id, diet_type):
         """
-        Eliminar una recomendación de macronutrientes de la categoría seleccionada.
-        :param category: La categoría de la dieta (weightLoss, muscleGain, maintenance).
-        :param recommendation_id: El ID de la recomendación a eliminar.
-        :return: True si se eliminó correctamente, False si no se encontró la recomendación.
+        Eliminar un plan de comidas de la categoría seleccionada.
+        :param user: El usuario que posee el plan de comidas.
+        :param mealplan_id: El ID del plan de comidas a eliminar.
+        :param diet_type: La categoría de la dieta (weightLoss, muscleGain, maintenance).
+        :return: True si se eliminó correctamente, False si no se encontró el plan de comidas.
         """
         try:
-            recommendation = MacrosRecommendation.objects.get(
-                id=recommendation_id, diet_type=category)
-            recommendation.delete()
+            # Buscar el MealPlan por ID, usuario y tipo de dieta
+            meal_plan = MealPlan.objects.get(id=mealplan_id, user=user, diet_type=diet_type)
+            meal_plan.delete()
             return True
-        except MacrosRecommendation.DoesNotExist:
+        except MealPlan.DoesNotExist:
             return False
 
+
     @staticmethod
-    def get_macronutrient_recommendation(category, recommendation_id):
+    def get_mealplan(user, mealplan_id, diet_type):
         """
-        Obtener los detalles de una recomendación de macronutrientes.
-        :param category: La categoría de la dieta.
-        :param recommendation_id: El ID de la recomendación.
-        :return: Un diccionario con los detalles de la recomendación o None si no se encontró.
+        Obtener los detalles de un plan de comidas.
+        :param user: El usuario asociado al plan de comidas.
+        :param mealplan_id: El ID del plan de comidas.
+        :param diet_type: La categoría de la dieta (weightLoss, muscleGain, maintenance).
+        :return: Un diccionario con los detalles del plan de comidas o None si no se encontró.
         """
         try:
-            recommendation = MacrosRecommendation.objects.get(
-                id=recommendation_id, category__name=category)
+            # Buscar el MealPlan por ID, usuario y tipo de dieta
+            meal_plan = MealPlan.objects.get(id=mealplan_id, user=user, diet_type=diet_type)
             return {
-                "id": recommendation.id,
-                "kcal": recommendation.kcal,
-                "proteins": float(recommendation.proteins),
-                "carbs": float(recommendation.carbs),
-                "fats": float(recommendation.fats)
+                "id": meal_plan.id,
+                "kcal": meal_plan.calories,
+                "proteins": float(meal_plan.proteins),
+                "carbs": float(meal_plan.carbs),
+                "fats": float(meal_plan.fats)
             }
-        except MacrosRecommendation.DoesNotExist:
+        except MealPlan.DoesNotExist:
             return None
 
+
+
     @staticmethod
-    def get_macros_by_category(category):
+    def get_mealplans_by_category(diet_type):
         """
-        Obtener todas las recomendaciones de macronutrientes por categoría.
-        :param category: La categoría de la dieta (p.ej., 'weightLoss').
-        :return: Lista de diccionarios con los detalles de cada recomendación.
+        Obtener todos los planes de comidas por categoría (tipo de dieta).
+        :param diet_type: La categoría de la dieta (p.ej., 'weightLoss').
+        :return: Lista de diccionarios con los detalles de cada plan de comidas.
         """
-        recommendations = MacrosRecommendation.objects.filter(
-            category__name=category)
+        meal_plans = MealPlan.objects.filter(diet_type=diet_type)
         return [
             {
-                "id": recommendation.id,
-                "kcal": recommendation.kcal,
-                "proteins": float(recommendation.proteins),
-                "carbs": float(recommendation.carbs),
-                "fats": float(recommendation.fats)
+                "id": meal_plan.id,
+                "kcal": meal_plan.calories,
+                "proteins": float(meal_plan.proteins),
+                "carbs": float(meal_plan.carbs),
+                "fats": float(meal_plan.fats)
             }
-            for recommendation in recommendations
+            for meal_plan in meal_plans
         ]
+
 
 
 class DietCategoryRepository:
