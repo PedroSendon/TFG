@@ -66,6 +66,12 @@ const AddWorkouts: React.FC = () => {
 
     const handleSave = async () => {
         try {
+            const accessToken = localStorage.getItem('access_token');
+
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
             const response = await fetch('http://127.0.0.1:8000/api/workouts/create/', {
                 method: 'POST',
                 headers: {
@@ -175,26 +181,26 @@ const AddWorkouts: React.FC = () => {
         fetchExercises();
     }, []);
 
-// Opciones para los menús desplegables
-const difficultyOptions = [
-    { value: 'Ligero', label: t('light') },
-    { value: 'Moderado', label: t('moderate') },
-    { value: 'Intermedio', label: t('intermediate') },
-    { value: 'Avanzado', label: t('advanced') },
-];
+    // Opciones para los menús desplegables
+    const difficultyOptions = [
+        { value: 'Ligero', label: t('light') },
+        { value: 'Moderado', label: t('moderate') },
+        { value: 'Intermedio', label: t('intermediate') },
+        { value: 'Avanzado', label: t('advanced') },
+    ];
 
-const trainingPreferenceOptions = [
-    { value: 'Entrenamiento en casa', label: t('home_training') },
-    { value: 'Entrenamiento en gimnasio', label: t('gym_training') },
-    { value: 'Ejercicios al aire libre', label: t('outdoor_training') },
-    { value: 'Clases grupales', label: t('group_classes') },
-];
+    const trainingPreferenceOptions = [
+        { value: 'Entrenamiento en casa', label: t('home_training') },
+        { value: 'Entrenamiento en gimnasio', label: t('gym_training') },
+        { value: 'Ejercicios al aire libre', label: t('outdoor_training') },
+        { value: 'Clases grupales', label: t('group_classes') },
+    ];
 
-const equipmentOptions = [
-    { value: 'Gimnasio completo', label: t('full_gym') },
-    { value: 'Pesas libres', label: t('free_weights') },
-    { value: 'Sin equipamiento', label: t('no_equipment') },
-];
+    const equipmentOptions = [
+        { value: 'Gimnasio completo', label: t('full_gym') },
+        { value: 'Pesas libres', label: t('free_weights') },
+        { value: 'Sin equipamiento', label: t('no_equipment') },
+    ];
 
     return (
         <IonPage>

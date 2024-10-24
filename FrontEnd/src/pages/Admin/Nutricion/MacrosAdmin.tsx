@@ -39,7 +39,19 @@ const MacrosAdmin: React.FC = () => {
     // Función para obtener las categorías de dieta desde el BE
     const fetchCategories = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/diet-categories/`);
+            const accessToken = localStorage.getItem('access_token');
+
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
+            const response = await fetch(`http://127.0.0.1:8000/api/diet-categories/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                },
+            });
             const data = await response.json();
             if (response.ok) {
                 setCategories(data.categories);
@@ -55,7 +67,19 @@ const MacrosAdmin: React.FC = () => {
     // Función para obtener las recomendaciones de macronutrientes desde el BE
     const fetchMacros = async (category: string) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/mealplans/${category}/`);
+            const accessToken = localStorage.getItem('access_token');
+
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
+            const response = await fetch(`http://127.0.0.1:8000/api/mealplans/${category}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                },
+            });
             const data = await response.json();
             if (response.ok) {
                 setMacros((prev) => ({ ...prev, [category]: data }));

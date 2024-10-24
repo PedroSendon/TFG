@@ -28,26 +28,39 @@ const AddMacros: React.FC = () => {
 
     // Obtener los tipos de dieta desde la base de datos al cargar el componente.
     useEffect(() => {
+
         const fetchDietTypes = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/diet-categories/');
+                const accessToken = localStorage.getItem('access_token');
+
+                if (!accessToken) {
+                    console.error(t('no_token'));
+                    return;
+                }
+                const response = await fetch('http://127.0.0.1:8000/api/diet-categories/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                    },
+                });
                 const data = await response.json();
-                
+
                 // Mapeamos las categorías
                 const types = data.categories.map((category: any) => ({
                     value: category.name,
                     label: category.description || category.name, // Ajusta según el formato de tu backend
                 }));
-                
+
                 setDietTypes(types); // Guardar en el estado
             } catch (error) {
                 console.error('Error fetching diet types:', error);
             }
         };
-    
+
         fetchDietTypes();
     }, []);
-    
+
 
     // Validaciones básicas.
     const validateField = (name: string, value: string) => {
@@ -81,10 +94,17 @@ const AddMacros: React.FC = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
+                const accessToken = localStorage.getItem('access_token');
+
+                if (!accessToken) {
+                    console.error(t('no_token'));
+                    return;
+                }
                 const response = await fetch('http://127.0.0.1:8000/api/mealplans/create/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
                     },
                     body: JSON.stringify({
                         kcal: formData.kcal,

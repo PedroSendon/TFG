@@ -56,7 +56,19 @@ const ModifyWorkoutPage: React.FC = () => {
   // Fetch de ejercicios
   const fetchExercises = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/exercises/all/');
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
+      const response = await fetch('http://127.0.0.1:8000/api/exercises/all/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+        },
+    });
       const data = await response.json();
 
       if (data && data.data) {
@@ -94,10 +106,17 @@ const ModifyWorkoutPage: React.FC = () => {
     };
 
     try {
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
       const response = await fetch(`http://127.0.0.1:8000/api/workouts/${workoutId}/update/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
         },
         body: JSON.stringify(updatedWorkout),
       });

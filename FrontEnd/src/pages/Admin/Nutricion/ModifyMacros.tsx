@@ -56,7 +56,19 @@ const ModifyMacros: React.FC = () => {
         // Obtener los tipos de dieta desde la base de datos.
         const fetchDietTypes = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/diet-categories/'); // Cambia la URL según tu configuración
+                const accessToken = localStorage.getItem('access_token');
+
+                if (!accessToken) {
+                    console.error(t('no_token'));
+                    return;
+                }
+                const response = await fetch('http://127.0.0.1:8000/api/diet-categories/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                    },
+                });
                 const data = await response.json();
                 const types = data.categories.map((category: any) => ({
                     value: category.name,
@@ -103,6 +115,12 @@ const ModifyMacros: React.FC = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
+                const accessToken = localStorage.getItem('access_token');
+
+                if (!accessToken) {
+                    console.error(t('no_token'));
+                    return;
+                }
                 const response = await fetch(`http://127.0.0.1:8000/api/mealplans/${formData.dietType}/${recommendationData?.id}/update/`, {
                     method: 'PUT',
                     headers: {

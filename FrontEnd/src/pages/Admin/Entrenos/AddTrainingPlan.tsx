@@ -42,7 +42,19 @@ const CreateTrainingPlan: React.FC = () => {
     // Llamada al backend para obtener la lista de entrenamientos
     const fetchTrainings = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/workouts/');
+            const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
+            const response = await fetch('http://127.0.0.1:8000/api/workouts/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                },
+            });
             const data = await response.json();
             console.log('Entrenamientos:', data);
             setTrainings(data.data);
@@ -66,12 +78,18 @@ const CreateTrainingPlan: React.FC = () => {
         };
     
         try {
+            const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
             const response = await fetch('http://127.0.0.1:8000/api/workouts/create/plan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
                 },
-                body: JSON.stringify(trainingPlanData),  // Convertir los datos a JSON
             });
     
             if (response.ok) {
