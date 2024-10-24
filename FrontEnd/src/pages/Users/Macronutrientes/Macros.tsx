@@ -29,10 +29,17 @@ const MacronutrientPage: React.FC = () => {
     // Función para hacer la llamada al backend y obtener los macronutrientes del usuario
     const fetchUserMacros = async () => {
       try {
+        const accessToken = localStorage.getItem('access_token');
+
+        if (!accessToken) {
+          console.error(t('no_token'));
+          return;
+        }
         const response = await fetch('http://127.0.0.1:8000/api/mealplans/', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
           }
         });
 
@@ -168,7 +175,7 @@ const MacronutrientPage: React.FC = () => {
               <IonCol size="12">
                 <IonLabel style={{ fontSize: '16px', fontWeight: 'bold' }}>{t('meal_distribution')}</IonLabel>
               </IonCol>
-            </IonRow>            
+            </IonRow>
             <IonCol size="10" style={{ marginBottom: '60px' }}>
               <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 10px', margin: '0 auto', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>
                 <thead>

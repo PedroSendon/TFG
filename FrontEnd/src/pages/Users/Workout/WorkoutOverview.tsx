@@ -18,8 +18,20 @@ const WorkoutOverview: React.FC = () => {
   // Función para obtener los entrenamientos del backend
   const fetchWorkouts = async () => {
     try {
+      const accessToken = localStorage.getItem('access_token');
+
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
       const userId = 1; // Reemplaza esto con el ID del usuario actualmente logueado
-      const response = await fetch(`http://127.0.0.1:8000/api/workouts/by-user/?userId=${userId}`); // Reemplaza por tu URL del backend
+      const response = await fetch(`http://127.0.0.1:8000/api/workouts/by-user/?userId=${userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+        },
+      });
       if (!response.ok) {
         throw new Error('Error al obtener los entrenamientos');
       }

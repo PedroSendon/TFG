@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { IonPage, IonContent, IonList, IonItem, IonLabel, IonImg, IonCheckbox, IonButton, IonProgressBar, IonRow, IonCol, IonGrid } from '@ionic/react';
-import { useHistory, useParams } from 'react-router-dom'; 
-import './WorkoutDay.css'; 
-import Header from '../../Header/Header'; 
+import { useHistory, useParams } from 'react-router-dom';
+import './WorkoutDay.css';
+import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
 import { Button } from '@mui/material';
 
@@ -19,14 +19,26 @@ const WorkoutDay: React.FC = () => {
 
   const fetchWorkoutDetails = async (day_id: string) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/workout/day/${day_id}/`);
+      const accessToken = localStorage.getItem('access_token');
+
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
+      const response = await fetch(`http://127.0.0.1:8000/api/workout/day/${day_id}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         setExercises(data);
 
         const totalSets = data.reduce((acc: number, exercise: any) => acc + exercise.sets, 0);
         const totalReps = data.reduce((acc: number, exercise: any) => acc + exercise.reps * exercise.sets, 0);
-        const estimatedTime = totalSets * 2; 
+        const estimatedTime = totalSets * 2;
         setTotalSets(totalSets);
         setTotalReps(totalReps);
         setEstimatedTime(estimatedTime);
@@ -110,27 +122,27 @@ const WorkoutDay: React.FC = () => {
           <IonProgressBar value={progress} color="success" style={{ height: '10px' }}></IonProgressBar>
         </div>
 
-          {/* Botón de cerrar sesión actualizado */}
-          <IonGrid style={{ marginBottom: '15%' }}>
-                    <IonRow>
-                        <IonCol size="12">
-                            <Button
-                                style={{
-                                    border: '1px solid #32CD32',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#32CD32',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                                onClick={handleCompleteWorkout}
-                            >
-                                {t('mark_training_completed')}
-                            </Button>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
+        {/* Botón de cerrar sesión actualizado */}
+        <IonGrid style={{ marginBottom: '15%' }}>
+          <IonRow>
+            <IonCol size="12">
+              <Button
+                style={{
+                  border: '1px solid #32CD32',
+                  backgroundColor: '#FFFFFF',
+                  color: '#32CD32',
+                  padding: '3% 0',
+                  borderRadius: '5px',
+                  fontSize: '1em',
+                  width: '100%',
+                }}
+                onClick={handleCompleteWorkout}
+              >
+                {t('mark_training_completed')}
+              </Button>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
 
       </IonContent>
     </IonPage>

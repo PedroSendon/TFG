@@ -52,10 +52,17 @@ const EditProfilePage: React.FC = () => {
 
     const handleSave = async () => {
         try {
+            const accessToken = localStorage.getItem('access_token');
+
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
             const response = await fetch('http://127.0.0.1:8000/api/profile/update/', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
                 },
                 body: JSON.stringify({
                     firstName: profileData.firstName,

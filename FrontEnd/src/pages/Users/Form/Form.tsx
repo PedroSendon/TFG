@@ -37,10 +37,17 @@ const UserDetailsForm: React.FC = () => {
 
     const handleFinish = async () => {
         try {
+            const accessToken = localStorage.getItem('access_token');
+
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
             const response = await fetch('http://127.0.0.1:8000/api/form/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
                 },
                 body: JSON.stringify({
                     height: parseInt(formData.height),
@@ -197,7 +204,7 @@ const UserDetailsForm: React.FC = () => {
                         </TextField>
                     </Grid>
 
-                   
+
 
                     <Grid item xs={12}>
                         <TextField
@@ -354,134 +361,134 @@ const UserDetailsForm: React.FC = () => {
     };
 
     const DietAndNutrition = () => {
-            
+
         return (
-          <Box
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            sx={{ height: '80vh' }}
-          >
-            <Typography variant="h5" align="center" gutterBottom>
-              {t('diet_and_nutrition')}
-            </Typography>
-      
-            <Grid container spacing={3} justifyContent="center">
-              {/* Número de comidas al día */}
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  label={t('meals_per_day')}
-                  name="mealsPerDay"
-                  type="number"
-                  value={formData.mealsPerDay}
-                  onChange={handleChange}
-                  fullWidth
-                />
-              </Grid>
-      
-              {/* Evaluación de la ingesta de macronutrientes */}
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  label={t('macronutrient_intake')}
-                  name="macronutrientIntake"
-                  select
-                  value={formData.macronutrientIntake}
-                  onChange={handleChange}
-                  fullWidth
+            <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ height: '80vh' }}
+            >
+                <Typography variant="h5" align="center" gutterBottom>
+                    {t('diet_and_nutrition')}
+                </Typography>
+
+                <Grid container spacing={3} justifyContent="center">
+                    {/* Número de comidas al día */}
+                    <Grid item xs={12}>
+                        <TextField
+                            variant="outlined"
+                            label={t('meals_per_day')}
+                            name="mealsPerDay"
+                            type="number"
+                            value={formData.mealsPerDay}
+                            onChange={handleChange}
+                            fullWidth
+                        />
+                    </Grid>
+
+                    {/* Evaluación de la ingesta de macronutrientes */}
+                    <Grid item xs={12}>
+                        <TextField
+                            variant="outlined"
+                            label={t('macronutrient_intake')}
+                            name="macronutrientIntake"
+                            select
+                            value={formData.macronutrientIntake}
+                            onChange={handleChange}
+                            fullWidth
+                        >
+                            <MenuItem value="Bajo en proteínas">{t('low_protein')}</MenuItem>
+                            <MenuItem value="Bajo en carbohidratos">{t('low_carb')}</MenuItem>
+                            <MenuItem value="Bajo en grasas">{t('low_fat')}</MenuItem>
+                            <MenuItem value="Balanceado">{t('balanced')}</MenuItem>
+                            <MenuItem value="No lo sé">{t('dont_know')}</MenuItem>
+                        </TextField>
+                    </Grid>
+                </Grid>
+
+                <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    sx={{ position: 'fixed', bottom: '20px', width: '80%' }}
                 >
-                  <MenuItem value="Bajo en proteínas">{t('low_protein')}</MenuItem>
-                  <MenuItem value="Bajo en carbohidratos">{t('low_carb')}</MenuItem>
-                  <MenuItem value="Bajo en grasas">{t('low_fat')}</MenuItem>
-                  <MenuItem value="Balanceado">{t('balanced')}</MenuItem>
-                  <MenuItem value="No lo sé">{t('dont_know')}</MenuItem>
-                </TextField>
-              </Grid>
-            </Grid>
-      
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              sx={{ position: 'fixed', bottom: '20px', width: '80%' }}
-            >
-              <Button
-                onClick={handleBack}
-                variant="outlined"
-                sx={{
-                  color: '#32CD32',
-                  borderColor: '#32CD32',
-                  '&:hover': { borderColor: '#2AA32A' },
-                  width: '48%',
-                }}
-              >
-                {t('back')}
-              </Button>
-              <Button
-                onClick={handleNext}
-                variant="contained"
-                sx={{
-                  backgroundColor: '#32CD32',
-                  '&:hover': { backgroundColor: '#2AA32A' },
-                  width: '48%',
-                }}
-              >
-                {t('next')}
-              </Button>
+                    <Button
+                        onClick={handleBack}
+                        variant="outlined"
+                        sx={{
+                            color: '#32CD32',
+                            borderColor: '#32CD32',
+                            '&:hover': { borderColor: '#2AA32A' },
+                            width: '48%',
+                        }}
+                    >
+                        {t('back')}
+                    </Button>
+                    <Button
+                        onClick={handleNext}
+                        variant="contained"
+                        sx={{
+                            backgroundColor: '#32CD32',
+                            '&:hover': { backgroundColor: '#2AA32A' },
+                            width: '48%',
+                        }}
+                    >
+                        {t('next')}
+                    </Button>
+                </Box>
             </Box>
-          </Box>
         );
-      };
-      const FormComplete = () => {      
+    };
+    const FormComplete = () => {
         return (
-          <Box
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            sx={{ height: '80vh' }}
-          >
-            <Typography variant="h5" align="center" gutterBottom>
-              {t('form_completed')}
-            </Typography>
-      
-            <Typography variant="body1" align="center" sx={{ margin: '20px 0' }}>
-              {t('thank_you_message')}
-            </Typography>
-      
             <Box
-              display="flex"
-              justifyContent="space-between"
-              sx={{ position: 'fixed', bottom: '20px', width: '80%' }}
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ height: '80vh' }}
             >
-              <Button
-                onClick={handleBack}
-                variant="outlined"
-                sx={{
-                  color: '#32CD32',
-                  borderColor: '#32CD32',
-                  '&:hover': { borderColor: '#2AA32A' },
-                  width: '48%',
-                }}
-              >
-                {t('back')}
-              </Button>
-              <Button
-                onClick={handleFinish}
-                variant="contained"
-                sx={{
-                  backgroundColor: '#32CD32',
-                  '&:hover': { backgroundColor: '#2AA32A' },
-                  width: '48%',
-                }}
-              >
-                {t('finish')}
-              </Button>
+                <Typography variant="h5" align="center" gutterBottom>
+                    {t('form_completed')}
+                </Typography>
+
+                <Typography variant="body1" align="center" sx={{ margin: '20px 0' }}>
+                    {t('thank_you_message')}
+                </Typography>
+
+                <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    sx={{ position: 'fixed', bottom: '20px', width: '80%' }}
+                >
+                    <Button
+                        onClick={handleBack}
+                        variant="outlined"
+                        sx={{
+                            color: '#32CD32',
+                            borderColor: '#32CD32',
+                            '&:hover': { borderColor: '#2AA32A' },
+                            width: '48%',
+                        }}
+                    >
+                        {t('back')}
+                    </Button>
+                    <Button
+                        onClick={handleFinish}
+                        variant="contained"
+                        sx={{
+                            backgroundColor: '#32CD32',
+                            '&:hover': { backgroundColor: '#2AA32A' },
+                            width: '48%',
+                        }}
+                    >
+                        {t('finish')}
+                    </Button>
+                </Box>
             </Box>
-          </Box>
         );
-      };
+    };
     const renderStep = () => {
         switch (currentStep) {
             case 0:
