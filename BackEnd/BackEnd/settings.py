@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+# Base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -92,8 +93,12 @@ WSGI_APPLICATION = 'BackEnd.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'smartgym',  # Nombre de la base de datos que creaste en pgAdmin
+        'USER': 'postgres',  # Usuario de PostgreSQL (por defecto suele ser 'postgres')
+        'PASSWORD': 'Admin',  # Contraseña de PostgreSQL
+        'HOST': 'localhost',  # Dirección del servidor de base de datos
+        'PORT': '5432',  # Puerto de PostgreSQL (por defecto 5432)
     }
 }
 

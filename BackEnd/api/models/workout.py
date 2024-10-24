@@ -1,5 +1,5 @@
 from django.db import models
-from .User import User  # Asegúrate de que 'User' esté definido en otro archivo de modelos
+from .user import User  # Asegúrate de que 'User' esté definido en otro archivo de modelos
 from .exercise import Exercise  # Asegúrate de que 'Exercise' esté definido en otro archivo de modelos
 
 class Workout(models.Model):

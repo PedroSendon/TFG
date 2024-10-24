@@ -1,10 +1,10 @@
 from datetime import datetime
 from api.models.macros import MealPlan, UserNutritionPlan
 from api.models.workout import TrainingPlan, UserWorkout, Workout
-from api.models import User
+from api.models import user
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import check_password, make_password
-from api.models.User import  User, UserDetails, DietPreferences
+from api.models.user import  User, UserDetails, DietPreferences
 from api.models.process import ProgressTracking
 from django.db.models.functions import TruncMonth
 from django.db.models import Count

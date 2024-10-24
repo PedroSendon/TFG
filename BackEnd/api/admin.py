@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from django.contrib import admin
-from .models.User import User, DietPreferences
+from .models.user import User, DietPreferences
 from .models.workout import Workout, WorkoutExercise
 from .models.macros import MealPlan, DietCategory
 from .models.exercise import Exercise

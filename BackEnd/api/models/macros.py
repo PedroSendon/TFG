@@ -1,5 +1,5 @@
 from django.db import models
-from .User import User  # Asegúrate de que 'User' esté definido en otro archivo de modelos
+from .user import User  # Asegúrate de que 'User' esté definido en otro archivo de modelos
 
 class DietCategory(models.Model):
     name = models.CharField(max_length=50, unique=True)  # Nombre de la categoría (p.ej., 'weightLoss', 'muscleGain', 'maintenance')

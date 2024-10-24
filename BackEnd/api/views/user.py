@@ -110,7 +110,6 @@ def login(request):
     Autenticar un usuario.
     """
     try:
-        print('Data', **request.data)
         # Validar los datos de la solicitud
         login_data = LoginSchema(**request.data)
         
