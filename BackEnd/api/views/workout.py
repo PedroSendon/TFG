@@ -7,6 +7,7 @@ from api.schemas.workout import WorkoutSchema, TrainingPlanSchema
 from api.schemas.exercise import ExerciseSchema
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_workouts(request):
     """
     Obtener la lista de entrenamientos disponibles.
@@ -19,6 +20,7 @@ def get_workouts(request):
     return Response({"data": workouts}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_workout_by_day(request, day):
     """
     Obtener los detalles de un entrenamiento basado en el día.
@@ -49,6 +51,7 @@ def get_workout_by_day(request, day):
     return Response(workout_data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_workout_exercises_by_day(request, day_id):
     """
     Obtener los detalles de los ejercicios para un día de entrenamiento específico.
@@ -74,6 +77,7 @@ def get_workout_exercises_by_day(request, day_id):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
 def mark_workout_day_complete(request, day_id):
     """
     Marcar un día de entrenamiento como completado y registrar los ejercicios completados.
@@ -94,6 +98,7 @@ def mark_workout_day_complete(request, day_id):
     return Response({"message": "Día de entrenamiento marcado como completado.", "completed_workouts": progress.completed_workouts}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_workout_details(request):
     """
     Obtener los detalles de un entrenamiento específico.
@@ -117,6 +122,7 @@ def get_workout_details(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_workouts_by_user(request):
     """
     Obtener todos los entrenamientos disponibles de un usuario.
@@ -181,6 +187,7 @@ def create_workout(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
 def create_training_plan(request):
     """
     Endpoint para crear un nuevo plan de entrenamiento.
@@ -211,6 +218,7 @@ def create_training_plan(request):
         return Response({"error": "Ocurrió un error inesperado."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_training_plans(request):
     """
     Obtener todos los planes de entrenamiento.

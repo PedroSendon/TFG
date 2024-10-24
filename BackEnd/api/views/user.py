@@ -57,7 +57,7 @@ def register(request):
 
 
 @api_view(['POST'])
-# @permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated]) 
 def create_user_as_admin(request):
     """
     Crear un nuevo usuario desde el modo administrador.
@@ -94,6 +94,7 @@ def create_user_as_admin(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_user_by_email(request, email):
     """
     Obtener un usuario por su correo electrónico.
@@ -161,6 +162,7 @@ def save_user_details(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_user_profile(request):
     """
     Obtener los datos del perfil del usuario.
@@ -177,6 +179,7 @@ def get_user_profile(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_weight_history(request):
     """
     Obtener el historial de peso del usuario a lo largo del tiempo.
@@ -194,6 +197,7 @@ def get_weight_history(request):
 
 
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated]) 
 def update_user_profile(request):
     """
     Actualizar la información del perfil del usuario.
@@ -290,6 +294,7 @@ def assign_role(request, user_id):
 
 
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated]) 
 def change_password(request):
     """
     Cambiar la contraseña del usuario.
@@ -314,8 +319,7 @@ def change_password(request):
 
 
 @api_view(['PUT'])
-# Permitir el manejo de archivos
-@parser_classes([MultiPartParser, FormParser])
+@permission_classes([IsAuthenticated]) 
 def upload_profile_photo(request):
     """
     Subir o actualizar la foto de perfil del usuario.
@@ -370,7 +374,7 @@ def delete_user(request, user_id):
 
 
 @api_view(['POST'])
-# Requiere que el usuario esté autenticado
+@permission_classes([IsAuthenticated]) 
 def create_user_details(request):
     try:
         print(f"Datos recibidos: {request.data}")

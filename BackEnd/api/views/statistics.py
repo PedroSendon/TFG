@@ -1,10 +1,12 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from api.repositories.exercise_repository import ExerciseRepository
 from api.repositories.user_repository import UserRepository
+from rest_framework.permissions import IsAuthenticated
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_exercise_popularity(request):
     """
     Obtener la popularidad de los ejercicios más realizados en la plataforma.
@@ -22,6 +24,7 @@ def get_exercise_popularity(request):
     return Response({"data": exercise_popularity}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_platform_growth(request):
     """
     Obtener el crecimiento de la plataforma en términos de nuevos usuarios registrados por mes.

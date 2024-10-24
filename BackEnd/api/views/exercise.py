@@ -75,6 +75,7 @@ def create_exercise(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def list_all_exercises(request):
     """
     Listar todos los ejercicios disponibles en el sistema.
@@ -83,6 +84,7 @@ def list_all_exercises(request):
     return Response({"data": exercises}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_exercise_details(request):
     """
     Obtener los detalles de un ejercicio específico por su ID.
@@ -105,6 +107,7 @@ def get_exercise_details(request):
         return Response({"error": "Ejercicio no encontrado."}, status=status.HTTP_404_NOT_FOUND)
     
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_exercises_by_training(request):
     """
     Obtener todos los ejercicios de un entrenamiento específico.

@@ -5,6 +5,7 @@ from rest_framework import status
 from api.repositories.macros_repository import MacrosRepository, DietCategoryRepository
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_user_mealplan(request):
     """
     Obtener los datos de macronutrientes del usuario.
@@ -19,6 +20,7 @@ def get_user_mealplan(request):
     return Response(macros_data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_all_mealplans(request):
     """
     Obtener todos los planes de comida disponibles en la base de datos.
@@ -38,6 +40,7 @@ def get_all_mealplans(request):
         return Response({"error": f"Error al obtener los planes de comida: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_macronutrient_by_id(request):
     """
     Obtener los detalles de una recomendación de macronutrientes por ID.
@@ -166,6 +169,7 @@ def delete_mealplan(request, category, id):
 
     
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_mealplan(request, category, id):
     """
     Obtener los detalles de un plan de comidas de la categoría seleccionada.
@@ -188,6 +192,7 @@ def get_mealplan(request, category, id):
     
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def get_mealplans_by_category(request, category):
     """
     Obtener todos los planes de comidas por categoría.
@@ -205,6 +210,7 @@ def get_mealplans_by_category(request, category):
         return Response({"error": "No se encontraron planes de comidas"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
 def list_diet_categories(request):
     """
     Endpoint para listar las categorías de dieta hardcodeadas.
