@@ -17,10 +17,9 @@ from rest_framework.permissions import AllowAny
 @permission_classes([AllowAny])  # Permitir a cualquier usuario registrar
 def register(request):
     """
-    Registrar un nuevo usuario.
+    Registrar un nuevo usuario y devolver tokens JWT.
     """
     try:
-        print(request.data)  # Esto imprimirá los datos que están llegando
         user_data = UserCreate(**request.data)
 
         # Verificar si el usuario ya existe por su email
@@ -35,12 +34,16 @@ def register(request):
         user_data.password = make_password(user_data.password)
 
         # Crear usuario usando el repositorio, asignando rol "cliente"
-        user = UserRepository.create_user(
-            {**user_data.dict(), "role": "cliente"})
+        user = UserRepository.create_user({**user_data.dict(), "role": "cliente"})
 
-        # Generar token
+        # Generar tokens JWT para el usuario
+        refresh = RefreshToken.for_user(user)
+
+        # Devolver tokens y mensaje de éxito
         return Response({
             "message": "Usuario registrado exitosamente",
+            "refresh": str(refresh),
+            "access": str(refresh.access_token)
         }, status=status.HTTP_201_CREATED)
 
     except ValidationError as e:
@@ -119,9 +122,14 @@ def login(request):
         if not user:
             return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
 
+        # Generar tokens JWT para el usuario
+        refresh = RefreshToken.for_user(user)
+
         # Generar token
         return Response({
             "message": "Inicio de sesión exitoso",
+            "refresh": str(refresh),
+            "access": str(refresh.access_token)
         }, status=status.HTTP_200_OK)
 
     except Exception as e:
@@ -330,8 +338,7 @@ def upload_profile_photo(request):
 
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication, SessionAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])  # Solo usuarios autenticados
 def get_all_users(request):
     """
     Obtener la lista de usuarios con su información básica.

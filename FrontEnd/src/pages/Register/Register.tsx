@@ -140,14 +140,20 @@ const Register: React.FC = () => {
           birth_date: formData.birthDate.format('YYYY-MM-DD'),
           gender: formData.gender,
           terms_accepted: formData.termsAccepted,
-        }),
+        }), 
       });
 
       if (response.ok) {
         const data = await response.json();
         console.log('Usuario registrado:', data);
+  
+        // Almacenar los tokens JWT en el localStorage o sessionStorage
+        localStorage.setItem('access_token', data.access); // Almacena el token de acceso
+        localStorage.setItem('refresh_token', data.refresh); // Almacena el token de refresco
+  
+        // Redirigir al usuario a otra página, por ejemplo el formulario o dashboard
         history.push('/form');
-      } else {
+      }  else {
         const errorData = await response.json();
         console.log('Error:', errorData);
         setErrors({ apiError: errorData.error });

@@ -12,7 +12,7 @@ import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
 
 const AddUsers: React.FC = () => {
-    const history = useHistory(); 
+    const history = useHistory();
     const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
 
     const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const AddUsers: React.FC = () => {
         password: '',
         birthDate: dayjs(),
         gender: '',
-        role: '', 
+        role: '',
     });
 
     const [errors, setErrors] = useState<any>({});
@@ -113,17 +113,24 @@ const AddUsers: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    
+
         if (!isFormValid()) {
             console.log(t('form_errors'));
             return;
         }
-    
+
         try {
+            const accessToken = localStorage.getItem('access_token');
+
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
             const response = await fetch('http://127.0.0.1:8000/api/users/create/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
                 },
                 body: JSON.stringify({
                     first_name: formData.firstName,
@@ -135,11 +142,11 @@ const AddUsers: React.FC = () => {
                     role: formData.role,  // Asegúrate de que este campo tenga un valor válido
                 }),
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
                 console.log(t('user_created'), data);
-                history.push('/admin/users'); 
+                history.push('/admin/users');
             } else {
                 const errorData = await response.json();
                 console.error('Error en la creación del usuario:', errorData);
@@ -148,8 +155,8 @@ const AddUsers: React.FC = () => {
             console.error('Error en la petición:', error);
         }
     };
-    
-    
+
+
     const handleCancel = () => {
         history.push('/admin/users');
     };

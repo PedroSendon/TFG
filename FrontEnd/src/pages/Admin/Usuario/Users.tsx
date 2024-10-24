@@ -42,10 +42,25 @@ const Users: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/users/');  // Cambia la URL a la correcta de tu backend
+      // Obtener el token de acceso del localStorage
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
+  
+      const response = await fetch('http://127.0.0.1:8000/api/users/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+        },
+      });
+  
       if (response.ok) {
         const data = await response.json();
-        setUsers(data);  // Actualiza el estado con los datos obtenidos
+        setUsers(data);  // Actualiza el estado con los usuarios obtenidos
       } else {
         console.error(t('fetch_error'));
       }
@@ -53,6 +68,7 @@ const Users: React.FC = () => {
       console.error(t('network_error'), error);
     }
   };
+  
 
   // Función para manejar la eliminación del usuario
   const handleDelete = (userId: number) => {

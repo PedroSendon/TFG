@@ -20,7 +20,19 @@ const AssignPlans: React.FC = () => {
 
   const fetchWorkouts = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/workouts/');
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
+      const response = await fetch('http://127.0.0.1:8000/api/workouts/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+        },
+      });
       const data = await response.json();
       setWorkoutOptions(data.data); 
     } catch (error) {
@@ -31,7 +43,19 @@ const AssignPlans: React.FC = () => {
 
   const fetchNutritionPlans = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/mealplans/all/');
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
+      const response = await fetch('http://127.0.0.1:8000/api/mealplans/all/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+        },
+      });
       if (!response.ok) {
         throw new Error(t('fetch_nutrition_plans_error'));
       }
@@ -50,10 +74,17 @@ const AssignPlans: React.FC = () => {
 
   const handleSave = async () => {
     try {
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
       const response = await fetch(`http://127.0.0.1:8000/api/users/${userId}/assign-plans/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
         },
         body: JSON.stringify({
           workout_id: selectedWorkout, 

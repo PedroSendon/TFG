@@ -75,6 +75,10 @@ const Login: React.FC = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Inicio de sesión exitoso:', data);
+                
+                localStorage.setItem('access_token', data.access); // Almacena el token de acceso
+                localStorage.setItem('refresh_token', data.refresh); // Almacena el token de refresco
+          
                 history.push('/workout');
             } else {
                 const errorData = await response.json();

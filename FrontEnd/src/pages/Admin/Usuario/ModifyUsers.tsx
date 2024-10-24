@@ -36,11 +36,17 @@ const ModifyUserPage: React.FC = () => {
 
     const handleSave = async () => {
         try {
+            const accessToken = localStorage.getItem('access_token');
+      
+            if (!accessToken) {
+              console.error(t('no_token'));
+              return;
+            }
             const response = await fetch(`http://127.0.0.1:8000/api/users/update/${userData.id}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Si necesitas un token de autenticación
+                    'Authorization': `Bearer ${accessToken}`, // Si necesitas un token de autenticación
                 },
                 body: JSON.stringify({
                     first_name: profileData.firstName,
