@@ -120,7 +120,7 @@ const MacrosAdmin: React.FC = () => {
     };
 
     const handleAddMacros = () => {
-        history.push(`/admin/nutrition/add`); 
+        history.push(`/admin/nutrition/add`);
     };
 
     const handleEditMacros = (macro: { id: number; kcal: number; proteins: number; carbs: number; fats: number }) => {
@@ -146,6 +146,14 @@ const MacrosAdmin: React.FC = () => {
                     }}
                     className="custom-segment"
                     color="success"
+                    style={{
+                        position: 'fixed',   // Posición fija
+                        top: '56px',         // Ajustar la posición debajo del Header
+                        width: '100%',
+                        zIndex: 1000,        // Asegura que esté sobre el contenido
+                        backgroundColor: '#ffffff',
+                        borderBottom: '1px solid #ccc',
+                    }}
                 >
                     <IonSegmentButton value="weightLoss">
                         <IonLabel>{t('weight_loss')}</IonLabel>  {/* Texto traducido */}
@@ -157,7 +165,7 @@ const MacrosAdmin: React.FC = () => {
                         <IonLabel>{t('maintenance')}</IonLabel>  {/* Texto traducido */}
                     </IonSegmentButton>
                 </IonSegment>
-
+                <div style={{ marginTop: '10%' }}> 
                 <IonGrid>
                     <IonRow>
                         {macros[selectedCategory] && macros[selectedCategory].map((macro) => (
@@ -172,66 +180,87 @@ const MacrosAdmin: React.FC = () => {
                                         boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
                                     }}
                                 >
-                                    <IonCardContent
-                                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                                    >
-                                        {/* Información de la recomendación */}
-                                        <div>
+                                    <IonCardContent>
+                                        {/* Contenedor general para el contenido */}
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                width: '100%',
+                                            }}
+                                        >
+                                            {/* Nombre del plan de macros (ocupando el ancho completo) */}
                                             <IonLabel
                                                 style={{
                                                     color: '#000000',
                                                     fontWeight: 'bold',
                                                     fontSize: '1.2em',
-                                                    display: 'block',
+                                                    width: '100%',
                                                     marginBottom: '8px',
                                                 }}
                                             >
-                                                {macro.kcal} {t('kcal')}
+                                                {macro.name}
                                             </IonLabel>
-                                            <IonLabel style={{ color: '#6b6b6b', fontSize: '0.9em' }}>
-                                                {t('proteins')}: {macro.proteins}g, {t('carbs')}: {macro.carbs}g, {t('fats')}: {macro.fats}g
-                                            </IonLabel>
-                                        </div>
 
-                                        {/* Botones Modificar y Eliminar */}
-                                        <div style={{ display: 'flex', gap: '5px' }}>
-                                            <Button
-                                                onClick={() => handleEditMacros(macro)}
+                                            {/* Contenedor para la información y los botones */}
+                                            <div
                                                 style={{
-                                                    border: '1px solid #32CD32',
-                                                    backgroundColor: '#FFFFFF',
-                                                    color: '#32CD32',
-                                                    padding: '4px 8px',
-                                                    borderRadius: '5px',
-                                                    fontSize: '0.7em',
-                                                    minWidth: '55px',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    width: '100%',
                                                 }}
                                             >
-                                                {t('modify_button')}
-                                            </Button>
+                                                {/* Información del macro a la izquierda */}
+                                                <div>
+                                                    <IonLabel style={{ color: '#6b6b6b', fontSize: '0.9em' }}>
+                                                        {macro.kcal} Kcal, {t('proteins')}: {macro.proteins}g, {t('carbs')}: {macro.carbs}g, {t('fats')}: {macro.fats}g
+                                                    </IonLabel>
+                                                </div>
 
-                                            <Button
-                                                onClick={() => confirmDelete(macro.id)}
-                                                style={{
-                                                    border: '1px solid #FF0000',
-                                                    backgroundColor: '#FFFFFF',
-                                                    color: '#FF0000',
-                                                    padding: '4px 8px',
-                                                    borderRadius: '5px',
-                                                    fontSize: '0.7em',
-                                                    minWidth: '55px',
-                                                }}
-                                            >
-                                                {t('delete_button')}
-                                            </Button>
+                                                {/* Botones a la derecha */}
+                                                <div style={{ display: 'flex', gap: '10px' }}>
+                                                    <Button
+                                                        onClick={() => handleEditMacros(macro)}
+                                                        style={{
+                                                            border: '1px solid #32CD32',
+                                                            backgroundColor: '#FFFFFF',
+                                                            color: '#32CD32',
+                                                            padding: '4px 8px',
+                                                            borderRadius: '5px',
+                                                            fontSize: '0.7em',
+                                                            minWidth: '55px',
+                                                        }}
+                                                    >
+                                                        {t('modify_button')}
+                                                    </Button>
+
+                                                    <Button
+                                                        onClick={() => confirmDelete(macro.id)}
+                                                        style={{
+                                                            border: '1px solid #FF0000',
+                                                            backgroundColor: '#FFFFFF',
+                                                            color: '#FF0000',
+                                                            padding: '4px 8px',
+                                                            borderRadius: '5px',
+                                                            fontSize: '0.7em',
+                                                            minWidth: '55px',
+                                                        }}
+                                                    >
+                                                        {t('delete_button')}
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </IonCardContent>
                                 </IonCard>
                             </IonCol>
+
                         ))}
                     </IonRow>
                 </IonGrid>
 
+                </div>
                 {/* Botón flotante para añadir una nueva recomendación */}
                 <IonFab vertical="bottom" horizontal="end" style={{ marginBottom: '15%', position: 'fixed' }}>
                     <Button

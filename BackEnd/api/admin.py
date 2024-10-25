@@ -23,7 +23,7 @@ class UserDetailsAdmin(admin.ModelAdmin):
 
 @admin.register(DietPreferences)
 class DietPreferencesAdmin(admin.ModelAdmin):
-    list_display = ['user', 'diet_type', 'meals_per_day', 'macronutrient_intake']
+    list_display = ['user', 'diet_type', 'meals_per_day']
     search_fields = ['user__first_name', 'user__last_name']
     list_filter = ['diet_type']
 
@@ -37,8 +37,8 @@ class ExerciseAdmin(admin.ModelAdmin):
 
 @admin.register(MealPlan)
 class MealPlanAdmin(admin.ModelAdmin):
-    list_display = ['user', 'diet_type', 'calories', 'proteins', 'carbs', 'fats']
-    search_fields = ['user__first_name', 'user__last_name', 'diet_type']
+    list_display = ['name', 'diet_type', 'calories', 'proteins', 'carbs', 'fats']  # Mostrar el nombre del plan
+    search_fields = ['name', 'diet_type']
     list_filter = ['diet_type']
 
 
@@ -51,7 +51,7 @@ class DietCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(UserNutritionPlan)
 class UserNutritionPlanAdmin(admin.ModelAdmin):
-    list_display = ['user', 'plan', 'date_assigned']
+    list_display = ['user', 'plan', 'date_assigned']  # Aquí sí incluimos 'user' porque es parte de UserNutritionPlan
     search_fields = ['user__first_name', 'user__last_name', 'plan__diet_type']
     list_filter = ['date_assigned']
 

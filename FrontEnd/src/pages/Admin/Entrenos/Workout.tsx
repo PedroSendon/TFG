@@ -108,25 +108,25 @@ const WorkoutsExercises: React.FC = () => {
 
     const fetchExercises = async () => {
         try {
-          const accessToken = localStorage.getItem('access_token');
-          if (!accessToken) {
-            console.error(t('no_token'));
-            return;
-          }
-          const response = await fetch('http://127.0.0.1:8000/api/exercises/all/', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`,
-            },
-          });
-          const data = await response.json();
-          console.log('Fetched exercises:', data);
-          setExercises(data.data || []); // Asegúrate de que sea un array vacío si no hay datos
+            const accessToken = localStorage.getItem('access_token');
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
+            const response = await fetch('http://127.0.0.1:8000/api/exercises/all/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+            const data = await response.json();
+            console.log('Fetched exercises:', data);
+            setExercises(data.data || []); // Asegúrate de que sea un array vacío si no hay datos
         } catch (error) {
-          console.error(t('error_fetching_exercises'), error);
+            console.error(t('error_fetching_exercises'), error);
         }
-      };
+    };
 
     const handleAddTrainingPlan = () => {
         history.push('/admin/workout/plan'); // Redirige a la vista de añadir plan de entrenamiento
@@ -178,24 +178,34 @@ const WorkoutsExercises: React.FC = () => {
         <IonPage>
             <Header title={t(selectedSection === 'workouts' ? 'workouts' : 'exercises')} />
             <IonContent style={{ backgroundColor: '#000000' }}>
-                <IonSegment
-                    value={selectedSection}
-                    onIonChange={(e: CustomEvent) => setSelectedSection(e.detail.value!)}
-                    className="custom-segment"
-                    color="success"
-                >
-                    <IonSegmentButton value="workouts">
-                        <IonLabel>{t('workouts')}</IonLabel>
-                    </IonSegmentButton>
-                    <IonSegmentButton value="exercises">
-                        <IonLabel>{t('exercises')}</IonLabel>
-                    </IonSegmentButton>
-                    <IonSegmentButton value="trainingPlans"> {/* Nueva opción */}
-                        <IonLabel>{t('training_plans')}</IonLabel> {/* Planes de entrenamiento */}
-                    </IonSegmentButton>
-                </IonSegment>
+           
+                    <IonSegment
+                        value={selectedSection}
+                        onIonChange={(e: CustomEvent) => setSelectedSection(e.detail.value!)}
+                        className="custom-segment"
+                        color="success"
+                        style={{
+                            position: 'fixed',   // Posición fija
+                            top: '56px',         // Ajustar la posición debajo del Header
+                            width: '100%',
+                            zIndex: 1000,        // Asegura que esté sobre el contenido
+                            backgroundColor: '#ffffff',
+                            borderBottom: '1px solid #ccc',
+                        }}
+                    >
+                        <IonSegmentButton value="workouts">
+                            <IonLabel>{t('workouts')}</IonLabel>
+                        </IonSegmentButton>
+                        <IonSegmentButton value="exercises">
+                            <IonLabel>{t('exercises')}</IonLabel>
+                        </IonSegmentButton>
+                        <IonSegmentButton value="trainingPlans">
+                            <IonLabel>{t('training_plans')}</IonLabel> {/* Nueva opción */}
+                        </IonSegmentButton>
+                    </IonSegment>
 
-                <IonGrid>
+                    <div style={{ marginTop: '10%' }}> 
+                <IonGrid >
                     {selectedSection === 'workouts' ? (
                         <IonRow>
                             {workouts.map((workout) => (
@@ -215,9 +225,7 @@ const WorkoutsExercises: React.FC = () => {
                                                 <IonLabel style={{ color: '#000000', fontWeight: 'bold', fontSize: '1em', display: 'block', marginBottom: '8px' }}>
                                                     {workout.name}
                                                 </IonLabel>
-                                                <IonLabel style={{ color: '#6b6b6b', fontSize: '0.9em' }}>
-                                                    {workout.description}
-                                                </IonLabel>
+
                                             </div>
                                             <div style={{ display: 'flex', gap: '5px' }}>
                                                 <Button
@@ -369,6 +377,8 @@ const WorkoutsExercises: React.FC = () => {
                         </IonRow>
                     )}
                 </IonGrid>
+                </div>
+                {/* Botón flotante para añadir elementos */}
 
                 <IonFab vertical="bottom" horizontal="end" style={{ marginBottom: '15%', position: 'fixed' }}>
                     <Button

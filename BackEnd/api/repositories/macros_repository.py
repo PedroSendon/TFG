@@ -232,6 +232,7 @@ class MacrosRepository:
         meal_plans = MealPlan.objects.filter(diet_type=diet_type)
         return [
             {
+                "name": meal_plan.name,
                 "id": meal_plan.id,
                 "kcal": meal_plan.calories,
                 "proteins": float(meal_plan.proteins),

@@ -79,7 +79,6 @@ class UserDetailsSchema(BaseModel):
 class DietPreferencesSchema(BaseModel):
     diet_type: str  # Tipo de dieta
     meals_per_day: conint(gt=0)  # Comidas al día, mayor a 0
-    macronutrient_intake: str  # Ingesta de macronutrientes
 
     class Config:
         from_attributes = True

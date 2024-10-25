@@ -42,7 +42,6 @@ class DietPreferences(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='diet_preferences')
     diet_type = models.CharField(max_length=100)  # Tipo de dieta
     meals_per_day = models.PositiveIntegerField()
-    macronutrient_intake = models.CharField(max_length=100)  # Ejemplo: 'Balanceado'
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - Diet Preferences'

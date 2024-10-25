@@ -84,7 +84,7 @@ const UserDetailsForm: React.FC = () => {
             <Typography variant="h4" align="center" sx={{ mb: 3 }}>
                 {t('registration_form')}
             </Typography>
-            <Box sx={{ position: 'fixed', bottom: '20px', width: '80%' }}>
+            <Box sx={{ position: 'fixed', bottom: '10%', width: '80%' }}>
                 <Button
                     onClick={handleNext}
                     variant="contained"
@@ -137,7 +137,7 @@ const UserDetailsForm: React.FC = () => {
             <Box
                 display="flex"
                 justifyContent="space-between"
-                sx={{ position: 'fixed', bottom: '20px', width: '80%' }}
+                sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
             >
                 <Button
                     onClick={handleBack}
@@ -244,7 +244,7 @@ const UserDetailsForm: React.FC = () => {
                 <Box
                     display="flex"
                     justifyContent="space-between"
-                    sx={{ position: 'fixed', bottom: '20px', width: '80%' }}
+                    sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
                 >
                     <Button
                         onClick={handleBack}
@@ -330,7 +330,7 @@ const UserDetailsForm: React.FC = () => {
                 <Box
                     display="flex"
                     justifyContent="space-between"
-                    sx={{ position: 'fixed', bottom: '20px', width: '80%' }}
+                    sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
                 >
                     <Button
                         onClick={handleBack}
@@ -411,7 +411,7 @@ const UserDetailsForm: React.FC = () => {
                 <Box
                     display="flex"
                     justifyContent="space-between"
-                    sx={{ position: 'fixed', bottom: '20px', width: '80%' }}
+                    sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
                 >
                     <Button
                         onClick={handleBack}
@@ -460,7 +460,7 @@ const UserDetailsForm: React.FC = () => {
                 <Box
                     display="flex"
                     justifyContent="space-between"
-                    sx={{ position: 'fixed', bottom: '20px', width: '80%' }}
+                    sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
                 >
                     <Button
                         onClick={handleBack}

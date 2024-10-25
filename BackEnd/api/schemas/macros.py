@@ -3,7 +3,8 @@ from typing import Optional
 
 
 class MealPlanSchema(BaseModel):
-    user_id: int
+    name: str  # Añadir el campo 'name'
+    user_id: Optional[int]  # Lo hacemos opcional para permitir meal plans sin asignar
     diet_type: str
     calories: int
     proteins: float
