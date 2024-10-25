@@ -224,28 +224,39 @@ def create_training_plan(request):
         return Response({"error": "Ocurrió un error inesperado."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
+@permission_classes([IsAuthenticated])
 def get_training_plans(request):
     """
     Obtener todos los planes de entrenamiento.
     """
-    # Llamar al repositorio para obtener todos los planes de entrenamiento
-    training_plans = TrainingPlanRepository.get_all_training_plans()
+    try:
+        print("Request received for training plans.")  # Debug 1
+        training_plans = TrainingPlanRepository.get_all_training_plans()
+        print(f"Fetched training plans: {training_plans}")  # Debug 2
 
-    # Si no hay planes de entrenamiento, retornar un mensaje vacío
-    if not training_plans:
-        return Response({"message": "No training plans found."}, status=status.HTTP_404_NOT_FOUND)
+        if not training_plans:
+            return Response({"message": "No training plans found."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Crear la respuesta con los datos de los planes de entrenamiento
-    training_plan_data = []
-    for plan in training_plans:
-        training_plan_data.append({
-            "id": plan.id,
-            "name": plan.name,
-            "description": plan.description
-        })
+        training_plan_data = []
+        for plan in training_plans:
+            training_plan_data.append({
+                "id": plan.id,
+                "name": plan.name,
+                "description": plan.description,
+                "difficulty": plan.difficulty,
+                "equipment": plan.equipment,
+                "media": plan.media,
+                "duration": plan.duration,
+                "workouts": [workout.id for workout in plan.workouts.all()]
+            })
 
-    return Response(training_plan_data, status=status.HTTP_200_OK)
+        return Response({"data": training_plan_data}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        import traceback
+        print("Error:", traceback.format_exc())
+        return Response({"error": f"Error fetching training plans: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])

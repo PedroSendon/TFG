@@ -10,7 +10,7 @@ class MacrosRepository:
         :return: Una lista de nombres de categorías.
         """
         return list(DietCategory.objects.values_list('name', flat=True))
-
+    
     @staticmethod
     def get_all_mealplans():
         """
@@ -20,22 +20,23 @@ class MacrosRepository:
             # Recuperar todos los planes de comida
             meal_plans = MealPlan.objects.all()
 
+            if not meal_plans:
+                print("No meal plans found.")
+                return []
+
             # Serializa los datos
             return [
                 {
                     "id": meal_plan.id,
-                    "dietType": meal_plan.diet_type,  # Tipo de dieta asociado al MealPlan
-                    "kcal": meal_plan.calories,
-                    "proteins": meal_plan.proteins,
-                    "carbs": meal_plan.carbs,
-                    "fats": meal_plan.fats
+                    "name": meal_plan.name,
+                    "dietType": meal_plan.diet_type,
                 } for meal_plan in meal_plans
             ]
 
         except Exception as e:
-            # En caso de error, retorna None o lanza una excepción
+            # En caso de error, loguea y lanza una excepción
             print(f"Error al obtener los planes de comida: {e}")
-            return None
+            raise e
 
     
     @staticmethod

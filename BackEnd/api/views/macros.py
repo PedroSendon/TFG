@@ -22,22 +22,18 @@ def get_user_mealplan(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
 def get_all_mealplans(request):
-    """
-    Obtener todos los planes de comida disponibles en la base de datos.
-    """
     try:
-        # Obtener todos los planes de comida desde el repositorio
         meal_plans = MacrosRepository.get_all_mealplans()
 
-        # Verifica que haya datos
         if not meal_plans:
             return Response({"error": "No se encontraron planes de comida."}, status=status.HTTP_404_NOT_FOUND)
 
         return Response({"data": meal_plans}, status=status.HTTP_200_OK)
 
     except Exception as e:
-        # Retorna un error genérico si algo falla
+        print(f"Error en get_all_mealplans: {str(e)}")  # Debug 3
         return Response({"error": f"Error al obtener los planes de comida: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 

@@ -42,8 +42,8 @@ urlpatterns = [
     # Workouts
     path('workouts/', workout.get_workouts, name='get-workouts'),
     path('workouts/create/', workout.create_workout, name='create-workout'),
-    path('workouts/create/plan', workout.create_training_plan, name='create-training-plan'),
-    path('trainingplans', workout.get_training_plans, name='training-plans'),
+    path('workouts/create/plan/', workout.create_training_plan, name='create-training-plan'),
+    path('trainingplans/', workout.get_training_plans, name='training-plans'),
     path('workouts/<int:workout_id>/update/', workout.update_workout, name='update-workout'),
     path('workouts/<int:workout_id>/delete/', workout.delete_workout, name='delete-workout'),
     path('workouts/by-user/', workout.get_workouts_by_user, name='get-workouts-by-user'),
@@ -60,14 +60,14 @@ urlpatterns = [
     path('exercises/<int:exercise_id>/', exercise.update_exercise, name='update-exercise'),
 
     # Macros
+    path('mealplans/all/', macros.get_all_mealplans, name='get-all-mealplans'),  # Primero la ruta más específica
     path('mealplans/<str:category>/<int:id>/', macros.get_mealplan, name='get-mealplan'),
     path('mealplans/<str:category>/<int:id>/update/', macros.update_mealplan, name='update-mealplan'),
     path('mealplans/<str:category>/<int:id>/delete/', macros.delete_mealplan, name='delete-mealplan'),
-    path('mealplans/create/', macros.add_mealplan, name='add-mealplan'),
     path('mealplans/', macros.get_user_mealplan, name='get-mealplans'),
     path('mealplans/<str:category>/', macros.get_mealplans_by_category, name='get-mealplans-by-category'),
+    path('mealplans/create/', macros.add_mealplan, name='add-mealplan'),
     path('diet-categories/', macros.list_diet_categories, name='get-diet-categories'),
-    path('mealplans/all/', macros.get_all_mealplans, name='get-all-mealplans'),
 
     # Estadísticas
     path('statistics/exercises/', statistics.get_exercise_popularity, name='get-exercise-popularity'),

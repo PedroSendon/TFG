@@ -83,28 +83,43 @@ const WorkoutsExercises: React.FC = () => {
     const fetchTrainingPlans = async () => {
         try {
             const accessToken = localStorage.getItem('access_token');
-
+    
             if (!accessToken) {
-                console.error(t('no_token'));
+                console.error("Token no encontrado");
                 return;
             }
+    
             const response = await fetch('http://127.0.0.1:8000/api/trainingplans/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                    'Authorization': `Bearer ${accessToken}`,
                 },
             });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Detalles del error:", errorData);
+                throw new Error(`Error fetching training plans: ${response.status}`);
+            }
+    
             const data = await response.json();
             setTrainingPlans(data.data.map((plan: any) => ({
                 id: plan.id,
                 name: plan.name,
                 description: plan.description,
+                difficulty: plan.difficulty,
+                equipment: plan.equipment,
+                media: plan.media,
+                duration: plan.duration,
+                workouts: plan.workouts,
             })));
         } catch (error) {
-            console.error(t('error_fetching_training_plans'), error);
+            console.error("Error al obtener planes de entrenamiento:", error);
         }
     };
+    
+    
 
     const fetchExercises = async () => {
         try {
@@ -121,7 +136,6 @@ const WorkoutsExercises: React.FC = () => {
                 },
             });
             const data = await response.json();
-            console.log('Fetched exercises:', data);
             setExercises(data.data || []); // Asegúrate de que sea un array vacío si no hay datos
         } catch (error) {
             console.error(t('error_fetching_exercises'), error);
@@ -281,9 +295,7 @@ const WorkoutsExercises: React.FC = () => {
                                                 <IonLabel style={{ color: '#000000', fontWeight: 'bold', fontSize: '1em', display: 'block', marginBottom: '8px' }}>
                                                     {plan.name}
                                                 </IonLabel>
-                                                <IonLabel style={{ color: '#6b6b6b', fontSize: '0.9em' }}>
-                                                    {plan.description}
-                                                </IonLabel>
+                        
                                             </div>
                                             <div style={{ display: 'flex', gap: '5px' }}>
                                                 <Button

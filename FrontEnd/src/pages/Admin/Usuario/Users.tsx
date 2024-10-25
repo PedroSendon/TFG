@@ -165,15 +165,7 @@ const Users: React.FC = () => {
                       >
                         {user.name}
                       </IonLabel>
-                      <IonLabel
-                        style={{
-                          display: 'block',
-                          color: '#6b6b6b',
-                          fontSize: '0.9em',
-                        }}
-                      >
-                        {user.email}
-                      </IonLabel>
+                    
                     </div>
 
                     {/* Botones Modificar y Eliminar juntos pero compactos */}

@@ -12,63 +12,81 @@ const AssignPlans: React.FC = () => {
   const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
   const { userId } = location.state as { userId: number }; 
 
-  const [selectedWorkout, setSelectedWorkout] = useState('');
+  const [selectedTrainingPlan, setSelectedTrainingPlan] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('');
-  const [workoutOptions, setWorkoutOptions] = useState<{ id: number; name: string }[]>([]);
-  const [nutritionPlans, setNutritionPlans] = useState<{ id: number; dietType: string }[]>([]);
+  const [trainingPlanOptions, setTrainingPlanOptions] = useState<{ id: number; name: string }[]>([]);
+  const [nutritionPlans, setNutritionPlans] = useState<{ id: number;  name: string; dietType: string }[]>([]);
   const [showToast, setShowToast] = useState(false); 
 
-  const fetchWorkouts = async () => {
-    try {
-      const accessToken = localStorage.getItem('access_token');
-      
-      if (!accessToken) {
-        console.error(t('no_token'));
-        return;
-      }
-      const response = await fetch('http://127.0.0.1:8000/api/workouts/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
-        },
-      });
-      const data = await response.json();
-      setWorkoutOptions(data.data); 
-    } catch (error) {
-      console.error(t('fetch_workouts_error'), error);
-      setShowToast(true);
-    }
-  };
 
-  const fetchNutritionPlans = async () => {
+  const fetchTrainingPlans = async () => {
     try {
+        const accessToken = localStorage.getItem('access_token');
+        
+        if (!accessToken) {
+            console.error(t('no_token'));
+            return;
+        }
+        
+        const response = await fetch('http://127.0.0.1:8000/api/trainingplans/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+            },
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            setTrainingPlanOptions(result.data);  // Acceder al array dentro de `data` si está envuelto
+        } else {
+            console.error("Error al obtener planes de entrenamiento:", result);
+            setTrainingPlanOptions([]);  // Fallback en caso de error
+        }
+    } catch (error) {
+        console.error(t('fetch_training_plans_error'), error);
+        setTrainingPlanOptions([]);  // Fallback en caso de excepción
+        setShowToast(true);
+    }
+};
+
+
+const fetchNutritionPlans = async () => {
+  try {
       const accessToken = localStorage.getItem('access_token');
       
       if (!accessToken) {
-        console.error(t('no_token'));
-        return;
+          console.error(t('no_token'));
+          return;
       }
       const response = await fetch('http://127.0.0.1:8000/api/mealplans/all/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
-        },
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+          },
       });
-      if (!response.ok) {
-        throw new Error(t('fetch_nutrition_plans_error'));
+
+      const result = await response.json();
+      console.log(result);
+      if (response.ok) {
+          setNutritionPlans(result.data);  // Accede a `data` si los datos están envueltos
+      } else {
+          console.error("Error al obtener planes nutricionales:", result);
+          setNutritionPlans([]);
       }
-      const data = await response.json();
-      setNutritionPlans(data.data); 
-    } catch (error) {
+  } catch (error) {
       console.error(t('fetch_nutrition_plans_error'), error);
-      setShowToast(true);  
-    }
-  };
+      setNutritionPlans([]);
+      setShowToast(true);
+  }
+};
+
+
 
   useEffect(() => {
-    fetchWorkouts();
+    fetchTrainingPlans();
     fetchNutritionPlans();
   }, []);
 
@@ -87,7 +105,7 @@ const AssignPlans: React.FC = () => {
           'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
         },
         body: JSON.stringify({
-          workout_id: selectedWorkout, 
+          training_plan_id: selectedTrainingPlan, 
           nutrition_plan_id: selectedPlan,  
         }),
       });
@@ -114,22 +132,22 @@ const AssignPlans: React.FC = () => {
 
       <IonContent>
         <IonGrid>
-          {/* Selector de entrenamientos */}
+          {/* Selector de planes de entrenamiento */}
           <IonRow style={{ marginTop: '20px' }}>
             <IonCol size="12">
               <Select
-                value={selectedWorkout}
-                onChange={(e) => setSelectedWorkout(e.target.value as string)}
+                value={selectedTrainingPlan}
+                onChange={(e) => setSelectedTrainingPlan(e.target.value as string)}
                 fullWidth
                 displayEmpty
                 style={{ border: '1px solid #d1d1d6', borderRadius: '8px', padding: '10px' }}
               >
                 <MenuItem value="" disabled>
-                  {t('select_workout')}
+                  {t('select_training_plan')}
                 </MenuItem>
-                {workoutOptions.map((workout) => (
-                  <MenuItem key={workout.id} value={workout.id}>
-                    {workout.name}
+                {trainingPlanOptions.map((plan) => (
+                  <MenuItem key={plan.id} value={plan.id}>
+                    {plan.name}
                   </MenuItem>
                 ))}
               </Select>
@@ -151,7 +169,7 @@ const AssignPlans: React.FC = () => {
                 </MenuItem>
                 {nutritionPlans.map((plan) => (
                   <MenuItem key={plan.id} value={plan.id}>
-                    {plan.dietType}
+                    {plan.name}
                   </MenuItem>
                 ))}
               </Select>

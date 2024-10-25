@@ -349,7 +349,7 @@ class TrainingPlanRepository:
         :return: Una lista de esquemas de planes de entrenamiento.
         """
         training_plans = TrainingPlan.objects.all()  # Suponiendo que usas un ORM como Django ORM
-        return [TrainingPlanSchema.from_orm(plan) for plan in training_plans]
+        return training_plans
     
     @staticmethod
     def get_training_plan_by_id(training_plan_id: int) -> TrainingPlanSchema:
