@@ -108,25 +108,25 @@ const WorkoutsExercises: React.FC = () => {
 
     const fetchExercises = async () => {
         try {
-            const accessToken = localStorage.getItem('access_token');
-
-            if (!accessToken) {
-                console.error(t('no_token'));
-                return;
-            }
-            const response = await fetch('http://127.0.0.1:8000/api/exercises/all/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
-                },
-            });
-            const data = await response.json();
-            setExercises(data.data);
+          const accessToken = localStorage.getItem('access_token');
+          if (!accessToken) {
+            console.error(t('no_token'));
+            return;
+          }
+          const response = await fetch('http://127.0.0.1:8000/api/exercises/all/', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          });
+          const data = await response.json();
+          console.log('Fetched exercises:', data);
+          setExercises(data.data || []); // Asegúrate de que sea un array vacío si no hay datos
         } catch (error) {
-            console.error(t('error_fetching_exercises'), error);
+          console.error(t('error_fetching_exercises'), error);
         }
-    };
+      };
 
     const handleAddTrainingPlan = () => {
         history.push('/admin/workout/plan'); // Redirige a la vista de añadir plan de entrenamiento

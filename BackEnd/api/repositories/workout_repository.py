@@ -64,7 +64,7 @@ class WorkoutRepository:
 
         return training_plans_data
 
-
+ 
     @staticmethod
     def get_workout_by_day(day):
         """

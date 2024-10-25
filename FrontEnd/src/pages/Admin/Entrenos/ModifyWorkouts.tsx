@@ -40,10 +40,7 @@ const ModifyWorkoutPage: React.FC = () => {
     name: data?.name || '',
     description: data?.description || '',
     exercises: data?.exercises || [], 
-    days_per_week: data?.days_per_week || 1,
     duration: data?.duration || 30,
-    difficulty: data?.difficulty || 'Ligero',
-    equipment: data?.equipment || '',
   });
 
   const [media, setMedia] = useState<string | null>(data?.media || null);
@@ -99,10 +96,7 @@ const ModifyWorkoutPage: React.FC = () => {
         rest: exercise.rest,
       })),
       media,
-      days_per_week: workoutDetails.days_per_week,
       duration: workoutDetails.duration,
-      difficulty: workoutDetails.difficulty,
-      equipment: workoutDetails.equipment,
     };
 
     try {
@@ -284,19 +278,6 @@ const ModifyWorkoutPage: React.FC = () => {
               <TextField
                 variant="outlined"
                 fullWidth
-                id="days_per_week"
-                label={t('days_per_week')}
-                name="days_per_week"
-                type="number"
-                value={workoutDetails.days_per_week}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                fullWidth
                 id="duration"
                 label={t('duration_minutes')}
                 name="duration"
@@ -306,43 +287,6 @@ const ModifyWorkoutPage: React.FC = () => {
               />
             </Grid>
 
-            {/* Campo de dificultad */}
-            <Grid item xs={12}>
-              <InputLabel id="difficulty-label">{t('difficulty')}</InputLabel>
-              <Select
-                labelId="difficulty-label"
-                id="difficulty"
-                name="difficulty"
-                value={workoutDetails.difficulty}
-                onChange={handleSelectChange}
-                fullWidth
-              >
-                {difficultyOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Grid>
-
-            {/* Campo de equipo */}
-            <Grid item xs={12}>
-              <InputLabel id="equipment-label">{t('equipment')}</InputLabel>
-              <Select
-                labelId="equipment-label"
-                id="equipment"
-                name="equipment"
-                value={workoutDetails.equipment}
-                onChange={handleSelectChange}
-                fullWidth
-              >
-                {equipmentOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Grid>
           </Grid>
 
           {/* Lista de ejercicios */}
