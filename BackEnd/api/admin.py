@@ -3,12 +3,15 @@ from django.contrib import admin
 # Register your models here.
 from django.contrib import admin
 from .models.user import User, DietPreferences
-from .models.workout import Workout, WorkoutExercise
+from .models.workout import Workout, WorkoutExercise, Imagen
 from .models.macros import MealPlan, DietCategory
 from .models.exercise import Exercise
 
 
 
+@admin.register(Imagen)
+class ProductoAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'descripcion']
 
 # Modelo intermedio WorkoutExercise para gestionar los ejercicios de cada entrenamiento
 class WorkoutExerciseInline(admin.TabularInline):

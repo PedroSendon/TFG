@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import Header from '../../Header/Header';
 import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
+import { IonPage } from '@ionic/react';
 
 const AddUsers: React.FC = () => {
     const history = useHistory();
@@ -162,6 +163,7 @@ const AddUsers: React.FC = () => {
     };
 
     return (
+        <IonPage>
         <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Header title={t('add_user')} />
             <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
@@ -315,6 +317,7 @@ const AddUsers: React.FC = () => {
                 </Grid>
             </Grid>
         </Container>
+        </IonPage>
     );
 };
 

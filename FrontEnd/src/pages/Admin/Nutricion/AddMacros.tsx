@@ -5,6 +5,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import Header from '../../Header/Header'; // Componente de header reutilizable
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
+import { IonPage } from '@ionic/react';
 
 const AddMacros: React.FC = () => {
     const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
@@ -139,6 +140,7 @@ const AddMacros: React.FC = () => {
     };
 
     return (
+        <IonPage>
         <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Header title={t('add_macros_title')} />
             <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
@@ -284,6 +286,7 @@ const AddMacros: React.FC = () => {
                 </Grid>
             </Grid>
         </Container>
+        </IonPage>
     );
 };
 

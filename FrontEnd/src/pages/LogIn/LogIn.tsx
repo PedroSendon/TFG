@@ -79,6 +79,8 @@ const Login: React.FC = () => {
                 localStorage.setItem('access_token', data.access); // Almacena el token de acceso
                 localStorage.setItem('refresh_token', data.refresh); // Almacena el token de refresco
           
+                // Esto forzará que la navbar se vuelva a renderizar
+                localStorage.setItem('navbar_reload', 'true');
                 history.push('/workout');
             } else {
                 const errorData = await response.json();

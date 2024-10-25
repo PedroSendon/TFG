@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, useLocation } from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -51,10 +51,6 @@ setupIonicReact();
 const App: React.FC = () => {
   const { language, changeLanguage } = useContext(LanguageContext); // Usamos el contexto para cambiar idioma
 
-  // Verificamos si la ruta actual es una de las que no necesita la navbar
-  const noNavbarRoutes = ['/login', '/register', '/', '/form'];
-  const showNavbar = !noNavbarRoutes.includes(window.location.pathname);
-
   return (
     <LanguageProvider>
     <IonApp>
@@ -84,7 +80,7 @@ const App: React.FC = () => {
           <Route exact path="/admin/users" component={AdminUsers} />
           <Route exact path="/admin/users/modify" component={AdminModifyUsers} />
           <Route exact path="/admin/users/add" component={AdminAddUsers} />
-          <Route path="/admin/users/assign" component={AssignPlans} />
+          <Route exact path="/admin/users/assign" component={AssignPlans} />
 
           {/* Rutas Admin workouts*/}
           <Route exact path="/admin/workout" component={AdminWorkout} />
@@ -119,12 +115,22 @@ const App: React.FC = () => {
         </IonRouterOutlet>
 
         {/* Mostrar la navbar si no estamos en login, registro o inicio */}
-        {showNavbar && <Navbar />}
+        <NavbarWrapper />
 
       </IonReactRouter>
     </IonApp>
     </LanguageProvider>
   );
+};
+
+const NavbarWrapper: React.FC = () => {
+  const location = useLocation();  // Ahora se ejecuta dentro del IonReactRouter context
+
+  // Definir rutas sin navbar
+  const noNavbarRoutes = ['/login', '/register', '/'];
+  const showNavbar = !noNavbarRoutes.includes(location.pathname);
+
+  return showNavbar ? <Navbar /> : null;  // Mostrar o esconder la navbar
 };
 
 export default App;

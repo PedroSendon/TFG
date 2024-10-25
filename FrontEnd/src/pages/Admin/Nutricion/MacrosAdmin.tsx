@@ -120,7 +120,7 @@ const MacrosAdmin: React.FC = () => {
     };
 
     const handleAddMacros = () => {
-        history.push(`/admin/nutrition/add`);
+        history.push(`/admin/nutrition/add`); 
     };
 
     const handleEditMacros = (macro: { id: number; kcal: number; proteins: number; carbs: number; fats: number }) => {

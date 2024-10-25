@@ -18,6 +18,10 @@ urlpatterns = [
     path('register/', user.register, name='register'),
     path('login/', user.login, name='login'),
     path('form/', user.create_user_details, name='create_user_details'), 
+    
+    #Imagenes
+    path('logo/', user.obtener_logo, name='obtener_logo'),
+
 
     path('user/details/', user.save_user_details, name='user-details'),
     path('users/email/<str:email>/', user.get_user_by_email, name='get-user-by-email'),

@@ -21,6 +21,15 @@ const Navbar: React.FC = () => {
     // Inicializamos el estado basado en la ruta actual
     const [value, setValue] = useState(0);
 
+    useEffect(() => {
+        const reloadNavbar = localStorage.getItem('navbar_reload');
+        if (reloadNavbar === 'true') {
+            setValue(0);  // Reinicia el estado o haz lo que sea necesario
+            localStorage.setItem('navbar_reload', 'false');  // Restablece la bandera
+        }
+    }, [location.pathname]);  // Se ejecuta cada vez que cambie la ruta
+    
+
     // Efecto que se ejecuta al cargar la página o cuando cambia la ruta
     useEffect(() => {
         switch (location.pathname) {

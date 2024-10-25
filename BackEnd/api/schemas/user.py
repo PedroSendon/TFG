@@ -91,3 +91,8 @@ class CompleteUserDetailsSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ImagenSchema(BaseModel):
+    nombre: str
+    logo_url: str
+    descripcion: str

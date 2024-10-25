@@ -125,7 +125,7 @@ def get_workout_details(request):
 @permission_classes([IsAuthenticated]) 
 def get_workouts_by_user(request):
     """
-    Obtener todos los entrenamientos disponibles de un usuario.
+    Obtener todos los planes de entrenamiento disponibles de un usuario.
     """
     user_id = request.query_params.get('userId')
 
@@ -137,12 +137,18 @@ def get_workouts_by_user(request):
     except ValueError:
         return Response({"error": "El parámetro 'userId' debe ser un número."}, status=status.HTTP_400_BAD_REQUEST)
 
-    workouts = WorkoutRepository.get_workouts_by_user(user_id)
+    try:
+        # Obtener los planes de entrenamiento asignados al usuario
+        training_plans = WorkoutRepository.get_training_plans_by_user(user_id)
 
-    if workouts:
-        return Response({"data": workouts}, status=status.HTTP_200_OK)
-    else:
-        return Response({"error": "No se encontraron entrenamientos para el usuario especificado."}, status=status.HTTP_404_NOT_FOUND)
+        if training_plans:
+            return Response({"data": training_plans}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No se encontraron planes de entrenamiento para el usuario especificado."}, status=status.HTTP_404_NOT_FOUND)
+    
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

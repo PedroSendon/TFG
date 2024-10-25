@@ -58,3 +58,11 @@ class TrainingPlan(models.Model):
 
     def __str__(self):
         return self.name
+
+class Imagen(models.Model):
+    nombre = models.CharField(max_length=255)
+    imagen = models.ImageField(upload_to='productos/')
+    descripcion = models.TextField()
+
+    def __str__(self):
+        return self.nombre

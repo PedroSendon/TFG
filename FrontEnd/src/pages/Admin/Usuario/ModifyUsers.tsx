@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import {
     TextField, Button, Grid, Container, MenuItem, Select
 } from '@mui/material';
-import { IonActionSheet, IonAvatar, IonButton, IonIcon } from '@ionic/react';
+import { IonActionSheet, IonAvatar, IonButton, IonIcon, IonPage } from '@ionic/react';
 import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
@@ -105,6 +105,7 @@ const ModifyUserPage: React.FC = () => {
     };
 
     return (
+        <IonPage>
         <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Header title={t('modify_user')} />
 
@@ -347,6 +348,7 @@ const ModifyUserPage: React.FC = () => {
                 </Grid>
             </Grid>
         </Container>
+        </IonPage>
     );
 };
 

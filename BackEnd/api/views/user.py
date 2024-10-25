@@ -1,7 +1,7 @@
 from rest_framework.response import Response  # type: ignore
 from rest_framework.decorators import api_view, parser_classes, permission_classes, authentication_classes  # type: ignore
 from rest_framework import status  # type: ignore
-from api.repositories.user_repository import UserRepository
+from api.repositories.user_repository import UserRepository, ImagenRepository
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from pydantic import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
+from api.schemas.user import ImagenSchema
 
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Permitir a cualquier usuario registrar
@@ -394,3 +395,25 @@ def create_user_details(request):
     except Exception as e:
         print(f"Error inesperado: {str(e)}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([AllowAny]) 
+def obtener_logo(request):
+    try:
+        # Usar el repositorio para obtener el logo
+        producto = ImagenRepository.obtener_logo()
+        
+        if not producto or not producto.imagen:
+            return Response({"error": "Logo no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Crear el esquema de salida
+        logo_data = ImagenSchema(
+            nombre=producto.nombre,
+            logo_url=producto.imagen.url,
+            descripcion=producto.descripcion
+        )
+
+        return Response(logo_data.dict(), status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

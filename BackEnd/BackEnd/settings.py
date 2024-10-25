@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 import os
 from pathlib import Path
+from google.oauth2 import service_account
+from decouple import config
 
 
 # Base directory of the project
@@ -27,7 +29,7 @@ SECRET_KEY = 'django-insecure-dpf!)y5i@$q=_ha*$f%oyswk*2l=l20*#ub@o)x7^_k=71@^l*
 
 # SECURITY WARNING: don't run with debug turned on in production!
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'BackEnd', 'media/')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -49,6 +51,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'storages',
 
 ]
 
@@ -77,7 +80,17 @@ SIMPLE_JWT = {
 }
 
 ROOT_URLCONF = 'BackEnd.urls'
+'''
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    os.path.join(BASE_DIR, 'BackEnd', 'meta-router-439617-d1-641fbf138cf5.json')
+)
 
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'firprox'  # Tu bucket de GCS
+GS_PROJECT_ID = 'meta-router-439617-d1'  # Tu proyecto de GCS
+GS_DEFAULT_ACL = 'publicRead'
+MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
+'''
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

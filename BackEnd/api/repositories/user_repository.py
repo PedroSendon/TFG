@@ -1,6 +1,6 @@
 from datetime import datetime
 from api.models.macros import MealPlan, UserNutritionPlan
-from api.models.workout import TrainingPlan, UserWorkout, Workout
+from api.models.workout import TrainingPlan, UserWorkout, Workout, Imagen
 from api.models import user
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import check_password, make_password
@@ -521,4 +521,10 @@ class UserDetailsRepository:
         month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         return [{"month": month_names[entry['month'].month - 1], "newUsers": entry['new_users']} for entry in monthly_growth]
     
-    
+class ImagenRepository:
+    @staticmethod
+    def obtener_logo():
+        """
+        Obtiene el primer producto que contiene el logo.
+        """
+        return Imagen.objects.first()
