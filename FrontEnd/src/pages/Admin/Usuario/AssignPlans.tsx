@@ -1,89 +1,95 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { IonPage, IonContent, IonGrid, IonRow, IonCol } from '@ionic/react';
 import Header from '../../Header/Header';
 import { Select, MenuItem, Button, Grid } from '@mui/material';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
 
 const AssignPlans: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
   const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
-  const { userId } = location.state as { userId: number }; 
+
+  // Verificación segura del ID del usuario
+  const locationState = location.state as { userId: number } | undefined;
+  const userId = locationState?.userId;
 
   const [selectedTrainingPlan, setSelectedTrainingPlan] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('');
   const [trainingPlanOptions, setTrainingPlanOptions] = useState<{ id: number; name: string }[]>([]);
-  const [nutritionPlans, setNutritionPlans] = useState<{ id: number;  name: string; dietType: string }[]>([]);
-  const [showToast, setShowToast] = useState(false); 
+  const [nutritionPlans, setNutritionPlans] = useState<{ id: number; name: string; dietType: string }[]>([]);
+  const [showToast, setShowToast] = useState(false);
 
+  // Redirigir si `userId` no está definido
+  useEffect(() => {
+    if (!userId) {
+        console.error("No se encontró userId, redirigiendo...");
+        history.push('/admin/users');
+    }
+}, [userId, history]);
 
   const fetchTrainingPlans = async () => {
     try {
-        const accessToken = localStorage.getItem('access_token');
-        
-        if (!accessToken) {
-            console.error(t('no_token'));
-            return;
-        }
-        
-        const response = await fetch('http://127.0.0.1:8000/api/trainingplans/', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            setTrainingPlanOptions(result.data);  // Acceder al array dentro de `data` si está envuelto
-        } else {
-            console.error("Error al obtener planes de entrenamiento:", result);
-            setTrainingPlanOptions([]);  // Fallback en caso de error
-        }
-    } catch (error) {
-        console.error(t('fetch_training_plans_error'), error);
-        setTrainingPlanOptions([]);  // Fallback en caso de excepción
-        setShowToast(true);
-    }
-};
-
-
-const fetchNutritionPlans = async () => {
-  try {
       const accessToken = localStorage.getItem('access_token');
       
       if (!accessToken) {
-          console.error(t('no_token'));
-          return;
+        console.error(t('no_token'));
+        return;
+      }
+      
+      const response = await fetch('http://127.0.0.1:8000/api/trainingplans/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setTrainingPlanOptions(result.data); // Acceder al array dentro de `data` si está envuelto
+      } else {
+        console.error("Error al obtener planes de entrenamiento:", result);
+        setTrainingPlanOptions([]); // Fallback en caso de error
+      }
+    } catch (error) {
+      console.error(t('fetch_training_plans_error'), error);
+      setTrainingPlanOptions([]); // Fallback en caso de excepción
+      setShowToast(true);
+    }
+  };
+
+  const fetchNutritionPlans = async () => {
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
       }
       const response = await fetch('http://127.0.0.1:8000/api/mealplans/all/', {
-          method: 'GET',
-          headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`,
-          },
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
       });
 
       const result = await response.json();
       console.log(result);
       if (response.ok) {
-          setNutritionPlans(result.data);  // Accede a `data` si los datos están envueltos
+        setNutritionPlans(result.data); // Accede a `data` si los datos están envueltos
       } else {
-          console.error("Error al obtener planes nutricionales:", result);
-          setNutritionPlans([]);
+        console.error("Error al obtener planes nutricionales:", result);
+        setNutritionPlans([]);
       }
-  } catch (error) {
+    } catch (error) {
       console.error(t('fetch_nutrition_plans_error'), error);
       setNutritionPlans([]);
       setShowToast(true);
-  }
-};
-
-
+    }
+  };
 
   useEffect(() => {
     fetchTrainingPlans();
@@ -102,11 +108,11 @@ const fetchNutritionPlans = async () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+          'Authorization': `Bearer ${accessToken}`, // Agrega el token JWT aquí
         },
         body: JSON.stringify({
-          training_plan_id: selectedTrainingPlan, 
-          nutrition_plan_id: selectedPlan,  
+          training_plan_id: selectedTrainingPlan,
+          nutrition_plan_id: selectedPlan,
         }),
       });
 

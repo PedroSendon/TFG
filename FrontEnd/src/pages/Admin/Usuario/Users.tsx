@@ -117,10 +117,10 @@ const Users: React.FC = () => {
 
   const handleAssign = (userId: number) => {
     history.push({
-      pathname: `/admin/users/assign`,
-      state: { userId },
+        pathname: `/admin/users/assign`,
+        state: { userId }, // Pasar el userId
     });
-  };
+};
 
 
   return (
