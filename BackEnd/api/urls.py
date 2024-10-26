@@ -43,8 +43,6 @@ urlpatterns = [
     # Workouts
     path('workouts/', workout.get_workouts, name='get-workouts'),
     path('workouts/create/', workout.create_workout, name='create-workout'),
-    path('workouts/create/plan/', workout.create_training_plan, name='create-training-plan'),
-    path('trainingplans/', workout.get_training_plans, name='training-plans'),
     path('workouts/<int:workout_id>/update/', workout.update_workout, name='update-workout'),
     path('workouts/<int:workout_id>/delete/', workout.delete_workout, name='delete-workout'),
     path('workouts/by-user/', workout.get_workouts_by_user, name='get-workouts-by-user'),
@@ -53,12 +51,19 @@ urlpatterns = [
     path('workout/day/<int:day_id>/', workout.get_workout_exercises_by_day, name='get-workout-exercises-by-day'),
     path('workout/day/<int:day_id>/complete/', workout.mark_workout_day_complete, name='mark-workout-day-complete'),
 
+    # Planes de entrenamiento
+    path('trainingplans/create/', workout.create_training_plan, name='create-training-plan'),
+    path('trainingplans/', workout.get_training_plans, name='training-plans'),
+    path('trainingplans/<int:plan_id>/delete/', workout.delete_training_plan, name='delete-training-plan'),
+
     # Exercises
     path('exercises/create/', exercise.create_exercise, name='create-exercise'),
     path('exercises/details/', exercise.get_exercise_details, name='get-exercise-details'),
     path('exercises/all/', exercise.list_all_exercises, name='list-all-exercises'),
     path('exercises/by-train/', exercise.get_exercises_by_training, name='get-exercises-by-training'),
     path('exercises/<int:exercise_id>/', exercise.update_exercise, name='update-exercise'),
+    path('exercises/<int:exercise_id>/delete/', exercise.delete_exercise, name='delete-exercise'),
+
 
     # Macros
     path('mealplans/all/', macros.get_all_mealplans, name='get-all-mealplans'),  # Primero la ruta más específica

@@ -316,3 +316,20 @@ def delete_workout(request, workout_id):
         return Response({"message": "Entrenamiento eliminado con éxito."}, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Entrenamiento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])  # Solo usuarios autenticados pueden acceder
+def delete_training_plan(request, plan_id):
+    """
+    Endpoint para eliminar un plan de entrenamiento.
+    
+    :param plan_id: ID del plan de entrenamiento a eliminar.
+    :return: Respuesta con mensaje de éxito o error.
+    """
+    # Llamar al repositorio para eliminar el plan de entrenamiento
+    success = TrainingPlanRepository.delete_training_plan_by_id(plan_id)
+    
+    if success:
+        return Response({"message": "Plan de entrenamiento eliminado exitosamente."}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Plan de entrenamiento no encontrado."}, status=status.HTTP_404_NOT_FOUND)

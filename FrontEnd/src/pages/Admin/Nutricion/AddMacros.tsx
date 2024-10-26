@@ -120,7 +120,10 @@ const AddMacros: React.FC = () => {
                 if (response.ok) {
                     const data = await response.json();
                     console.log(t('recommendation_added'), data);
-                    history.push('/admin/macros'); // Redirigir después de añadir.
+                    history.push({
+                        pathname: '/admin/macros',
+                        state: { reload: true }  // Pasar un estado para indicar recarga
+                    });
                 } else {
                     const errorData = await response.json();
                     console.error(t('error_adding_recommendation'), errorData);

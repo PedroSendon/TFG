@@ -84,7 +84,7 @@ const CreateTrainingPlan: React.FC = () => {
         console.error(t('no_token'));
         return;
       }
-            const response = await fetch('http://127.0.0.1:8000/api/workouts/create/plan', {
+            const response = await fetch('http://127.0.0.1:8000/api/trainingplans/create/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

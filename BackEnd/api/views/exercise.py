@@ -73,6 +73,22 @@ def create_exercise(request):
         "data": exercise_data
     }, status=status.HTTP_201_CREATED)
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])  # Solo usuarios autenticados pueden acceder
+def delete_exercise(request, exercise_id):
+    """
+    Endpoint para eliminar un ejercicio.
+    
+    :param exercise_id: ID del ejercicio a eliminar.
+    :return: Respuesta con mensaje de éxito o error.
+    """
+    # Llamar al repositorio para eliminar el ejercicio
+    success = ExerciseRepository.delete_exercise_by_id(exercise_id)
+    
+    if success:
+        return Response({"message": "Ejercicio eliminado exitosamente."}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Ejercicio no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 

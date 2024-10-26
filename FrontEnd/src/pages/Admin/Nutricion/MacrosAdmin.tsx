@@ -17,7 +17,7 @@ import { Add } from '@mui/icons-material';
 import Header from '../../Header/Header';
 import Navbar from '../../Navbar/Navbar';
 import { Button } from '@mui/material';
-import { useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 import { LanguageContext } from '../../../context/LanguageContext';  // Importar el contexto de idioma
 
 // Definir un tipo para las categorías
@@ -35,6 +35,8 @@ const MacrosAdmin: React.FC = () => {
     const [showAlert, setShowAlert] = useState(false);
     const [macroToDelete, setMacroToDelete] = useState<number | null>(null);
     const history = useHistory();
+    const [updateRequired, setUpdateRequired] = useState(false);  // Estado para controlar recarga de datos
+    const location = useLocation<{ reload?: boolean }>();  // Obtener la ubicación actual con tipo definido
 
     // Función para obtener las categorías de dieta desde el BE
     const fetchCategories = async () => {
@@ -91,28 +93,53 @@ const MacrosAdmin: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        fetchCategories();
-    }, []);
+
 
     useEffect(() => {
+        fetchCategories();
         if (selectedCategory) {
             fetchMacros(selectedCategory);
         }
-    }, [selectedCategory]);
+    }, [selectedCategory, updateRequired]); 
 
-    // Función para eliminar
-    const handleDelete = () => {
-        if (macroToDelete !== null) {
-            setMacros((prevMacros) => {
-                const updatedMacros = { ...prevMacros };
-                updatedMacros[selectedCategory] = updatedMacros[selectedCategory].filter((macro) => macro.id !== macroToDelete);
-                return updatedMacros;
-            });
-            setMacroToDelete(null);
+    // Recargar datos si el usuario regresa desde otra página
+    useEffect(() => {
+        if (location.state?.reload) {
+            setUpdateRequired(!updateRequired);
         }
-        setShowAlert(false);
+    }, [location.state]);
+    // Función para eliminar
+    const handleDelete = async () => {
+        if (macroToDelete !== null) {
+            try {
+                const accessToken = localStorage.getItem('access_token');
+                if (!accessToken) {
+                    console.error(t('no_token'));
+                    return;
+                }
+    
+                const response = await fetch(`http://127.0.0.1:8000/api/mealplans/${selectedCategory}/${macroToDelete}/delete/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                });
+    
+                if (response.ok) {
+                    // Refrescar datos de macros al eliminar
+                    setUpdateRequired(!updateRequired);
+                } else {
+                    console.error('Error al eliminar el macro');
+                }
+            } catch (error) {
+                console.error('Error en la eliminación:', error);
+            }
+            setMacroToDelete(null);
+            setShowAlert(false);
+        }
     };
+    
 
     const confirmDelete = (id: number) => {
         setMacroToDelete(id);

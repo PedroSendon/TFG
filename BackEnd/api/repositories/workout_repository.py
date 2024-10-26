@@ -363,3 +363,18 @@ class TrainingPlanRepository:
             return TrainingPlanSchema.from_orm(training_plan)
         except TrainingPlan.DoesNotExist:
             return None
+        
+    @staticmethod
+    def delete_training_plan_by_id(plan_id: int) -> bool:
+        """
+        Elimina un plan de entrenamiento por su ID.
+        
+        :param plan_id: ID del plan de entrenamiento a eliminar.
+        :return: True si el plan fue eliminado, False si no se encontró.
+        """
+        try:
+            training_plan = TrainingPlan.objects.get(id=plan_id)
+            training_plan.delete()
+            return True
+        except TrainingPlan.DoesNotExist:
+            return False

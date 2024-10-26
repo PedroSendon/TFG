@@ -88,6 +88,21 @@ class ExerciseRepository:
             }
         except Exercise.DoesNotExist:
             return None
+        
+    @staticmethod
+    def delete_exercise_by_id(exercise_id: int) -> bool:
+        """
+        Elimina un ejercicio por su ID.
+        
+        :param exercise_id: ID del ejercicio a eliminar.
+        :return: True si el ejercicio fue eliminado, False si no se encontró.
+        """
+        try:
+            exercise = Exercise.objects.get(id=exercise_id)
+            exercise.delete()
+            return True
+        except Exercise.DoesNotExist:
+            return False
 
     @staticmethod
     def list_all_exercises():

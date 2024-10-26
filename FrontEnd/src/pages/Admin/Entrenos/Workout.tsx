@@ -146,27 +146,48 @@ const WorkoutsExercises: React.FC = () => {
         history.push('/admin/workout/plan'); // Redirige a la vista de añadir plan de entrenamiento
     };
 
-    const handleDelete = (id: number, type: string) => {
-        presentAlert({
-            header: t('confirm_delete'),
-            message: t('confirm_delete_message'),
-            buttons: [
-                t('cancel'),
-                {
-                    text: t('delete'),
-                    handler: () => {
-                        if (type === 'workout') {
-                            setWorkouts((prev) => prev.filter((workout) => workout.id !== id));
-                        } else if (type === 'exercise') {
-                            setExercises((prev) => prev.filter((exercise) => exercise.id !== id));
-                        } else if (type === 'plan') {
-                            setTrainingPlans((prev) => prev.filter((plan) => plan.id !== id));
-                        }
-                    },
+    const handleDelete = async (id: number, type: string) => {
+        const accessToken = localStorage.getItem('access_token');
+    
+        if (!accessToken) {
+            console.error(t('no_token'));
+            return;
+        }
+    
+        const deleteUrl = 
+            type === 'workout'
+                ? `http://127.0.0.1:8000/api/workouts/${id}/delete/`
+                : type === 'exercise'
+                ? `http://127.0.0.1:8000/api/exercises/${id}/delete/`
+                : `http://127.0.0.1:8000/api/trainingplans/${id}/delete/`;
+    
+        try {
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
                 },
-            ],
-        });
+            });
+    
+            if (response.ok) {
+                // Refrescar la lista después de eliminar el elemento
+                if (type === 'workout') {
+                    setWorkouts((prev) => prev.filter((workout) => workout.id !== id));
+                } else if (type === 'exercise') {
+                    setExercises((prev) => prev.filter((exercise) => exercise.id !== id));
+                } else if (type === 'plan') {
+                    setTrainingPlans((prev) => prev.filter((plan) => plan.id !== id));
+                }
+            } else {
+                const errorData = await response.json();
+                console.error('Error al eliminar el elemento:', errorData);
+            }
+        } catch (error) {
+            console.error('Error en la solicitud de eliminación:', error);
+        }
     };
+    
 
     const handleEdit = (id: number, type: string) => {
         const selectedData = type === 'workout'
