@@ -320,9 +320,9 @@ const UserDetailsForm: React.FC = () => {
                             onChange={handleChange}
                             fullWidth
                         >
-                            <MenuItem value="Gimnasio completo">{t('full_gym')}</MenuItem>
+                            <MenuItem value="Gimnasio">{t('full_gym')}</MenuItem>
                             <MenuItem value="Pesas libres">{t('free_weights')}</MenuItem>
-                            <MenuItem value="Sin equipamiento">{t('no_equipment')}</MenuItem>
+                            <MenuItem value="Nada">{t('no_equipment')}</MenuItem>
                         </TextField>
                     </Grid>
                 </Grid>

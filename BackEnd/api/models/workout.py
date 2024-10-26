@@ -3,12 +3,7 @@ from .user import User  # Asegúrate de que 'User' esté definido en otro archiv
 from .exercise import Exercise  # Asegúrate de que 'Exercise' esté definido en otro archivo de modelos
 
 class Workout(models.Model):
-    DIFFICULTY_LEVELS = [
-        ('ligero', 'Ligero'),
-        ('moderado', 'Moderado'),
-        ('intermedio', 'Intermedio'),
-        ('avanzado', 'Avanzado'),
-    ]
+    
     name = models.CharField(max_length=100)
     description = models.TextField()
     exercises = models.ManyToManyField(Exercise, through='WorkoutExercise', related_name='workouts')
@@ -48,11 +43,17 @@ class UserWorkout(models.Model):
 
     
 class TrainingPlan(models.Model):
+    DIFFICULTY_LEVELS = [
+        ('ligero', 'Ligero'),
+        ('moderado', 'Moderado'),
+        ('intermedio', 'Intermedio'),
+        ('avanzado', 'Avanzado'),
+    ]
     name = models.CharField(max_length=100)
     description = models.TextField()
     workouts = models.ManyToManyField(Workout, related_name='training_plans')  # Relacionamos los entrenamientos incluidos en el plan
     media = models.URLField(blank=True, null=True)
-    difficulty = models.CharField(max_length=20, choices=Workout.DIFFICULTY_LEVELS)  # Usamos las mismas dificultades
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_LEVELS)  # Restricción a las opciones definidas
     equipment = models.CharField(max_length=100)  # Equipamiento requerido para el plan
     duration = models.PositiveIntegerField()  # Duración del plan completo en días o semanas
 

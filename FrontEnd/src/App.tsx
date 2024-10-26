@@ -41,6 +41,7 @@ import AdminMacronutrientAdd from './pages/Admin/Nutricion/AddMacros';
 import AdminMacronutrientModify from './pages/Admin/Nutricion/ModifyMacros';
 import AssignPlans from './pages/Admin/Usuario/AssignPlans';
 import CreateTrainingPlan from './pages/Admin/Entrenos/AddTrainingPlan';
+import ModifyTrainingPlan from './pages/Admin/Entrenos/ModifyTrainingPlan';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -88,7 +89,8 @@ const App: React.FC = () => {
           <Route exact path="/admin/exercise/modify" component={AdminModifyExercise} />
           <Route exact path="/admin/workout/add" component={AdminAddWorkout} />
           <Route exact path="/admin/workout/modify" component={AdminModifyWorkout} />
-          <Route exact path="/admin/workout/plan" component={CreateTrainingPlan} />
+          <Route exact path="/admin/trainingplan/add" component={CreateTrainingPlan} />
+          <Route exact path="/admin/trainingplan/modify" component={ModifyTrainingPlan} />
 
           {/* Rutas Admin estadisticas*/}
           <Route exact path="/admin/statistics" component={AdminStatistics} />

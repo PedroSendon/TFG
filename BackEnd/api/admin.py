@@ -100,7 +100,7 @@ class TrainingPlanAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'difficulty', 'duration', 'equipment']
     search_fields = ['name', 'difficulty']
     list_filter = ['difficulty']
-
+    
 
 @admin.register(Imagen)
 class ImagenAdmin(admin.ModelAdmin):

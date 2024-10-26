@@ -333,3 +333,44 @@ def delete_training_plan(request, plan_id):
         return Response({"message": "Plan de entrenamiento eliminado exitosamente."}, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Plan de entrenamiento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_training_plan(request, training_plan_id):
+    """
+    Obtener los detalles de un plan de entrenamiento específico.
+    """
+    training_plan, error = TrainingPlanRepository.get_training_plan_by_id2(training_plan_id)
+    
+    if error:
+        return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
+    
+    return Response(training_plan, status=status.HTTP_200_OK)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_training_plan(request, training_plan_id):
+    """
+    Modificar los detalles de un plan de entrenamiento específico.
+    """
+    data = request.data
+
+    updated_plan, error = TrainingPlanRepository.update_training_plan(training_plan_id, data)
+    
+    if error:
+        return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response(updated_plan, status=status.HTTP_200_OK)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_training_plan(request, training_plan_id):
+    """
+    Eliminar un plan de entrenamiento específico.
+    """
+    success, message = TrainingPlanRepository.delete_training_plan(training_plan_id)
+
+    if not success:
+        return Response({"error": message}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({"message": message}, status=status.HTTP_200_OK)

@@ -378,3 +378,84 @@ class TrainingPlanRepository:
             return True
         except TrainingPlan.DoesNotExist:
             return False
+
+    @staticmethod
+    def get_training_plan_by_id2(training_plan_id):
+        """
+        Obtiene un plan de entrenamiento específico por su ID.
+        """
+        try:
+            training_plan = TrainingPlan.objects.prefetch_related('workouts').get(id=training_plan_id)
+            workouts = training_plan.workouts.all()
+
+            return {
+                "id": training_plan.id,
+                "name": training_plan.name,
+                "description": training_plan.description,
+                "media": training_plan.media,
+                "difficulty": training_plan.difficulty,
+                "equipment": training_plan.equipment,
+                "duration": training_plan.duration,
+                "workouts": [
+                    {
+                        "id": workout.id,
+                        "name": workout.name,
+                        "description": workout.description
+                    }
+                    for workout in workouts
+                ]
+            }, None
+        except TrainingPlan.DoesNotExist:
+            return None, "Training Plan not found."
+        
+    @staticmethod
+    def update_training_plan(training_plan_id, data):
+        """
+        Actualiza un plan de entrenamiento específico con los datos proporcionados.
+        """
+        try:
+            training_plan = TrainingPlan.objects.get(id=training_plan_id)
+
+            # Actualizamos los campos básicos
+            training_plan.name = data.get("name", training_plan.name)
+            training_plan.description = data.get("description", training_plan.description)
+            training_plan.media = data.get("media", training_plan.media)
+            training_plan.difficulty = data.get("difficulty", training_plan.difficulty)
+            training_plan.equipment = data.get("equipment", training_plan.equipment)
+            training_plan.duration = data.get("duration", training_plan.duration)
+            training_plan.save()
+
+            # Actualizamos los entrenamientos asociados si se proporcionan
+            workout_ids = data.get("workouts", [])
+            if workout_ids:
+                workouts = Workout.objects.filter(id__in=workout_ids)
+                training_plan.workouts.set(workouts)
+
+            return {
+                "id": training_plan.id,
+                "name": training_plan.name,
+                "description": training_plan.description,
+                "media": training_plan.media,
+                "difficulty": training_plan.difficulty,
+                "equipment": training_plan.equipment,
+                "duration": training_plan.duration,
+                "workouts": [{"id": workout.id, "name": workout.name} for workout in training_plan.workouts.all()]
+            }, None
+        except TrainingPlan.DoesNotExist:
+            return None, "Training Plan not found."
+        except Exception as e:
+            return None, str(e)
+        
+    @staticmethod
+    def delete_training_plan(training_plan_id):
+        """
+        Elimina un plan de entrenamiento específico.
+        """
+        try:
+            training_plan = TrainingPlan.objects.get(id=training_plan_id)
+            training_plan.delete()
+            return True, "Training plan deleted successfully."
+        except TrainingPlan.DoesNotExist:
+            return False, "Training plan not found."
+        except Exception as e:
+            return False, str(e)

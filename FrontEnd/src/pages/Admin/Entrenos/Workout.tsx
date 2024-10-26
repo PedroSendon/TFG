@@ -176,7 +176,7 @@ const WorkoutsExercises: React.FC = () => {
                     setWorkouts((prev) => prev.filter((workout) => workout.id !== id));
                 } else if (type === 'exercise') {
                     setExercises((prev) => prev.filter((exercise) => exercise.id !== id));
-                } else if (type === 'plan') {
+                } else if (type === 'trainingplan') {
                     setTrainingPlans((prev) => prev.filter((plan) => plan.id !== id));
                 }
             } else {
@@ -320,7 +320,7 @@ const WorkoutsExercises: React.FC = () => {
                                             </div>
                                             <div style={{ display: 'flex', gap: '5px' }}>
                                                 <Button
-                                                    onClick={() => handleEdit(plan.id, 'plan')}
+                                                    onClick={() => handleEdit(plan.id, 'trainingplan')}
                                                     style={{
                                                         border: '1px solid #32CD32',
                                                         backgroundColor: '#FFFFFF',

@@ -55,6 +55,10 @@ urlpatterns = [
     path('trainingplans/create/', workout.create_training_plan, name='create-training-plan'),
     path('trainingplans/', workout.get_training_plans, name='training-plans'),
     path('trainingplans/<int:plan_id>/delete/', workout.delete_training_plan, name='delete-training-plan'),
+    path('training-plans/<int:training_plan_id>/', workout.get_training_plan, name='get-training-plan'),
+    path('training-plans/<int:training_plan_id>/update/', workout.update_training_plan, name='update-training-plan'),
+    path('training-plans/<int:training_plan_id>/delete/', workout.delete_training_plan, name='delete-training-plan'),
+
 
     # Exercises
     path('exercises/create/', exercise.create_exercise, name='create-exercise'),
