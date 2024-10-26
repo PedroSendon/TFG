@@ -147,7 +147,10 @@ const AddUsers: React.FC = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log(t('user_created'), data);
-                history.push('/admin/users');
+                history.push({
+                    pathname: '/admin/users',
+                    state: { reload: true }  // Pasar un estado para indicar recarga
+                });
             } else {
                 const errorData = await response.json();
                 console.error('Error en la creación del usuario:', errorData);

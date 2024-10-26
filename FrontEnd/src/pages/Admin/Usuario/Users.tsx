@@ -17,7 +17,7 @@ import { Add } from '@mui/icons-material';
 import Header from '../../Header/Header'; // Componente de header reutilizable
 import Navbar from '../../Navbar/Navbar'; // Componente de la navbar
 import './Users.css'; // Estilos personalizados
-import { useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 import { Button } from '@mui/material';
 import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
@@ -25,6 +25,8 @@ import { LanguageContext } from '../../../context/LanguageContext'; // Importar 
 const Users: React.FC = () => {
   const history = useHistory();
   const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
+  const location = useLocation<{ reload?: boolean }>();  // Obtener la ubicación actual con tipo definido
+
 
   interface User {
     id: number;
@@ -38,18 +40,23 @@ const Users: React.FC = () => {
   // Llamar al backend para obtener los usuarios cuando el componente se monta
   useEffect(() => {
     fetchUsers();  // Llama a la función para obtener los usuarios
-  }, []);
+    // Comprobar si necesitamos recargar los usuarios después de añadir un nuevo usuario
+    if (location.state?.reload) {
+      fetchUsers();  // Volver a cargar los usuarios
+      history.replace({ ...location, state: {} });  // Limpiar el estado de recarga en `history`
+    }
+  }, [location.state]);
 
   const fetchUsers = async () => {
     try {
       // Obtener el token de acceso del localStorage
       const accessToken = localStorage.getItem('access_token');
-      
+
       if (!accessToken) {
         console.error(t('no_token'));
         return;
       }
-  
+
       const response = await fetch('http://127.0.0.1:8000/api/users/', {
         method: 'GET',
         headers: {
@@ -57,7 +64,7 @@ const Users: React.FC = () => {
           'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
         },
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         setUsers(data);  // Actualiza el estado con los usuarios obtenidos
@@ -68,7 +75,7 @@ const Users: React.FC = () => {
       console.error(t('network_error'), error);
     }
   };
-  
+
 
   // Función para manejar la eliminación del usuario
   const handleDelete = (userId: number) => {
@@ -86,8 +93,22 @@ const Users: React.FC = () => {
         {
           text: t('delete'),
           handler: () => {
-            fetch(`http://127.0.0.1:8000/api/users/delete/${userId}/`, { method: 'DELETE' })  // Asegúrate de incluir la barra al final
-            .then((response) => {
+            // Obtener el token de acceso del localStorage
+            const accessToken = localStorage.getItem('access_token');
+
+            if (!accessToken) {
+              console.error(t('no_token'));
+              return;
+            }
+
+            fetch(`http://127.0.0.1:8000/api/users/delete/${userId}/`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,  // Pasar el token aquí
+              }
+            })
+              .then((response) => {
                 if (response.ok) {
                   setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
                 } else {
@@ -116,10 +137,10 @@ const Users: React.FC = () => {
 
   const handleAssign = (userId: number) => {
     history.push({
-        pathname: `/admin/users/assign`,
-        state: { userId }, // Pasar el userId
+      pathname: `/admin/users/assign`,
+      state: { userId }, // Pasar el userId
     });
-};
+  };
 
 
   return (
@@ -164,7 +185,7 @@ const Users: React.FC = () => {
                       >
                         {user.name}
                       </IonLabel>
-                    
+
                     </div>
 
                     {/* Botones Modificar y Eliminar juntos pero compactos */}
