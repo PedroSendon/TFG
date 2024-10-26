@@ -4,7 +4,7 @@ from api.models.workout import TrainingPlan, UserWorkout, Workout, Imagen
 from api.models import user
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import check_password, make_password
-from api.models.user import  User, UserDetails, DietPreferences
+from api.models.user import User, UserDetails, DietPreferences
 from api.models.process import ProgressTracking
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
@@ -24,15 +24,48 @@ class UserRepository:
                 first_name=user_data['first_name'],
                 last_name=user_data['last_name'],
                 email=user_data['email'],
-                password=user_data['password'],  # Asegúrate de que la contraseña esté hasheada
+                # Asegúrate de que la contraseña esté hasheada
+                password=user_data['password'],
                 birth_date=user_data['birth_date'],
                 gender=user_data['gender'],
-                role=user_data.get('role', 'cliente')  # Asignar el rol, por defecto "cliente"
+                # Asignar el rol, por defecto "cliente"
+                role=user_data.get('role', 'cliente')
             )
             return user
         except Exception as e:
             raise ValueError(f"Error creando usuario: {e}")
-        
+
+    @staticmethod
+    def update_user_details(user_id, data):
+        try:
+            user = UserRepository.get_user_by_id(user_id)
+            if not user:
+                return False, "Usuario no encontrado."
+
+            user.first_name = data.get('first_name', user.first_name)
+            user.last_name = data.get('last_name', user.last_name)
+            user.role = data.get('role', user.role)
+            user.save()
+
+            user_details, created = UserDetails.objects.get_or_create(user=user)
+            
+            weight_goal_map = {
+                "Ganar masa muscular": "gain_muscle",
+                "Perder peso": "lose_weight",
+                "Mantenimiento": "maintain"
+            }
+            user_details.weight_goal = weight_goal_map.get(data.get('weightGoal'), user_details.weight_goal)
+            user_details.physical_activity_level = data.get('activityLevel', user_details.physical_activity_level)
+            user_details.weekly_training_days = data.get('trainingFrequency', user_details.weekly_training_days)
+            user_details.weight = data.get('currentWeight', user_details.weight)
+            user_details.save()
+
+            return True, "Usuario y detalles actualizados exitosamente."
+
+        except Exception as e:
+            print(f"Error al actualizar el usuario: {e}")
+            return False, "Error al actualizar el usuario."
+
     @staticmethod
     def create_user_admin(user_data):
         """
@@ -45,10 +78,11 @@ class UserRepository:
                 first_name=user_data['first_name'],
                 last_name=user_data['last_name'],
                 email=user_data['email'],
-                password=user_data['password'],  # Asegúrate de que la contraseña esté hasheada
+                # Asegúrate de que la contraseña esté hasheada
+                password=user_data['password'],
                 birth_date=user_data['birth_date'],
                 gender=user_data['gender'],
-                role=user_data['role'] 
+                role=user_data['role']
             )
             return user
         except Exception as e:
@@ -86,7 +120,7 @@ class UserRepository:
             }
         except user.DoesNotExist:
             return None
-        
+
     @staticmethod
     def get_user_profile(user_id):
         """
@@ -96,14 +130,14 @@ class UserRepository:
         """
         try:
             user = User.objects.get(id=user_id)
-            
+
             # Intentar obtener los detalles del usuario
             try:
                 user_details = user.details
             except UserDetails.DoesNotExist:
                 # Si no existen detalles, devolver valores predeterminados o manejar la ausencia
                 user_details = None
-            
+
             profile_data = {
                 "username": f"{user.first_name} {user.last_name}",
                 "email": user.email,
@@ -111,15 +145,16 @@ class UserRepository:
                 "height": user_details.height if user_details else 0,
                 "initialWeight": user_details.weight if user_details else 0.0,
                 "currentWeight": user_details.weight if user_details else 0.0,
-                "weightGoal": user_details.weight_goal if user_details else 0.0,
+                # Cambiado para usar el valor de la opción
+                "weightGoal": user_details.weight_goal if user_details else "No goal set",
                 "activityLevel": user_details.physical_activity_level if user_details else "No info",
                 "trainingFrequency": user_details.weekly_training_days if user_details else 0
             }
-            
+
             return profile_data
         except User.DoesNotExist:
             return None
-        
+
     @staticmethod
     def user_exists_by_email(email):
         """
@@ -128,7 +163,6 @@ class UserRepository:
         :return: True si existe, False en caso contrario.
         """
         return User.objects.filter(email=email).exists()
-
 
     @staticmethod
     def authenticate_user(email, password):
@@ -158,9 +192,9 @@ class UserRepository:
 
             # Crear la relación entre el usuario y el plan de entrenamiento
             UserWorkout.objects.create(user=user, training_plan=training_plan)
-            
+
             return True, "Plan de entrenamiento asignado exitosamente."
-        
+
         except User.DoesNotExist:
             return False, "Usuario no encontrado."
         except TrainingPlan.DoesNotExist:
@@ -180,27 +214,52 @@ class UserRepository:
             # Crear la relación entre el usuario y el plan nutricional
             UserNutritionPlan.objects.create(user=user, plan=nutrition_plan)
             return True, "Plan nutricional asignado exitosamente."
-        
+
         except User.DoesNotExist:
             return False, "Usuario no encontrado."
         except MealPlan.DoesNotExist:
             return False, "Plan nutricional no encontrado."
         except Exception as e:
-            return False, str(e)      
+            return False, str(e)
+
+    @staticmethod
+    def get_user_by_id2(user_id):
+        """
+        Obtener un usuario por su ID.
+        :param user_id: ID del usuario.
+        :return: Diccionario con los datos del usuario o None si no existe.
+        """
+        try:
+            user = User.objects.get(id=user_id)
+            details = user.details if hasattr(user, 'details') else None
+
+            return {
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "current_weight": details.weight if details else None,
+                "weight_goal": details.weight_goal if details else None,
+                "activity_level": details.physical_activity_level if details else None,
+                "training_frequency": details.weekly_training_days if details else None,
+                "role": user.role,
+            }
+        except User.DoesNotExist:
+            return None
 
     @staticmethod
     def complete_user_registration(user):
         """
         Completa el proceso de registro del usuario asignando entrenamiento y plan nutricional.
         """
-        workout_assigned, workout_message = UserRepository.assign_workout_to_user(user)
-        nutrition_assigned, nutrition_message = UserRepository.assign_nutrition_plan_to_user(user)
+        workout_assigned, workout_message = UserRepository.assign_workout_to_user(
+            user)
+        nutrition_assigned, nutrition_message = UserRepository.assign_nutrition_plan_to_user(
+            user)
 
         if workout_assigned and nutrition_assigned:
             return True, f"Registro completado. {workout_message} {nutrition_message}"
         else:
             return False, f"Error durante la asignación. {workout_message} {nutrition_message}"
-    
+
     @staticmethod
     def assign_nutrition_plan_to_user(user):
         """
@@ -212,8 +271,10 @@ class UserRepository:
 
             # Filtrar los planes nutricionales basados en las calorías y proteínas calculadas
             nutrition_plans = MealPlan.objects.filter(
-                Q(kcal__gte=user.details.daily_calories - 200, kcal__lte=user.details.daily_calories + 200),  # Calorías aproximadas
-                Q(proteins__gte=proteins_needed - 10, proteins__lte=proteins_needed + 10),  # Proteínas adecuadas
+                Q(kcal__gte=user.details.daily_calories - 200,
+                  kcal__lte=user.details.daily_calories + 200),  # Calorías aproximadas
+                Q(proteins__gte=proteins_needed - 10,
+                  proteins__lte=proteins_needed + 10),  # Proteínas adecuadas
                 diet_type=user.preferences.diet_type  # Tipo de dieta del usuario
             )
 
@@ -224,10 +285,10 @@ class UserRepository:
                 return True, f"Plan nutricional '{plan.diet_type}' asignado exitosamente al usuario {user.first_name}."
             else:
                 return False, "No se encontró un plan nutricional adecuado para el usuario."
-        
+
         except Exception as e:
             return False, str(e)
-        
+
     @staticmethod
     def assign_training_plan_to_user(user):
         """
@@ -238,10 +299,12 @@ class UserRepository:
         try:
             # Filtrar planes de entrenamiento según los días semanales, la duración diaria, el equipo disponible y la preferencia de entrenamiento
             training_plans = TrainingPlan.objects.filter(
-                duration__lte=user.details.daily_training_time,  # Filtrar planes de igual o menor duración diaria
-                equipment__in=user.details.available_equipment,  # Filtrar planes según el equipo disponible
+                # Filtrar planes de igual o menor duración diaria
+                duration__lte=user.details.daily_training_time,
+                # Filtrar planes según el equipo disponible
+                equipment__in=user.details.available_equipment,
             )
-            
+
             # Asignar el plan de entrenamiento basado en el nivel de actividad física del usuario
             if user.details.physical_activity_level == 'sedentario':
                 plan = training_plans.filter(difficulty='ligero').first()
@@ -264,8 +327,9 @@ class UserRepository:
         except Exception as e:
             return False, str(e)
 
+
 class UserDetailsRepository:
-    
+
     @staticmethod
     def create_user_details(user, details_data):
         """
@@ -296,14 +360,11 @@ class UserDetailsRepository:
                 }
             )
 
-
-            
-
             return user_details, diet_preferences
 
         except Exception as e:
-            raise ValueError(f"Error al crear o actualizar los detalles del usuario: {e}")
-
+            raise ValueError(
+                f"Error al crear o actualizar los detalles del usuario: {e}")
 
     @staticmethod
     def get_user_profile(user_id):
@@ -322,16 +383,17 @@ class UserDetailsRepository:
                 "age": UserRepository.calculate_age(user.birth_date),
                 "height": user_details.height,
                 "initialWeight": user_details.weight,
-                "currentWeight": user_details.weight,  # Suponiendo que `weight` es el peso actual, podría ser separado
+                # Suponiendo que `weight` es el peso actual, podría ser separado
+                "currentWeight": user_details.weight,
                 "weightGoal": user_details.weight_goal,
                 "activityLevel": user_details.physical_activity_level,
                 "trainingFrequency": user_details.weekly_training_days
             }
-            
+
             return profile_data
         except user.DoesNotExist:
             return None
-    
+
     @staticmethod
     def calculate_age(birth_date):
         """
@@ -342,7 +404,7 @@ class UserDetailsRepository:
         from datetime import date
         today = date.today()
         return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
-    
+
     @staticmethod
     def get_weight_history(user_id):
         """
@@ -352,7 +414,8 @@ class UserDetailsRepository:
         """
         try:
             # Filtrar por el usuario y ordenar por fecha ascendente para mostrar el historial cronológicamente
-            weight_history = ProgressTracking.objects.filter(user_id=user_id).order_by('date')
+            weight_history = ProgressTracking.objects.filter(
+                user_id=user_id).order_by('date')
 
             # Convertir el historial a un formato adecuado
             history_data = [
@@ -365,7 +428,7 @@ class UserDetailsRepository:
             return history_data
         except ProgressTracking.DoesNotExist:
             return None
-        
+
     @staticmethod
     def update_user_profile(user_id, profile_data):
         """
@@ -385,10 +448,14 @@ class UserDetailsRepository:
             user.save()
 
             # Actualizar los detalles del usuario
-            user_details.weight = profile_data.get('currentWeight', user_details.weight)
-            user_details.weight_goal = profile_data.get('weightGoal', user_details.weight_goal)
-            user_details.physical_activity_level = profile_data.get('activityLevel', user_details.physical_activity_level)
-            user_details.weekly_training_days = profile_data.get('trainingFrequency', user_details.weekly_training_days)
+            user_details.weight = profile_data.get(
+                'currentWeight', user_details.weight)
+            user_details.weight_goal = profile_data.get(
+                'weightGoal', user_details.weight_goal)
+            user_details.physical_activity_level = profile_data.get(
+                'activityLevel', user_details.physical_activity_level)
+            user_details.weekly_training_days = profile_data.get(
+                'trainingFrequency', user_details.weekly_training_days)
             user_details.save()
 
             return {
@@ -401,7 +468,6 @@ class UserDetailsRepository:
 
         except User.DoesNotExist:  # Asegúrate de que `User` esté definido correctamente
             return None
-
 
     @staticmethod
     def change_user_password(user_id, current_password, new_password, confirm_password):
@@ -437,7 +503,7 @@ class UserDetailsRepository:
 
         except user.DoesNotExist:
             return {"error": "Usuario no encontrado."}
-        
+
     @staticmethod
     def update_profile_photo(user_id, photo):
         """
@@ -460,7 +526,7 @@ class UserDetailsRepository:
 
         except user.DoesNotExist:
             return None
-        
+
     @staticmethod
     def get_all_users():
         """
@@ -480,23 +546,20 @@ class UserDetailsRepository:
         ]
 
         return user_data
-    
+
     @staticmethod
     def delete_user_by_id(user_id):
         """
         Eliminar un usuario y sus relaciones.
         """
         try:
-            
+
             user = User.objects.get(id=user_id)
             user.delete()  # Eliminar el usuario
             return True
         except User.DoesNotExist:
             return False
 
-
-
-        
     @staticmethod
     def get_monthly_user_growth(year=None):
         """
@@ -518,9 +581,11 @@ class UserDetailsRepository:
         )
 
         # Convertir el resultado a una lista de diccionarios con el formato deseado
-        month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        month_names = ["Jan", "Feb", "Mar", "Apr", "May",
+                       "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         return [{"month": month_names[entry['month'].month - 1], "newUsers": entry['new_users']} for entry in monthly_growth]
-    
+
+
 class ImagenRepository:
     @staticmethod
     def obtener_logo():

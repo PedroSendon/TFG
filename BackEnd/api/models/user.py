@@ -24,18 +24,33 @@ class User(models.Model):
         return f'{self.first_name} {self.last_name} - {self.email}'
 
 
+from django.db import models
+
 class UserDetails(models.Model):
+    WEIGHT_GOAL_CHOICES = [
+        ('gain_muscle', 'Ganar masa muscular'),
+        ('lose_weight', 'Perder peso'),
+        ('maintain', 'Mantenimiento'),
+    ]
+    ACTIVITY_LEVEL_CHOICES = [
+        ('sedentary', 'Sedentario'),
+        ('light', 'Ligera'),
+        ('moderate', 'Moderada'),
+        ('intense', 'Intensa'),
+    ]
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='details')
     height = models.PositiveIntegerField()  # En cm
     weight = models.DecimalField(max_digits=5, decimal_places=2)  # En kg
-    weight_goal = models.DecimalField(max_digits=5, decimal_places=2)  # Peso deseado
+    weight_goal = models.CharField(max_length=20, choices=WEIGHT_GOAL_CHOICES)  # Cambiado a opciones de texto
     weekly_training_days = models.PositiveIntegerField()
     daily_training_time = models.CharField(max_length=50)  # Ejemplo: '1-2 horas'
-    physical_activity_level = models.CharField(max_length=50)  # Ejemplo: 'Moderate activity'
+    physical_activity_level = models.CharField(max_length=20, choices=ACTIVITY_LEVEL_CHOICES)  # Opciones de nivel de actividad
     available_equipment = models.CharField(max_length=100, default="None")  # Ejemplo: 'Sin equipamiento'
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - Details'
+
 
 
 class DietPreferences(models.Model):

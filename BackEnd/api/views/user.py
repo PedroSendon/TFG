@@ -248,6 +248,19 @@ def assign_plans(request, user_id):
     }, status=status.HTTP_200_OK)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_details(request, user_id):
+    """
+    Endpoint para obtener los detalles de un usuario por su ID, delegando la lógica al repositorio.
+    """
+    user_data = UserRepository.get_user_by_id2(user_id)
+    
+    if user_data is None:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    
+    return Response(user_data, status=status.HTTP_200_OK)
+
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])
 def update_user_as_admin(request, user_id):
@@ -255,24 +268,18 @@ def update_user_as_admin(request, user_id):
     Modificar los datos de un usuario existente desde el modo administrador.
     """
     try:
-        user = request.user
-        if user.role != 'administrador':
+        # Verificar el rol del usuario que hace la solicitud
+        if request.user.role != 'administrador':
             return Response({"error": "No tienes permisos para modificar usuarios"}, status=status.HTTP_403_FORBIDDEN)
 
-        user = UserRepository.get_user_by_id(user_id)
-        if not user:
-            return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        # Llamar a la función del repositorio para actualizar el usuario
+        success, message = UserRepository.update_user_details(user_id, request.data)
 
-        # Actualizar los campos del usuario
-        user.first_name = request.data.get('first_name', user.first_name)
-        user.last_name = request.data.get('last_name', user.last_name)
-        user.email = request.data.get('email', user.email)
-        user.role = request.data.get(
-            'role', user.role)  # Permitir cambiar el rol
-        user.save()
-
-        return Response({"message": "Usuario actualizado exitosamente."}, status=status.HTTP_200_OK)
-
+        if success:
+            return Response({"message": message}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": message}, status=status.HTTP_404_NOT_FOUND)
+        
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

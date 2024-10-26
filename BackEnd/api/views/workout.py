@@ -5,6 +5,7 @@ from rest_framework import status
 from api.repositories.workout_repository import WorkoutRepository, TrainingPlanRepository
 from api.schemas.workout import WorkoutSchema, TrainingPlanSchema
 from api.schemas.exercise import ExerciseSchema
+from api.utils.decorators import role_required
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
@@ -152,14 +153,11 @@ def get_workouts_by_user(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@role_required(['entrenador', 'administrador'])
 def create_workout(request):
     """
     Crear un nuevo entrenamiento en el sistema.
     """
-    user = request.user
-    if user.role != 'entrenador' and user.role != 'administrador':
-        return Response({"error": "No tienes permisos para crear entrenamientos"}, status=status.HTTP_403_FORBIDDEN)
-
     # Obtener los datos del cuerpo de la solicitud
     name = request.data.get('name')
     description = request.data.get('description')

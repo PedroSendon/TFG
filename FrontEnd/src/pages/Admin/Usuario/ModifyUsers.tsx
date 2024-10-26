@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     TextField, Button, Grid, Container, MenuItem, Select
 } from '@mui/material';
@@ -10,39 +10,96 @@ import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext';
 
 const ModifyUserPage: React.FC = () => {
+
     const history = useHistory();
     const location = useLocation();
-    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
+    const { t } = useContext(LanguageContext);
 
-    // Recibir datos del usuario seleccionado desde la lista de usuarios
-    const { userData } = (location.state || {
-        userData: {},
-    }) as { userData: any };
+    // Recibir ID del usuario seleccionado desde la lista de usuarios
+    const { userId } = (location.state || { userId: null }) as { userId: number };
 
-    // Estado local para manejar los datos editados (inicializado con los datos del usuario)
     const [profileData, setProfileData] = useState({
-        firstName: userData?.firstName || '',
-        lastName: userData?.lastName || '',
-        currentWeight: userData?.currentWeight || 0,
-        weightGoal: userData?.weightGoal || '',
-        activityLevel: userData?.activityLevel || '',
-        trainingFrequency: userData?.trainingFrequency || 0,
-        role: userData?.role || '', // Añadir el rol al estado.
+        firstName: '',
+        lastName: '',
+        currentWeight: 0,
+        weightGoal: '',
+        activityLevel: '',
+        trainingFrequency: '', // Cambiar el valor inicial a '' en lugar de 0
+        role: '',
     });
+
 
     const [profilePicture, setProfilePicture] = useState('https://via.placeholder.com/150');
     const [showActionSheet, setShowActionSheet] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const fetchUserDetails = async () => {
+        try {
+            const accessToken = localStorage.getItem('access_token');
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
+
+            console.log("Starting fetch for user details...");
+
+            const response = await fetch(`http://127.0.0.1:8000/api/users/details/${userId}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Fetched user data:", data);
+
+                setProfileData({
+                    firstName: data.first_name,
+                    lastName: data.last_name,
+                    currentWeight: data.current_weight,
+                    weightGoal: data.weight_goal,
+                    activityLevel: data.activity_level,
+                    trainingFrequency: data.training_frequency,
+                    role: data.role,
+                });
+            } else {
+                console.error("Fetch error: ", await response.text());
+            }
+        } catch (error) {
+            console.error(t('request_error'), error);
+        }
+    };
+
+
+    useEffect(() => {
+        if (userId) {
+            console.log("Fetching user details for userId:", userId);
+            fetchUserDetails();
+        } else {
+            console.warn("No userId provided in location.state");
+        }
+    }, [userId]);
+
     const handleSave = async () => {
         try {
             const accessToken = localStorage.getItem('access_token');
-      
+
             if (!accessToken) {
-              console.error(t('no_token'));
-              return;
+                console.error(t('no_token'));
+                return;
             }
-            const response = await fetch(`http://127.0.0.1:8000/api/users/update/${userData.id}/`, {
+            console.log("Datos enviados para la actualización:", {
+                first_name: profileData.firstName,
+                last_name: profileData.lastName,
+                currentWeight: profileData.currentWeight,
+                weightGoal: profileData.weightGoal,
+                activityLevel: profileData.activityLevel,
+                trainingFrequency: profileData.trainingFrequency,
+                role: profileData.role,
+            });
+            const response = await fetch(`http://127.0.0.1:8000/api/users/update/${userId}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,7 +115,7 @@ const ModifyUserPage: React.FC = () => {
                     role: profileData.role,
                 }),
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
                 console.log(t('user_updated'), data);
@@ -106,248 +163,248 @@ const ModifyUserPage: React.FC = () => {
 
     return (
         <IonPage>
-        <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <Header title={t('modify_user')} />
+            <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <Header title={t('modify_user')} />
 
-            <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
-                {/* Sección de cambiar imagen de perfil */}
-                <IonAvatar
-                    className="custom-avatar"
-                    style={{
-                        width: '100px',  
-                        height: '100px',  
-                        border: '1.5px solid var(--color-verde-lima)',  
-                        borderRadius: '50%',
-                        overflow: 'hidden',
-                        marginBottom: '0px',
-                    }}
-                >
-                    <img
-                        src={profilePicture}
-                        alt="Foto de perfil"
+                <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
+                    {/* Sección de cambiar imagen de perfil */}
+                    <IonAvatar
+                        className="custom-avatar"
                         style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
+                            width: '100px',
+                            height: '100px',
+                            border: '1.5px solid var(--color-verde-lima)',
                             borderRadius: '50%',
+                            overflow: 'hidden',
+                            marginBottom: '0px',
                         }}
+                    >
+                        <img
+                            src={profilePicture}
+                            alt="Foto de perfil"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                borderRadius: '50%',
+                            }}
+                        />
+                    </IonAvatar>
+                    <IonButton
+                        style={{
+                            color: 'var(--color-verde-lima)',
+                            fontSize: '12px',
+                            margin: '0px'
+                        }}
+                        fill="clear"
+                        onClick={() => setShowActionSheet(true)}
+                    >
+                        <IonIcon icon={cameraOutline} style={{ fontSize: '16px' }} />
+                        {t('change_photo')}
+                    </IonButton>
+
+                    {/* Action Sheet para opciones de foto */}
+                    <IonActionSheet
+                        isOpen={showActionSheet}
+                        onDidDismiss={() => setShowActionSheet(false)}
+                        buttons={[
+                            {
+                                text: t('upload_photo'),
+                                icon: imageOutline,
+                                handler: () => handlePhotoOption('upload'),
+                            },
+                            {
+                                text: t('take_photo'),
+                                icon: cameraOutline,
+                                handler: () => handlePhotoOption('take'),
+                            },
+                            {
+                                text: t('delete_photo'),
+                                role: 'destructive',
+                                icon: trashOutline,
+                                handler: () => handlePhotoOption('delete'),
+                            },
+                            {
+                                text: t('cancel'),
+                                icon: closeOutline,
+                                role: 'cancel',
+                            },
+                        ]}
                     />
-                </IonAvatar>
-                <IonButton
-                    style={{
-                        color: 'var(--color-verde-lima)',
-                        fontSize: '12px',  
-                        margin: '0px'
-                    }}
-                    fill="clear"
-                    onClick={() => setShowActionSheet(true)}
-                >
-                    <IonIcon icon={cameraOutline} style={{ fontSize: '16px' }} /> 
-                    {t('change_photo')}
-                </IonButton>
 
-                {/* Action Sheet para opciones de foto */}
-                <IonActionSheet
-                    isOpen={showActionSheet}
-                    onDidDismiss={() => setShowActionSheet(false)}
-                    buttons={[
-                        {
-                            text: t('upload_photo'),
-                            icon: imageOutline,
-                            handler: () => handlePhotoOption('upload'),
-                        },
-                        {
-                            text: t('take_photo'),
-                            icon: cameraOutline,
-                            handler: () => handlePhotoOption('take'),
-                        },
-                        {
-                            text: t('delete_photo'),
-                            role: 'destructive',
-                            icon: trashOutline,
-                            handler: () => handlePhotoOption('delete'),
-                        },
-                        {
-                            text: t('cancel'),
-                            icon: closeOutline,
-                            role: 'cancel',
-                        },
-                    ]}
-                />
+                    <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileChange}
+                    />
 
-                <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    onChange={handleFileChange}
-                />
+                    <form onSubmit={handleSave}>
+                        <Grid container spacing={2}>
+                            {/* Campo de nombre */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="firstName"
+                                    label={t('first_name')}
+                                    name="firstName"
+                                    value={profileData.firstName}
+                                    onChange={handleChange}
+                                />
+                            </Grid>
 
-                <form onSubmit={handleSave}>
+                            {/* Campo de apellidos */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="lastName"
+                                    label={t('last_name')}
+                                    name="lastName"
+                                    value={profileData.lastName}
+                                    onChange={handleChange}
+                                />
+                            </Grid>
+
+                            {/* Campo de peso actual */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    type="number"
+                                    id="currentWeight"
+                                    label={t('current_weight')}
+                                    name="currentWeight"
+                                    value={profileData?.currentWeight || ''}  // Agrega verificación
+                                    onChange={handleChange}
+                                />
+                            </Grid>
+
+                            {/* Selector de meta de peso */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    variant="outlined"
+                                    required
+                                    select
+                                    fullWidth
+                                    id="weightGoal"
+                                    label={t('weight_goal')}
+                                    name="weightGoal"
+                                    value={profileData.weightGoal}
+                                    onChange={handleChange}
+                                >
+                                    <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
+                                    <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
+                                    <MenuItem value="Mantener peso">{t('maintain_weight')}</MenuItem>
+                                </TextField>
+                            </Grid>
+
+                            {/* Selector de nivel de actividad */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    variant="outlined"
+                                    required
+                                    select
+                                    fullWidth
+                                    id="activityLevel"
+                                    label={t('activity_level')}
+                                    name="activityLevel"
+                                    value={profileData.activityLevel}
+                                    onChange={handleChange}
+                                >
+                                    <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
+                                    <MenuItem value="Ligera">{t('light')}</MenuItem>
+                                    <MenuItem value="Moderada">{t('moderate')}</MenuItem>
+                                    <MenuItem value="Intensa">{t('intense')}</MenuItem>
+                                </TextField>
+                            </Grid>
+
+                            {/* Selector de frecuencia de entrenamiento */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    variant="outlined"
+                                    required
+                                    select
+                                    fullWidth
+                                    id="trainingFrequency"
+                                    label={t('training_frequency')}
+                                    name="trainingFrequency"
+                                    value={profileData.trainingFrequency}
+                                    onChange={handleChange}
+                                >
+                                    {[1, 2, 3, 4, 5, 6].map((day) => (
+                                        <MenuItem key={day} value={day}>{day}</MenuItem>
+                                    ))}
+                                </TextField>
+                            </Grid>
+
+                            {/* Selector de rol */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    variant="outlined"
+                                    required
+                                    select
+                                    fullWidth
+                                    id="role"
+                                    label={t('role')}
+                                    name="role"
+                                    value={profileData.role}
+                                    onChange={handleSelectChange}
+                                >
+                                    <MenuItem value="cliente">{t('client')}</MenuItem>
+                                    <MenuItem value="administrador">{t('admin')}</MenuItem>
+                                    <MenuItem value="entrenador">{t('trainer')}</MenuItem>
+                                    <MenuItem value="nutricionista">{t('nutritionist')}</MenuItem>
+                                </TextField>
+                            </Grid>
+                        </Grid>
+                    </form>
+                </div>
+
+                {/* Botones de Cancelar y Guardar */}
+                <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
                     <Grid container spacing={2}>
-                        {/* Campo de nombre */}
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                required
-                                fullWidth
-                                id="firstName"
-                                label={t('first_name')}
-                                name="firstName"
-                                value={profileData.firstName}
-                                onChange={handleChange}
-                            />
-                        </Grid>
-
-                        {/* Campo de apellidos */}
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                required
-                                fullWidth
-                                id="lastName"
-                                label={t('last_name')}
-                                name="lastName"
-                                value={profileData.lastName}
-                                onChange={handleChange}
-                            />
-                        </Grid>
-
-                        {/* Campo de peso actual */}
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                required
-                                fullWidth
-                                type="number"
-                                id="currentWeight"
-                                label={t('current_weight')}
-                                name="currentWeight"
-                                value={profileData.currentWeight}
-                                onChange={handleChange}
-                            />
-                        </Grid>
-
-                        {/* Selector de meta de peso */}
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                required
-                                select
-                                fullWidth
-                                id="weightGoal"
-                                label={t('weight_goal')}
-                                name="weightGoal"
-                                value={profileData.weightGoal}
-                                onChange={handleChange}
+                        <Grid item xs={6}>
+                            <Button
+                                onClick={handleCancel}
+                                style={{
+                                    border: '1px solid #FF0000',
+                                    backgroundColor: '#FFFFFF',
+                                    color: '#FF0000',
+                                    padding: '3% 0',
+                                    borderRadius: '5px',
+                                    fontSize: '1em',
+                                    width: '100%',
+                                }}
                             >
-                                <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
-                                <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
-                                <MenuItem value="Mantener peso">{t('maintain_weight')}</MenuItem>
-                            </TextField>
+                                {t('cancel')}
+                            </Button>
                         </Grid>
-
-                        {/* Selector de nivel de actividad */}
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                required
-                                select
-                                fullWidth
-                                id="activityLevel"
-                                label={t('activity_level')}
-                                name="activityLevel"
-                                value={profileData.activityLevel}
-                                onChange={handleChange}
+                        <Grid item xs={6}>
+                            <Button
+                                type="submit"
+                                style={{
+                                    border: '1px solid #32CD32',
+                                    backgroundColor: '#FFFFFF',
+                                    color: '#32CD32',
+                                    padding: '3% 0',
+                                    borderRadius: '5px',
+                                    fontSize: '1em',
+                                    width: '100%',
+                                }}
+                                onClick={handleSave}
                             >
-                                <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
-                                <MenuItem value="Ligera">{t('light')}</MenuItem>
-                                <MenuItem value="Moderada">{t('moderate')}</MenuItem>
-                                <MenuItem value="Intensa">{t('intense')}</MenuItem>
-                            </TextField>
+                                {t('save')}
+                            </Button>
                         </Grid>
-
-                        {/* Selector de frecuencia de entrenamiento */}
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                required
-                                select
-                                fullWidth
-                                id="trainingFrequency"
-                                label={t('training_frequency')}
-                                name="trainingFrequency"
-                                value={profileData.trainingFrequency}
-                                onChange={handleChange}
-                            >
-                                {[1, 2, 3, 4, 5, 6].map((day) => (
-                                    <MenuItem key={day} value={day}>{day}</MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid>
-
-                        {/* Selector de rol */}
-                        <Grid item xs={12}>
-                            <TextField
-                                variant="outlined"
-                                required
-                                select
-                                fullWidth
-                                id="role"
-                                label={t('role')}
-                                name="role"
-                                value={profileData.role}
-                                onChange={handleSelectChange}
-                            >
-                                <MenuItem value="cliente">{t('client')}</MenuItem>
-                                <MenuItem value="administrador">{t('admin')}</MenuItem>
-                                <MenuItem value="entrenador">{t('trainer')}</MenuItem>
-                                <MenuItem value="nutricionista">{t('nutritionist')}</MenuItem>
-                            </TextField>
-                        </Grid>
-                    </Grid>
-                </form>
-            </div>
-
-            {/* Botones de Cancelar y Guardar */}
-            <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
-                <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                        <Button
-                            onClick={handleCancel}
-                            style={{
-                                border: '1px solid #FF0000',
-                                backgroundColor: '#FFFFFF',
-                                color: '#FF0000',
-                                padding: '3% 0',
-                                borderRadius: '5px',
-                                fontSize: '1em',
-                                width: '100%',
-                            }}
-                        >
-                            {t('cancel')}
-                        </Button>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Button
-                            type="submit"
-                            style={{
-                                border: '1px solid #32CD32',
-                                backgroundColor: '#FFFFFF',
-                                color: '#32CD32',
-                                padding: '3% 0',
-                                borderRadius: '5px',
-                                fontSize: '1em',
-                                width: '100%',
-                            }}
-                            onClick={handleSave}
-                        >
-                            {t('save')}
-                        </Button>
                     </Grid>
                 </Grid>
-            </Grid>
-        </Container>
+            </Container>
         </IonPage>
     );
 };

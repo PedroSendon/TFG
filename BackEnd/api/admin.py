@@ -18,7 +18,7 @@ class UserAdmin(admin.ModelAdmin):
 class UserDetailsAdmin(admin.ModelAdmin):
     list_display = ['user', 'height', 'weight', 'weight_goal', 'weekly_training_days', 'daily_training_time']
     search_fields = ['user__first_name', 'user__last_name']
-    list_filter = ['weekly_training_days']
+    list_filter = ['weekly_training_days', 'weight_goal']  # Agregar weight_goal al filtro
 
 
 @admin.register(DietPreferences)

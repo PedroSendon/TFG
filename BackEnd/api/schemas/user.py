@@ -1,6 +1,6 @@
 from datetime import date
 from pydantic import BaseModel, EmailStr, Field, constr, PositiveInt, conint
-from typing import Optional, List
+from typing import Literal, Optional, List
 
 
 
@@ -60,20 +60,17 @@ class LoginSchema(BaseModel):
         from_attributes = True
 
 
-
 class UserDetailsSchema(BaseModel):
     height: PositiveInt
     weight: PositiveInt
-    weight_goal: str 
+    weight_goal: Literal["Ganar masa muscular", "Perder peso", "Mantenimiento"]  # Opciones específicas para la meta de peso
     weekly_training_days: conint(ge=1, le=7)
     daily_training_time: str
-    physical_activity_level: str
+    physical_activity_level: Literal["Sedentario", "Ligera", "Moderada", "Intensa"]  # Opciones específicas para nivel de actividad
     available_equipment: str  # Equipamiento disponible
 
     class Config:
         from_attributes = True
-
-
 
 
 class DietPreferencesSchema(BaseModel):

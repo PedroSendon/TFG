@@ -104,10 +104,9 @@ const Users: React.FC = () => {
 
 
   const handleEdit = (userId: number) => {
-    const selectedUser = users.find((user) => user.id === userId);
     history.push({
       pathname: `/admin/users/modify`,
-      state: { userData: selectedUser },
+      state: { userId },  // Asegúrate de que userId se pase correctamente
     });
   };
 

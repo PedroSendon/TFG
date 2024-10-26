@@ -313,8 +313,6 @@ const EditProfilePage: React.FC = () => {
                                 <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
                                 <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
                                 <MenuItem value="Mantener el peso actual">{t('maintain_weight')}</MenuItem>
-                                <MenuItem value="Mejorar resistencia física">{t('improve_resistance')}</MenuItem>
-                                <MenuItem value="Aumentar fuerza">{t('increase_strength')}</MenuItem>
                             </TextField>
                         </IonCol>
                     </IonRow>
