@@ -23,20 +23,20 @@ const AssignPlans: React.FC = () => {
   // Redirigir si `userId` no está definido
   useEffect(() => {
     if (!userId) {
-        console.error("No se encontró userId, redirigiendo...");
-        history.push('/admin/users');
+      console.error("No se encontró userId, redirigiendo...");
+      history.push('/admin/users');
     }
-}, [userId, history]);
+  }, [userId, history]);
 
   const fetchTrainingPlans = async () => {
     try {
       const accessToken = localStorage.getItem('access_token');
-      
+
       if (!accessToken) {
         console.error(t('no_token'));
         return;
       }
-      
+
       const response = await fetch('http://127.0.0.1:8000/api/trainingplans/', {
         method: 'GET',
         headers: {
@@ -63,7 +63,7 @@ const AssignPlans: React.FC = () => {
   const fetchNutritionPlans = async () => {
     try {
       const accessToken = localStorage.getItem('access_token');
-      
+
       if (!accessToken) {
         console.error(t('no_token'));
         return;
@@ -99,19 +99,25 @@ const AssignPlans: React.FC = () => {
   const handleSave = async () => {
     try {
       const accessToken = localStorage.getItem('access_token');
-      
+
       if (!accessToken) {
         console.error(t('no_token'));
         return;
       }
+
+      console.log("Enviando datos:", {
+        training_plan_id: selectedTrainingPlan,
+        nutrition_plan_id: selectedPlan,
+      });
+
       const response = await fetch(`http://127.0.0.1:8000/api/users/${userId}/assign-plans/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`, // Agrega el token JWT aquí
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          training_plan_id: selectedTrainingPlan,
+          workout_id: selectedTrainingPlan,
           nutrition_plan_id: selectedPlan,
         }),
       });
@@ -119,14 +125,16 @@ const AssignPlans: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         console.log(t('assign_success'), data);
-        history.push('/admin/users');  
+        history.push('/admin/users');
       } else {
-        console.error(t('assign_error'), await response.json());
+        const errorData = await response.json();
+        console.error(t('assign_error'), errorData);
       }
     } catch (error) {
       console.error(t('request_error'), error);
     }
   };
+
 
   const handleCancel = () => {
     history.push('/admin/users');
@@ -134,7 +142,7 @@ const AssignPlans: React.FC = () => {
 
   return (
     <IonPage>
-      <Header title={t('assign_plans')} /> 
+      <Header title={t('assign_plans')} />
 
       <IonContent>
         <IonGrid>

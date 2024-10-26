@@ -221,7 +221,7 @@ def update_user_profile(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def assign_plans(request, user_id):
     """
     Asignar un plan de entrenamiento y un plan nutricional a un usuario.
@@ -229,16 +229,20 @@ def assign_plans(request, user_id):
     workout_id = request.data.get('workout_id')
     nutrition_plan_id = request.data.get('nutrition_plan_id')
 
+    # Verificar si se recibieron los IDs correctamente
+    if not workout_id or not nutrition_plan_id:
+        return Response({"error": "ID del plan de entrenamiento o plan nutricional no proporcionado."}, status=status.HTTP_400_BAD_REQUEST)
+
+    print("Asignando workout_id:", workout_id, "nutrition_plan_id:", nutrition_plan_id)
+
     # Llamar al repositorio para asignar el entrenamiento
-    success_workout, message_workout = UserRepository.assign_workout_to_user(
-        user_id, workout_id)
+    success_workout, message_workout = UserRepository.assign_concret_training_plan_to_user(user_id, workout_id)
 
     if not success_workout:
         return Response({"error": message_workout}, status=status.HTTP_400_BAD_REQUEST)
 
     # Llamar al repositorio para asignar el plan nutricional
-    success_plan, message_plan = UserRepository.assign_nutrition_plan_to_user(
-        user_id, nutrition_plan_id)
+    success_plan, message_plan = UserRepository.assign_concret_nutrition_plan_to_user(user_id, nutrition_plan_id)
 
     if not success_plan:
         return Response({"error": message_plan}, status=status.HTTP_400_BAD_REQUEST)

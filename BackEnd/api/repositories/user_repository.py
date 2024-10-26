@@ -182,17 +182,16 @@ class UserRepository:
             return None
 
     @staticmethod
-    def assign_training_plan_to_user(user_id, training_plan_id):
+    def assign_concret_training_plan_to_user(user_id, training_plan_id):
         """
         Asigna un plan de entrenamiento a un usuario.
         """
         try:
+            print(f"Intentando asignar el plan de entrenamiento {training_plan_id} al usuario {user_id}")
             user = User.objects.get(id=user_id)
             training_plan = TrainingPlan.objects.get(id=training_plan_id)
 
-            # Crear la relación entre el usuario y el plan de entrenamiento
             UserWorkout.objects.create(user=user, training_plan=training_plan)
-
             return True, "Plan de entrenamiento asignado exitosamente."
 
         except User.DoesNotExist:
@@ -201,17 +200,17 @@ class UserRepository:
             return False, "Plan de entrenamiento no encontrado."
         except Exception as e:
             return False, str(e)
-
+    
     @staticmethod
-    def assign_nutrition_plan_to_user(user_id, plan_id):
+    def assign_concret_nutrition_plan_to_user(user_id, plan_id):
         """
         Asigna un plan nutricional a un usuario.
         """
         try:
+            print(f"Intentando asignar el plan nutricional {plan_id} al usuario {user_id}")
             user = User.objects.get(id=user_id)
             nutrition_plan = MealPlan.objects.get(id=plan_id)
 
-            # Crear la relación entre el usuario y el plan nutricional
             UserNutritionPlan.objects.create(user=user, plan=nutrition_plan)
             return True, "Plan nutricional asignado exitosamente."
 
@@ -250,7 +249,7 @@ class UserRepository:
         """
         Completa el proceso de registro del usuario asignando entrenamiento y plan nutricional.
         """
-        workout_assigned, workout_message = UserRepository.assign_workout_to_user(
+        workout_assigned, workout_message = UserRepository.assign_training_plan_to_user(
             user)
         nutrition_assigned, nutrition_message = UserRepository.assign_nutrition_plan_to_user(
             user)
