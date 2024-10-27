@@ -254,6 +254,17 @@ def assign_plans(request, user_id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def get_user_role(request):
+    """
+    Devuelve el rol del usuario autenticado.
+    """
+    user = request.user
+    role_data = UserRepository.ger_user_role(user.id)
+    return Response(role_data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_user_details(request, user_id):
     """
     Endpoint para obtener los detalles de un usuario por su ID, delegando la lógica al repositorio.

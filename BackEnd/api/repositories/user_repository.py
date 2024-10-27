@@ -11,6 +11,18 @@ from django.db.models import Q
 
 
 class UserRepository:
+
+    @staticmethod
+    def ger_user_role(user_id):
+        """
+        Obtener el rol de un usuario.
+        """
+        try:
+            user = User.objects.get(id=user_id)
+            return {"role": user.role}
+        except User.DoesNotExist:
+            return None
+
     @staticmethod
     def create_user(user_data):
         """

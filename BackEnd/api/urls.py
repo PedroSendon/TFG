@@ -33,6 +33,8 @@ urlpatterns = [
     path('users/create/', user.create_user_as_admin, name='create-user-as-admin'),
     path('users/<int:user_id>/assign-plans/', user.assign_plans, name='assign-plans'),
     path('users/details/<int:user_id>/', user.get_user_details, name='get-user-details'),
+    path('user/role/', user.get_user_role, name='get_user_role'),
+
 
     # Perfil de usuario
     path('profile/', user.get_user_profile, name='get-user-profile'),
