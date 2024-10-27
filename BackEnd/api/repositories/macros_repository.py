@@ -1,4 +1,5 @@
-from api.models.macros import MealPlan, DietCategory
+from api.models.user import User
+from api.models.macros import MealPlan, DietCategory, UserNutritionPlan
 
 
 class MacrosRepository:
@@ -40,50 +41,37 @@ class MacrosRepository:
 
     
     @staticmethod
-    def get_user_mealplan(user_id):
+    def get_user_mealplan(user):
         """
         Obtener los datos de macronutrientes del usuario.
-        :param user_id: ID del usuario.
-        :return: Un diccionario con las calorías totales y los macronutrientes del usuario.
         """
         try:
-            # Obtener el plan de comidas del usuario
-            meal_plan = MealPlan.objects.filter(user_id=user_id)
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+            # Obtener el plan de nutrición del usuario
+            user_nutrition_plan = UserNutritionPlan.objects.get(user=user)
+            meal_plan = user_nutrition_plan.plan
 
-            if not meal_plan.exists():
-                return None
-
-            # Sumar los macronutrientes y calorías
-            total_kcal = 0
-            total_proteins = 0
-            total_carbs = 0
-            total_fats = 0
-
-            for meal in meal_plan:
-                total_kcal += meal.calories
-                total_proteins += meal.proteins
-                total_carbs += meal.carbs
-                total_fats += meal.fats
-
+            # Calcular macronutrientes y calorías
             macros_data = {
-                "totalKcal": total_kcal,
+                "totalKcal": meal_plan.calories,
                 "macros": {
                     "carbs": {
-                        "grams": total_carbs,
-                        "kcal": total_carbs * 4,  # 1 gramo de carbohidratos tiene 4 kcal
-                        "percentage": round((total_carbs * 4 / total_kcal) * 100),
+                        "grams": meal_plan.carbs,
+                        "kcal": meal_plan.carbs * 4,  # 1 gramo de carbohidratos tiene 4 kcal
+                        "percentage": round((meal_plan.carbs * 4 / meal_plan.calories) * 100),
                         "color": "#ff4d4d"
                     },
                     "protein": {
-                        "grams": total_proteins,
-                        "kcal": total_proteins * 4,  # 1 gramo de proteína tiene 4 kcal
-                        "percentage": round((total_proteins * 4 / total_kcal) * 100),
+                        "grams": meal_plan.proteins,
+                        "kcal": meal_plan.proteins * 4,  # 1 gramo de proteína tiene 4 kcal
+                        "percentage": round((meal_plan.proteins * 4 / meal_plan.calories) * 100),
                         "color": "#4d79ff"
                     },
                     "fat": {
-                        "grams": total_fats,
-                        "kcal": total_fats * 9,  # 1 gramo de grasa tiene 9 kcal
-                        "percentage": round((total_fats * 9 / total_kcal) * 100),
+                        "grams": meal_plan.fats,
+                        "kcal": meal_plan.fats * 9,  # 1 gramo de grasa tiene 9 kcal
+                        "percentage": round((meal_plan.fats * 9 / meal_plan.calories) * 100),
                         "color": "#ffd11a"
                     }
                 }
@@ -91,7 +79,7 @@ class MacrosRepository:
 
             return macros_data
 
-        except Exception as e:
+        except UserNutritionPlan.DoesNotExist:
             return None
 
     @staticmethod

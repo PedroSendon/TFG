@@ -5,6 +5,8 @@ import './WorkoutDay.css';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
 import { Button } from '@mui/material';
+import { arrowBackOutline } from 'ionicons/icons';
+import { IonIcon } from '@ionic/react';
 
 const WorkoutDay: React.FC = () => {
   const history = useHistory();
@@ -57,9 +59,6 @@ const WorkoutDay: React.FC = () => {
   useEffect(() => {
     if (day_id) {
         fetchWorkoutDetails(day_id);
-    } else {
-        console.error('No day_id found in state');
-        history.push('/workout/overview'); // Redirige si no hay `day_id`
     }
 }, [day_id, history]);
 
@@ -87,18 +86,22 @@ const WorkoutDay: React.FC = () => {
     console.log('Entrenamiento completado');
   };
 
+  const handleBack = () => {
+    history.push('/workout'); // Navega de regreso a la ruta '/workout'
+  };
+
   const progress = exercises.length > 0 ? completedCount / exercises.length : 0;
   const progressPercentage = Math.round(progress * 100);
 
   return (
     <IonPage>
-      <Header title={t('training_of_the_day')} />
+            <Header title={t('training_of_the_day')} onBack={handleBack} showBackButton={true} />
 
       <IonContent>
         <IonList className="no-lines">
           {exercises.map((exercise, index) => (
             <IonItem key={index} className="workout-item no-lines">
-              <div className="workout-container" onClick={(e) => handleExerciseClick(index, e)}>
+              <div className="workout-container" onClick={(e) => handleExerciseClick(index, e)} >
                 <IonLabel className="workout-label">
                   <h1>{exercise.name}</h1>
                   <p>{`${exercise.sets} ${t('sets')} ${t('of')} ${exercise.reps} ${t('repetitions')}`}</p>

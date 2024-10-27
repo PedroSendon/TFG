@@ -159,7 +159,7 @@ const EditProfilePage: React.FC = () => {
 
     return (
         <IonPage>
-            <Header title={t('edit_profile')} />
+            <Header title={t('edit_profile')} onBack={handleCancel} showBackButton={true}  />
 
             <IonContent>
                 <IonGrid>

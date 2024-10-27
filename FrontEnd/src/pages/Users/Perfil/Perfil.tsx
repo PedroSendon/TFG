@@ -214,25 +214,7 @@ const ProfilePage: React.FC = () => {
                     </IonRow>
                 </IonGrid>
 
-                <hr className="thin-divider" />
-
-                <IonGrid>
-                    <IonRow>
-                        <IonCol>
-                            <h3>{t('weight_over_time')}</h3>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <LineChart data={weightData}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="day" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Line type="monotone" dataKey="weight" stroke="var(--color-verde-lima)" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
+               
 
                 {/* Botón de cerrar sesión actualizado */}
                 <IonGrid style={{ marginBottom: '15%' }}>

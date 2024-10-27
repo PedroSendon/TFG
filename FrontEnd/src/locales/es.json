@@ -263,5 +263,6 @@
   "information": "Información",
   "duration": "Duración",
   "days": "días",
-  "no_token": "No se encontró el token de acceso"
+  "no_token": "No se encontró el token de acceso",
+  "macros_distribution": "Distribución de Macronutrientes"
 }

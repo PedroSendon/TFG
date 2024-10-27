@@ -10,9 +10,8 @@ def get_user_mealplan(request):
     """
     Obtener los datos de macronutrientes del usuario.
     """
-    user_id = request.query_params.get('userId') or request.user.id  # Obtener el ID del usuario autenticado o proporcionado
-
-    macros_data = MacrosRepository.get_user_mealplan(user_id)
+    user = request.user  # Obtener el ID del usuario autenticado o proporcionado
+    macros_data = MacrosRepository.get_user_mealplan(user)
 
     if not macros_data:
         return Response({"error": "No se encontraron datos de macronutrientes para el usuario."}, status=status.HTTP_404_NOT_FOUND)

@@ -262,5 +262,6 @@
   "information": "Informació",
   "duration": "Durada",
   "days": "dies",
-  "no_token": "No s'ha trobat el token d'accés"
+  "no_token": "No s'ha trobat el token d'accés",
+  "macros_distribution": "Distribució de Macronutrients"
 }

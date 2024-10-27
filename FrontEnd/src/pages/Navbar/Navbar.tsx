@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';  // Workout icon
-import FastfoodIcon from '@mui/icons-material/Fastfood';  // Macros icon
+import FoodBankIcon from '@mui/icons-material/FoodBank';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';  // Progress icon
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';  // Perfil icon
 import GroupIcon from '@mui/icons-material/Group';  // Usuarios (para administrador)
@@ -142,7 +142,7 @@ const Navbar: React.FC = () => {
             />
             <BottomNavigationAction
                 label={t(userRole === 'admin' ? 'navbar_admin_nutrition' : 'navbar_macros')}
-                icon={<FastfoodIcon />}
+                icon={<FoodBankIcon />}
                 sx={{
                     color: value === 1 ? '#32CD32' : '#6b6b6b',
                     '&.Mui-selected': {

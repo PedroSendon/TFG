@@ -262,5 +262,6 @@
   "information": "Information",
   "duration": "Duration",
   "days": "days",
-  "no_token": "No access token found"
+  "no_token": "No access token found",
+  "macros_distribution": "Macronutrient Distribution"
 }

@@ -18,9 +18,10 @@ import { LanguageContext } from '../../../context/LanguageContext'; // Importar 
 
 const ExerciseDetailPage: React.FC = () => {
     const location = useLocation<{ day_id: number, exerciseId: string }>();
+    const history = useHistory();
     const day_id = location.state?.day_id;
     const exerciseId = location.state?.exerciseId;
-    
+
 
     const [showModal, setShowModal] = useState(false);
     const [exerciseInfo, setExerciseInfo] = useState<{
@@ -57,11 +58,11 @@ const ExerciseDetailPage: React.FC = () => {
                 },
                 body: JSON.stringify({ day_id, exerciseId }),
             });
-    
+
             if (!response.ok) {
                 throw new Error(`Error ${response.status}: ${response.statusText}`);
             }
-    
+
             const data = await response.json();
             if (typeof data.media === "string") {
                 data.media = [data.media];
@@ -70,13 +71,13 @@ const ExerciseDetailPage: React.FC = () => {
                 data.media = ["https://via.placeholder.com/300x200"];
             }
             setExerciseInfo(data);
-    
+
         } catch (error) {
             console.error('Error fetching exercise details:', error);
             setShowToast(true);
         }
     };
-    
+
 
     // Asegúrate de que `exerciseId` esté definido antes de realizar la petición
     useEffect(() => {
@@ -96,14 +97,16 @@ const ExerciseDetailPage: React.FC = () => {
             setCurrentImageIndex(currentImageIndex - 1);
         }
     };
-
+    const handleBack = () => {
+        history.push('/workout/day'); // Navega de regreso a la ruta '/workout'
+    };
     if (!exerciseInfo) {
         return <p>{t('loading_exercise_details')}</p>;
     }
     return (
         <IonPage>
             {/* Encabezado del ejercicio */}
-            <Header title={t('exercise_details')} />
+            <Header title={t('exercise_details')} onBack={handleBack} showBackButton={true} />
 
             <IonContent>
                 <IonGrid>

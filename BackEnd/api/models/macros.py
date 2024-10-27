@@ -21,7 +21,7 @@ class MealPlan(models.Model):
 
 
 class UserNutritionPlan(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_nutrition_plans')  # Relación con el usuario
+    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='user_nutrition_plans')  # Relación con el usuario
     plan = models.ForeignKey('MealPlan', on_delete=models.CASCADE, related_name='user_nutrition_plans')  # Relación con el meal plan
     date_assigned = models.DateField(auto_now_add=True)  # Fecha en la que el plan fue asignado
 
