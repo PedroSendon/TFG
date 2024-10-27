@@ -99,12 +99,18 @@ def list_all_exercises(request):
     exercises = ExerciseRepository.list_all_exercises()
     return Response({"data": exercises}, status=status.HTTP_200_OK)
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def get_exercise_details(request, day_id, exercise_id):
+def get_exercise_details(request):
     """
     Obtener los detalles de un ejercicio específico dentro de un workout asociado al usuario autenticado.
     """
+    day_id = request.data.get('day_id')
+    exercise_id = request.data.get('exerciseId')
+    print(day_id, exercise_id)
+
+    if not day_id or not exercise_id:
+        return Response({"error": "day_id y exercise_id son requeridos."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         user = request.user  # Obtener el usuario autenticado
@@ -115,6 +121,7 @@ def get_exercise_details(request, day_id, exercise_id):
             return Response({"error": "Ejercicio no encontrado en el workout especificado."}, status=status.HTTP_404_NOT_FOUND)
     except ValueError:
         return Response({"error": "Los parámetros 'day_id' y 'exercise_id' deben ser números."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET'])

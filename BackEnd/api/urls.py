@@ -63,7 +63,7 @@ urlpatterns = [
 
     # Exercises
     path('exercises/create/', exercise.create_exercise, name='create-exercise'),
-    path('exercises/details/<int:day_id>/<int:exercise_id>/', exercise.get_exercise_details, name='get-exercise-details'),
+    path('exercises/details/', exercise.get_exercise_details, name='get-exercise-details'),
     path('exercises/all/', exercise.list_all_exercises, name='list-all-exercises'),
     path('exercises/by-train/', exercise.get_exercises_by_training, name='get-exercises-by-training'),
     path('exercises/<int:exercise_id>/', exercise.update_exercise, name='update-exercise'),

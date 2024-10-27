@@ -65,7 +65,7 @@ const App: React.FC = () => {
           {/* Rutas workout */}
           <Route exact path="/workout" component={WorkoutOverview} />
           <Route exact path="/workout/day" component={WorkoutDay} />
-          <Route exact path="/workout/day/:day_id/exercise/:exerciseId" component={Exercice} />
+          <Route exact path="/workout/day/exercise" component={Exercice} />
 
 
           {/* Rutas macros */}

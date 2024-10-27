@@ -107,6 +107,7 @@ class WorkoutRepository:
                     "imageUrl": workout_exercise.exercise.media,
                     "sets": workout_exercise.sets,
                     "reps": workout_exercise.reps,
+                    "rest": workout_exercise.rest,
                     "completed": False  # Puedes personalizar este campo si tienes información de progreso
                 }
                 for workout_exercise in workout.workoutexercise_set.all()

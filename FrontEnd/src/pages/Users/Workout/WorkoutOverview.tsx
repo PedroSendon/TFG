@@ -55,7 +55,6 @@ const WorkoutOverview: React.FC = () => {
           imageUrl: workout.media || 'default-workout-image.jpg' // Asigna una imagen predeterminada o la de cada workout
         })),
       });
-      console.log(data);
       setLoading(false);
     } catch (err) {
       setError(t('error_fetching_workouts'));
@@ -68,7 +67,6 @@ const WorkoutOverview: React.FC = () => {
   }, []);
 
   const handleDayClick = (id: number) => {
-    console.log("DAY ID", id);
     history.push({
       pathname: `/workout/day`, // La ruta sin el parámetro en la URL
       state: { day_id: id }, // Pasamos el `id` en el `state`

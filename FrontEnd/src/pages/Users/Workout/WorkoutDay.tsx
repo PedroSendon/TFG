@@ -12,11 +12,12 @@ const WorkoutDay: React.FC = () => {
   const { t } = useContext(LanguageContext);
 
   const day_id = location.state?.day_id; // Accedemos a `day_id` desde el estado pasado
-  const [exercises, setExercises] = useState<Array<{ id: number; name: string; imageUrl: string; sets: number; reps: number; completed: boolean }>>([]);
+  const [exercises, setExercises] = useState<Array<{ id: number; name: string; imageUrl: string; sets: number; reps: number; rest: number; completed: boolean }>>([]);
   const [totalSets, setTotalSets] = useState<number>(0);
   const [totalReps, setTotalReps] = useState<number>(0);
-  const [estimatedTime, setEstimatedTime] = useState<number>(0);
   const [completedCount, setCompletedCount] = useState<number>(0);
+  const [totalRest, setTotalRest] = useState<number>(0);
+
 
   const fetchWorkoutDetails = async (day_id: number) => {
     try {
@@ -38,11 +39,13 @@ const WorkoutDay: React.FC = () => {
 
         const totalSets = data.reduce((acc: number, exercise: any) => acc + exercise.sets, 0);
         const totalReps = data.reduce((acc: number, exercise: any) => acc + exercise.reps * exercise.sets, 0);
-        const estimatedTime = totalSets * 2;
+        const totalRest = data.reduce((acc: number, exercise: any) => exercise.rest, 0); // Calcula total de descanso
+
         setTotalSets(totalSets);
         setTotalReps(totalReps);
-        setEstimatedTime(estimatedTime);
-        console.log(data);
+        setTotalRest(totalRest); // Establece el valor de totalRest
+
+        
       } else {
         console.error('Error fetching workout details');
       }
@@ -52,7 +55,6 @@ const WorkoutDay: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('day_id:', day_id);
     if (day_id) {
         fetchWorkoutDetails(day_id);
     } else {
@@ -75,12 +77,11 @@ const WorkoutDay: React.FC = () => {
     if (target.tagName !== 'ION-CHECKBOX' && target.tagName !== 'ION-LABEL') {
         const exerciseId = exercises[index].id;
         history.push({
-            pathname: `/workout/day/${day_id}/exercise/${exerciseId}`,
-            state: { day_id, exerciseId },
+            pathname: `/workout/day/exercise`, // Ruta sin IDs
+            state: { day_id, exerciseId }, // Pasa day_id y exerciseId en el estado
         });
     }
 };
-
 
   const handleCompleteWorkout = () => {
     console.log('Entrenamiento completado');
@@ -122,7 +123,7 @@ const WorkoutDay: React.FC = () => {
 
         <div className="summary-container">
           <h3>{t('training_summary')}</h3>
-          <p><strong>{totalSets}</strong> {t('sets')} | <strong>{totalReps}</strong> {t('repetitions')} | <strong>{estimatedTime}</strong> {t('minutes')}</p>
+          <p><strong>{totalSets}</strong> {t('sets')} | <strong>{totalReps}</strong> {t('repetitions')} | <strong>{totalRest}</strong> {t('minutes')}</p>
         </div>
 
         <hr className="divider" />

@@ -20,6 +20,7 @@ const ExerciseDetailPage: React.FC = () => {
     const location = useLocation<{ day_id: number, exerciseId: string }>();
     const day_id = location.state?.day_id;
     const exerciseId = location.state?.exerciseId;
+    
 
     const [showModal, setShowModal] = useState(false);
     const [exerciseInfo, setExerciseInfo] = useState<{
@@ -43,33 +44,39 @@ const ExerciseDetailPage: React.FC = () => {
 
     const fetchExerciseDetails = async (day_id: number, exerciseId: string) => {
         try {
-            console.log('Fetching exercise details for workout', day_id, 'and exercise', exerciseId);
             const accessToken = localStorage.getItem('access_token');
             if (!accessToken) {
                 console.error('No access token found');
                 return;
             }
-            const response = await fetch(`http://127.0.0.1:8000/api/exercises/details/${day_id}/${exerciseId}/`, {
-                method: 'GET',
+            const response = await fetch(`http://127.0.0.1:8000/api/exercises/details/`, {
+                method: 'POST', // Usa POST para enviar parámetros en el cuerpo si prefieres no usar GET
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,
                 },
+                body: JSON.stringify({ day_id, exerciseId }),
             });
-
+    
             if (!response.ok) {
                 throw new Error(`Error ${response.status}: ${response.statusText}`);
             }
-
+    
             const data = await response.json();
+            if (typeof data.media === "string") {
+                data.media = [data.media];
+            }
+            if (!data.media || data.media.length === 0) {
+                data.media = ["https://via.placeholder.com/300x200"];
+            }
             setExerciseInfo(data);
-
+    
         } catch (error) {
             console.error('Error fetching exercise details:', error);
             setShowToast(true);
         }
     };
-
+    
 
     // Asegúrate de que `exerciseId` esté definido antes de realizar la petición
     useEffect(() => {
