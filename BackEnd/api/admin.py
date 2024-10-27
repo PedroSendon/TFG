@@ -3,7 +3,7 @@ from .models.user import User, UserDetails, DietPreferences
 from .models.macros import DietCategory, MealPlan, UserNutritionPlan
 from .models.exercise import Exercise
 from .models.process import ProgressTracking, ExerciseLog
-from .models.workout import Workout, WorkoutExercise, UserWorkout, Imagen
+from .models.workout import WeeklyWorkout, Workout, WorkoutExercise, UserWorkout, Imagen
 from .models.trainingplan import TrainingPlan
 
 # Registro de todos los modelos en el panel de administración de Django
@@ -107,3 +107,12 @@ class TrainingPlanAdmin(admin.ModelAdmin):
 class ImagenAdmin(admin.ModelAdmin):
     list_display = ['nombre', 'descripcion']
     search_fields = ['nombre']
+
+    
+@admin.register(WeeklyWorkout)
+class WeeklyWorkoutAdmin(admin.ModelAdmin):
+    list_display = ('get_user', 'workout', 'completed')
+    list_filter = ('completed',)
+    search_fields = ('user_workout__user__first_name', 'user_workout__user__last_name', 'workout__name')
+    ordering = ('user_workout__user', 'workout')
+

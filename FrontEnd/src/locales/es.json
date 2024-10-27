@@ -264,5 +264,8 @@
   "duration": "Duración",
   "days": "días",
   "no_token": "No se encontró el token de acceso",
-  "macros_distribution": "Distribución de Macronutrientes"
+  "macros_distribution": "Distribución de Macronutrientes",
+  "next_workout": "Próximo entrenamiento",
+  "days_for_next_workout": "días para el próximo entrenamiento",
+  "training_schedule": "Horario de entrenamiento"
 }

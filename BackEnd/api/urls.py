@@ -53,7 +53,8 @@ urlpatterns = [
     path('workout/<int:day>/', workout.get_workout_by_day, name='get-workout-by-day'),
     path('workout/day/<int:day_id>/', workout.get_workout_exercises_by_day, name='get-workout-exercises-by-day'),
     path('workout/day/<int:day_id>/complete/', workout.mark_workout_day_complete, name='mark-workout-day-complete'),
-
+    path('weekly-workout/<int:workout_id>/complete/', workout.complete_workout, name='mark-workout-as-completed'),
+  
     # Planes de entrenamiento
     path('trainingplans/create/', trainingplan.create_training_plan, name='create-training-plan'),
     path('trainingplans/', trainingplan.get_training_plans, name='training-plans'),
@@ -62,6 +63,7 @@ urlpatterns = [
     path('training-plans/<int:training_plan_id>/update/', trainingplan.update_training_plan, name='update-training-plan'),
     path('training-plans/<int:training_plan_id>/delete/', trainingplan.delete_training_plan, name='delete-training-plan'),
     path('assigned-training-plan/', trainingplan.get_assigned_training_plan, name='get-assigned-training-plan'),
+    path('next-pending-workout/', trainingplan.get_next_pending_workout, name='get-next-pending-workout'),
 
     # Exercises
     path('exercises/create/', exercise.create_exercise, name='create-exercise'),

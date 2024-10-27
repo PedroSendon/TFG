@@ -1,6 +1,6 @@
 from datetime import datetime
 from api.models.macros import MealPlan, UserNutritionPlan
-from api.models.workout import UserWorkout, Imagen
+from api.models.workout import UserWorkout, Imagen, WeeklyWorkout
 from api.models.trainingplan import TrainingPlan
 from django.contrib.auth.hashers import check_password, make_password
 from api.models.user import User, UserDetails, DietPreferences
@@ -202,7 +202,13 @@ class UserRepository:
             user = User.objects.get(id=user_id)
             training_plan = TrainingPlan.objects.get(id=training_plan_id)
 
-            UserWorkout.objects.create(user=user, training_plan=training_plan)
+            user_workout = UserWorkout.objects.create(user=user, training_plan=training_plan)
+
+            # Crear WeeklyWorkout para cada entrenamiento en el TrainingPlan y marcar como incompleto
+            for workout in training_plan.workouts.all():
+                WeeklyWorkout.objects.create(user_workout=user_workout, workout=workout, completed=False)
+
+
             return True, "Plan de entrenamiento asignado exitosamente."
 
         except User.DoesNotExist:
@@ -603,3 +609,37 @@ class ImagenRepository:
         Obtiene el primer producto que contiene el logo.
         """
         return Imagen.objects.first()
+
+class UserWorkoutRepository:
+    @staticmethod
+    def mark_workout_as_completed(user_id, workout_id):
+        """
+        Marca un entrenamiento como completo para un usuario. Si todos los entrenamientos están completos,
+        reinicia todos los entrenamientos a incompleto.
+        """
+        try:
+            user_workout = UserWorkout.objects.get(user_id=user_id)
+            workout = WeeklyWorkout.objects.get(user_workout=user_workout, workout_id=workout_id)
+            workout.completed = True
+            workout.save()
+
+            # Verifica si todos los entrenamientos están completados
+            UserWorkoutRepository.check_and_reset_all_workouts(user_workout)
+
+            return {"message": "Workout marked as completed"}
+        except WeeklyWorkout.DoesNotExist:
+            return {"error": "Workout not found for the user"}, 404
+
+    @staticmethod
+    def check_and_reset_all_workouts(user_workout):
+        """
+        Verifica si todos los entrenamientos del plan están completos.
+        Si es así, los reinicia a incompletos para empezar el ciclo de nuevo.
+        """
+        weekly_workouts = WeeklyWorkout.objects.filter(user_workout=user_workout)
+        if all(workout.completed for workout in weekly_workouts):
+            for workout in weekly_workouts:
+                workout.completed = False
+                workout.save()
+            user_workout.progress = 0  # Reiniciar el progreso del plan si es necesario
+            user_workout.save()

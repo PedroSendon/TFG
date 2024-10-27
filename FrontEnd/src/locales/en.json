@@ -263,5 +263,8 @@
   "duration": "Duration",
   "days": "days",
   "no_token": "No access token found",
-  "macros_distribution": "Macronutrient Distribution"
+  "macros_distribution": "Macronutrient Distribution",
+  "next_workout": "Next Workout",
+  "days_for_next_workout": "days until next workout",
+  "training_schedule": "Training Schedule"
 }

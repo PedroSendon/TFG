@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from api.repositories.user_repository import UserWorkoutRepository
 from api.repositories.workout_repository import WorkoutRepository
 from api.utils.decorators import role_required
 
@@ -65,6 +66,15 @@ def get_workout_exercises_by_day(request, day_id):
 
     # Retornamos la respuesta directamente con los datos preparados
     return Response(exercises, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def complete_workout(request, workout_id):
+    user_id = request.user.id
+    result = UserWorkoutRepository.mark_workout_as_completed(user_id, workout_id)
+    if "error" in result:
+        return Response(result, status=result[1])
+    return Response(result, status=status.HTTP_200_OK)
 
 
 

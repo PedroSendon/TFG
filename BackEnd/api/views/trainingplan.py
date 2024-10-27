@@ -146,3 +146,17 @@ def get_training_plans(request):
         import traceback
         print("Error:", traceback.format_exc())
         return Response({"error": f"Error fetching training plans: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_next_pending_workout(request):
+    """
+    Obtener el primer entrenamiento no completado del plan de entrenamiento del usuario autenticado.
+    """
+    user = request.user
+    next_workout, error = TrainingPlanRepository.get_next_pending_workout(user)
+
+    if error:
+        return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response(next_workout, status=status.HTTP_200_OK)

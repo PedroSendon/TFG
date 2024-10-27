@@ -1,6 +1,7 @@
 from typing import List
+from api.models.user import User
 from api.schemas.workout import TrainingPlanSchema  # Import TrainingPlanSchema
-from api.models.workout import UserWorkout, Workout
+from api.models.workout import UserWorkout, WeeklyWorkout, Workout
 from api.models.trainingplan import TrainingPlan
 
 class TrainingPlanRepository:
@@ -45,6 +46,40 @@ class TrainingPlanRepository:
             "workouts": [workout.id for workout in training_plan.workouts.all()]
         }
     
+    @staticmethod
+    def get_next_pending_workout(user):
+        """
+        Obtener el primer entrenamiento no completado del usuario.
+        """
+        try:
+            # Busca el UserWorkout relacionado con el usuario
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+            
+            user_workout = UserWorkout.objects.get(user_id=user.id)
+            print(user_workout)
+            training_plan = user_workout.training_plan
+            
+            # Encuentra el primer entrenamiento no completado
+            next_workout = WeeklyWorkout.objects.filter(
+                user_workout=user_workout,
+                completed=False
+            ).order_by('workout__id').first()  # Ordena para asegurar obtener el primero
+
+            print(next_workout)
+
+            if not next_workout:
+                return None, "No pending workouts found."
+
+            return {
+                "id": next_workout.workout.id,
+                "name": next_workout.workout.name,
+                "description": next_workout.workout.description,
+                "progress": user_workout.progress,
+            }, None
+        except UserWorkout.DoesNotExist:
+            return None, "User workout not found."
+
     @staticmethod
     def get_all_training_plans() -> List[TrainingPlanSchema]:
         """
