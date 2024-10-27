@@ -85,4 +85,15 @@ urlpatterns = [
     # Estadísticas
     path('statistics/exercises/', statistics.get_exercise_popularity, name='get-exercise-popularity'),
     path('statistics/growth/', statistics.get_platform_growth, name='get-platform-growth'),
+    path('progress/', statistics.create_progress, name='create-progress'),
+    path('progress/user/<int:user_id>/', statistics.get_progress_by_user, name='get-progress-by-user'),
+    path('progress/<int:progress_id>/', statistics.update_progress, name='update-progress'),
+    path('progress/<int:progress_id>/delete/', statistics.delete_progress, name='delete-progress'),
+
+    # Endpoints para ExerciseLog
+    path('exercise-log/', statistics.create_exercise_log, name='create-exercise-log'),
+    path('exercise-log/user/<int:user_id>/', statistics.get_exercise_logs_by_user, name='get-exercise-logs-by-user'),
+    path('exercise-log/<int:log_id>/', statistics.update_exercise_log, name='update-exercise-log'),
+    path('exercise-log/<int:log_id>/delete/', statistics.delete_exercise_log, name='delete-exercise-log'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
