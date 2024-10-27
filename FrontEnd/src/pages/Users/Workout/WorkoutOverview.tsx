@@ -1,117 +1,160 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { IonPage, IonButton, IonIcon, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonImg } from '@ionic/react';
-import { useHistory } from 'react-router-dom'; // Hook para manejar la navegación en Ionic/React Router
-import './WorkoutOverview.css'; // Archivo CSS para los estilos personalizados
-import Header from '../../Header/Header';  // Importa el componente Header
-import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
+import './WorkoutOverview.css';
+import { LanguageContext } from '../../../context/LanguageContext';
+import Header from '../../Header/Header';
 
-// Componente funcional WorkoutOverview
 const WorkoutOverview: React.FC = () => {
-  const history = useHistory(); // Hook para manejar la navegación entre páginas
-  const { t } = useContext(LanguageContext); // Obtiene la función de traducción del contexto
+  const history = useHistory();
+  const { t } = useContext(LanguageContext);
 
-  // Estado para almacenar los datos de los entrenamientos (simulados o del backend)
-  const [workoutDays, setWorkoutDays] = useState<Array<{ id: number; day: string; imageUrl: string; workoutName: string }>>([]);
-  const [loading, setLoading] = useState<boolean>(true); // Estado para controlar si los datos están cargando
-  const [error, setError] = useState<string | null>(null); // Estado para manejar posibles errores
+  const [trainingPlan, setTrainingPlan] = useState<{
+    id: number;
+    name: string;
+    description: string;
+    difficulty: string;
+    equipment: string;
+    duration: number;
+    workouts: Array<{ id: number; name: string; description: string; imageUrl: string }>;
+  } | null>(null);
+  
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Función para obtener los entrenamientos del backend
   const fetchWorkouts = async () => {
     try {
       const accessToken = localStorage.getItem('access_token');
-
       if (!accessToken) {
-        console.error(t('no_token'));
+        setError(t('no_token'));
         return;
       }
-      const userId = 1; // Reemplaza esto con el ID del usuario actualmente logueado
-      const response = await fetch(`http://127.0.0.1:8000/api/workouts/by-user/?userId=${userId}`, {
+  
+      const response = await fetch(`http://127.0.0.1:8000/api/assigned-training-plan/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
+  
       if (!response.ok) {
-        throw new Error('Error al obtener los entrenamientos');
+        throw new Error(t('error_fetching_workouts'));
       }
+  
       const data = await response.json();
-      setWorkoutDays(data.data); // Actualiza los entrenamientos con los datos obtenidos
-      setLoading(false); // Desactiva el estado de carga
+      setTrainingPlan({
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        difficulty: data.difficulty,
+        equipment: data.equipment,
+        duration: data.duration,
+        workouts: data.workouts.map((workout: any) => ({
+          ...workout,
+          imageUrl: workout.media || 'default-workout-image.jpg' // Asigna una imagen predeterminada o la de cada workout
+        })),
+      });
+      console.log(data);
+      setLoading(false);
     } catch (err) {
-      setError(t('error_fetching_workouts')); // Maneja el error si falla la solicitud
-      setLoading(false); // Desactiva el estado de carga en caso de error
+      setError(t('error_fetching_workouts'));
+      setLoading(false);
     }
   };
-
-  // useEffect para cargar los datos cuando el componente se monta
+  
   useEffect(() => {
-    fetchWorkouts(); // Llama a la función que obtiene los datos
-  }, []); // El array vacío asegura que esto solo se ejecute una vez al montar el componente
+    fetchWorkouts();
+  }, []);
 
-  // Función que maneja el clic en un día de entrenamiento y navega a la vista de ese día
   const handleDayClick = (id: number) => {
-    history.push(`/workout/day/${id}`); // Redirige a la página del entrenamiento, pasando el id en la URL
+    console.log("DAY ID", id);
+    history.push({
+      pathname: `/workout/day`, // La ruta sin el parámetro en la URL
+      state: { day_id: id }, // Pasamos el `id` en el `state`
+    });
   };
 
-  // Muestra una pantalla de carga mientras se obtienen los entrenamientos
   if (loading) {
     return (
       <IonPage>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>{t('loading_workouts')}</IonTitle> {/* Texto traducido de "Cargando entrenamientos..." */}
+            <IonTitle>{t('loading_workouts')}</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent>
-          <p>{t('loading')}...</p> {/* Texto traducido de "Cargando..." */}
+          <p>{t('loading')}...</p>
         </IonContent>
       </IonPage>
     );
   }
 
-  // Muestra un mensaje de error si la obtención de entrenamientos falla
   if (error) {
     return (
       <IonPage>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>{t('error')}</IonTitle> {/* Texto traducido de "Error" */}
+            <IonTitle>{t('error')}</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent>
-          <p>{error}</p> {/* Muestra el mensaje de error traducido */}
+          <p>{error}</p>
         </IonContent>
       </IonPage>
     );
   }
 
-  // Renderiza la página con la lista de entrenamientos
   return (
     <IonPage>
-      <Header title={t('select_training')} />  {/* Componente Header con título traducido */}
+      {/* Header usando la variable de título en el archivo de idiomas */}
+      <Header title={t('training_plan_overview')} />
+
 
       <IonContent>
-        <IonList lines="none"> {/* Lista de entrenamientos sin líneas entre los items */}
-          {workoutDays.map((workout, index) => (
+        {trainingPlan && (
+          <div className="training-plan-details" style={{ padding: '20px' }}>
+            <p style={{ marginBottom: '20px' }}>{trainingPlan.description}</p>
+            <div style={{
+              backgroundColor: '#f9f9f9',
+              padding: '15px',
+              borderRadius: '10px',
+              boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+              marginBottom: '20px'
+            }}>
+              <h3 style={{ fontWeight: 'bold', marginBottom: '10px' }}>{t('information')}</h3>
+              <p><strong>{t('difficulty')}:</strong> {trainingPlan.difficulty}</p>
+              <p><strong>{t('equipment')}:</strong> {trainingPlan.equipment}</p>
+              <p><strong>{t('duration')}:</strong> {trainingPlan.duration} {t('minutes')}</p>
+            </div>
+          </div>
+        )}
+        
+        <IonList lines="none" style={{ padding: '0 20px', marginBottom:'15%'}}>
+          {trainingPlan?.workouts.map((workout) => (
             <IonItem
-              key={index}  // Se necesita una key única para cada item de la lista
+              key={workout.id}
               button
-              detail={false} // Oculta la flecha de detalle a la derecha del item
-              className="workout-item" // Clase CSS para estilizar los items
-              lines="none"  // Sin líneas para los items individuales
-              onClick={() => handleDayClick(workout.id)} // Llama a la función cuando se hace clic en el item
+              detail={false}
+              className="workout-item"
+              lines="none"
+              onClick={() => handleDayClick(workout.id)}
+              style={{
+                backgroundImage: `url(${workout.imageUrl})`, // Fondo de imagen
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                borderRadius: '10px',
+                marginBottom: '10px',
+                padding: '15px',
+                color: '#32CD32', // Texto en blanco para contraste
+                boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+              }}
             >
-              {/* Contenedor del ítem con imagen y texto */}
-              <div className="workout-container">
+              <div className="workout-container" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', borderRadius: '10px', padding: '10px' }}>
                 <IonLabel className="workout-label">
-                  <h1>{workout.workoutName}</h1> {/* Muestra el nombre del entrenamiento */}
+                  <h1>{workout.name}</h1>
+                  <p>{workout.description}</p>
                 </IonLabel>
-                <IonImg
-                  className="workout-img"
-                  src={workout.imageUrl}
-                  alt={`${t('workout_image_alt')} ${workout.workoutName}`} // Texto alternativo traducido
-                /> {/* Imagen asociada con el entrenamiento */}
               </div>
             </IonItem>
           ))}

@@ -258,5 +258,10 @@
   "training_name": "Nombre del Entrenamiento",
   "equipment_type": "Tipo de Equipo",
   "upload_image": "Subir Imagen",
-  "no_trainings_available": "No hay entrenamientos disponibles"
+  "no_trainings_available": "No hay entrenamientos disponibles",
+  "training_plan_overview": "Plan de Entrenamiento",
+  "information": "Información",
+  "duration": "Duración",
+  "days": "días",
+  "no_token": "No se encontró el token de acceso"
 }

@@ -257,5 +257,10 @@
   "training_name": "Nom de l'Entrenament",
   "equipment_type": "Tipus d'Equip",
   "upload_image": "Pujar Imatge",
-  "no_trainings_available": "No hi ha entrenaments disponibles"
+  "no_trainings_available": "No hi ha entrenaments disponibles",
+  "training_plan_overview": "Pla d'Entrenament",
+  "information": "Informació",
+  "duration": "Durada",
+  "days": "dies",
+  "no_token": "No s'ha trobat el token d'accés"
 }

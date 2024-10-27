@@ -317,13 +317,13 @@ const ModifyUserPage: React.FC = () => {
                                     value={profileData.activityLevel}
                                     onChange={handleChange}
                                 >
-                                    <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
+                                    <MenuItem value="Sedentaria">{t('sedentary')}</MenuItem>
                                     <MenuItem value="Ligera">{t('light')}</MenuItem>
                                     <MenuItem value="Moderada">{t('moderate')}</MenuItem>
                                     <MenuItem value="Intensa">{t('intense')}</MenuItem>
                                 </TextField>
                             </Grid>
-
+ 
                             {/* Selector de frecuencia de entrenamiento */}
                             <Grid item xs={12}>
                                 <TextField

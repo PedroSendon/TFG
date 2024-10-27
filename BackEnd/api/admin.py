@@ -3,7 +3,8 @@ from .models.user import User, UserDetails, DietPreferences
 from .models.macros import DietCategory, MealPlan, UserNutritionPlan
 from .models.exercise import Exercise
 from .models.process import ProgressTracking, ExerciseLog
-from .models.workout import Workout, WorkoutExercise, UserWorkout, TrainingPlan, Imagen
+from .models.workout import Workout, WorkoutExercise, UserWorkout, Imagen
+from .models.trainingplan import TrainingPlan
 
 # Registro de todos los modelos en el panel de administración de Django
 

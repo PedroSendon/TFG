@@ -302,10 +302,10 @@ const UserDetailsForm: React.FC = () => {
                             onChange={handleChange}
                             fullWidth
                         >
-                            <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
-                            <MenuItem value="Actividad ligera">{t('light_activity')}</MenuItem>
-                            <MenuItem value="Actividad moderada">{t('moderate_activity')}</MenuItem>
-                            <MenuItem value="Actividad intensa">{t('intense_activity')}</MenuItem>
+                            <MenuItem value="Sedentaria">{t('sedentary')}</MenuItem>
+                            <MenuItem value="Ligera">{t('light')}</MenuItem>
+                            <MenuItem value="Moderada">{t('moderate')}</MenuItem>
+                            <MenuItem value="Intensa">{t('intense')}</MenuItem>
                         </TextField>
                     </Grid>
 

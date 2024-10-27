@@ -1,8 +1,7 @@
 from datetime import datetime
 from api.models.macros import MealPlan, UserNutritionPlan
-from api.models.workout import TrainingPlan, UserWorkout, Workout, Imagen
-from api.models import user
-from django.core.exceptions import ValidationError
+from api.models.workout import UserWorkout, Imagen
+from api.models.trainingplan import TrainingPlan
 from django.contrib.auth.hashers import check_password, make_password
 from api.models.user import User, UserDetails, DietPreferences
 from api.models.process import ProgressTracking
@@ -274,7 +273,7 @@ class UserRepository:
                   kcal__lte=user.details.daily_calories + 200),  # Calorías aproximadas
                 Q(proteins__gte=proteins_needed - 10,
                   proteins__lte=proteins_needed + 10),  # Proteínas adecuadas
-                diet_type=user.preferences.diet_type  # Tipo de dieta del usuario
+                diet_type=user.details.weight_goal  # Tipo de dieta del usuario 
             )
 
             # Seleccionar el plan nutricional más adecuado
@@ -305,14 +304,14 @@ class UserRepository:
             )
 
             # Asignar el plan de entrenamiento basado en el nivel de actividad física del usuario
-            if user.details.physical_activity_level == 'sedentario':
-                plan = training_plans.filter(difficulty='ligero').first()
-            elif user.details.physical_activity_level == 'ligero':
-                plan = training_plans.filter(difficulty='moderado').first()
-            elif user.details.physical_activity_level == 'moderado':
-                plan = training_plans.filter(difficulty='intermedio').first()
+            if user.details.physical_activity_level == 'sedentaria':
+                plan = training_plans.filter(difficulty='sedentaria').first()
+            elif user.details.physical_activity_level == 'ligera':
+                plan = training_plans.filter(difficulty='ligera').first()
+            elif user.details.physical_activity_level == 'moderada':
+                plan = training_plans.filter(difficulty='moderada').first()
             else:
-                plan = training_plans.filter(difficulty='avanzado').first()
+                plan = training_plans.filter(difficulty='intensa').first()
 
             # Asignar el plan de entrenamiento encontrado al usuario
             if plan:

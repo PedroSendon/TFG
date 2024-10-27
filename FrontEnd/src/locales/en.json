@@ -257,5 +257,10 @@
   "training_name": "Training Name",
   "equipment_type": "Equipment Type",
   "upload_image": "Upload Image",
-  "no_trainings_available": "No trainings available"
+  "no_trainings_available": "No trainings available",
+  "training_plan_overview": "Training Plan Overview",
+  "information": "Information",
+  "duration": "Duration",
+  "days": "days",
+  "no_token": "No access token found"
 }

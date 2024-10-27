@@ -1,5 +1,6 @@
+from api.models.user import User
 from api.models.exercise import Exercise
-from api.models.workout import WorkoutExercise
+from api.models.workout import UserWorkout, Workout, WorkoutExercise
 from api.models.process import ExerciseLog
 from django.db.models import Sum
 from datetime import datetime
@@ -121,26 +122,57 @@ class ExerciseRepository:
         } for exercise in exercises]
 
 
-    
+        
     @staticmethod
-    def get_exercise_by_id(exercise_id):
+    def get_exercise_by_user_workout_and_id(user, workout_id, exercise_id):
         """
-        Obtener un ejercicio por su ID.
+        Obtener un ejercicio por su ID y el ID del workout dentro del training plan del usuario.
+        :param user: Usuario autenticado.
+        :param workout_id: ID del workout.
         :param exercise_id: ID del ejercicio.
         :return: Un diccionario con los detalles del ejercicio o None si no existe.
         """
         try:
-            exercise = Exercise.objects.get(id=exercise_id)
-            return {
-                "id": exercise.id,
-                "name": exercise.name,
-                "description": exercise.description,
-                "muscleGroups": exercise.get_muscle_groups(),  # Acceder directamente a la lista de grupos musculares
-                "instructions": exercise.instructions,
-                "media": exercise.media
-            }
-        except Exercise.DoesNotExist:
+            # Verificar que `user` es una instancia del modelo User
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+
+            # Primero, obtenemos el UserWorkout y el TrainingPlan asociado
+            user_workout = UserWorkout.objects.get(user=user)
+            training_plan = user_workout.training_plan
+            
+            # Iteramos sobre los workouts en el training plan
+            for workout in training_plan.workouts.all():
+                if workout.id == workout_id:
+                    # Una vez que encontramos el workout correcto, iteramos sobre los ejercicios
+                    for workout_exercise in workout.workoutexercise_set.all():
+                        if workout_exercise.exercise_id == exercise_id:
+                            # Ejercicio encontrado, retornamos los detalles
+                            exercise = workout_exercise.exercise
+                            return {
+                                "id": exercise.id,
+                                "name": exercise.name,
+                                "description": exercise.description,
+                                "muscleGroups": exercise.get_muscle_groups(),
+                                "instructions": exercise.get_instructions_list(),
+                                "media": exercise.media,
+                                "sets": workout_exercise.sets,
+                                "reps": workout_exercise.reps,
+                                "rest": workout_exercise.rest
+                            }
+            
+            print(f"No se encontró el ejercicio con ID {exercise_id} en el workout con ID {workout_id}")
             return None
+        except UserWorkout.DoesNotExist:
+            print(f"No se encontró un UserWorkout para el usuario {user}")
+            return None
+        except Exception as e:
+            print(f"Error inesperado: {e}")
+            return None
+
+
+
+
 
         
     @staticmethod

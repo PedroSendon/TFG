@@ -16,3 +16,7 @@ class Exercise(models.Model):
 
     def set_muscle_groups(self, muscle_groups):
         self.muscleGroups = ','.join(muscle_groups)
+
+    def get_instructions_list(self):
+        # Divide las instrucciones en una lista de strings separadas por el carácter '.'
+        return [instr.strip() for instr in self.instructions.split('.') if instr.strip()]

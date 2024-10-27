@@ -100,28 +100,23 @@ def list_all_exercises(request):
     return Response({"data": exercises}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
-def get_exercise_details(request):
+@permission_classes([IsAuthenticated])
+def get_exercise_details(request, day_id, exercise_id):
     """
-    Obtener los detalles de un ejercicio específico por su ID.
+    Obtener los detalles de un ejercicio específico dentro de un workout asociado al usuario autenticado.
     """
-    exercise_id = request.query_params.get('id')
-
-    if not exercise_id:
-        return Response({"error": "El parámetro 'id' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        exercise_id = int(exercise_id)
+        user = request.user  # Obtener el usuario autenticado
+        exercise = ExerciseRepository.get_exercise_by_user_workout_and_id(user, day_id, exercise_id)
+        if exercise:
+            return Response(exercise, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Ejercicio no encontrado en el workout especificado."}, status=status.HTTP_404_NOT_FOUND)
     except ValueError:
-        return Response({"error": "El parámetro 'id' debe ser un número."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Los parámetros 'day_id' y 'exercise_id' deben ser números."}, status=status.HTTP_400_BAD_REQUEST)
 
-    exercise = ExerciseRepository.get_exercise_by_id(exercise_id)
 
-    if exercise:
-        return Response(exercise, status=status.HTTP_200_OK)
-    else:
-        return Response({"error": "Ejercicio no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
 def get_exercises_by_training(request):

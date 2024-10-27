@@ -8,6 +8,7 @@ from .views import macros
 from .views import workout
 from .views import statistics
 from .views import exercise
+from .views import trainingplan
 
 
 urlpatterns = [
@@ -52,17 +53,17 @@ urlpatterns = [
     path('workout/day/<int:day_id>/complete/', workout.mark_workout_day_complete, name='mark-workout-day-complete'),
 
     # Planes de entrenamiento
-    path('trainingplans/create/', workout.create_training_plan, name='create-training-plan'),
-    path('trainingplans/', workout.get_training_plans, name='training-plans'),
-    path('trainingplans/<int:plan_id>/delete/', workout.delete_training_plan, name='delete-training-plan'),
-    path('training-plans/<int:training_plan_id>/', workout.get_training_plan, name='get-training-plan'),
-    path('training-plans/<int:training_plan_id>/update/', workout.update_training_plan, name='update-training-plan'),
-    path('training-plans/<int:training_plan_id>/delete/', workout.delete_training_plan, name='delete-training-plan'),
-
+    path('trainingplans/create/', trainingplan.create_training_plan, name='create-training-plan'),
+    path('trainingplans/', trainingplan.get_training_plans, name='training-plans'),
+    path('trainingplans/<int:plan_id>/delete/', trainingplan.delete_training_plan, name='delete-training-plan'),
+    path('training-plans/<int:training_plan_id>/', trainingplan.get_training_plan, name='get-training-plan'),
+    path('training-plans/<int:training_plan_id>/update/', trainingplan.update_training_plan, name='update-training-plan'),
+    path('training-plans/<int:training_plan_id>/delete/', trainingplan.delete_training_plan, name='delete-training-plan'),
+    path('assigned-training-plan/', trainingplan.get_assigned_training_plan, name='get-assigned-training-plan'),
 
     # Exercises
     path('exercises/create/', exercise.create_exercise, name='create-exercise'),
-    path('exercises/details/', exercise.get_exercise_details, name='get-exercise-details'),
+    path('exercises/details/<int:day_id>/<int:exercise_id>/', exercise.get_exercise_details, name='get-exercise-details'),
     path('exercises/all/', exercise.list_all_exercises, name='list-all-exercises'),
     path('exercises/by-train/', exercise.get_exercises_by_training, name='get-exercises-by-training'),
     path('exercises/<int:exercise_id>/', exercise.update_exercise, name='update-exercise'),

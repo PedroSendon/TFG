@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { IonPage, IonContent, IonList, IonItem, IonLabel, IonImg, IonCheckbox, IonButton, IonProgressBar, IonRow, IonCol, IonGrid } from '@ionic/react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import './WorkoutDay.css';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
@@ -8,19 +8,19 @@ import { Button } from '@mui/material';
 
 const WorkoutDay: React.FC = () => {
   const history = useHistory();
-  const { day_id } = useParams<{ day_id: string }>();
-  const { t } = useContext(LanguageContext); // Usar el contexto de idioma
+  const location = useLocation<{ day_id: number }>(); // Definimos el tipo para acceder al estado
+  const { t } = useContext(LanguageContext);
 
-  const [exercises, setExercises] = useState<Array<{ name: string; imageUrl: string; sets: number; reps: number; completed: boolean }>>([]);
+  const day_id = location.state?.day_id; // Accedemos a `day_id` desde el estado pasado
+  const [exercises, setExercises] = useState<Array<{ id: number; name: string; imageUrl: string; sets: number; reps: number; completed: boolean }>>([]);
   const [totalSets, setTotalSets] = useState<number>(0);
   const [totalReps, setTotalReps] = useState<number>(0);
   const [estimatedTime, setEstimatedTime] = useState<number>(0);
   const [completedCount, setCompletedCount] = useState<number>(0);
 
-  const fetchWorkoutDetails = async (day_id: string) => {
+  const fetchWorkoutDetails = async (day_id: number) => {
     try {
       const accessToken = localStorage.getItem('access_token');
-
       if (!accessToken) {
         console.error(t('no_token'));
         return;
@@ -29,7 +29,7 @@ const WorkoutDay: React.FC = () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
       if (response.ok) {
@@ -42,6 +42,7 @@ const WorkoutDay: React.FC = () => {
         setTotalSets(totalSets);
         setTotalReps(totalReps);
         setEstimatedTime(estimatedTime);
+        console.log(data);
       } else {
         console.error('Error fetching workout details');
       }
@@ -51,10 +52,14 @@ const WorkoutDay: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('day_id:', day_id);
     if (day_id) {
-      fetchWorkoutDetails(day_id);
+        fetchWorkoutDetails(day_id);
+    } else {
+        console.error('No day_id found in state');
+        history.push('/workout/overview'); // Redirige si no hay `day_id`
     }
-  }, [day_id]);
+}, [day_id, history]);
 
   const handleCheckboxChange = (index: number) => {
     const updatedExercises = [...exercises];
@@ -68,9 +73,14 @@ const WorkoutDay: React.FC = () => {
   const handleExerciseClick = (index: number, e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName !== 'ION-CHECKBOX' && target.tagName !== 'ION-LABEL') {
-      history.push(`/workout/day/exercise`);
+        const exerciseId = exercises[index].id;
+        history.push({
+            pathname: `/workout/day/${day_id}/exercise/${exerciseId}`,
+            state: { day_id, exerciseId },
+        });
     }
-  };
+};
+
 
   const handleCompleteWorkout = () => {
     console.log('Entrenamiento completado');

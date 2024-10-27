@@ -33,7 +33,7 @@ class UserDetails(models.Model):
         ('maintain', 'Mantenimiento'),
     ]
     ACTIVITY_LEVEL_CHOICES = [
-        ('sedentary', 'Sedentario'),
+        ('sedentary', 'Sedentaria'),
         ('light', 'Ligera'),
         ('moderate', 'Moderada'),
         ('intense', 'Intensa'),

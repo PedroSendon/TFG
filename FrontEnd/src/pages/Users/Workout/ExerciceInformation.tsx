@@ -46,40 +46,43 @@ const ExerciseInfoModal: React.FC<ExerciseInfoModalProps> = ({ isOpen, onClose, 
         <IonLabel>
           <h2 style={{ color: '#32CD32', marginBottom: '10px' }}>{t('step_by_step_instructions')}</h2>  {/* Texto dinámico */}
           <IonGrid>
-            {steps.map((step, index) => (
-              <IonRow key={index} className="ion-justify-content-center">
-                <IonCol size="12">
-                  <div
-                    style={{
-                      border: '1px solid #d1d1d6',
-                      padding: '10px 15px',
-                      borderRadius: '8px',
-                      marginBottom: '10px',
-                      textAlign: 'left',
-                      fontSize: '1em',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                  >
+            {Array.isArray(steps) ? (
+              steps.map((step, index) => (
+                <IonRow key={index} className="ion-justify-content-center">
+                  <IonCol size="12">
                     <div
                       style={{
-                        color: '#32CD32',
-                        fontWeight: 'bold',
-                        width: '30px',
-                        height: '30px',
+                        border: '1px solid #d1d1d6',
+                        padding: '10px 15px',
+                        borderRadius: '8px',
+                        marginBottom: '10px',
+                        textAlign: 'left',
+                        fontSize: '1em',
                         display: 'flex',
-                        justifyContent: 'left',
-                        alignItems: 'center',
-                        marginRight: '10px'
+                        alignItems: 'center'
                       }}
                     >
-                      {index + 1}
+                      <div
+                        style={{
+                          color: '#32CD32',
+                          fontWeight: 'bold',
+                          width: '30px',
+                          height: '30px',
+                          display: 'flex',
+                          justifyContent: 'left',
+                          alignItems: 'center',
+                          marginRight: '10px'
+                        }}
+                      >
+                        {index + 1}
+                      </div>
+                      <div>{step}</div>
                     </div>
-                    <div>{step}</div>
-                  </div>
-                </IonCol>
-              </IonRow>
-            ))}
+                  </IonCol>
+                </IonRow>
+              ))) : (
+              <p>{t('no_instructions_available')}</p> // Mensaje de error o estado alternativo
+            )}
           </IonGrid>
         </IonLabel>
 
