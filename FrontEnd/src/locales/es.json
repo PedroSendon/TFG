@@ -267,5 +267,14 @@
   "macros_distribution": "Distribución de Macronutrientes",
   "next_workout": "Próximo entrenamiento",
   "days_for_next_workout": "días para el próximo entrenamiento",
-  "training_schedule": "Horario de entrenamiento"
+  "training_schedule": "Horario de entrenamiento",
+    "fetch_workout_plan_error": "Error al obtener el plan de entrenamiento",
+    "network_error_fetching_plan": "Error de red al obtener el plan de entrenamiento",
+    "motivation_start": "¡Comienza tu primer entrenamiento y haz la diferencia!",
+    "motivation_good_start": "¡Buen comienzo! Sigue así.",
+    "motivation_almost_done": "¡Casi lo logras! Sigue adelante.",
+    "motivation_all_done": "¡Felicidades! Has completado todos los entrenamientos.",
+    "completed_training": "entrenamientos completados",
+    "training_history": "Historial de Entrenamientos",
+    "training_day": "Día de entrenamiento {day}"
 }

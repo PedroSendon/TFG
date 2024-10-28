@@ -83,7 +83,7 @@ const WorkoutDay: React.FC = () => {
 };
 
   const handleCompleteWorkout = () => {
-    console.log('Entrenamiento completado');
+    
   };
 
   const handleBack = () => {

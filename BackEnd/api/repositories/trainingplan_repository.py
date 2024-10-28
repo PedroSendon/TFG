@@ -57,7 +57,6 @@ class TrainingPlanRepository:
                 user = User.objects.get(id=user.id)
             
             user_workout = UserWorkout.objects.get(user_id=user.id)
-            print(user_workout)
             training_plan = user_workout.training_plan
             
             # Encuentra el primer entrenamiento no completado
@@ -65,8 +64,6 @@ class TrainingPlanRepository:
                 user_workout=user_workout,
                 completed=False
             ).order_by('workout__id').first()  # Ordena para asegurar obtener el primero
-
-            print(next_workout)
 
             if not next_workout:
                 return None, "No pending workouts found."

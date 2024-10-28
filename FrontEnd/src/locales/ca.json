@@ -266,5 +266,14 @@
   "macros_distribution": "Distribució de Macronutrients",
   "next_workout": "Pròxim entrenament",
   "days_for_next_workout": "dies per al pròxim entrenament",
-  "training_schedule": "Horari d'entrenament"
+  "training_schedule": "Horari d'entrenament",
+  "fetch_workout_plan_error": "Error en obtenir el pla d'entrenament",
+    "network_error_fetching_plan": "Error de xarxa en obtenir el pla d'entrenament",
+    "motivation_start": "Comença el teu primer entrenament i marca la diferència!",
+    "motivation_good_start": "Bon començament! Continua així.",
+    "motivation_almost_done": "Gairebé ho has aconseguit! Continua endavant.",
+    "motivation_all_done": "Felicitats! Has completat tots els entrenaments.",
+    "completed_training": "entrenaments completats",
+    "training_history": "Historial d'Entrenaments",
+    "training_day": "Dia d'entrenament {day}"
 }

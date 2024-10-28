@@ -266,5 +266,14 @@
   "macros_distribution": "Macronutrient Distribution",
   "next_workout": "Next Workout",
   "days_for_next_workout": "days until next workout",
-  "training_schedule": "Training Schedule"
+  "training_schedule": "Training Schedule",
+    "fetch_workout_plan_error": "Failed to fetch workout plan",
+    "network_error_fetching_plan": "Network error fetching workout plan",
+    "motivation_start": "Start your first training and make a difference!",
+    "motivation_good_start": "Good start! Keep it up.",
+    "motivation_almost_done": "You almost did it! Keep moving forward.",
+    "motivation_all_done": "Congratulations! You have completed all training.",
+    "completed_training": "completed training",
+    "training_history": "Training History",
+    "training_day": "{day} training day"
 }

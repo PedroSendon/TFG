@@ -1,6 +1,14 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel } from '@ionic/react';
+import {
+  IonPage,
+  IonContent,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonIcon,
+} from '@ionic/react';
 import { useHistory } from 'react-router-dom';
+import { lockClosedOutline, playCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import './WorkoutOverview.css';
 import { LanguageContext } from '../../../context/LanguageContext';
 import Header from '../../Header/Header';
@@ -16,9 +24,9 @@ const WorkoutOverview: React.FC = () => {
     difficulty: string;
     equipment: string;
     duration: number;
-    workouts: Array<{ id: number; name: string; description: string; imageUrl: string }>;
+    workouts: Array<{ id: number; name: string; description: string; imageUrl: string; completed: boolean }>;
   } | null>(null);
-  
+
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +37,7 @@ const WorkoutOverview: React.FC = () => {
         setError(t('no_token'));
         return;
       }
-  
+
       const response = await fetch(`http://127.0.0.1:8000/api/assigned-training-plan/`, {
         method: 'GET',
         headers: {
@@ -37,11 +45,11 @@ const WorkoutOverview: React.FC = () => {
           'Authorization': `Bearer ${accessToken}`,
         },
       });
-  
+
       if (!response.ok) {
         throw new Error(t('error_fetching_workouts'));
       }
-  
+
       const data = await response.json();
       setTrainingPlan({
         id: data.id,
@@ -52,7 +60,8 @@ const WorkoutOverview: React.FC = () => {
         duration: data.duration,
         workouts: data.workouts.map((workout: any) => ({
           ...workout,
-          imageUrl: workout.media || 'default-workout-image.jpg' // Asigna una imagen predeterminada o la de cada workout
+          imageUrl: workout.media || 'default-workout-image.jpg', // Imagen predeterminada si no hay media
+          completed: workout.completed,
         })),
       });
       setLoading(false);
@@ -61,26 +70,33 @@ const WorkoutOverview: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchWorkouts();
   }, []);
 
   const handleDayClick = (id: number) => {
     history.push({
-      pathname: `/workout/day`, // La ruta sin el parámetro en la URL
-      state: { day_id: id }, // Pasamos el `id` en el `state`
+      pathname: `/workout/day`,
+      state: { day_id: id },
     });
+  };
+
+  const getWorkoutStatusIcon = (workout: any, index: number) => {
+    if (workout.completed) {
+      return <IonIcon icon={checkmarkCircleOutline} color="success" style={{ fontSize: '1.5em' }} />;
+    } else if (index === trainingPlan?.workouts.findIndex(w => !w.completed)) {
+      // Primer entrenamiento incompleto, el próximo disponible
+      return <IonIcon icon={playCircleOutline} color="primary" style={{ fontSize: '1.5em' }} />;
+    } else {
+      return <IonIcon icon={lockClosedOutline} color="medium" style={{ fontSize: '1.5em' }} />;
+    }
   };
 
   if (loading) {
     return (
       <IonPage>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{t('loading_workouts')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
+        <Header title={t('loading_workouts')} />
         <IonContent>
           <p>{t('loading')}...</p>
         </IonContent>
@@ -91,11 +107,7 @@ const WorkoutOverview: React.FC = () => {
   if (error) {
     return (
       <IonPage>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{t('error')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
+        <Header title={t('error')} />
         <IonContent>
           <p>{error}</p>
         </IonContent>
@@ -105,9 +117,7 @@ const WorkoutOverview: React.FC = () => {
 
   return (
     <IonPage>
-      {/* Header usando la variable de título en el archivo de idiomas */}
       <Header title={t('training_plan_overview')} />
-
 
       <IonContent>
         {trainingPlan && (
@@ -118,7 +128,8 @@ const WorkoutOverview: React.FC = () => {
               padding: '15px',
               borderRadius: '10px',
               boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-              marginBottom: '20px'
+              marginBottom: '20px',
+              border: '1px solid #b0b0b0',
             }}>
               <h3 style={{ fontWeight: 'bold', marginBottom: '10px' }}>{t('information')}</h3>
               <p><strong>{t('difficulty')}:</strong> {trainingPlan.difficulty}</p>
@@ -127,36 +138,53 @@ const WorkoutOverview: React.FC = () => {
             </div>
           </div>
         )}
-        
-        <IonList lines="none" style={{ padding: '0 20px', marginBottom:'15%'}}>
-          {trainingPlan?.workouts.map((workout) => (
+
+        <IonList lines="none" style={{ padding: '0 20px', marginBottom: '15%' }}>
+          {trainingPlan?.workouts.map((workout, index) => (
             <IonItem
               key={workout.id}
-              button
+              button={index === trainingPlan.workouts.findIndex(w => !w.completed)}
               detail={false}
               className="workout-item"
               lines="none"
-              onClick={() => handleDayClick(workout.id)}
+              onClick={() => index === trainingPlan.workouts.findIndex(w => !w.completed) && handleDayClick(workout.id)}
               style={{
-                backgroundImage: `url(${workout.imageUrl})`, // Fondo de imagen
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 borderRadius: '10px',
-                marginBottom: '10px',
-                padding: '15px',
-                color: '#32CD32', // Texto en blanco para contraste
                 boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #b0b0b0', // Borde con color verde
               }}
             >
-              <div className="workout-container" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', borderRadius: '10px', padding: '10px' }}>
-                <IonLabel className="workout-label">
-                  <h1>{workout.name}</h1>
-                  <p>{workout.description}</p>
-                </IonLabel>
+              <div className="workout-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '10px', padding: '10px' }}>
+
+                {/* Contenedor para el nombre y la descripción */}
+                <div style={{ flex: 1 }}>
+                  <h1 style={{ fontWeight: 'bold', fontSize: '1.2em', marginBottom: '5px' }}>{workout.name}</h1>
+                  <p style={{
+                    margin: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                  }}
+                  >
+                    {workout.description}
+                  </p>
+                </div>
+
+                {/* Contenedor para el icono de estado */}
+                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+                  {getWorkoutStatusIcon(workout, index)}
+                </div>
+
               </div>
             </IonItem>
           ))}
         </IonList>
+
+
       </IonContent>
     </IonPage>
   );
