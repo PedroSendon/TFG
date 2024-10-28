@@ -230,3 +230,35 @@ class TrainingPlanRepository:
             }, None
         except UserWorkout.DoesNotExist:
             return None, "Training plan not found for the user."
+        
+    @staticmethod
+    def mark_workout_as_complete(user, day_id, progress):
+        try:
+            # Verificar si el objeto `user` es una instancia de `User`
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+
+            # Obtener el `UserWorkout` del usuario
+            user_workout = UserWorkout.objects.get(user_id=user.id)
+            print(user_workout)
+            # Encontrar el primer `WeeklyWorkout` que no esté completado y coincida con `day_id`
+            weekly_workout = WeeklyWorkout.objects.filter(user_workout=user_workout, completed=False, workout_id=day_id).first()
+
+            if not weekly_workout:
+                return False, "Workout not found or already completed."
+            
+            # Marcar el entrenamiento como completado
+            weekly_workout.completed = True
+            weekly_workout.save()
+            
+            # Actualizar el progreso del `UserWorkout`
+            user_workout_progress = user_workout.weekly_workouts.filter(completed=True).count()
+            total_workouts = user_workout.weekly_workouts.count()
+            user_workout.progress = min(int((user_workout_progress / total_workouts) * 100), progress)  # Actualizar con el progreso recibido
+            user_workout.save()
+
+            return True, "Workout marked as complete."
+        except WeeklyWorkout.DoesNotExist:
+            return False, "Workout not found."
+        except Exception as e:
+            return False, str(e)

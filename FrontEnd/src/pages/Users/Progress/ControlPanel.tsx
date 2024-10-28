@@ -154,7 +154,7 @@ const ControlPanel: React.FC = () => {
                             <div style={{ width: 80, marginRight: '20px' }}>
                                 <CircularProgressbar
                                     value={nextWorkout ? nextWorkout.progress : 0}
-                                    text={`${nextWorkout ? Math.round(nextWorkout.progress * 100) : 0}%`}
+                                    text={`${nextWorkout ? Math.round(nextWorkout.progress) : 0}%`}
                                     styles={buildStyles({
                                         pathColor: '#32CD32',
                                         textColor: '#32CD32',

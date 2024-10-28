@@ -23,7 +23,7 @@ urlpatterns = [
     #Imagenes
     path('logo/', user.obtener_logo, name='obtener_logo'),
 
-
+    # Admin users
     path('user/details/', user.save_user_details, name='user-details'),
     path('users/email/<str:email>/', user.get_user_by_email, name='get-user-by-email'),
     path('users/', user.get_all_users, name='get-all-users'),
@@ -34,7 +34,6 @@ urlpatterns = [
     path('users/<int:user_id>/assign-plans/', user.assign_plans, name='assign-plans'),
     path('users/details/<int:user_id>/', user.get_user_details, name='get-user-details'),
     path('user/role/', user.get_user_role, name='get_user_role'),
-
 
     # Perfil de usuario
     path('profile/', user.get_user_profile, name='get-user-profile'),
@@ -64,6 +63,7 @@ urlpatterns = [
     path('training-plans/<int:training_plan_id>/delete/', trainingplan.delete_training_plan, name='delete-training-plan'),
     path('assigned-training-plan/', trainingplan.get_assigned_training_plan, name='get-assigned-training-plan'),
     path('next-pending-workout/', trainingplan.get_next_pending_workout, name='get-next-pending-workout'),
+    path('workout/complete/<int:day_id>/', trainingplan.mark_workout_complete, name='mark-workout-complete'),
 
     # Exercises
     path('exercises/create/', exercise.create_exercise, name='create-exercise'),
@@ -72,7 +72,6 @@ urlpatterns = [
     path('exercises/by-train/', exercise.get_exercises_by_training, name='get-exercises-by-training'),
     path('exercises/<int:exercise_id>/', exercise.update_exercise, name='update-exercise'),
     path('exercises/<int:exercise_id>/delete/', exercise.delete_exercise, name='delete-exercise'),
-
 
     # Macros
     path('mealplans/all/', macros.get_all_mealplans, name='get-all-mealplans'),  # Primero la ruta más específica

@@ -160,3 +160,14 @@ def get_next_pending_workout(request):
         return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
 
     return Response(next_workout, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_workout_complete(request, day_id):
+    user = request.user
+    progress = request.data.get('progress', 0)  # Obtener el progreso del request
+    success, message = TrainingPlanRepository.mark_workout_as_complete(user, day_id, progress)
+
+    if success:
+        return Response({"message": message}, status=status.HTTP_200_OK)
+    return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)

@@ -4,7 +4,6 @@ import {
   IonContent,
   IonList,
   IonItem,
-  IonLabel,
   IonIcon,
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
@@ -12,6 +11,15 @@ import { lockClosedOutline, playCircleOutline, checkmarkCircleOutline } from 'io
 import './WorkoutOverview.css';
 import { LanguageContext } from '../../../context/LanguageContext';
 import Header from '../../Header/Header';
+
+interface Workout {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  completed: boolean;
+  statusIcon: JSX.Element; // Cambiamos el tipo a JSX.Element para incluir el icono con color
+}
 
 const WorkoutOverview: React.FC = () => {
   const history = useHistory();
@@ -24,11 +32,12 @@ const WorkoutOverview: React.FC = () => {
     difficulty: string;
     equipment: string;
     duration: number;
-    workouts: Array<{ id: number; name: string; description: string; imageUrl: string; completed: boolean }>;
+    workouts: Workout[];
   } | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [nextWorkout, setNextWorkout] = useState<Workout | null>(null);
 
   const fetchWorkouts = async () => {
     try {
@@ -51,6 +60,38 @@ const WorkoutOverview: React.FC = () => {
       }
 
       const data = await response.json();
+
+      // Llamada adicional para obtener el siguiente entrenamiento pendiente
+      const nextWorkoutResponse = await fetch('http://127.0.0.1:8000/api/next-pending-workout/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+      const nextWorkoutData = nextWorkoutResponse.ok ? await nextWorkoutResponse.json() : null;
+      setNextWorkout(nextWorkoutData);
+
+      // Procesar los entrenamientos y asignar el icono con color correcto
+      const workoutsWithIcons = data.workouts.map((workout: any) => ({
+        ...workout,
+        imageUrl: workout.media || 'default-workout-image.jpg',
+        completed: workout.completed,
+        statusIcon: <IonIcon icon={lockClosedOutline} color="danger" style={{ fontSize: '1.5em' }} />, // Inicialmente bloqueado (rojo)
+      }));
+
+      // Encontrar el índice de `nextWorkout` y actualizar `statusIcon` para los entrenamientos anteriores, el próximo, y los bloqueados
+      const nextWorkoutIndex = workoutsWithIcons.findIndex((w: any) => w.id === nextWorkoutData?.id);
+      workoutsWithIcons.forEach((workout: Workout, index: number) => {
+        if (index < nextWorkoutIndex) {
+          workout.statusIcon = <IonIcon icon={checkmarkCircleOutline} color="success" style={{ fontSize: '1.5em' }} />; // Completado (verde)
+        } else if (index === nextWorkoutIndex) {
+          workout.statusIcon = <IonIcon icon={playCircleOutline} color="primary" style={{ fontSize: '1.5em' }} />; // Disponible (azul)
+        } else {
+          workout.statusIcon = <IonIcon icon={lockClosedOutline} color="medium" style={{ fontSize: '1.5em' }} />; // Bloqueado (gris)
+        }
+      });
+
       setTrainingPlan({
         id: data.id,
         name: data.name,
@@ -58,11 +99,7 @@ const WorkoutOverview: React.FC = () => {
         difficulty: data.difficulty,
         equipment: data.equipment,
         duration: data.duration,
-        workouts: data.workouts.map((workout: any) => ({
-          ...workout,
-          imageUrl: workout.media || 'default-workout-image.jpg', // Imagen predeterminada si no hay media
-          completed: workout.completed,
-        })),
+        workouts: workoutsWithIcons,
       });
       setLoading(false);
     } catch (err) {
@@ -80,17 +117,6 @@ const WorkoutOverview: React.FC = () => {
       pathname: `/workout/day`,
       state: { day_id: id },
     });
-  };
-
-  const getWorkoutStatusIcon = (workout: any, index: number) => {
-    if (workout.completed) {
-      return <IonIcon icon={checkmarkCircleOutline} color="success" style={{ fontSize: '1.5em' }} />;
-    } else if (index === trainingPlan?.workouts.findIndex(w => !w.completed)) {
-      // Primer entrenamiento incompleto, el próximo disponible
-      return <IonIcon icon={playCircleOutline} color="primary" style={{ fontSize: '1.5em' }} />;
-    } else {
-      return <IonIcon icon={lockClosedOutline} color="medium" style={{ fontSize: '1.5em' }} />;
-    }
   };
 
   if (loading) {
@@ -140,25 +166,23 @@ const WorkoutOverview: React.FC = () => {
         )}
 
         <IonList lines="none" style={{ padding: '0 20px', marginBottom: '15%' }}>
-          {trainingPlan?.workouts.map((workout, index) => (
+          {trainingPlan?.workouts.map((workout) => (
             <IonItem
               key={workout.id}
-              button={index === trainingPlan.workouts.findIndex(w => !w.completed)}
+              button={!!(nextWorkout && workout.id === nextWorkout.id)}
               detail={false}
               className="workout-item"
               lines="none"
-              onClick={() => index === trainingPlan.workouts.findIndex(w => !w.completed) && handleDayClick(workout.id)}
+              onClick={() => nextWorkout && workout.id === nextWorkout.id && handleDayClick(workout.id)}
               style={{
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 borderRadius: '10px',
                 boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #b0b0b0', // Borde con color verde
+                border: '1px solid #b0b0b0',
               }}
             >
               <div className="workout-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '10px', padding: '10px' }}>
-
-                {/* Contenedor para el nombre y la descripción */}
                 <div style={{ flex: 1 }}>
                   <h1 style={{ fontWeight: 'bold', fontSize: '1.2em', marginBottom: '5px' }}>{workout.name}</h1>
                   <p style={{
@@ -174,16 +198,14 @@ const WorkoutOverview: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Contenedor para el icono de estado */}
-                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
-                  {getWorkoutStatusIcon(workout, index)}
+                {/* Icono de estado con color correspondiente */}
+                <div style={{ marginLeft: '3%', display: 'flex', alignItems: 'center' }}>
+                  {workout.statusIcon}
                 </div>
-
               </div>
             </IonItem>
           ))}
         </IonList>
-
 
       </IonContent>
     </IonPage>

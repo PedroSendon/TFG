@@ -47,7 +47,7 @@ const WorkoutDay: React.FC = () => {
         setTotalReps(totalReps);
         setTotalRest(totalRest); // Establece el valor de totalRest
 
-        
+
       } else {
         console.error('Error fetching workout details');
       }
@@ -58,9 +58,9 @@ const WorkoutDay: React.FC = () => {
 
   useEffect(() => {
     if (day_id) {
-        fetchWorkoutDetails(day_id);
+      fetchWorkoutDetails(day_id);
     }
-}, [day_id, history]);
+  }, [day_id, history]);
 
   const handleCheckboxChange = (index: number) => {
     const updatedExercises = [...exercises];
@@ -74,17 +74,46 @@ const WorkoutDay: React.FC = () => {
   const handleExerciseClick = (index: number, e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName !== 'ION-CHECKBOX' && target.tagName !== 'ION-LABEL') {
-        const exerciseId = exercises[index].id;
-        history.push({
-            pathname: `/workout/day/exercise`, // Ruta sin IDs
-            state: { day_id, exerciseId }, // Pasa day_id y exerciseId en el estado
-        });
+      const exerciseId = exercises[index].id;
+      history.push({
+        pathname: `/workout/day/exercise`, // Ruta sin IDs
+        state: { day_id, exerciseId }, // Pasa day_id y exerciseId en el estado
+      });
     }
-};
-
-  const handleCompleteWorkout = () => {
-    
   };
+
+  const handleCompleteWorkout = async () => {
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        console.error(t('no_token'));
+        return;
+      }
+
+      const response = await fetch(`http://127.0.0.1:8000/api/workout/complete/${day_id}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ progress: progressPercentage }), // Progreso calculado en el FE
+      });
+
+      if (response.ok) {
+        console.log("Workout marked as complete.");
+        // Actualiza el estado del ejercicio a completado y refresca la vista si es necesario
+        setExercises((prevExercises) =>
+          prevExercises.map((exercise) => ({ ...exercise, completed: true }))
+        );
+        handleBack();
+      } else {
+        console.error('Failed to mark workout as complete');
+      }
+    } catch (error) {
+      console.error('Error marking workout as complete:', error);
+    }
+  };
+
 
   const handleBack = () => {
     history.push('/workout'); // Navega de regreso a la ruta '/workout'
@@ -95,7 +124,7 @@ const WorkoutDay: React.FC = () => {
 
   return (
     <IonPage>
-            <Header title={t('training_of_the_day')} onBack={handleBack} showBackButton={true} />
+      <Header title={t('training_of_the_day')} onBack={handleBack} showBackButton={true} />
 
       <IonContent>
         <IonList className="no-lines">
