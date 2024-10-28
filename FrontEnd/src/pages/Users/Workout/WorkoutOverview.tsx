@@ -6,7 +6,7 @@ import {
   IonItem,
   IonIcon,
 } from '@ionic/react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { lockClosedOutline, playCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import './WorkoutOverview.css';
 import { LanguageContext } from '../../../context/LanguageContext';
@@ -18,12 +18,14 @@ interface Workout {
   description: string;
   imageUrl: string;
   completed: boolean;
-  statusIcon: JSX.Element; // Cambiamos el tipo a JSX.Element para incluir el icono con color
+  statusIcon?: JSX.Element;
 }
 
 const WorkoutOverview: React.FC = () => {
   const history = useHistory();
   const { t } = useContext(LanguageContext);
+  const location = useLocation<{ reload?: boolean }>();
+
 
   const [trainingPlan, setTrainingPlan] = useState<{
     id: number;
@@ -37,7 +39,7 @@ const WorkoutOverview: React.FC = () => {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [nextWorkout, setNextWorkout] = useState<Workout | null>(null);
+  const [nextWorkout, setNextWorkout] = useState<number | null>(null); // Store next workout ID directly
 
   const fetchWorkouts = async () => {
     try {
@@ -60,8 +62,9 @@ const WorkoutOverview: React.FC = () => {
       }
 
       const data = await response.json();
+      setTrainingPlan(data);
 
-      // Llamada adicional para obtener el siguiente entrenamiento pendiente
+      // Fetch the next workout
       const nextWorkoutResponse = await fetch('http://127.0.0.1:8000/api/next-pending-workout/', {
         method: 'GET',
         headers: {
@@ -69,38 +72,11 @@ const WorkoutOverview: React.FC = () => {
           'Authorization': `Bearer ${accessToken}`,
         },
       });
-      const nextWorkoutData = nextWorkoutResponse.ok ? await nextWorkoutResponse.json() : null;
-      setNextWorkout(nextWorkoutData);
+      if (nextWorkoutResponse.ok) {
+        const nextWorkoutData = await nextWorkoutResponse.json();
+        setNextWorkout(nextWorkoutData?.id || null);
+      }
 
-      // Procesar los entrenamientos y asignar el icono con color correcto
-      const workoutsWithIcons = data.workouts.map((workout: any) => ({
-        ...workout,
-        imageUrl: workout.media || 'default-workout-image.jpg',
-        completed: workout.completed,
-        statusIcon: <IonIcon icon={lockClosedOutline} color="danger" style={{ fontSize: '1.5em' }} />, // Inicialmente bloqueado (rojo)
-      }));
-
-      // Encontrar el índice de `nextWorkout` y actualizar `statusIcon` para los entrenamientos anteriores, el próximo, y los bloqueados
-      const nextWorkoutIndex = workoutsWithIcons.findIndex((w: any) => w.id === nextWorkoutData?.id);
-      workoutsWithIcons.forEach((workout: Workout, index: number) => {
-        if (index < nextWorkoutIndex) {
-          workout.statusIcon = <IonIcon icon={checkmarkCircleOutline} color="success" style={{ fontSize: '1.5em' }} />; // Completado (verde)
-        } else if (index === nextWorkoutIndex) {
-          workout.statusIcon = <IonIcon icon={playCircleOutline} color="primary" style={{ fontSize: '1.5em' }} />; // Disponible (azul)
-        } else {
-          workout.statusIcon = <IonIcon icon={lockClosedOutline} color="medium" style={{ fontSize: '1.5em' }} />; // Bloqueado (gris)
-        }
-      });
-
-      setTrainingPlan({
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        difficulty: data.difficulty,
-        equipment: data.equipment,
-        duration: data.duration,
-        workouts: workoutsWithIcons,
-      });
       setLoading(false);
     } catch (err) {
       setError(t('error_fetching_workouts'));
@@ -109,8 +85,16 @@ const WorkoutOverview: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchWorkouts();
-  }, []);
+      fetchWorkouts(); // Llama a la función para actualizar los datos
+}, []);
+
+  useEffect(() => {
+    // Si el estado `reload` está presente en la ubicación, recargar los datos
+    if (location.state?.reload) {
+        fetchWorkouts(); // Llama a la función para actualizar los datos
+        history.replace({ ...location, state: {} }); // Limpia el estado `reload` para evitar recargas infinitas
+    }
+}, [location.state]);
 
   const handleDayClick = (id: number) => {
     history.push({
@@ -169,11 +153,11 @@ const WorkoutOverview: React.FC = () => {
           {trainingPlan?.workouts.map((workout) => (
             <IonItem
               key={workout.id}
-              button={!!(nextWorkout && workout.id === nextWorkout.id)}
+              button={!workout.completed && workout.id === nextWorkout}
               detail={false}
               className="workout-item"
               lines="none"
-              onClick={() => nextWorkout && workout.id === nextWorkout.id && handleDayClick(workout.id)}
+              onClick={() => workout.id === nextWorkout && handleDayClick(workout.id)}
               style={{
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -200,13 +184,18 @@ const WorkoutOverview: React.FC = () => {
 
                 {/* Icono de estado con color correspondiente */}
                 <div style={{ marginLeft: '3%', display: 'flex', alignItems: 'center' }}>
-                  {workout.statusIcon}
+                  {workout.completed ? (
+                    <IonIcon icon={checkmarkCircleOutline} color="success" style={{ fontSize: '1.5em' }} />
+                  ) : workout.id === nextWorkout ? (
+                    <IonIcon icon={playCircleOutline} color="primary" style={{ fontSize: '1.5em' }} />
+                  ) : (
+                    <IonIcon icon={lockClosedOutline} color="medium" style={{ fontSize: '1.5em' }} />
+                  )}
                 </div>
               </div>
             </IonItem>
           ))}
         </IonList>
-
       </IonContent>
     </IonPage>
   );

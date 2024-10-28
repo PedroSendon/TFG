@@ -154,7 +154,7 @@
     "macros_carbs": "Carbohidrats",
     "macros_protein": "Proteïnes",
     "macros_fat": "Greixos",
-    "macros_total_kcal": "Kcal totals",
+    "macros_total_kcal": "Kcal",
     "diet_type_default": "Dieta alta en proteïnes",
     "meal_distribution": "Distribució de menjars suggerida",
     "breakfast": "Esmorzar",
@@ -275,5 +275,10 @@
     "motivation_all_done": "Felicitats! Has completat tots els entrenaments.",
     "completed_training": "entrenaments completats",
     "training_history": "Historial d'Entrenaments",
-    "training_day": "Dia d'entrenament {day}"
+    "training_day": "Dia d'entrenament {day}",
+  "no_completed_workouts": "Comença a entrenar! Encara no has completat cap entrenament.",
+  "completed_workouts": "entrenaments completats",
+  "completed_training_history": "Historial d'entrenaments completats",
+  "completed_day": "Dia completat {day}",
+  "start_training_message": "Comença el teu primer entrenament per veure els entrenaments completats aquí."
 }

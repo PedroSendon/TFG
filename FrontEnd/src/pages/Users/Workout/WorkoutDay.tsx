@@ -116,7 +116,7 @@ const WorkoutDay: React.FC = () => {
 
 
   const handleBack = () => {
-    history.push('/workout'); // Navega de regreso a la ruta '/workout'
+    history.push('/workout', { reload: true }); // Navega de regreso a la ruta '/workout'
   };
 
   const progress = exercises.length > 0 ? completedCount / exercises.length : 0;

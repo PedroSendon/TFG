@@ -45,6 +45,7 @@ class WeeklyWorkout(models.Model):
     user_workout = models.ForeignKey(UserWorkout, on_delete=models.CASCADE, related_name='weekly_workouts')
     workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)  # Indica si el entrenamiento está completado o no
+    progress = models.PositiveIntegerField(default=0)  # Progreso en el entrenamiento (0 a 100)
 
     def __str__(self):
         return f"{self.workout.name} for {self.user_workout.user.first_name}"
