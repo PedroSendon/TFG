@@ -3,7 +3,7 @@ from api.models.macros import MealPlan, UserNutritionPlan
 from api.models.workout import UserWorkout, Imagen, WeeklyWorkout
 from api.models.trainingplan import TrainingPlan
 from django.contrib.auth.hashers import check_password, make_password
-from api.models.user import User, UserDetails, DietPreferences
+from api.models.user import User, UserDetails, DietPreferences, WeightRecord
 from api.models.process import ProgressTracking
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
@@ -68,8 +68,15 @@ class UserRepository:
             user_details.weight_goal = weight_goal_map.get(data.get('weightGoal'), user_details.weight_goal)
             user_details.physical_activity_level = data.get('activityLevel', user_details.physical_activity_level)
             user_details.weekly_training_days = data.get('trainingFrequency', user_details.weekly_training_days)
-            user_details.weight = data.get('currentWeight', user_details.weight)
+
+            # Guardar el peso actualizado
+            new_weight = data.get('currentWeight', user_details.weight)
+            user_details.weight = new_weight
             user_details.save()
+
+            # Crear un nuevo registro de peso si el peso actual fue modificado
+            if new_weight:
+                WeightRecord.objects.create(user=user, weight=new_weight)
 
             return True, "Usuario y detalles actualizados exitosamente."
 
@@ -376,6 +383,9 @@ class UserDetailsRepository:
                 }
             )
 
+            # Crear un registro inicial de peso
+            WeightRecordRepository.crear_registro_peso(user.id, details_data['weight'])
+
             return user_details, diet_preferences
 
         except Exception as e:
@@ -643,3 +653,48 @@ class UserWorkoutRepository:
                 workout.save()
             user_workout.progress = 0  # Reiniciar el progreso del plan si es necesario
             user_workout.save()
+
+class WeightRecordRepository:
+    @staticmethod
+    def obtener_registros_peso_usuario(user):
+        """
+        Obtiene todos los registros de peso de un usuario específico.
+        """
+        try:
+            # Verificar que `user` es una instancia del modelo User
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+
+            user = User.objects.get(id=user.id)
+            return user.weight_records.all(), None
+        except User.DoesNotExist:
+            return None, "Usuario no encontrado."
+
+    @staticmethod
+    def crear_registro_peso(user, peso):
+        """
+        Crea un nuevo registro de peso para el usuario especificado.
+        """
+        try:
+            # Verificar que `user` es una instancia del modelo User
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+
+            registro_peso = WeightRecord.objects.create(user=user, weight=peso)
+            return registro_peso, None
+        except User.DoesNotExist:
+            return None, "Usuario no encontrado."
+        
+
+    @staticmethod
+    def get_latest_weight_record(user):
+        """
+        Obtiene el último registro de peso de un usuario específico.
+        :param user_id: ID del usuario
+        :return: Último registro de peso o None si no existe
+        """
+        if not isinstance(user, User):
+            user = User.objects.get(id=user.id)
+
+        return WeightRecord.objects.filter(user=user).order_by('-date', '-id').first()
+        

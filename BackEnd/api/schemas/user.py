@@ -2,6 +2,8 @@ from datetime import date
 from pydantic import BaseModel, EmailStr, Field, constr, PositiveInt, conint
 from typing import Literal, Optional, List
 
+from api.models.user import WeightRecord
+
 
 
 class UserSchema(BaseModel):
@@ -92,3 +94,10 @@ class ImagenSchema(BaseModel):
     nombre: str
     logo_url: str
     descripcion: str
+
+class WeightRecordSchema(BaseModel):
+    weight: PositiveInt
+    date: date
+
+    class Config:
+        from_attributes = True

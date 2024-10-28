@@ -60,3 +60,12 @@ class DietPreferences(models.Model):
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - Diet Preferences'
+
+
+class WeightRecord(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='weight_records')
+    weight = models.DecimalField(max_digits=5, decimal_places=2)  # Peso en kg
+    date = models.DateField(auto_now_add=True)  # Fecha del registro
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name} - {self.weight} kg on {self.date}"

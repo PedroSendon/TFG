@@ -24,31 +24,55 @@ const ProfilePage: React.FC = () => {
     const fetchUserProfile = async (userId: number) => {
         try {
             const accessToken = localStorage.getItem('access_token');
-
+    
             if (!accessToken) {
                 console.error(t('no_token'));
                 return;
             }
-            const response = await fetch(`http://127.0.0.1:8000/api/profile/?userId=${userId}`, {
+    
+            // Fetch profile data
+            const profileResponse = await fetch(`http://127.0.0.1:8000/api/profile/?userId=${userId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                    'Authorization': `Bearer ${accessToken}`,
                 },
             });
-            if (response.ok) {
-                const data = await response.json();
-                setUserData(data);
-                setLoading(false);
+    
+            if (profileResponse.ok) {
+                const profileData = await profileResponse.json();
+                setUserData(profileData);
             } else {
                 console.error('Error fetching user profile');
-                setLoading(false);
+            }
+    
+            // Fetch latest weight record
+            const weightResponse = await fetch('http://127.0.0.1:8000/api/latest-weight-record/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+    
+            if (weightResponse.ok) {
+                const weightData = await weightResponse.json();
+                console.log(weightData);
+                setUserData((prevData: any) => ({
+                    ...prevData,
+                    currentWeight: weightData.weight,
+                }));
+            } else {
+                console.error('Error fetching latest weight record');
             }
         } catch (error) {
-            console.error('Network error fetching user profile', error);
+            console.error('Network error fetching user profile or weight history', error);
+        } finally {
             setLoading(false);
         }
     };
+    
+    
 
     const fetchWeightHistory = async () => {
         try {

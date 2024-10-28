@@ -1,7 +1,7 @@
 from rest_framework.response import Response  # type: ignore
 from rest_framework.decorators import api_view, parser_classes, permission_classes, authentication_classes  # type: ignore
 from rest_framework import status  # type: ignore
-from api.repositories.user_repository import UserRepository, ImagenRepository
+from api.repositories.user_repository import UserRepository, ImagenRepository, WeightRecordRepository
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -439,3 +439,65 @@ def obtener_logo(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def obtener_registros_peso_usuario(request):
+    """
+    Endpoint para obtener todos los registros de peso de un usuario.
+    """
+    user = request.user  # Obtener el usuario autenticado
+    registros_peso, error = WeightRecordRepository.obtener_registros_peso_usuario(user)
+    
+    if error:
+        return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
+
+    # Serialización de los datos de los registros de peso
+    registros_peso_data = [
+        {"weight": registro.weight, "date": registro.date}
+        for registro in registros_peso
+    ]
+    return Response(registros_peso_data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def crear_registro_peso(request):
+    """
+    Endpoint para crear un nuevo registro de peso para un usuario.
+    """
+    peso = request.data.get("weight")
+    user = request.user  # Obtener el usuario autenticado
+    if peso is None:
+        return Response({"error": "El peso es requerido."}, status=status.HTTP_400_BAD_REQUEST)
+
+    registro_peso, error = WeightRecordRepository.crear_registro_peso(user, peso)
+    
+    if error:
+        return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({"message": "Registro de peso creado", "id": registro_peso.id}, status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_latest_weight_record(request):
+    """
+    Obtiene el último registro de peso del usuario autenticado.
+    """
+    try:
+        user = request.user  # Obtener el usuario autenticado
+        latest_weight_record = WeightRecordRepository.get_latest_weight_record(user)
+
+        if latest_weight_record:
+            # Formatear la respuesta con los datos del último registro de peso
+            data = {
+                'weight': latest_weight_record.weight,
+                'date': latest_weight_record.date
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "No weight record found."}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    

@@ -91,6 +91,12 @@ urlpatterns = [
     path('progress/<int:progress_id>/', statistics.update_progress, name='update-progress'),
     path('progress/<int:progress_id>/delete/', statistics.delete_progress, name='delete-progress'),
 
+    # Endpoints para WeightRecord
+    path('weight-records/', user.obtener_registros_peso_usuario, name='obtener_registros_peso_usuario'),
+    path('weight-records/create/', user.crear_registro_peso, name='crear_registro_peso'),
+    path('latest-weight-record/', user.get_latest_weight_record, name='latest-weight-record'),
+
+
     # Endpoints para ExerciseLog
     path('exercise-log/', statistics.create_exercise_log, name='create-exercise-log'),
     path('exercise-log/user/<int:user_id>/', statistics.get_exercise_logs_by_user, name='get-exercise-logs-by-user'),
