@@ -25,7 +25,6 @@ import { useHistory } from 'react-router-dom';
 import { IonFabButton, IonIcon, IonContent, IonPage, IonCol, IonRow, IonGrid, IonCard, IonLabel, IonActionSheet } from '@ionic/react';
 import { cameraOutline, closeOutline, imageOutline, trashOutline } from 'ionicons/icons';
 import Header from '../../Header/Header';
-import '../../../theme/variables.css';
 import { LanguageContext } from '../../../context/LanguageContext';
 
 interface Exercise {
@@ -256,9 +255,9 @@ const AddWorkouts: React.FC = () => {
                                     <Button
                                         onClick={() => setShowActionSheet(true)}
                                         style={{
-                                            border: '1px solid #32CD32',
+                                            border: '1px solid #000',
                                             backgroundColor: '#FFFFFF',
-                                            color: '#32CD32',
+                                            color: '#000',
                                             padding: '3% 0',
                                             borderRadius: '5px',
                                             fontSize: '1em',
@@ -371,9 +370,9 @@ const AddWorkouts: React.FC = () => {
                                     <Button
                                         onClick={handleAddExercise}
                                         style={{
-                                            border: '1px solid #32CD32',
+                                            border: '1px solid #000',
                                             backgroundColor: '#FFFFFF',
-                                            color: '#32CD32',
+                                            color: '#000',
                                             padding: '3% 0',
                                             borderRadius: '5px',
                                             fontSize: '1em',
@@ -406,9 +405,9 @@ const AddWorkouts: React.FC = () => {
                                             <Button
                                                 type="submit"
                                                 style={{
-                                                    border: '1px solid #32CD32',
+                                                    border: '1px solid #000',
                                                     backgroundColor: '#FFFFFF',
-                                                    color: '#32CD32',
+                                                    color: '#000',
                                                     padding: '3% 0',
                                                     borderRadius: '5px',
                                                     fontSize: '1em',

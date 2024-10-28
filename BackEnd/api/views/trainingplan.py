@@ -171,3 +171,8 @@ def mark_workout_complete(request, day_id):
     if success:
         return Response({"message": message}, status=status.HTTP_200_OK)
     return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_training_plan_images(request):
+    images = TrainingPlanRepository.get_training_plan_images()
+    return Response(images)

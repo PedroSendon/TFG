@@ -165,7 +165,7 @@ const ExerciseDetailPage: React.FC = () => {
                         </IonCol>
                         <IonCol size="2" className="ion-text-right" style={{ display: 'flex', alignItems: 'center' }}>
                             <IonButton fill="clear" onClick={() => setShowModal(true)}>
-                                <IonIcon icon={informationCircleOutline} style={{ fontSize: '28px', color: '#32CD32' }} />
+                                <IonIcon icon={informationCircleOutline} style={{ fontSize: '28px', color: '#000' }} />
                             </IonButton>
                         </IonCol>
                     </IonRow>
@@ -176,7 +176,7 @@ const ExerciseDetailPage: React.FC = () => {
                             <IonCol key={index} size="auto">
                                 <div style={{
                                     padding: '4px 8px',
-                                    backgroundColor: '#32CD32',
+                                    backgroundColor: '#000',
                                     color: '#fff',
                                     borderRadius: '4px',
                                     fontSize: '12px',
@@ -198,7 +198,7 @@ const ExerciseDetailPage: React.FC = () => {
                                 width: '100px',
                                 height: '100px',
                                 borderRadius: '50%',
-                                border: '3px solid #32CD32',
+                                border: '3px solid #000',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'center',
@@ -214,7 +214,7 @@ const ExerciseDetailPage: React.FC = () => {
                                 width: '100px',
                                 height: '100px',
                                 borderRadius: '50%',
-                                border: '3px solid #32CD32',
+                                border: '3px solid #000',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'center',
@@ -230,7 +230,7 @@ const ExerciseDetailPage: React.FC = () => {
                                 width: '100px',
                                 height: '100px',
                                 borderRadius: '50%',
-                                border: '3px solid #32CD32',
+                                border: '3px solid #000',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'center',

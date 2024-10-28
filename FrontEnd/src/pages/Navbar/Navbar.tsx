@@ -12,7 +12,7 @@ import { LanguageContext } from '../../context/LanguageContext';  // Importar el
 
 const Navbar: React.FC = () => {
     const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
-    const history = useHistory();  
+    const history = useHistory();
     const location = useLocation();  // Obtener la ubicación/ruta actual
     const [userRole, setUserRole] = useState<string | null>(null);
 
@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
         }
         fetchUserRole();
     }, [location.pathname]);  // Se ejecuta cada vez que cambie la ruta
-    
+
 
     // Efecto que se ejecuta al cargar la página o cuando cambia la ruta
     useEffect(() => {
@@ -59,10 +59,10 @@ const Navbar: React.FC = () => {
             case userRole === 'admin' ? '/admin/nutrition' : '/macronutrients':
                 setValue(1);
                 break;
-                case userRole === 'admin' ? '/admin/statistics' : '/progress':
+            case userRole === 'admin' ? '/admin/statistics' : '/progress':
                 setValue(2);
                 break;
-                case userRole === 'admin' ? '/admin/users' : '/profile':
+            case userRole === 'admin' ? '/admin/users' : '/profile':
                 setValue(3);
                 break;
             default:
@@ -74,10 +74,10 @@ const Navbar: React.FC = () => {
     // Función para manejar el cambio de la selección en la navbar
     const handleNavigation = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
-        
+
         // Redirigir a la página adecuada según el valor seleccionado y tipo de usuario
         if (userRole === 'admin') {
-            switch(newValue) {
+            switch (newValue) {
                 case 0:
                     history.push('/admin/workout');
                     break;
@@ -94,7 +94,7 @@ const Navbar: React.FC = () => {
                     break;
             }
         } else {
-            switch(newValue) {
+            switch (newValue) {
                 case 0:
                     history.push('/workout');
                     break;
@@ -126,48 +126,55 @@ const Navbar: React.FC = () => {
                 backgroundColor: '#fff',
                 boxShadow: '0 -1px 10px rgba(0,0,0,0.1)',
                 '& .Mui-selected': {
-                    color: '#32CD32',  // Color verde lima para el elemento seleccionado
+                    color: '#000',  // Color verde lima para el elemento seleccionado
                 },
             }}
         >
             <BottomNavigationAction
-                label={t(userRole === 'admin' ? 'navbar_admin_workout' : 'navbar_workout')}
+                //label={t(userRole === 'admin' ? 'navbar_admin_workout' : 'navbar_workout')}
                 icon={<FitnessCenterIcon />}
                 sx={{
-                    color: value === 0 ? '#32CD32' : '#6b6b6b',
+                    color: value === 0 ? '#000' : '#6b6b6b',
+                    backgroundColor: value === 0 ? 'gray' : 'transparent',
                     '&.Mui-selected': {
-                        color: '#32CD32',
-                    }
+                        color: '#fff',
+                    },
+                    
                 }}
             />
             <BottomNavigationAction
-                label={t(userRole === 'admin' ? 'navbar_admin_nutrition' : 'navbar_macros')}
+                //label={t(userRole === 'admin' ? 'navbar_admin_nutrition' : 'navbar_macros')}
                 icon={<FoodBankIcon />}
                 sx={{
-                    color: value === 1 ? '#32CD32' : '#6b6b6b',
+                    color: value === 1 ? '#000' : '#6b6b6b',
+                    backgroundColor: value === 1 ? 'gray' : 'transparent',
                     '&.Mui-selected': {
-                        color: '#32CD32',
-                    }
+                        color: '#fff',
+                    },
+                    
                 }}
             />
             <BottomNavigationAction
-                label={t(userRole === 'admin' ? 'navbar_admin_statistics' : 'navbar_progress')}
+                //label={t(userRole === 'admin' ? 'navbar_admin_statistics' : 'navbar_progress')}
                 icon={isAdmin ? <BarChartIcon /> : <TrendingUpIcon />}
                 sx={{
-                    color: value === 2 ? '#32CD32' : '#6b6b6b',
+                    color: value === 2 ? '#000' : '#6b6b6b',
+                    backgroundColor: value === 2 ? 'gray' : 'transparent',
                     '&.Mui-selected': {
-                        color: '#32CD32',
-                    }
+                        color: '#fff',
+                    },
                 }}
             />
             <BottomNavigationAction
-                label={t(userRole === 'admin' ? 'navbar_admin_users' : 'navbar_profile')}
+                //label={t(userRole === 'admin' ? 'navbar_admin_users' : 'navbar_profile')}
                 icon={isAdmin ? <GroupIcon /> : <AccountCircleIcon />}
                 sx={{
-                    color: value === 3 ? '#32CD32' : '#6b6b6b',
+                    color: value === 3 ? '#000' : '#6b6b6b',
+                    backgroundColor: value === 3 ? 'gray' : 'transparent',
                     '&.Mui-selected': {
-                        color: '#32CD32',
-                    }
+                        color: '#fff',
+                    },
+                  
                 }}
             />
         </BottomNavigation>

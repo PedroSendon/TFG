@@ -1,6 +1,7 @@
-import React from 'react';
-import { IonHeader, IonToolbar, IonTitle, IonButton, IonButtons, IonIcon } from '@ionic/react';
-import { arrowBackOutline } from 'ionicons/icons';
+import React, { useState } from 'react';
+import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import MenuIcon from '@mui/icons-material/Menu';
 
 interface HeaderProps {
   title: string;  // El título que se pasará como parámetro
@@ -9,41 +10,30 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, onBack = () => {}, showBackButton = false }) => {
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
   return (
-    <IonHeader>
-      <IonToolbar
-        style={{
-          background: '#F5F5F5', // Fondo gris claro
-          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', // Sombra ligera
-          height: '56px', // Altura optimizada
-          display: 'flex',
-          alignItems: 'center', // Alinea los elementos verticalmente en el centro
-        }}
-      >
+    <AppBar position="static" style={{ backgroundColor: '#c1c1c1', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', height: '64px' }}>
+      <Toolbar style={{ display: 'flex', alignItems: 'center' }}>
         {showBackButton && (
-          <IonButtons slot="start" style={{ paddingLeft: '10px' }}>
-            <IonButton onClick={onBack}>
-              <IonIcon icon={arrowBackOutline} slot="icon-only" style={{color: '#32CD32'}}/>
-            </IonButton>
-          </IonButtons>
+          <IconButton edge="start" color="inherit" onClick={onBack} aria-label="back">
+            <ArrowBackIcon />
+          </IconButton>
         )}
+        <Typography variant="h6" style={{ flexGrow: 1, textAlign: 'center', color: 'black'}}>
+          {title}
+        </Typography>
         
-        <IonTitle
-          style={{
-            flexGrow: 1, // El título ocupará el espacio restante
-            textAlign: 'center',
-            color: '#32CD32', // Verde lima para el título
-            fontWeight: 'bold',
-            fontSize: '1.1em', // Tamaño de fuente optimizado
-            overflow: 'hidden', // Evita que el título se desborde
-            textOverflow: 'ellipsis', // Añade puntos suspensivos si es necesario
-            whiteSpace: 'nowrap', // Evita saltos de línea en el título
-          }}
-        >
-          {title}  {/* Mostramos el título que se pasa como prop */}
-        </IonTitle>
-      </IonToolbar>
-    </IonHeader>
+      </Toolbar>
+    </AppBar>
   );
 };
 

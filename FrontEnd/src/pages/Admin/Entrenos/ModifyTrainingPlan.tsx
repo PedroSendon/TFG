@@ -14,7 +14,6 @@ import {
 import { cameraOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
-import '../../../theme/variables.css';
 import { Box, Chip, InputLabel, MenuItem, OutlinedInput, Select, TextField, Button, Card, CardContent } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material';
 import { LanguageContext } from '../../../context/LanguageContext';
@@ -308,9 +307,9 @@ const ModifyTrainingPlans: React.FC = () => {
                         <IonCol size="12" className="ion-text-center">
                             <Button
                                 style={{
-                                    border: '1px solid #32CD32',
+                                    border: '1px solid #000',
                                     backgroundColor: '#FFFFFF',
-                                    color: '#32CD32',
+                                    color: '#000',
                                     padding: '3% 0',
                                     borderRadius: '5px',
                                     fontSize: '1em',
@@ -353,9 +352,9 @@ const ModifyTrainingPlans: React.FC = () => {
                     <IonRow className="ion-text-center">
                         <IonCol size="12">
                             <Button onClick={handleMediaUpload} style={{
-                                    border: '1px solid #32CD32',
+                                    border: '1px solid #000',
                                     backgroundColor: '#FFFFFF',
-                                    color: '#32CD32',
+                                    color: '#000',
                                     padding: '3% 0',
                                     borderRadius: '5px',
                                     fontSize: '1em',
@@ -388,9 +387,9 @@ const ModifyTrainingPlans: React.FC = () => {
                             <Button
                                 onClick={handleSave}
                                 style={{
-                                    border: '1px solid #32CD32',
+                                    border: '1px solid #000',
                                     backgroundColor: '#FFFFFF',
-                                    color: '#32CD32',
+                                    color: '#000',
                                     padding: '3% 0',
                                     borderRadius: '5px',
                                     fontSize: '1em',

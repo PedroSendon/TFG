@@ -4,7 +4,6 @@ import { useHistory } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { LanguageContext } from '../../context/LanguageContext'; // Importamos el contexto de idioma
-import '../../theme/variables.css';
 
 const Login: React.FC = () => {
     const history = useHistory();

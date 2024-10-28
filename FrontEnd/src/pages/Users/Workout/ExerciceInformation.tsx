@@ -47,7 +47,7 @@ const ExerciseInfoModal: React.FC<ExerciseInfoModalProps> = ({ isOpen, onClose, 
 
               {/* Instrucciones paso a paso */}
               <IonLabel>
-                <h2 style={{ color: '#32CD32', marginBottom: '10px' }}>{t('step_by_step_instructions')}</h2>  {/* Texto dinámico */}
+                <h2 style={{ color: '#000', marginBottom: '10px' }}>{t('step_by_step_instructions')}</h2>  {/* Texto dinámico */}
                 <IonGrid>
                   {Array.isArray(steps) ? (
                     steps.map((step, index) => (
@@ -67,7 +67,7 @@ const ExerciseInfoModal: React.FC<ExerciseInfoModalProps> = ({ isOpen, onClose, 
                           >
                             <div
                               style={{
-                                color: '#32CD32',
+                                color: '#000',
                                 fontWeight: 'bold',
                                 width: '30px',
                                 height: '30px',

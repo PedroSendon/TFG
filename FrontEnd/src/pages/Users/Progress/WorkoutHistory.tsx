@@ -1,16 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
-import {
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonCard,
-    IonCardContent,
-    IonLabel,
-    IonProgressBar
-} from '@ionic/react';
+import { Grid, Card, CardContent, Typography, LinearProgress, Box } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { LanguageContext } from '../../../context/LanguageContext';
-import './WorkoutHistory.css';
 
 interface Workout {
     id: number;
@@ -18,14 +9,13 @@ interface Workout {
     description: string;
     imageUrl: string;
     completed: boolean;
-    progress: number;  // Progreso individual del entrenamiento
+    progress: number;
 }
 
 const WorkoutHistory: React.FC = () => {
     const [workoutHistory, setWorkoutHistory] = useState<Array<Workout>>([]);
     const [completedWorkouts, setCompletedWorkouts] = useState(0);
     const [totalWorkouts, setTotalWorkouts] = useState(0);
-    const [nextWorkout, setNextWorkout] = useState<Workout | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const history = useHistory();
@@ -39,7 +29,6 @@ const WorkoutHistory: React.FC = () => {
                 return;
             }
 
-            // Fetch training plan
             const response = await fetch(`http://127.0.0.1:8000/api/assigned-training-plan/`, {
                 method: 'GET',
                 headers: {
@@ -50,15 +39,13 @@ const WorkoutHistory: React.FC = () => {
             if (!response.ok) throw new Error(t('error_fetching_workouts'));
             const data = await response.json();
 
-            // Process workouts to include progress
             const workoutsWithProgress = data.workouts.map((workout: any) => ({
                 ...workout,
                 imageUrl: workout.media || 'default-workout-image.jpg',
                 completed: workout.completed,
-                progress: workout.progress || 0,  // Asegura que el progreso se reciba del backend o usa 0
+                progress: workout.progress || 0,
             }));
 
-            // Count completed workouts
             const completedCount = workoutsWithProgress.filter((workout: Workout) => workout.completed).length;
 
             setWorkoutHistory(workoutsWithProgress);
@@ -73,7 +60,6 @@ const WorkoutHistory: React.FC = () => {
         fetchWorkouts();
     }, []);
 
-    // Motivation message based on completed workouts
     const getMotivationMessage = () => {
         if (completedWorkouts === 0) return t('motivation_start');
         else if (completedWorkouts < totalWorkouts / 2) return t('motivation_good_start');
@@ -81,7 +67,6 @@ const WorkoutHistory: React.FC = () => {
         else return t('motivation_all_done');
     };
 
-    // Navigate to available workout
     const handleStartWorkout = (workoutId: number) => {
         history.push({
             pathname: `/workout/day`,
@@ -90,67 +75,64 @@ const WorkoutHistory: React.FC = () => {
     };
 
     return (
-        <IonGrid>
-            {/* Motivation message and completed workouts count */}
-            <IonRow>
-                <IonCol size="12">
-                    <IonCard>
-                        <IonCardContent style={{ textAlign: 'center' }}>
-                            <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+        <Box sx={{ padding: 1, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+            <Grid container>
+                <Grid item xs={12} sx={{ marginTop: '20px', marginBottom:'20px' }}>
+                    <Card sx={{ color: 'gray', borderRadius: '12px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.2)' }}>
+                        <CardContent sx={{ textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.2em', color: '#000' }}>
                                 {completedWorkouts} {t('of')} {totalWorkouts} {t('completed_training')}
-                            </IonLabel>
-                            <p style={{ color: '#32CD32', fontWeight: 'bold', marginTop: '10px' }}>
+                            </Typography>
+                            <Typography variant="body1" sx={{ color: 'gray', fontWeight: 'bold', marginTop: '10px' }}>
                                 {getMotivationMessage()}
-                            </p>
-                        </IonCardContent>
-                    </IonCard>
-                </IonCol>
-            </IonRow>
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
 
-            <hr className="thin-divider" />
+                <Box sx={{ borderTop: '1px solid #333', width: '100%', margin: '20px 0' }} />
 
-            <IonRow>
-                <IonCol size="12">
-                    <IonLabel style={{ fontWeight: 'bold', fontSize: '1.4em' }}>
+                <Grid item xs={12} >
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: '1.4em', color: '#333' }}>
                         {t('completed_training_history')}
-                    </IonLabel>
-                </IonCol>
-            </IonRow>
+                    </Typography>
+                </Grid>
 
-            {/* Training history - Only completed workouts */}
-            <IonGrid style={{ marginBottom: '15%' }}>
-                {completedWorkouts === 0 ? (
-                    <IonRow>
-                        <IonCol size="12">
-                            <p style={{ textAlign: 'center', color: 'gray' }}>
-                                {t('no_completed_workouts')}
-                            </p>
-                        </IonCol>
-                    </IonRow>
-                ) : (
-                    workoutHistory
-                        .filter((workout) => workout.completed) // Only show completed workouts
-                        .map((workout) => (
-                            <IonRow key={workout.id}>
-                                <IonCol size="12">
-                                    <IonCard className="workout-card completed">
-                                        <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
-                                                <p style={{ margin: 0, fontWeight: 'bold', fontSize: '1.2em' }}>{workout.name}</p>
-                                                <IonLabel style={{ fontWeight: 'bold', fontSize: '1em' }}>
-                                                    {t('completed_day').replace('{day}', workout.id.toString())}
-                                                </IonLabel>
-                                            </div>
-                                            {/* Progress bar to show workout progress */}
-                                            <IonProgressBar value={workout.progress / 100} color="success" style={{ width: '30%' }} />
-                                        </IonCardContent>
-                                    </IonCard>
-                                </IonCol>
-                            </IonRow>
-                        ))
-                )}
-            </IonGrid>
-        </IonGrid>
+                <Grid item xs={12} sx={{ marginTop: '20px', marginBottom:'20px' }}>
+                    {completedWorkouts === 0 ? (
+                        <Typography sx={{ textAlign: 'center', color: 'gray' }}>
+                            {t('no_completed_workouts')}
+                        </Typography>
+                    ) : (
+                        workoutHistory
+                            .filter((workout) => workout.completed)
+                            .map((workout) => (
+                                <Card
+                                    key={workout.id}
+                                    sx={{ borderRadius: '10px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)', marginBottom: '15px' }}
+                                >
+                                    <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff' }}>
+                                        <Box>
+                                            <Typography variant="h6" sx={{ margin: 0, fontWeight: 'bold', fontSize: '1.2em', color: '#000' }}>
+                                                {workout.name}
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '1em', color: 'gray' }}>
+                                                {t('completed_day').replace('{day}', workout.id.toString())}
+                                            </Typography>
+                                        </Box>
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={workout.progress}
+                                            sx={{ width: '30%'}}
+                                            color="primary"
+                                        />
+                                    </CardContent>
+                                </Card>
+                            ))
+                    )}
+                </Grid>
+            </Grid>
+        </Box>
     );
 };
 

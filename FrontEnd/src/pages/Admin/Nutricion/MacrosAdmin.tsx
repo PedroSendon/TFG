@@ -250,9 +250,9 @@ const MacrosAdmin: React.FC = () => {
                                                     <Button
                                                         onClick={() => handleEditMacros(macro)}
                                                         style={{
-                                                            border: '1px solid #32CD32',
+                                                            border: '1px solid #000',
                                                             backgroundColor: '#FFFFFF',
-                                                            color: '#32CD32',
+                                                            color: '#000',
                                                             padding: '4px 8px',
                                                             borderRadius: '5px',
                                                             fontSize: '0.7em',
@@ -294,18 +294,18 @@ const MacrosAdmin: React.FC = () => {
                         onClick={handleAddMacros}
                         style={{
                             backgroundColor: '#FFFFFF',
-                            color: '#32CD32',
+                            color: '#000',
                             width: '60px',
                             height: '60px',
                             borderRadius: '50%',
-                            border: '2px solid #32CD32',
+                            border: '2px solid #000',
                             zIndex: 1000,
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
                         }}
                     >
-                        <Add style={{ fontSize: '24px', color: '#32CD32' }} />
+                        <Add style={{ fontSize: '24px', color: '#000' }} />
                     </Button>
                 </IonFab>
 

@@ -156,7 +156,7 @@ const AdminStatistics: React.FC = () => {
                                             <YAxis />
                                             <Tooltip />
                                             <Legend />
-                                            <Bar dataKey="newUsers" fill="#32CD32" />
+                                            <Bar dataKey="newUsers" fill="#000" />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </IonCardContent>

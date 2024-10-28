@@ -1,8 +1,8 @@
-:root {
-  /* Colores de la paleta */
-  --color-morado-brillante: #8E24AA;  /* Para detalles llamativos */
-  --color-gris-claro: #F5F5F5;        /* Para el fondo de secciones */
-  --color-gris-oscuro: #424242;       /* Para el texto principal */
-  --color-blanco: #FFFFFF;            /* Para el fondo de la app y texto claro */
-  --color-verde-lima: #32CD32;         /* Para botones de confirmación */
-}
+/* Quita el margen y padding predeterminados */
+body, html, #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+  }

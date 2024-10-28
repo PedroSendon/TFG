@@ -64,6 +64,8 @@ urlpatterns = [
     path('assigned-training-plan/', trainingplan.get_assigned_training_plan, name='get-assigned-training-plan'),
     path('next-pending-workout/', trainingplan.get_next_pending_workout, name='get-next-pending-workout'),
     path('workout/complete/<int:day_id>/', trainingplan.mark_workout_complete, name='mark-workout-complete'),
+    path('images/', trainingplan.get_training_plan_images, name='get_training_plan_images'),
+
 
     # Exercises
     path('exercises/create/', exercise.create_exercise, name='create-exercise'),

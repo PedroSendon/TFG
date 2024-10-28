@@ -1,4 +1,6 @@
+import os
 from typing import List
+from BackEnd import settings
 from api.models.user import User
 from api.schemas.workout import TrainingPlanSchema  # Import TrainingPlanSchema
 from api.models.workout import UserWorkout, WeeklyWorkout, Workout
@@ -6,6 +8,21 @@ from api.models.trainingplan import TrainingPlan
 
 
 class TrainingPlanRepository:
+
+    @staticmethod
+    def get_training_plan_images():
+        images_dir = os.path.join(settings.MEDIA_ROOT, 'productos')
+        images = []
+
+        # Verifica si el directorio de imágenes existe
+        if os.path.exists(images_dir):
+            # Recorre los archivos en el directorio de imágenes
+            for file_name in os.listdir(images_dir):
+                if file_name.endswith(('.png', '.jpg', '.jpeg')):
+                    # Construye la URL de acceso a la imagen
+                    images.append(f"{settings.MEDIA_URL}productos/{file_name}")
+        
+        return images
 
     @staticmethod
     def create_training_plan(name: str, description: str, workout_ids: List[int], media: str, difficulty: str, equipment: str, duration: int):

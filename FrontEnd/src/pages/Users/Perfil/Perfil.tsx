@@ -1,112 +1,39 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { IonPage, IonItemDivider, IonHeader, IonToolbar, IonTitle, IonContent, IonAvatar, IonLabel, IonButton, IonCard, IonCardContent, IonGrid, IonRow, IonCol, IonIcon } from '@ionic/react';
-import { logOutOutline, pencilOutline } from 'ionicons/icons';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
-import './Perfil.css'; // Asegúrate de crear este archivo CSS para aplicar los estilos
-import { useHistory } from 'react-router-dom';  // Hook para redirigir
-import Header from '../../Header/Header';  // Importamos el componente Header
-import { LanguageContext } from '../../../context/LanguageContext';  // Importa el contexto de idioma
-import { Button } from '@mui/material';
+import { Button, Card, CardContent, Divider, IconButton, Typography, Box, List, ListItem, ListItemText, Avatar } from '@mui/material';
+import { Edit as EditIcon, Logout as LogoutIcon } from '@mui/icons-material';
+import { useHistory } from 'react-router-dom';
+import Header from '../../Header/Header';
+import { LanguageContext } from '../../../context/LanguageContext';
 
 const ProfilePage: React.FC = () => {
     const history = useHistory();
-    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
-    const [userData, setUserData] = useState<any>(null);  // Datos del usuario
-    const [weightData, setWeightData] = useState<any[]>([]);  // Historial de peso
-    const [loading, setLoading] = useState<boolean>(true);  // Controla el estado de carga
+    const { t } = useContext(LanguageContext);
+    const [userData, setUserData] = useState<any>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        const userId = 1; // Replace with the actual user ID
-        fetchUserProfile(userId);  // Llamar a la función para obtener el perfil cuando el componente se monta
-        fetchWeightHistory();  // Llamar a la función para obtener el historial de peso
+        fetchUserProfile();
     }, []);
 
-    const fetchUserProfile = async (userId: number) => {
+    const fetchUserProfile = async () => {
         try {
             const accessToken = localStorage.getItem('access_token');
-    
-            if (!accessToken) {
-                console.error(t('no_token'));
-                return;
-            }
-    
-            // Fetch profile data
-            const profileResponse = await fetch(`http://127.0.0.1:8000/api/profile/?userId=${userId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                },
+            if (!accessToken) return;
+            const profileResponse = await fetch(`http://127.0.0.1:8000/api/profile/`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` },
             });
-    
-            if (profileResponse.ok) {
-                const profileData = await profileResponse.json();
-                setUserData(profileData);
-            } else {
-                console.error('Error fetching user profile');
-            }
-    
-            // Fetch latest weight record
-            const weightResponse = await fetch('http://127.0.0.1:8000/api/latest-weight-record/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-            });
-    
-            if (weightResponse.ok) {
-                const weightData = await weightResponse.json();
-                console.log(weightData);
-                setUserData((prevData: any) => ({
-                    ...prevData,
-                    currentWeight: weightData.weight,
-                }));
-            } else {
-                console.error('Error fetching latest weight record');
-            }
+            if (profileResponse.ok) setUserData(await profileResponse.json());
         } catch (error) {
-            console.error('Network error fetching user profile or weight history', error);
+            console.error('Error fetching profile data', error);
         } finally {
             setLoading(false);
         }
     };
-    
-    
 
-    const fetchWeightHistory = async () => {
-        try {
-            const accessToken = localStorage.getItem('access_token');
-
-            if (!accessToken) {
-                console.error(t('no_token'));
-                return;
-            }
-            const response = await fetch('http://127.0.0.1:8000/api/profile/weight-history/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setWeightData(data);
-            } else {
-                console.error('Error fetching weight history');
-            }
-        } catch (error) {
-            console.error('Network error fetching weight history', error);
-        }
-    };
-
-    if (loading) {
-        return <p>{t('loading_profile')}</p>;
-    }
+    if (loading) return <p>{t('loading_profile')}</p>;
 
     const handleLogout = () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        localStorage.clear();
         sessionStorage.clear();
         history.push('/');
     };
@@ -119,150 +46,96 @@ const ProfilePage: React.FC = () => {
     };
 
     return (
-        <IonPage>
-            <Header title={t('profile_title')} />  {/* Título dinámico */}
-            <IonContent>
-                <IonButton
-                    fill="clear"
-                    size="small"
-                    onClick={handleEdit}
-                    style={{
-                        color: 'var(--color-verde-lima)',
-                        position: 'absolute',
-                        top: '10px',
-                        right: '10px',
-                        zIndex: 10,
-                        padding: '10px',
-                    }}
-                >
-                    <IonIcon icon={pencilOutline} /> {t('edit_button')} {/* Botón dinámico */}
-                </IonButton>
+        <Box>
+            <Header title={t('profile_title')} />
+            <Box style={{ padding: '20px', backgroundColor: '#f5f5f5', paddingBottom: '15%' }}> {/* Margen inferior del 15% */}
 
-                {/* Avatar y nombre de usuario */}
-                <IonGrid className="ion-text-center">
-                    <IonRow>
-                        <IonCol size="12" className="avatar-container">
-                            <IonAvatar className="custom-avatar" style={{ border: '2px solid var(--color-verde-lima)' }}>
-                                <img src="https://via.placeholder.com/150" alt={t('profile_picture_alt')} />
-                            </IonAvatar>
-                            <h2 className="username">{userData.username}</h2>
-                            <p className="user-email">{userData.email}</p>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
+                {/* Encabezado con Avatar, Nombre, Email y Botón de edición */}
+                <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ padding: '10px', marginTop: '10px', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
+                    <Box display="flex" alignItems="center">
+                        <Avatar sx={{ width: '60px', height: '60px', marginRight: '15px' }}>
+                            <img src="https://via.placeholder.com/60" alt={t('profile_picture_alt')} style={{ width: '100%', height: '100%' }} />
+                        </Avatar>
+                        <Box>
+                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{userData?.username}</Typography>
+                            <Typography variant="body2" color="textSecondary">{userData?.email}</Typography>
+                        </Box>
+                    </Box>
+                    <IconButton onClick={handleEdit} sx={{ color: '#000' }}>
+                        <EditIcon />
+                    </IconButton>
+                </Box>
 
-                <hr className="thin-divider" />
+                {/* Información personal en tarjeta en formato de lista */}
+                <Card variant="outlined" sx={{ marginTop: '15px', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
+                    <CardContent>
+                        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+                            {t('personal_information')}
+                        </Typography>
+                        <List dense>
+                            <ListItem>
+                                <ListItemText primary={t('age_label')} secondary={`${userData?.age} ${t('years')}`} />
+                            </ListItem>
+                            <Divider component="li" />
+                            <ListItem>
+                                <ListItemText primary={t('height_label')} secondary={`${userData?.height} cm`} />
+                            </ListItem>
+                            <Divider component="li" />
+                            <ListItem>
+                                <ListItemText primary={t('starting_weight')} secondary={`${userData?.initialWeight} kg`} />
+                            </ListItem>
+                            <Divider component="li" />
+                            <ListItem>
+                                <ListItemText primary={t('current_weight')} secondary={`${userData?.currentWeight} kg`} />
+                            </ListItem>
+                        </List>
+                    </CardContent>
+                </Card>
 
-                <IonGrid>
-                    <IonRow>
-                        <IonCol size="12" className="ion-text-center">
-                            <h2>{t('personal_information')}</h2>
-                        </IonCol>
-                    </IonRow>
+                {/* Objetivos de salud en tarjeta en formato de lista */}
+                <Card variant="outlined" sx={{ marginTop: '15px', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
+                    <CardContent>
+                        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+                            {t('health_goals')}
+                        </Typography>
+                        <List dense>
+                            <ListItem>
+                                <ListItemText primary={t('weight_goal')} secondary={userData?.weightGoal} />
+                            </ListItem>
+                            <Divider component="li" />
+                            <ListItem>
+                                <ListItemText primary={t('activity_level')} secondary={userData?.activityLevel} />
+                            </ListItem>
+                            <Divider component="li" />
+                            <ListItem>
+                                <ListItemText primary={t('training_frequency')} secondary={`${userData?.trainingFrequency} ${t('days_per_week')}`} />
+                            </ListItem>
+                        </List>
+                    </CardContent>
+                </Card>
 
-                    <IonRow>
-                        <IonCol size="6">
-                            <IonCard className="custom-card">
-                                <IonCardContent className="ion-text-center">
-                                    <IonLabel>
-                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('age_label')}</h3>
-                                        <p>{userData.age} {t('years')}</p>
-                                    </IonLabel>
-                                </IonCardContent>
-                            </IonCard>
-                        </IonCol>
-                        <IonCol size="6">
-                            <IonCard className="custom-card">
-                                <IonCardContent className="ion-text-center">
-                                    <IonLabel>
-                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('height_label')}</h3>
-                                        <p>{userData.height} cm</p>
-                                    </IonLabel>
-                                </IonCardContent>
-                            </IonCard>
-                        </IonCol>
-                    </IonRow>
+                {/* Botón de cerrar sesión */}
+                <Box display="flex" justifyContent="center" mt={4}>
+                    <Button
+                        onClick={handleLogout}
+                        variant="outlined"
+                        sx={{
+                            backgroundColor: '#ffffff',
+                            color: '#000',
+                            border: '1px solid #000',
+                            borderRadius: '8px',
+                            padding: '10px 20px',
+                            width: '80%',
+                            maxWidth: '200px',
+                        }}
+                        startIcon={<LogoutIcon />}
+                    >
+                        {t('log_out')}
+                    </Button>
+                </Box>
 
-                    <IonRow>
-                        <IonCol size="6">
-                            <IonCard className="custom-card">
-                                <IonCardContent className="ion-text-center">
-                                    <IonLabel>
-                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('starting_weight')}</h3>
-                                        <p>{userData.initialWeight} kg</p>
-                                    </IonLabel>
-                                </IonCardContent>
-                            </IonCard>
-                        </IonCol>
-                        <IonCol size="6">
-                            <IonCard className="custom-card">
-                                <IonCardContent className="ion-text-center">
-                                    <IonLabel>
-                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('current_weight')}</h3>
-                                        <p>{userData.currentWeight} kg</p>
-                                    </IonLabel>
-                                </IonCardContent>
-                            </IonCard>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
-
-                <hr className="thin-divider" />
-
-                <IonGrid>
-                    <IonRow>
-                        <IonCol size="12" className="ion-text-center">
-                            <h2>{t('health_goals')}</h2>
-                        </IonCol>
-                    </IonRow>
-
-                    <IonRow>
-                        <IonCol>
-                            <IonCard className="custom-card">
-                                <IonCardContent className="ion-text-center">
-                                    <IonLabel>
-                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('weight_goal')}</h3>
-                                        <p>{userData.weightGoal}</p>
-                                    </IonLabel>
-                                    <IonLabel>
-                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('activity_level')}</h3>
-                                        <p>{userData.activityLevel}</p>
-                                    </IonLabel>
-                                    <IonLabel>
-                                        <h3 style={{ color: 'var(--color-verde-lima)' }}>{t('training_frequency')}</h3>
-                                        <p>{userData.trainingFrequency} {t('days_per_week')}</p>
-                                    </IonLabel>
-                                </IonCardContent>
-                            </IonCard>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
-
-               
-
-                {/* Botón de cerrar sesión actualizado */}
-                <IonGrid style={{ marginBottom: '15%' }}>
-                    <IonRow>
-                        <IonCol size="12">
-                            <Button
-                                style={{
-                                    border: '1px solid #32CD32',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#32CD32',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                                onClick={handleLogout}
-                            >
-                                {t('log_out')}
-                            </Button>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
-            </IonContent>
-        </IonPage>
+            </Box>
+        </Box>
     );
 };
 

@@ -1,7 +1,0 @@
-/* Botón de Cancelar (outline) */
-.cancel-button {
-    --border-color: var(--color-verde-lima);  /* Color del borde en verde lima */
-    --color: var(--color-verde-lima);  /* Color del texto en verde lima */
-    --ion-border-width: 2px;  /* Ajusta el grosor del borde */
-  }
-  

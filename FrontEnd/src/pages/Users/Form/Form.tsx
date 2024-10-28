@@ -90,7 +90,7 @@ const UserDetailsForm: React.FC = () => {
                     variant="contained"
                     fullWidth
                     sx={{
-                        backgroundColor: '#32CD32',
+                        backgroundColor: '#000',
                         '&:hover': { backgroundColor: '#2AA32A' },
                         mt: 4,
                     }}
@@ -143,8 +143,8 @@ const UserDetailsForm: React.FC = () => {
                     onClick={handleBack}
                     variant="outlined"
                     sx={{
-                        color: '#32CD32',
-                        borderColor: '#32CD32',
+                        color: '#000',
+                        borderColor: '#000',
                         '&:hover': { borderColor: '#2AA32A' },
                         width: '48%',
                     }}
@@ -155,7 +155,7 @@ const UserDetailsForm: React.FC = () => {
                     onClick={handleNext}
                     variant="contained"
                     sx={{
-                        backgroundColor: '#32CD32',
+                        backgroundColor: '#000',
                         '&:hover': { backgroundColor: '#2AA32A' },
                         width: '48%',
                     }}
@@ -250,8 +250,8 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleBack}
                         variant="outlined"
                         sx={{
-                            color: '#32CD32',
-                            borderColor: '#32CD32',
+                            color: '#000',
+                            borderColor: '#000',
                             '&:hover': { borderColor: '#2AA32A' },
                             width: '48%',
                         }}
@@ -262,7 +262,7 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleNext}
                         variant="contained"
                         sx={{
-                            backgroundColor: '#32CD32',
+                            backgroundColor: '#000',
                             '&:hover': { backgroundColor: '#2AA32A' },
                             width: '48%',
                         }}
@@ -336,8 +336,8 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleBack}
                         variant="outlined"
                         sx={{
-                            color: '#32CD32',
-                            borderColor: '#32CD32',
+                            color: '#000',
+                            borderColor: '#000',
                             '&:hover': { borderColor: '#2AA32A' },
                             width: '48%',
                         }}
@@ -348,7 +348,7 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleNext}
                         variant="contained"
                         sx={{
-                            backgroundColor: '#32CD32',
+                            backgroundColor: '#000',
                             '&:hover': { backgroundColor: '#2AA32A' },
                             width: '48%',
                         }}
@@ -417,8 +417,8 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleBack}
                         variant="outlined"
                         sx={{
-                            color: '#32CD32',
-                            borderColor: '#32CD32',
+                            color: '#000',
+                            borderColor: '#000',
                             '&:hover': { borderColor: '#2AA32A' },
                             width: '48%',
                         }}
@@ -429,7 +429,7 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleNext}
                         variant="contained"
                         sx={{
-                            backgroundColor: '#32CD32',
+                            backgroundColor: '#000',
                             '&:hover': { backgroundColor: '#2AA32A' },
                             width: '48%',
                         }}
@@ -466,8 +466,8 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleBack}
                         variant="outlined"
                         sx={{
-                            color: '#32CD32',
-                            borderColor: '#32CD32',
+                            color: '#000',
+                            borderColor: '#000',
                             '&:hover': { borderColor: '#2AA32A' },
                             width: '48%',
                         }}
@@ -478,7 +478,7 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleFinish}
                         variant="contained"
                         sx={{
-                            backgroundColor: '#32CD32',
+                            backgroundColor: '#000',
                             '&:hover': { backgroundColor: '#2AA32A' },
                             width: '48%',
                         }}

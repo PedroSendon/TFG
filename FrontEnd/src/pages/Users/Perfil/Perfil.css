@@ -33,7 +33,7 @@
     width: 150px;
     height: 150px;
     border-radius: 50%;
-    border: 2px solid #32CD32; /* Verde lima en lugar de la variable */
+    border: 2px solid #000; /* Verde lima en lugar de la variable */
     margin-bottom: 15px;
 }
   

@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Select, MenuItem, Container, Button, Typography } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { LanguageContext } from '../../context/LanguageContext'; // Importar el contexto de idioma
-import '../../theme/variables.css';
 
 const MainScreen: React.FC = () => {
   const history = useHistory();
@@ -18,46 +17,6 @@ const MainScreen: React.FC = () => {
   const handleLogin = () => {
     history.push('/login');
   };
-
-  const fetchLogo = async () => {
-    try {
-      // Realizar la solicitud GET a la API para obtener el logo
-      const response = await fetch('http://127.0.0.1:8000/api/logo/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      // Verificar si la respuesta es correcta
-      if (!response.ok) {
-        throw new Error('Error al obtener el logo');
-      }
-
-      // Parsear la respuesta como JSON
-      const data = await response.json();
-
-      // Actualizar el estado con la URL del logo si está presente
-      if (data.logo_url) {
-        console.log('Logo encontrado:', data.logo_url);
-        setLogoUrl(data.logo_url);  // Establecer la URL del logo
-      } else {
-        console.error('Logo no encontrado');
-      }
-
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error('Error al obtener el logo:', err.message);
-      } else {
-        console.error('Error al obtener el logo:', err);
-      }
-    }
-  };
-
-  // useEffect para cargar los datos cuando el componente se monta
-  useEffect(() => {
-    fetchLogo(); // Llama a la función que obtiene los datos
-  }, []); // El array vacío asegura que esto solo se ejecute una vez al montar el componente
 
   return (
     <Container
@@ -128,7 +87,7 @@ const MainScreen: React.FC = () => {
 
       <div style={{ width: '100%', marginBottom: '1.5rem' }}>
         <img
-          src={'http://localhost:8000/media/productos/FitProX.png'} 
+          src={'/src/components/pexels-victorfreitas-791763.jpg'} 
           alt="Logo de la App"
           style={{ width: '100%', marginBottom: '1rem' }}
         />

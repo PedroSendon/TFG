@@ -9,7 +9,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { LanguageContext } from '../../context/LanguageContext'; // Importamos el contexto de idioma
-import '../../theme/variables.css';
 
 const Register: React.FC = () => {
   const history = useHistory();
@@ -284,7 +283,7 @@ const Register: React.FC = () => {
                   label={t('birthdate')}
                   value={formData.birthDate}
                   onChange={handleDateChange}
-                  renderInput={(params) => (
+                  renderInput={(params: any) => (
                     <TextField
                       {...params}
                       fullWidth

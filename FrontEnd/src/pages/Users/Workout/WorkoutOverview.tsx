@@ -5,13 +5,17 @@ import {
   IonList,
   IonItem,
   IonIcon,
+  IonButton,
+  IonModal,
 } from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { lockClosedOutline, playCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
-import './WorkoutOverview.css';
+import { lockClosedOutline, playCircleOutline, checkmarkCircleOutline, informationCircleOutline } from 'ionicons/icons';
 import { LanguageContext } from '../../../context/LanguageContext';
 import Header from '../../Header/Header';
+import { authenticatedFetch } from '../../../utils/authFetch';
 
+import { AppBar, Toolbar, Typography, IconButton, Box, Card, CardContent, Divider, Modal, List, ListItem, ListItemText } from '@mui/material';
+import { Close as CloseIcon, Info as InfoIcon, PlayCircleOutline, CheckCircleOutline, Lock } from '@mui/icons-material';
 interface Workout {
   id: number;
   name: string;
@@ -26,7 +30,6 @@ const WorkoutOverview: React.FC = () => {
   const { t } = useContext(LanguageContext);
   const location = useLocation<{ reload?: boolean }>();
 
-
   const [trainingPlan, setTrainingPlan] = useState<{
     id: number;
     name: string;
@@ -37,41 +40,36 @@ const WorkoutOverview: React.FC = () => {
     workouts: Workout[];
   } | null>(null);
 
+  const [modalOpen, setModalOpen] = useState(false); // Controla el estado del modal
+
+  const hardcodedImages = [
+    '/src/components/pexels-anush-1229356.jpg',
+    '/src/components/pexels-scottwebb-136404.jpg',
+    '/src/components/pexels-victorfreitas-791763.jpg',
+  ];
+
+  const [sliderImages, setSliderImages] = useState<string[]>(hardcodedImages);
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
+
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [nextWorkout, setNextWorkout] = useState<number | null>(null); // Store next workout ID directly
+  const [nextWorkout, setNextWorkout] = useState<number | null>(null);
 
   const fetchWorkouts = async () => {
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        setError(t('no_token'));
-        return;
-      }
-
-      const response = await fetch(`http://127.0.0.1:8000/api/assigned-training-plan/`, {
+      const response = await authenticatedFetch('http://127.0.0.1:8000/api/assigned-training-plan/', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
       });
 
-      if (!response.ok) {
-        throw new Error(t('error_fetching_workouts'));
-      }
+      if (!response.ok) throw new Error(t('error_fetching_workouts'));
 
       const data = await response.json();
       setTrainingPlan(data);
-
-      // Fetch the next workout
-      const nextWorkoutResponse = await fetch('http://127.0.0.1:8000/api/next-pending-workout/', {
+      
+      const nextWorkoutResponse = await authenticatedFetch('http://127.0.0.1:8000/api/next-pending-workout/', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
       });
+
       if (nextWorkoutResponse.ok) {
         const nextWorkoutData = await nextWorkoutResponse.json();
         setNextWorkout(nextWorkoutData?.id || null);
@@ -85,16 +83,23 @@ const WorkoutOverview: React.FC = () => {
   };
 
   useEffect(() => {
-      fetchWorkouts(); // Llama a la función para actualizar los datos
-}, []);
+    const interval = setInterval(() => {
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % sliderImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [sliderImages]);
 
   useEffect(() => {
-    // Si el estado `reload` está presente en la ubicación, recargar los datos
+    fetchWorkouts();
+  }, []);
+
+  useEffect(() => {
     if (location.state?.reload) {
-        fetchWorkouts(); // Llama a la función para actualizar los datos
-        history.replace({ ...location, state: {} }); // Limpia el estado `reload` para evitar recargas infinitas
+      fetchWorkouts();
+      history.replace({ ...location, state: {} });
     }
-}, [location.state]);
+  }, [location.state]);
 
   const handleDayClick = (id: number) => {
     history.push({
@@ -126,78 +131,170 @@ const WorkoutOverview: React.FC = () => {
   }
 
   return (
-    <IonPage>
-      <Header title={t('training_plan_overview')} />
+    <Box sx={{backgroundColor: '#f5f5f5',  height: '100vh'}}>
+      <Header title="Training Plan Overview" />
 
-      <IonContent>
-        {trainingPlan && (
-          <div className="training-plan-details" style={{ padding: '20px' }}>
-            <p style={{ marginBottom: '20px' }}>{trainingPlan.description}</p>
-            <div style={{
-              backgroundColor: '#f9f9f9',
-              padding: '15px',
-              borderRadius: '10px',
-              boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+      <Box sx={{  minHeight: '100vh'  }}>
+
+        {/* Slider de imágenes */}
+        {sliderImages.length > 0 && (
+          <Box
+            className="slider"
+            sx={{
+              width: '100%',
+              height: '200px',
+              overflow: 'hidden',
+              position: 'relative',
               marginBottom: '20px',
-              border: '1px solid #b0b0b0',
-            }}>
-              <h3 style={{ fontWeight: 'bold', marginBottom: '10px' }}>{t('information')}</h3>
-              <p><strong>{t('difficulty')}:</strong> {trainingPlan.difficulty}</p>
-              <p><strong>{t('equipment')}:</strong> {trainingPlan.equipment}</p>
-              <p><strong>{t('duration')}:</strong> {trainingPlan.duration} {t('minutes')}</p>
-            </div>
-          </div>
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.2)', // Sombra suave
+            }}
+          >
+            <img
+              src={sliderImages[currentSlide]}
+              alt="Training plan slide"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                opacity: '0.9', // Opacidad para dar efecto elegante
+              }}
+            />
+          </Box>
+
         )}
 
-        <IonList lines="none" style={{ padding: '0 20px', marginBottom: '15%' }}>
-          {trainingPlan?.workouts.map((workout) => (
-            <IonItem
+        <List sx={{ padding: '0 20px' }}>
+          {trainingPlan && trainingPlan.workouts.map((workout) => (
+            <ListItem
               key={workout.id}
-              button={!workout.completed && workout.id === nextWorkout}
-              detail={false}
-              className="workout-item"
-              lines="none"
-              onClick={() => workout.id === nextWorkout && handleDayClick(workout.id)}
-              style={{
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                borderRadius: '10px',
-                boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #b0b0b0',
+              component="button"
+              onClick={() => handleDayClick(workout.id)}
+              sx={{
+                backgroundColor: '#ffffff',
+                borderRadius: '12px', // Bordes redondeados más suaves
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', // Sombra suave para darle profundidad
+                border: '1px solid #e0e0e0', // Borde claro para una apariencia limpia
+                marginBottom: '15px',
+                padding: '16px', // Espaciado interno
+                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'scale(1.02)', // Leve efecto de agrandamiento al pasar el cursor
+                  boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)', // Aumenta la sombra al hacer hover
+                },
               }}
             >
-              <div className="workout-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '10px', padding: '10px' }}>
-                <div style={{ flex: 1 }}>
-                  <h1 style={{ fontWeight: 'bold', fontSize: '1.2em', marginBottom: '5px' }}>{workout.name}</h1>
-                  <p style={{
-                    margin: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                  }}
+              <ListItemText
+                primary={
+                  <Typography sx={{ fontWeight: 'bold', fontSize: '1.2em', color: '#333' }}>
+                    {workout.name}
+                  </Typography>
+                }
+                secondary={
+                  <Typography
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      color: '#666', // Color de texto más suave
+                    }}
                   >
                     {workout.description}
-                  </p>
-                </div>
-
-                {/* Icono de estado con color correspondiente */}
-                <div style={{ marginLeft: '3%', display: 'flex', alignItems: 'center' }}>
-                  {workout.completed ? (
-                    <IonIcon icon={checkmarkCircleOutline} color="success" style={{ fontSize: '1.5em' }} />
-                  ) : workout.id === nextWorkout ? (
-                    <IonIcon icon={playCircleOutline} color="primary" style={{ fontSize: '1.5em' }} />
-                  ) : (
-                    <IonIcon icon={lockClosedOutline} color="medium" style={{ fontSize: '1.5em' }} />
-                  )}
-                </div>
-              </div>
-            </IonItem>
+                  </Typography>
+                }
+              />
+              <div style={{ marginLeft: '3%', display: 'flex', alignItems: 'center' }}>
+              {workout.completed ? (
+                <CheckCircleOutline sx={{ color: 'green', fontSize: '1.5em' }} />
+              ) : workout.id === nextWorkout ? (
+                <PlayCircleOutline sx={{ color: 'blue', fontSize: '1.5em' }} />
+              ) : (
+                <Lock sx={{ color: 'gray', fontSize: '1.5em' }} />
+              )}
+            </div>
+            </ListItem>
           ))}
-        </IonList>
-      </IonContent>
-    </IonPage>
+        </List>
+
+        {/* Botón de información */}
+        <IconButton
+  sx={{
+    position: 'fixed',
+    marginBottom: '15%',
+    bottom: '20px',
+    right: '20px',
+    width: '56px',
+    height: '56px',
+    borderRadius: '50%',
+    backgroundColor: '#f7f7f7',
+    border: '1px solid #d0d0d0',
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      backgroundColor: '#e0e0e0',
+      boxShadow: '0px 6px 14px rgba(0, 0, 0, 0.15)',
+      transform: 'scale(1.1)',
+    },
+    '&:active': {
+      backgroundColor: '#d0d0d0',
+    },
+  }}
+  onClick={() => setModalOpen(true)}
+>
+  <InfoIcon sx={{ color: '#5a5a5a', fontSize: '24px' }} />
+</IconButton>
+
+
+        {/* Modal de información */}
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+          <Box sx={{
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%', bgcolor: 'background.paper', p: 4, borderRadius: '10px',
+          }}>
+            <IconButton onClick={() => setModalOpen(false)} sx={{ position: 'absolute', top: '10px', right: '10px', color: '#6b6b6b', zIndex: 1 }}>
+              <CloseIcon />
+            </IconButton>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+                {trainingPlan?.name}
+              </Typography>
+              <Divider sx={{ margin: '10px 0', backgroundColor: '#b0b0b0' }} />
+              <Typography variant="body1" sx={{ color: '#555', marginBottom: '20px' }}>
+                {trainingPlan?.description}
+              </Typography>
+              <Divider sx={{ margin: '20px 0', backgroundColor: '#b0b0b0' }} />
+              <Card sx={{
+                backgroundColor: '#f9f9f9',
+                padding: '20px',
+                borderRadius: '10px',
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #b0b0b0',
+              }}>
+                <CardContent>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+                    Information
+                  </Typography>
+                  <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
+                  <Typography sx={{ marginBottom: '10px', color: '#333' }}>
+                    <strong>Difficulty:</strong> {trainingPlan?.difficulty}
+                  </Typography>
+                  <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
+                  <Typography sx={{ marginBottom: '10px', color: '#333' }}>
+                    <strong>Equipment:</strong> {trainingPlan?.equipment}
+                  </Typography>
+                  <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
+                  <Typography sx={{ color: '#333' }}>
+                    <strong>Duration:</strong> {trainingPlan?.duration} minutes
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Box>
+          </Box>
+        </Modal>
+      </Box>
+    </Box>
   );
 };
 

@@ -48,8 +48,8 @@
 
 .react-calendar__tile--now {
     background-color: #FFFFFF !important; /* Fondo blanco para el día actual */
-    color: #32CD32 !important; /* Color verde lima para el número */
-    border: 2px solid #32CD32; /* Añadimos un borde en verde lima */
+    color: #000 !important; /* Color verde lima para el número */
+    border: 2px solid #000; /* Añadimos un borde en verde lima */
     border-radius: 50%; /* Redondeamos para que sea un círculo */
 }
 
@@ -59,7 +59,7 @@
 }
 
 .react-calendar__tile--active {
-    background-color: #32CD32 !important;
+    background-color: #000 !important;
     color: white !important;
     border-radius: 50%;
 }
@@ -67,9 +67,9 @@
 /* Estilo para el día actual */
 .current-day {
     background-color: #FFFFFF !important; /* Fondo blanco */
-    color: #32CD32 !important; /* Texto en verde lima */
+    color: #000 !important; /* Texto en verde lima */
     border-radius: 50%; /* Redondeamos para que sea un círculo */
-    border: 2px solid #32CD32; /* Añadimos un borde en verde lima */
+    border: 2px solid #000; /* Añadimos un borde en verde lima */
 }
 
 /* Otros estilos del calendario */

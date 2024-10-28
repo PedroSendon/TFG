@@ -1,6 +1,6 @@
 .custom-segment {
-    --indicator-color: #32CD32; /* Color del indicador de la casilla seleccionada */
-    --color-checked: #32CD32;   /* Color del texto en la casilla seleccionada */
+    --indicator-color: #000; /* Color del indicador de la casilla seleccionada */
+    --color-checked: #000;   /* Color del texto en la casilla seleccionada */
     --color: #9C27B0;           /* Color del texto en las casillas no seleccionadas */
     --border-radius: 8px;       /* Bordes redondeados opcionales */
 }

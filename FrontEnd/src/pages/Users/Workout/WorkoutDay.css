@@ -17,7 +17,7 @@
   position: absolute;
   top: 50%;
   transform: translate(0%, -50%);
-  color: #32CD32;  /* Texto en verde lima */
+  color: #000;  /* Texto en verde lima */
   z-index: 1;
   text-align: center;
 }
@@ -34,7 +34,7 @@
   text-align: center;
   margin-top: 20px;
   font-size: 1.2em;
-  color: #32CD32; /* Texto del resumen en verde lima */
+  color: #000; /* Texto del resumen en verde lima */
 }
 
 .progress-container {
@@ -44,13 +44,13 @@
 
 .progress-percentage {
   text-align: center;
-  color: #32CD32;  /* Verde lima */
+  color: #000;  /* Verde lima */
   font-weight: bold;
 }
 
 .ion-progress-bar {
   --progress-background: #D1D1D6; /* Fondo gris claro */
-  --progress-background-color: #32CD32; /* Verde lima para el progreso */
+  --progress-background-color: #000; /* Verde lima para el progreso */
   height: 10px; /* Grosor ajustado a 10px */
 }
 

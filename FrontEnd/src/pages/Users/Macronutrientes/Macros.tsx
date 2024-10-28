@@ -1,18 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
-  IonPage,
-  IonContent,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonLabel,
-  IonCard,
-  IonCardHeader,
-  IonCardContent,
-} from '@ionic/react';
-import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts'; // Gráficas circulares
-import Header from '../../Header/Header'; // Encabezado
-import { LanguageContext } from '../../../context/LanguageContext'; // Contexto de idioma
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
+import Header from '../../Header/Header';
+import { LanguageContext } from '../../../context/LanguageContext';
 
 const MacronutrientPage: React.FC = () => {
   const { t } = useContext(LanguageContext);
@@ -69,131 +69,114 @@ const MacronutrientPage: React.FC = () => {
   ];
 
   return (
-    <IonPage>
-      <Header title={t('macros_title')} /> {/* Título de la página */}
-      <IonContent>
-        <IonGrid>
+    <Box sx={{ width: '100%', padding: 0,  height: '100vh' }}> {/* Eliminamos el margen lateral */}
+      <Header title={t('macros_title')} />
+      <Box sx={{ textAlign: 'center', mt: 2 }}>
+        <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+          {dietType}
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          {totalKcal} {t('macros_total_kcal')}
+        </Typography>
+      </Box>
 
-          {/* Tipo de dieta como título principal */}
-          <IonRow className="ion-text-center" style={{ marginBottom: '10px' }}>
-            <IonCol size="12">
-              <IonLabel style={{ fontSize: '24px', fontWeight: 'bold' }}>{dietType}</IonLabel>
-            </IonCol>
-          </IonRow>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 3 }}>
+        {Object.keys(macros).map((macro) => (
+          <Card
+            key={macro}
+            sx={{
+              border: `1px solid ${macros[macro as keyof typeof macros].color}`,
+              backgroundColor: '#fff',
+              borderRadius: '8px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+              width: '90px',
+              textAlign: 'center',
+            }}
+          >
+            <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+              {/* Texto totalmente alineado a la izquierda */}
+              <Typography variant="body2" color="textPrimary" sx={{ alignSelf: 'flex-start' }}>
+                {t(`macros_${macro}`)}
+              </Typography>
+              {/* Número centrado */}
+              <Typography variant="subtitle1" sx={{ color: macros[macro as keyof typeof macros].color, fontSize: '16px' }}>
+                {macros[macro as keyof typeof macros].grams}g
+              </Typography>
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
 
-          {/* Calorías Totales */}
-          <IonRow className="ion-text-center" style={{ marginBottom: '20px' }}>
-            <IonCol size="12">
-              <IonLabel style={{ fontSize: '18px', fontWeight: 'normal', color: '#444' }}>{totalKcal} {t('macros_total_kcal')}</IonLabel>
-            </IonCol>
-          </IonRow>
 
-          {/* Tarjetas para los macronutrientes centradas */}
-          <IonRow className="ion-justify-content-center ion-align-items-center">
-            {Object.keys(macros).map((macro) => (
-              <IonCol size="4" className="ion-align-self-center" key={macro}>
-                <IonCard style={{
-                  border: `2px solid ${macros[macro as keyof typeof macros].color}`,
-                  backgroundColor: '#fff',
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  margin: '10px',
-                }}>
-                  <IonCardHeader className="ion-text-center">
-                    <IonLabel>{t(`macros_${macro}`)}</IonLabel>
-                  </IonCardHeader>
-                  <IonCardContent className="ion-text-center">
-                    <h3 style={{ color: macros[macro as keyof typeof macros].color, fontSize: '20px', fontWeight: 'bold' }}>
-                      {macros[macro as keyof typeof macros].grams}g
-                    </h3>
-                  </IonCardContent>
-                </IonCard>
-              </IonCol>
+
+      <Box sx={{ textAlign: 'center', marginTop: '20px' }}>
+        <Typography variant="h6" fontWeight="bold" color="textPrimary">
+          {t('macros_distribution')}
+        </Typography>
+        <PieChart width={300} height={300} style={{ display: 'inline-block', marginTop: '10px' }}>
+          <Pie
+            data={pieData}
+            dataKey="value"
+            outerRadius={100}
+            innerRadius={70}
+            label={({ percent, x, y }) => (
+              <text
+                x={x}
+                y={y}
+                fill="#333"
+                textAnchor="middle"
+                dominantBaseline="central"
+                style={{ fontSize: '12px', fontWeight: 'bold' }}
+              >
+                {`${(percent * 100).toFixed(0)}%`}
+              </text>
+            )}
+            labelLine={false}
+          >
+            {pieData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
-          </IonRow>
+          </Pie>
+          <Legend />
+          <Tooltip />
+        </PieChart>
+      </Box>
 
+      <Box sx={{ borderTop: '1px solid #ccc', width: '80%', m: '20px auto' }} />
 
-
-          {/* Título y gráfica circular de los macronutrientes */}
-          <IonRow className="ion-justify-content-center ion-align-items-center" style={{ marginTop: '20px', marginBottom: '20px' }}>
-            <IonCol size="12" className="ion-text-center">
-              <IonLabel style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '10px', color: '#444' }}>{t('macros_distribution')}</IonLabel>
-              <PieChart width={300} height={300} style={{ display: 'inline-block', marginTop: '10px' }}>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  outerRadius={100}
-                  innerRadius={70}
-                  label={({ percent, x, y }) => (
-                    <text
-                      x={x}
-                      y={y}
-                      fill="#333"
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      style={{ fontSize: '12px', fontWeight: 'bold' }}
-                    >
-                      {`${(percent * 100).toFixed(0)}%`}
-                    </text>
-                  )}
-                  labelLine={false}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Legend />
-                <Tooltip />
-              </PieChart>
-            </IonCol>
-          </IonRow>
-
-          {/* Divider debajo de la gráfica */}
-          <hr style={{ width: '80%', margin: '0 auto', border: 'none', borderBottom: '1px solid #ccc' }} />
-
-          {/* Tabla para la distribución de comidas estilizada */}
-          <IonRow className="ion-justify-content-center" style={{ marginTop: '20px', marginBottom: '15%'}}>
-            <IonCol size="12" className="ion-text-center">
-              {/* Título de la distribución de comidas */}
-              <IonLabel style={{ fontSize: '16px', fontWeight: 'bold', color: '#333', marginBottom: '10px' }}>
-                {t('meal_distribution')}
-              </IonLabel>
-            </IonCol>
-            <IonCol size="10" className="ion-justify-content-center">
-              <table style={{
-                width: '100%',
-                borderCollapse: 'separate',
-                borderSpacing: '0 10px',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                textAlign: 'center',
-                margin: '0 auto',
-              }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#4CAF50', color: '#fff', fontWeight: 'bold' }}>
-                    <th style={{ padding: '12px' }}>{t('breakfast')}</th>
-                    <th style={{ padding: '12px' }}>{t('lunch')}</th>
-                    <th style={{ padding: '12px' }}>{t('dinner')}</th>
-                    <th style={{ padding: '12px' }}>{t('snacks')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style={{ backgroundColor: '#f9f9f9' }}>
-                    <td>{t('percentage_20')}</td>
-                    <td>{t('percentage_40')}</td>
-                    <td>{t('percentage_30')}</td>
-                    <td>{t('percentage_10')}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </IonCol>
-          </IonRow>
-
-
-        </IonGrid>
-      </IonContent>
-    </IonPage>
+      <Box sx={{ textAlign: 'center', mt: 3, paddingBottom:'15%'}}>
+        <Typography variant="h6" fontWeight="bold" color="#333">
+          {t('meal_distribution')}
+        </Typography>
+        <Table
+          sx={{
+            maxWidth: '90%',
+            margin: '20px auto',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            backgroundColor: '#fff',
+            borderRadius: '8px',
+            overflow: 'hidden',
+          }}
+        >
+          <TableHead>
+            <TableRow sx={{ backgroundColor: '#333' }}>
+              <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{t('breakfast')}</TableCell>
+              <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{t('lunch')}</TableCell>
+              <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{t('dinner')}</TableCell>
+              <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{t('snacks')}</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>{t('percentage_20')}</TableCell>
+              <TableCell align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>{t('percentage_40')}</TableCell>
+              <TableCell align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>{t('percentage_30')}</TableCell>
+              <TableCell align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>{t('percentage_10')}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </Box>
+    </Box>
   );
 };
 

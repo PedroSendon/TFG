@@ -213,9 +213,9 @@ const AssignPlans: React.FC = () => {
                 <Button
                   onClick={handleSave}
                   style={{
-                    border: '1px solid #32CD32',
+                    border: '1px solid #000',
                     backgroundColor: '#FFFFFF',
-                    color: '#32CD32',
+                    color: '#000',
                     padding: '3% 0',
                     borderRadius: '5px',
                     fontSize: '1em',

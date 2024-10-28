@@ -1,15 +1,14 @@
 import React, { useEffect, useState, useContext } from 'react';
 import {
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonCard,
-    IonCardContent,
-    IonLabel,
-    IonInput,
-    IonButton,
-    IonLoading,
-} from '@ionic/react';
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  CircularProgress,
+} from '@mui/material';
 import { Line } from 'react-chartjs-2';
 import { LanguageContext } from '../../../context/LanguageContext';
 import {
@@ -22,150 +21,163 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Button } from '@mui/material';
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend);
 
 const Graphics: React.FC = () => {
-    const { t } = useContext(LanguageContext);
-    const [weightRecords, setWeightRecords] = useState<{ weight: number; date: string }[]>([]);
-    const [newWeight, setNewWeight] = useState<number | undefined>(undefined);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+  const { t } = useContext(LanguageContext);
+  const [weightRecords, setWeightRecords] = useState<{ weight: number; date: string }[]>([]);
+  const [newWeight, setNewWeight] = useState<number | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const fetchWeightRecords = async () => {
-        setLoading(true);
-        try {
-            const accessToken = localStorage.getItem('access_token');
-            const response = await fetch('http://127.0.0.1:8000/api/weight-records/', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (!response.ok) throw new Error('Failed to fetch weight records');
-            const data = await response.json();
-            setWeightRecords(data);
-        } catch (err) {
-            setError('Error fetching weight records');
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchWeightRecords = async () => {
+    setLoading(true);
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      const response = await fetch('http://127.0.0.1:8000/api/weight-records/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch weight records');
+      const data = await response.json();
+      setWeightRecords(data);
+    } catch (err) {
+      setError('Error fetching weight records');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const addWeightRecord = async () => {
-        if (!newWeight) return;
-        setLoading(true);
-        try {
-            const accessToken = localStorage.getItem('access_token');
-            const response = await fetch('http://127.0.0.1:8000/api/weight-records/create/', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ weight: newWeight }),
-            });
-            if (!response.ok) throw new Error('Failed to add weight record');
-            setNewWeight(undefined);
-            fetchWeightRecords(); // Update weight records after adding a new one
-        } catch (err) {
-            setError('Error adding weight record');
-        } finally {
-            setLoading(false);
-        }
-    };
+  const addWeightRecord = async () => {
+    if (!newWeight) return;
+    setLoading(true);
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      const response = await fetch('http://127.0.0.1:8000/api/weight-records/create/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ weight: newWeight }),
+      });
+      if (!response.ok) throw new Error('Failed to add weight record');
+      setNewWeight(undefined);
+      fetchWeightRecords();
+    } catch (err) {
+      setError('Error adding weight record');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        fetchWeightRecords();
-    }, []);
+  useEffect(() => {
+    fetchWeightRecords();
+  }, []);
 
-    const chartData = {
-        labels: weightRecords.map(record => new Date(record.date).toLocaleDateString()),
-        datasets: [
-            {
-                label: t('Weight Evolution'),
-                data: weightRecords.map(record => record.weight),
-                borderColor: 'rgba(50, 205, 50, 1)',  // Verde lima para la línea
-                backgroundColor: 'rgba(50, 205, 50, 0.2)',  // Verde lima claro para el área de relleno
-                fill: true,
-            },
-        ],
-    };
+  const chartData = {
+    labels: weightRecords.map(record => new Date(record.date).toLocaleDateString()),
+    datasets: [
+      {
+        label: t('Weight Evolution'),
+        data: weightRecords.map(record => record.weight),
+        borderColor: 'rgba(70, 130, 180, 1)', // Color gris azulado
+        backgroundColor: 'rgba(70, 130, 180, 0.2)', // Fondo claro
+        fill: true,
+      },
+    ],
+  };
 
-    return (
-        <IonGrid>
-            <IonLoading isOpen={loading} message={t('Loading...')} />
-            {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+  return (
+    <Box sx={{ padding: 1, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '20vh', marginTop:'20px' }}>
+          <CircularProgress />
+        </Box>
+      )}
 
-            {/* Section for Adding a New Weight Record */}
-            <IonRow>
-                <IonCol size="12">
-                    <IonCard>
-                        <IonCardContent>
-                            <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em'}}>
-                                {t('Add Weight Record')}
-                            </IonLabel>
-                            <IonInput
-                                type="number"
-                                value={newWeight}
-                                placeholder={t('Enter your weight')}
-                                onIonChange={(e: CustomEvent) => {
-                                    const weight = parseFloat(e.detail.value);
-                                    setNewWeight(!isNaN(weight) ? weight : undefined);
-                                }}
-                                style={{ marginBottom: '10px' }}
-                            />
-                            <Button
-                                onClick={addWeightRecord}
-                                disabled={newWeight === undefined}
-                                style={{
-                                    border: '1px solid #32CD32',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#32CD32',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                  }}
-                            >
-                                {t('Add Weight')}
-                            </Button>
-                        </IonCardContent>
-                    </IonCard>
-                </IonCol>
-            </IonRow>
+      {error && (
+        <Typography color="error" align="center" sx={{ marginBottom: 2 }}>
+          {error}
+        </Typography>
+      )}
 
-            {/* Section for Weight Evolution Chart */}
-            <IonRow>
-                <IonCol size="12">
-                    <IonCard>
-                        <IonCardContent>
-                            <IonLabel style={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-                                {t('Weight Evolution')}
-                            </IonLabel>
-                            <Line
-                                data={chartData}
-                                options={{
-                                    responsive: true,
-                                    plugins: {
-                                        legend: {
-                                            display: false,  // Oculta la leyenda
-                                        },
-                                    },
-                                    scales: {
-                                        x: { title: { display: true, text: t('Date') } },
-                                        y: { title: { display: true, text: t('Weight (kg)') } },
-                                    },
-                                }}
-                            />
-                        </IonCardContent>
-                    </IonCard>
-                </IonCol>
-            </IonRow>
-        </IonGrid>
-    );
+      {/* Section for Adding a New Weight Record */}
+      <Grid container  justifyContent="center" sx={{ paddingBottom: '20px', marginTop:'20px'}}>
+        <Grid item xs={12} sm={8} md={6}>
+          <Card sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px' }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#333' }}>
+                {t('Add Weight Record')}
+              </Typography>
+              <TextField
+                fullWidth
+                type="number"
+                label={t('Enter your weight')}
+                value={newWeight ?? ''}
+                onChange={(e) => {
+                  const weight = parseFloat(e.target.value);
+                  setNewWeight(!isNaN(weight) ? weight : undefined);
+                }}
+                sx={{ marginBottom: 2 }}
+              />
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={addWeightRecord}
+                disabled={newWeight === undefined || loading}
+                sx={{
+                  backgroundColor: '#b0b0b0',
+                  color: '#fff',
+                  borderRadius: '8px',
+                  '&:hover': { backgroundColor: '#a0a0a0' },
+                  padding: '10px',
+                  fontWeight: 'bold',
+                }}
+              >
+                {t('Add Weight')}
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      <Box sx={{ borderTop: '1px solid #333', width: '100%', margin: '20px 0' }} />
+
+                <Grid item xs={12}sx={{ marginTop: '20px', marginBottom:'20px' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: '1.4em', color: '#333' }}>
+                        {t('Evolution')}
+                    </Typography>
+                </Grid>
+
+      {/* Section for Weight Evolution Chart */}
+      <Grid container spacing={3} justifyContent="center">
+        <Grid item xs={12} sm={10} md={8}>
+          <Card sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px' }}>
+            <CardContent>
+              <Line
+                data={chartData}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: { display: false },
+                  },
+                  scales: {
+                    x: { title: { display: true, text: t('Date') } },
+                    y: { title: { display: true, text: t('Weight (kg)') } },
+                  },
+                }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
 };
 
 export default Graphics;

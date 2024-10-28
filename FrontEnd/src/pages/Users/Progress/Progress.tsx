@@ -1,44 +1,48 @@
 import React, { useState, useContext } from 'react';
-import { IonContent, IonHeader, IonPage, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
+import { Box, Tabs, Tab, Container } from '@mui/material';
 import ControlPanel from './ControlPanel';
 import WorkoutHistory from './WorkoutHistory';
 import Graphics from './Graphics';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext'; // Contexto de idioma
-import './Progress.css';
 
 const Progress: React.FC = () => {
-    const [selectedSection, setSelectedSection] = useState<string>('control');
+    const [selectedSection, setSelectedSection] = useState<number>(0);
     const { t } = useContext(LanguageContext); // Hook para obtener la función de traducción
 
+    // Función para manejar el cambio de pestañas
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        setSelectedSection(newValue);
+    };
+
     return (
-        <IonPage>
+        <Box sx={{ backgroundColor: '#f5f5f5' }}>
             <Header title={t('progress_title')} />  {/* Usamos la variable para el título */}
-            <IonContent>
+            <Container maxWidth="md">
                 {/* Etiquetas para seleccionar las secciones */}
-                <IonSegment
+                <Tabs
                     value={selectedSection}
-                    onIonChange={(e: { detail: { value: React.SetStateAction<string>; }; }) => setSelectedSection(e.detail.value!)}
-                    className="custom-segment"
-                    color="success"
+                    onChange={handleTabChange}
+                    centered
+                    textColor="inherit"
+                    indicatorColor="secondary"
+                    sx={{
+                        color: 'gray',
+                        '.Mui-selected': { color: 'gray' }, // Color de pestaña seleccionada
+                        '.MuiTabs-indicator': { backgroundColor: 'gray' }, // Color del indicador
+                    }}
                 >
-                    <IonSegmentButton value="control">
-                        <IonLabel>{t('control_panel_label')}</IonLabel>
-                    </IonSegmentButton>
-                    <IonSegmentButton value="workout">
-                        <IonLabel>{t('workout_label')}</IonLabel>
-                    </IonSegmentButton>
-                    <IonSegmentButton value="graphics">
-                        <IonLabel>{t('weight_graph_label')}</IonLabel>
-                    </IonSegmentButton>
-                </IonSegment>
+                    <Tab label={t('control_panel_label')} />
+                    <Tab label={t('workout_label')} />
+                    <Tab label={t('weight_graph_label')} />
+                </Tabs>
 
                 {/* Mostrar la sección seleccionada */}
-                {selectedSection === 'control' && <ControlPanel />}
-                {selectedSection === 'workout' && <WorkoutHistory />}
-                {selectedSection === 'graphics' && <Graphics />}
-            </IonContent>
-        </IonPage>
+                {selectedSection === 0 && <ControlPanel />}
+                {selectedSection === 1 && <WorkoutHistory />}
+                {selectedSection === 2 && <Graphics />}
+            </Container>
+        </Box>
     );
 };
 

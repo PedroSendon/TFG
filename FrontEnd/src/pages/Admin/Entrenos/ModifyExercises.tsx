@@ -15,7 +15,6 @@ import {
 import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
-import '../../../theme/variables.css';
 import { Box, Chip, InputLabel, MenuItem, OutlinedInput, Select, TextField, Button } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material';
 import { LanguageContext } from '../../../context/LanguageContext';
@@ -156,14 +155,14 @@ const ModifyExercises: React.FC = () => {
                     {/* Sección de Imagen */}
                     <IonRow className="ion-text-center">
                         <IonCol size="12">
-                            <IonAvatar style={{ width: '150px', height: '150px', margin: '10px auto', borderRadius: '10px', border: '2px solid #32CD32' }}>
+                            <IonAvatar style={{ width: '150px', height: '150px', margin: '10px auto', borderRadius: '10px', border: '2px solid #000' }}>
                                 {media ? (
                                     <img src={media} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : (
                                     <div style={{ width: '100%', height: '100%', backgroundColor: '#f2f2f2' }} />
                                 )}
                             </IonAvatar>
-                            <IonButton fill="clear" onClick={() => setShowActionSheet(true)} style={{ color: '#32CD32', borderColor: '#32CD32' }}>
+                            <IonButton fill="clear" onClick={() => setShowActionSheet(true)} style={{ color: '#000', borderColor: '#000' }}>
                                 <IonIcon icon={cameraOutline} /> {t('change_image_video')} {/* Texto traducido */}
                             </IonButton>
                         </IonCol>
@@ -292,9 +291,9 @@ const ModifyExercises: React.FC = () => {
                             <Button
                                 onClick={handleSave}
                                 style={{
-                                    border: '1px solid #32CD32',
+                                    border: '1px solid #000',
                                     backgroundColor: '#FFFFFF',
-                                    color: '#32CD32',
+                                    color: '#000',
                                     padding: '3% 0',
                                     borderRadius: '5px',
                                     fontSize: '1em',

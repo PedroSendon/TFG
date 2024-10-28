@@ -16,7 +16,6 @@ import { useHistory } from 'react-router-dom'; // Hook para redirección.
 import { IonFabButton, IonIcon, IonContent, IonPage } from '@ionic/react';
 import { cameraOutline } from 'ionicons/icons';  // Icono de cámara para subir imágenes/videos.
 import Header from '../../Header/Header';  // Importación del Header
-import '../../../theme/variables.css'; // Archivo de estilos personalizados.
 import { LanguageContext } from '../../../context/LanguageContext';
 import musclesCa from '../../../locales/muscles_ca.json';
 import musclesEs from '../../../locales/muscles_es.json';
@@ -297,16 +296,16 @@ const AddExercises: React.FC = () => {
                                         onClick={handleMediaUpload}
                                         variant="contained"
                                         style={{
-                                            border: '1px solid #32CD32',
+                                            border: '1px solid #000',
                                             backgroundColor: '#FFFFFF',
-                                            color: '#32CD32',
+                                            color: '#000',
                                             padding: '3% 0',
                                             borderRadius: '5px',
                                             fontSize: '1em',
                                             minWidth: '100%',
                                         }}
                                     >
-                                        <IonIcon icon={cameraOutline} style={{ color: '#32CD32', marginRight: '10px' }} />
+                                        <IonIcon icon={cameraOutline} style={{ color: '#000', marginRight: '10px' }} />
                                         {t('upload_image_video')} {/* Texto traducido */}
                                     </Button>
 
@@ -348,9 +347,9 @@ const AddExercises: React.FC = () => {
                             <Button
                                 type="submit"
                                 style={{
-                                    border: '1px solid #32CD32',
+                                    border: '1px solid #000',
                                     backgroundColor: '#FFFFFF',
-                                    color: '#32CD32',
+                                    color: '#000',
                                     padding: '3% 0',
                                     borderRadius: '5px',
                                     fontSize: '1em',

@@ -7,6 +7,6 @@
   }
   
   .workout-card.completed {
-    border: 1px solid #32CD32; /* Borde verde lima para completados */
+    border: 1px solid #000; /* Borde verde lima para completados */
   }
   

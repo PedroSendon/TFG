@@ -266,9 +266,9 @@ const WorkoutsExercises: React.FC = () => {
                                                 <Button
                                                     onClick={() => handleEdit(workout.id, 'workout')}
                                                     style={{
-                                                        border: '1px solid #32CD32',
+                                                        border: '1px solid #000',
                                                         backgroundColor: '#FFFFFF',
-                                                        color: '#32CD32',
+                                                        color: '#000',
                                                         padding: '4px 8px',
                                                         borderRadius: '5px',
                                                         fontSize: '0.7em',
@@ -322,9 +322,9 @@ const WorkoutsExercises: React.FC = () => {
                                                 <Button
                                                     onClick={() => handleEdit(plan.id, 'trainingplan')}
                                                     style={{
-                                                        border: '1px solid #32CD32',
+                                                        border: '1px solid #000',
                                                         backgroundColor: '#FFFFFF',
-                                                        color: '#32CD32',
+                                                        color: '#000',
                                                         padding: '4px 8px',
                                                         borderRadius: '5px',
                                                         fontSize: '0.7em',
@@ -377,9 +377,9 @@ const WorkoutsExercises: React.FC = () => {
                                                 <Button
                                                     onClick={() => handleEdit(exercise.id, 'exercise')}
                                                     style={{
-                                                        border: '1px solid #32CD32',
+                                                        border: '1px solid #000',
                                                         backgroundColor: '#FFFFFF',
-                                                        color: '#32CD32',
+                                                        color: '#000',
                                                         padding: '4px 8px',
                                                         borderRadius: '5px',
                                                         fontSize: '0.7em',
@@ -418,18 +418,18 @@ const WorkoutsExercises: React.FC = () => {
                         onClick={() => handleAdd(selectedSection === 'workouts' ? 'workout' : 'exercise')}
                         style={{
                             backgroundColor: '#FFFFFF',
-                            color: '#32CD32',
+                            color: '#000',
                             width: '60px',
                             height: '60px',
                             borderRadius: '50%',
-                            border: '2px solid #32CD32',
+                            border: '2px solid #000',
                             zIndex: 1000,
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
                         }}
                     >
-                        <FitnessCenter style={{ fontSize: '24px', color: '#32CD32' }} /> {/* Icono de mancuerna */}
+                        <FitnessCenter style={{ fontSize: '24px', color: '#000' }} /> {/* Icono de mancuerna */}
                     </Button>
                 </IonFab>
 
@@ -439,18 +439,18 @@ const WorkoutsExercises: React.FC = () => {
                             onClick={handleAddTrainingPlan}
                             style={{
                                 backgroundColor: '#FFFFFF',
-                                color: '#32CD32',
+                                color: '#000',
                                 width: '60px',
                                 height: '60px',
                                 borderRadius: '50%',
-                                border: '2px solid #32CD32',
+                                border: '2px solid #000',
                                 zIndex: 1000,
                                 display: 'flex',
                                 justifyContent: 'center',
                                 alignItems: 'center',
                             }}
                         >
-                            <AssignmentOutlined style={{ fontSize: '24px', color: '#32CD32' }} /> {/* Icono de plan de entrenamiento */}
+                            <AssignmentOutlined style={{ fontSize: '24px', color: '#000' }} /> {/* Icono de plan de entrenamiento */}
                         </Button>
                     </IonFab>
                 )}
