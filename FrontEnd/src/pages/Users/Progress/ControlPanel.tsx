@@ -13,6 +13,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './ControlPanel.css';
 import { LanguageContext } from '../../../context/LanguageContext';
+import { useHistory } from 'react-router';
 
 interface Workout {
     id: number;
@@ -26,6 +27,8 @@ const ControlPanel: React.FC = () => {
     const [date, setDate] = useState(new Date());
     const [trainingDays, setTrainingDays] = useState<Date[]>([]); // Fechas de entrenamiento en los próximos dos meses
     const [nextWorkout, setNextWorkout] = useState<Workout | null>(null);
+    const history = useHistory();
+
 
     const fetchNextPendingWorkout = async () => {
         try {
@@ -112,8 +115,14 @@ const ControlPanel: React.FC = () => {
     };
 
     const handleStartWorkout = () => {
-        console.log('Redirigiendo al entrenamiento de la semana');
+        if (nextWorkout) {
+            history.push({
+                pathname: `/workout/day`, // La ruta sin el parámetro en la URL
+                state: { day_id: nextWorkout.id }, // Pasamos el `id` en el `state`
+              });
+        }
     };
+
 
     const tileContent = ({ date, view }: any) => {
         if (view === 'month' && trainingDays.some(day => day.getDate() === date.getDate() && day.getMonth() === date.getMonth())) {
