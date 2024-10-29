@@ -1,23 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
-import {
-    IonPage,
-    IonContent,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonCard,
-    IonCardContent,
-    IonLabel,
-    IonFab,
-    useIonAlert,
-    IonSegment,
-    IonSegmentButton
-} from '@ionic/react';
-import { Add, AssignmentOutlined, FitnessCenter, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { AssignmentOutlined, FitnessCenter, Edit as EditIcon, Delete as DeleteIcon, Close } from '@mui/icons-material';
 import Header from '../../Header/Header';
 import Navbar from '../../Navbar/Navbar';
 import { useHistory } from 'react-router';
-import { Box, Button, Card, CardContent, Container, Fab, Grid, IconButton, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Container, Dialog, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importamos el contexto de idioma
 
 interface Workout {
@@ -45,7 +31,8 @@ const WorkoutsExercises: React.FC = () => {
     const [workouts, setWorkouts] = useState<Workout[]>([]);
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [trainingPlans, setTrainingPlans] = useState<TrainingPlan[]>([]); // Nueva constante
-    const [presentAlert] = useIonAlert();
+    const [openDialog, setOpenDialog] = useState(false);
+    const [deleteDetails, setDeleteDetails] = useState<{ id: number; type: string } | null>(null);
 
     // Obtener entrenamientos desde el BE
     useEffect(() => {
@@ -142,18 +129,12 @@ const WorkoutsExercises: React.FC = () => {
         }
     };
 
-    const handleAddTrainingPlan = () => {
-        history.push('/admin/workout/plan'); // Redirige a la vista de añadir plan de entrenamiento
-    };
 
-    const handleDelete = async (id: number, type: string) => {
+
+    const handleDelete = async () => {
+        if (!deleteDetails) return;
+        const { id, type } = deleteDetails;
         const accessToken = localStorage.getItem('access_token');
-
-        if (!accessToken) {
-            console.error(t('no_token'));
-            return;
-        }
-
         const deleteUrl =
             type === 'workout'
                 ? `http://127.0.0.1:8000/api/workouts/${id}/delete/`
@@ -171,7 +152,6 @@ const WorkoutsExercises: React.FC = () => {
             });
 
             if (response.ok) {
-                // Refrescar la lista después de eliminar el elemento
                 if (type === 'workout') {
                     setWorkouts((prev) => prev.filter((workout) => workout.id !== id));
                 } else if (type === 'exercise') {
@@ -180,12 +160,19 @@ const WorkoutsExercises: React.FC = () => {
                     setTrainingPlans((prev) => prev.filter((plan) => plan.id !== id));
                 }
             } else {
-                const errorData = await response.json();
-                console.error('Error al eliminar el elemento:', errorData);
+                console.error('Error al eliminar el elemento');
             }
         } catch (error) {
             console.error('Error en la solicitud de eliminación:', error);
+        } finally {
+            setOpenDialog(false);
+            setDeleteDetails(null);
         }
+    };
+
+    const openDeleteDialog = (id: number, type: string) => {
+        setDeleteDetails({ id, type });
+        setOpenDialog(true);
     };
 
     const handleSectionChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -287,7 +274,7 @@ const WorkoutsExercises: React.FC = () => {
                                                 <EditIcon fontSize="small" />
                                             </IconButton>
                                             <IconButton
-                                                onClick={() => handleDelete(item.id, selectedSection)}
+                                                onClick={() => openDeleteDialog(item.id, selectedSection)}
                                                 sx={{
                                                     border: '1px solid #FF0000',
                                                     backgroundColor: '#FFFFFF',
@@ -338,7 +325,31 @@ const WorkoutsExercises: React.FC = () => {
                     )}
                 </Fab>
             </Container>
-            <Navbar />
+            {/* Diálogo de confirmación de eliminación */}
+            {/* Diálogo de confirmación de eliminación */}
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                <DialogTitle>
+                    {t('confirm_delete')}
+                    <IconButton
+                        edge="end"
+                        onClick={() => setOpenDialog(false)}
+                        sx={{ position: 'absolute', right: 8, top: 8, color: '#888' }}
+                    >
+                        <Close />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>{t('delete_message')}</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDialog(false)} sx={{ color: '#555' }}>
+                        {t('cancel')}
+                    </Button>
+                    <Button onClick={handleDelete} sx={{ color: '#FF0000' }}>
+                        {t('delete')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

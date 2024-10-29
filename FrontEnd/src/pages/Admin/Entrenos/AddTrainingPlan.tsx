@@ -1,17 +1,4 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import {
-    IonPage,
-    IonContent,
-    IonLabel,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonAvatar,
-    IonActionSheet,
-    IonButton,
-    IonIcon,
-} from '@ionic/react';
-import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import Header from '../../Header/Header';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';

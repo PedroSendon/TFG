@@ -1,19 +1,5 @@
 import React, { useState, useRef, useContext } from 'react';
-import {
-    IonPage,
-    IonHeader,
-    IonActionSheet,
-    IonTitle,
-    IonContent,
-    IonAvatar,
-    IonButton,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonModal,
-    IonToast,
-    IonIcon,
-} from '@ionic/react';
+
 import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { TextField, Button, MenuItem, Grid, Container, Snackbar, Modal, Box, Typography, IconButton, Avatar } from '@mui/material'; // Importar TextField y otros componentes de MUI
 import './EditPerfil.css';
