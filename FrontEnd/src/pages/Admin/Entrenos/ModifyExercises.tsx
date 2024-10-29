@@ -15,12 +15,13 @@ import {
 import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
-import { Box, Chip, InputLabel, MenuItem, OutlinedInput, Select, TextField, Button } from '@mui/material';
+import { Box, Chip, InputLabel, MenuItem, OutlinedInput, Select, TextField, Button, Container, Snackbar, Card, Grid, Avatar } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material';
 import { LanguageContext } from '../../../context/LanguageContext';
 import musclesCa from '../../../locales/muscles_ca.json';
 import musclesEs from '../../../locales/muscles_es.json';
 import musclesEn from '../../../locales/muscles_en.json';
+import { CameraAlt } from '@mui/icons-material';
 
 interface MuscleGroupsData {
     muscleGroups: string[];
@@ -147,42 +148,37 @@ const ModifyExercises: React.FC = () => {
     };
 
     return (
-        <IonPage>
-            <Header title={t('modify_exercise_title')} /> {/* Reemplazamos el título */}
-
-            <IonContent>
-                <IonGrid>
-                    {/* Sección de Imagen */}
-                    <IonRow className="ion-text-center">
-                        <IonCol size="12">
-                            <IonAvatar style={{ width: '150px', height: '150px', margin: '10px auto', borderRadius: '10px', border: '2px solid #000' }}>
-                                {media ? (
-                                    <img src={media} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                ) : (
-                                    <div style={{ width: '100%', height: '100%', backgroundColor: '#f2f2f2' }} />
-                                )}
-                            </IonAvatar>
-                            <IonButton fill="clear" onClick={() => setShowActionSheet(true)} style={{ color: '#000', borderColor: '#000' }}>
-                                <IonIcon icon={cameraOutline} /> {t('change_image_video')} {/* Texto traducido */}
-                            </IonButton>
-                        </IonCol>
-                    </IonRow>
-
-                    <IonActionSheet
-                        isOpen={showActionSheet}
-                        onDidDismiss={() => setShowActionSheet(false)}
-                        buttons={[
-                            { text: t('upload_image_video'), icon: imageOutline, handler: () => handleMediaUpload() },
-                            { text: t('delete_image_video'), icon: trashOutline, role: 'destructive', handler: () => setMedia(null) },
-                            { text: t('cancel'), icon: closeOutline, role: 'cancel' },
-                        ]}
+        <Box  sx={{ pb: 10, pt: 5 , backgroundColor: '#f5f5f5'}}>
+            <Header title={t('modify_exercise_title')} />
+            <Box sx={{ p: 3, mt: 2, backgroundColor: '#f5f5f5' }}>
+                <Box textAlign="center" mb={2}>
+                    <Avatar
+                        src={media || undefined}
+                        alt="Preview"
+                        sx={{
+                            width: 150, height: 150, mx: 'auto', borderRadius: '8px', border: '2px solid #000',
+                        }}
                     />
+                    <Button
+                        variant="outlined"
+                        startIcon={<CameraAlt />}
+                        onClick={handleMediaUpload}
+                        sx={{ mt: 2, color: '#000', borderColor: '#000' }}
+                    >
+                        {t('change_image_video')}
+                    </Button>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileChange}
+                    />
+                </Box>
 
-                    <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-
-                    {/* Campos de modificación */}
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12">
+                <form>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
                                 fullWidth
@@ -190,12 +186,18 @@ const ModifyExercises: React.FC = () => {
                                 name="name"
                                 value={exerciseDetails.name}
                                 onChange={handleChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
-                        </IonCol>
-                    </IonRow>
-
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12">
+                        </Grid>
+                        <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
                                 fullWidth
@@ -204,22 +206,27 @@ const ModifyExercises: React.FC = () => {
                                 value={exerciseDetails.description}
                                 onChange={handleChange}
                                 multiline
+                                rows={3}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
-                        </IonCol>
-                    </IonRow>
+                        </Grid>
 
-                    {/* Grupos musculares */}
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12">
-                            <InputLabel style={{ color: 'var(--color-gris-oscuro)' }}>{t('muscle_groups')}</InputLabel> {/* Texto traducido */}
+                        <Grid item xs={12}>
+                            <InputLabel style={{ color: '#555555', marginBottom: 1 }}>{t('muscle_groups')}</InputLabel>
                             <Select
-                                labelId="muscleGroups-label"
-                                id="muscleGroups"
                                 multiple
                                 fullWidth
                                 value={exerciseDetails.muscleGroups}
-                                onChange={(event) => handleMuscleGroupChange(event as SelectChangeEvent<string[]>)}
-                                input={<OutlinedInput id="select-multiple-chip" />}
+                                onChange={handleMuscleGroupChange}
+                                input={<OutlinedInput />}
                                 renderValue={(selected) => (
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                         {(selected as string[]).map((value) => (
@@ -228,20 +235,11 @@ const ModifyExercises: React.FC = () => {
                                     </Box>
                                 )}
                                 sx={{
-                                    width: '100%',
                                     '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: 'var(--color-gris-oscuro)',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'var(--color-verde-lima)',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: 'var(--color-verde-lima)',
-                                        },
-                                        '& input': {
-                                            padding: '10px',
-                                        },
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
                                     },
                                 }}
                             >
@@ -251,12 +249,9 @@ const ModifyExercises: React.FC = () => {
                                     </MenuItem>
                                 ))}
                             </Select>
-                        </IonCol>
-                    </IonRow>
+                        </Grid>
 
-                    {/* Instrucciones */}
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12">
+                        <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
                                 fullWidth
@@ -265,50 +260,54 @@ const ModifyExercises: React.FC = () => {
                                 value={exerciseDetails.instructions}
                                 onChange={handleChange}
                                 multiline
+                                rows={3}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
-                        </IonCol>
-                    </IonRow>
+                        </Grid>
 
-                    {/* Botones de Cancelar y Guardar */}
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="6" className="ion-text-center">
-                            <Button
-                                onClick={handleCancel}
-                                style={{
-                                    border: '1px solid #FF0000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#FF0000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                            >
-                                {t('cancel')} {/* Texto traducido */}
-                            </Button>
-                        </IonCol>
-                        <IonCol size="6" className="ion-text-center">
-                            <Button
-                                onClick={handleSave}
-                                style={{
-                                    border: '1px solid #000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                            >
-                                {t('save')} {/* Texto traducido */}
-                            </Button>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
+                        <Grid container spacing={2} sx={{ mt: 2 }}>
+                            <Grid item xs={6}>
+                                <Button
+                                    fullWidth
+                                    variant="outlined"
+                                    onClick={handleCancel}
+                                    sx={{
+                                        color: '#777', borderColor: '#777', fontWeight: 'bold', py: 1, borderRadius: '8px',
+                                      }}                                >
+                                    {t('cancel')}
+                                </Button>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    onClick={handleSave}
+                                    sx={{
+                                        backgroundColor: '#555', color: '#FFF', fontWeight: 'bold', py: 1, borderRadius: '8px', '&:hover': { backgroundColor: '#333' },
+                                      }}                                >
+                                    {t('save')}
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </form>
+            </Box>
 
-                <IonToast isOpen={showToast} onDidDismiss={() => setShowToast(false)} message={t('toast_success')} duration={2000} /> {/* Texto traducido */}
-            </IonContent>
-        </IonPage>
+            <Snackbar
+                open={showToast}
+                autoHideDuration={2000}
+                onClose={() => setShowToast(false)}
+                message={t('toast_success')}
+            />
+        </Box>
     );
 
 };

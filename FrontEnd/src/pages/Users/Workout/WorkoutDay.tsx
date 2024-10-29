@@ -1,12 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { IonPage, IonContent, IonList, IonItem, IonLabel, IonImg, IonCheckbox, IonButton, IonProgressBar, IonRow, IonCol, IonGrid } from '@ionic/react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import './WorkoutDay.css';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
-import { Box, Button, Card, CardContent, CardMedia, Checkbox, Container, LinearProgress, Typography } from '@mui/material';
-import { arrowBackOutline } from 'ionicons/icons';
-import { IonIcon } from '@ionic/react';
+import { Box, Button, Card, CardContent, CardMedia, Checkbox, LinearProgress, Typography } from '@mui/material';
 
 const WorkoutDay: React.FC = () => {
   const history = useHistory();

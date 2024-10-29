@@ -3,7 +3,7 @@ import { Box, Button, Card, CardContent, Container, Dialog, DialogActions, Dialo
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Add } from '@mui/icons-material';
-import { useHistory, useLocation } from 'react-router';
+import { useHistory } from 'react-router';
 import { LanguageContext } from '../../../context/LanguageContext';
 import Navbar from '../../Navbar/Navbar';
 import Header from '../../Header/Header';

@@ -11,7 +11,6 @@ import dayjs from 'dayjs';
 import Header from '../../Header/Header';
 import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
-import { IonPage } from '@ionic/react';
 
 const AddUsers: React.FC = () => {
     const history = useHistory();

@@ -71,12 +71,12 @@ const App: React.FC = () => {
 
           {/* Admin Workout Routes */}
           <Route exact path="/admin/workout" component={AdminWorkout} />
-          <Route exact path="/admin/exercise/add" component={AdminAddExercise} />
-          <Route exact path="/admin/exercise/modify" component={AdminModifyExercise} />
-          <Route exact path="/admin/workout/add" component={AdminAddWorkout} />
+          <Route exact path="/admin/exercises/add" component={AdminAddExercise} />
+          <Route exact path="/admin/exercises/modify" component={AdminModifyExercise} />
+          <Route exact path="/admin/workouts/add" component={AdminAddWorkout} />
           <Route exact path="/admin/workouts/modify" component={AdminModifyWorkout} />
-          <Route exact path="/admin/trainingplan/add" component={CreateTrainingPlan} />
-          <Route exact path="/admin/trainingplan/modify" component={ModifyTrainingPlan} />
+          <Route exact path="/admin/trainingplans/add" component={CreateTrainingPlan} />
+          <Route exact path="/admin/trainingplans/modify" component={ModifyTrainingPlan} />
 
           {/* Admin Statistics Route */}
           <Route exact path="/admin/statistics" component={AdminStatistics} />

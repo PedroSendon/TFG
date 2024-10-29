@@ -8,7 +8,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Add, Close } from '@mui/icons-material';
 import Header from '../../Header/Header'; // Componente de header reutilizable
-import Navbar from '../../Navbar/Navbar'; // Componente de la navbar
 import './Users.css'; // Estilos personalizados
 import { useHistory, useLocation } from 'react-router';
 import { Box, Button, Card, CardContent, Container, Dialog, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, Typography } from '@mui/material';

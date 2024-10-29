@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-    TextField, Button, Grid, Container, MenuItem, Select,
+    TextField, Button, Grid, Container, MenuItem,
     Box,
     Avatar,
     Dialog,
-    DialogActions,
     DialogContent,
     DialogTitle,
     IconButton
@@ -13,7 +12,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext';
-import { CameraAlt as CameraAltIcon, Close, Delete, PhotoCamera, Image, CameraAlt } from '@mui/icons-material';
+import { Close, Delete, PhotoCamera, Image, CameraAlt } from '@mui/icons-material';
 
 
 const ModifyUserPage: React.FC = () => {

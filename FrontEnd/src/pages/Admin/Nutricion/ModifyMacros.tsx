@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {
-    Box, Button, Container, Grid, MenuItem, TextField, Typography,
+    Box, Button, Container, Grid, MenuItem, TextField,
 } from '@mui/material'; // Importación de componentes de Material UI.
 import { useHistory, useLocation } from 'react-router-dom'; // Hook para redirección y obtener datos.
 import Header from '../../Header/Header'; // Componente de header reutilizable
 import { LanguageContext } from '../../../context/LanguageContext';  // Importar el contexto de idioma
-import { IonPage } from '@ionic/react';
 
 const ModifyMacros: React.FC = () => {
     const { t } = useContext(LanguageContext); // Usamos el contexto de idioma

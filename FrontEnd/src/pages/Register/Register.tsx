@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import {
-  TextField, IconButton, Button, Grid, Typography, Container,
-  FormControlLabel, Checkbox, Link, MenuItem,
+  TextField, Button, Grid, Typography, Container,
+  FormControlLabel, Checkbox, MenuItem,
   Box
 } from '@mui/material';
 import { useHistory } from 'react-router-dom';

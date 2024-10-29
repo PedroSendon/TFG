@@ -299,7 +299,7 @@ const ModifyWorkoutPage: React.FC = () => {
           onClick={handleAddExercise}
           variant="outlined"
           sx={{
-            color: '#000', borderColor: '#000', width: '100%', borderRadius: '8px', padding: '8px',
+            color: '#777', borderColor: '#777', fontWeight: 'bold', width: '100%', borderRadius: '8px', padding: '8px',
           }}
         >
           {t('add_exercise')}
