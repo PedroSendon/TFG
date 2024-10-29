@@ -15,11 +15,12 @@ import {
     IonIcon,
 } from '@ionic/react';
 import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
-import { TextField, Button, MenuItem, Grid } from '@mui/material'; // Importar TextField y otros componentes de MUI
+import { TextField, Button, MenuItem, Grid, Container, Snackbar, Modal, Box, Typography, IconButton, Avatar } from '@mui/material'; // Importar TextField y otros componentes de MUI
 import './EditPerfil.css';
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
+import { CameraAlt } from '@mui/icons-material';
 
 const EditProfilePage: React.FC = () => {
     const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
@@ -36,6 +37,7 @@ const EditProfilePage: React.FC = () => {
         weightGoal: userData.weightGoal || '',
         activityLevel: userData.activityLevel || '',
         trainingFrequency: userData.trainingFrequency || 0,
+        profilePicture: userData.profilePicture || 'https://via.placeholder.com/150',
     });
 
     const [passwords, setPasswords] = useState({
@@ -158,331 +160,336 @@ const EditProfilePage: React.FC = () => {
     };
 
     return (
-        <IonPage>
-            <Header title={t('edit_profile')} onBack={handleCancel} showBackButton={true}  />
+        <Container maxWidth="sm" sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', mt: 2, p: 3, borderRadius: '8px' }}>
+  
+            <Header title={t('edit_profile')} />
 
-            <IonContent>
-                <IonGrid>
-                    <IonRow className="ion-text-center">
-                        <IonCol size="12">
-                            <IonAvatar
-                                className="custom-avatar"
-                                style={{
-                                    width: '150px',
-                                    height: '150px',
-                                    border: '2px solid var(--color-verde-lima)',
-                                    borderRadius: '50%',
-                                    overflow: 'hidden',
-                                    marginBottom: '0px',
-                                }}
-                            >
-                                <img
-                                    src={profilePicture}
-                                    alt={t('profile_picture')}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'cover',
-                                        borderRadius: '50%',
-                                    }}
-                                />
-                            </IonAvatar>
-                            <IonButton
-                                style={{ color: 'var(--color-verde-lima)' }}
-                                fill="clear"
-                                onClick={() => setShowActionSheet(true)}
-                            >
-                                <IonIcon icon={cameraOutline} /> {t('change_photo')}
-                            </IonButton>
-                        </IonCol>
-                    </IonRow>
+            <Box textAlign="center" mb={3}>
+                <Avatar
+                    src={profileData.profilePicture}
+                    alt="Preview"
+                    sx={{
+                        width: 150, height: 150, mx: 'auto', borderRadius: '8px', border: '2px solid #000', mt:'18%'
+                    }}
+                />
+                <Button
+                    variant="outlined"
+                    startIcon={<CameraAlt />}
+                    onClick={() => fileInputRef.current?.click()}
+                    sx={{ mt: 2, color: '#000', borderColor: '#000' }}
+                >
+                    {t('change_image_video')}
+                </Button>
+                <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                />
+            </Box>
 
-                    <IonActionSheet
-                        isOpen={showActionSheet}
-                        onDidDismiss={() => setShowActionSheet(false)}
-                        buttons={[
-                            {
-                                text: t('upload_photo'),
-                                icon: imageOutline,
-                                handler: () => handlePhotoOption('upload'),
+            <Grid container spacing={3}>
+                <Grid item xs={12}>
+                    <Typography variant="h6">{t('personal_information')}</Typography>
+                </Grid>
+
+                {/* First Name Input */}
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        variant="outlined"
+                        label={t('first_name')}
+                        value={profileData.firstName}
+                        onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                                '& fieldset': { borderColor: '#CCCCCC' },
+                                '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                '&.Mui-focused fieldset': { borderColor: '#555555' },
                             },
-                            {
-                                text: t('delete_photo'),
-                                role: 'destructive',
-                                icon: trashOutline,
-                                handler: () => handlePhotoOption('delete'),
-                            },
-                            {
-                                text: t('cancel'),
-                                icon: closeOutline,
-                                role: 'cancel',
-                            },
-                        ]}
+                            '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                        }}
                     />
+                </Grid>
 
-                    <hr style={{ height: '1px', backgroundColor: '#d1d1d6' }} />
-                    <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                        onChange={handleFileChange}
+                {/* Last Name Input */}
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        variant="outlined"
+                        label={t('last_name')}
+                        value={profileData.lastName}
+                        onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                                '& fieldset': { borderColor: '#CCCCCC' },
+                                '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                '&.Mui-focused fieldset': { borderColor: '#555555' },
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                        }}
                     />
+                </Grid>
 
-                    <IonRow>
-                        <IonCol size="12">
-                            <h3>{t('personal_information')}</h3>
-                        </IonCol>
-                    </IonRow>
+                {/* Current Weight Input */}
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        variant="outlined"
+                        label={t('current_weight')}
+                        type="number"
+                        value={profileData.currentWeight}
+                        onChange={(e) => setProfileData({ ...profileData, currentWeight: e.target.value })}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                                '& fieldset': { borderColor: '#CCCCCC' },
+                                '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                '&.Mui-focused fieldset': { borderColor: '#555555' },
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                        }}
+                    />
+                </Grid>
 
-                    <IonRow>
-                        <IonCol size="12">
-                            <TextField
-                                fullWidth
-                                label={t('first_name')}
-                                variant="outlined"
-                                value={profileData.firstName}
-                                onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
-                            />
-                        </IonCol>
-                    </IonRow>
+                {/* Weight Goal Input */}
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        select
+                        variant="outlined"
+                        label={t('weight_goal')}
+                        value={profileData.weightGoal}
+                        onChange={(e) => setProfileData({ ...profileData, weightGoal: e.target.value })}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                                '& fieldset': { borderColor: '#CCCCCC' },
+                                '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                '&.Mui-focused fieldset': { borderColor: '#555555' },
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                        }}
+                    >
+                        <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
+                        <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
+                        <MenuItem value="Mantener el peso actual">{t('maintain_weight')}</MenuItem>
+                    </TextField>
+                </Grid>
 
-                    <IonRow>
-                        <IonCol size="12">
-                            <TextField
-                                fullWidth
-                                label={t('last_name')}
-                                variant="outlined"
-                                value={profileData.lastName}
-                                onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
-                            />
-                        </IonCol>
-                    </IonRow>
+                {/* Activity Level Input */}
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        select
+                        variant="outlined"
+                        label={t('activity_level')}
+                        value={profileData.activityLevel}
+                        onChange={(e) => setProfileData({ ...profileData, activityLevel: e.target.value })}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                                '& fieldset': { borderColor: '#CCCCCC' },
+                                '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                '&.Mui-focused fieldset': { borderColor: '#555555' },
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                        }}
+                    >
+                        <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
+                        <MenuItem value="Ligera">{t('light')}</MenuItem>
+                        <MenuItem value="Moderada">{t('moderate')}</MenuItem>
+                        <MenuItem value="Intensa">{t('intense')}</MenuItem>
+                    </TextField>
+                </Grid>
 
-                    <IonRow>
-                        <IonCol size="12">
-                            <TextField
-                                fullWidth
-                                label={t('current_weight')}
-                                variant="outlined"
-                                type="number"
-                                value={profileData.currentWeight}
-                                onChange={(e) => setProfileData({ ...profileData, currentWeight: parseFloat(e.target.value) })}
-                            />
-                        </IonCol>
-                    </IonRow>
+                {/* Training Frequency Input */}
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        select
+                        variant="outlined"
+                        label={t('training_frequency')}
+                        value={profileData.trainingFrequency}
+                        onChange={(e) => setProfileData({ ...profileData, trainingFrequency: parseInt(e.target.value) })}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                                '& fieldset': { borderColor: '#CCCCCC' },
+                                '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                '&.Mui-focused fieldset': { borderColor: '#555555' },
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                        }}
+                    >
+                        {[1, 2, 3, 4, 5, 6].map((day) => (
+                            <MenuItem key={day} value={day}>{day}</MenuItem>
+                        ))}
+                    </TextField>
+                </Grid>
 
-                    <IonRow>
-                        <IonCol size="12">
+                {/* Button to open password change modal */}
+                <Grid item xs={12}>
+                    <Button
+                        fullWidth
+                        variant="outlined"
+                        sx={{
+                            color: '#555',
+                            borderColor: '#555',
+                            fontWeight: 'bold',
+                            py: 1.5,
+                            borderRadius: '8px',
+                            '&:hover': { backgroundColor: '#f5f5f5' },
+                        }}
+                        onClick={() => setShowPasswordModal(true)}
+                    >
+                        {t('change_password')}
+                    </Button>
+                </Grid>
+
+                {/* Botones de Cancelar y Guardar */}
+                <Grid item xs={12}>
+                    <Grid container spacing={2} sx={{ mb: 6 }}>
+                        <Grid item xs={6}>
                             <Button
-                                type="submit"
-                                style={{
-                                    border: '1px solid #000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
+                                fullWidth
+                                variant="outlined"
+                                onClick={handleCancel}
+                                sx={{
+                                    color: '#777',
+                                    borderColor: '#777',
+                                    fontWeight: 'bold',
+                                    py: 1,
+                                    borderRadius: '8px',
                                 }}
-                                onClick={() => setShowPasswordModal(true)}
                             >
-                                {t('change_password')}
+                                {t('cancel')}
                             </Button>
-                        </IonCol>
-                    </IonRow>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                onClick={handleSave}
+                                sx={{
+                                    backgroundColor: '#555',
+                                    color: '#FFF',
+                                    fontWeight: 'bold',
+                                    py: 1,
+                                    borderRadius: '8px',
+                                    '&:hover': { backgroundColor: '#333' },
+                                }}
+                            >
+                                {t('save')}
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
 
-                    <hr style={{ height: '1px', backgroundColor: '#d1d1d6' }} />
-
-                    <IonRow>
-                        <IonCol size="12">
-                            <h3>{t('sports_information')}</h3>
-                        </IonCol>
-                    </IonRow>
-
-                    <IonRow>
-                        <IonCol size="12">
+            {/* Modal for Password Change */}
+            <Modal open={showPasswordModal} onClose={() => setShowPasswordModal(false)}>
+                <Box sx={{ p: 4, backgroundColor: '#FFF', borderRadius: '8px', mx: 'auto', my: 5, maxWidth: 400 }}>
+                    <Typography variant="h6" align="center" gutterBottom>{t('change_password')}</Typography>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
                             <TextField
                                 fullWidth
-                                label={t('weight_goal')}
-                                select
                                 variant="outlined"
-                                value={profileData.weightGoal}
-                                onChange={(e) => setProfileData({ ...profileData, weightGoal: e.target.value })}
-                            >
-                                <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
-                                <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
-                                <MenuItem value="Mantener el peso actual">{t('maintain_weight')}</MenuItem>
-                            </TextField>
-                        </IonCol>
-                    </IonRow>
-
-                    <IonRow>
-                        <IonCol size="12">
+                                label={t('current_password')}
+                                type="password"
+                                value={passwords.currentPassword}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
+                                onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
                             <TextField
                                 fullWidth
-                                label={t('activity_level')}
-                                select
                                 variant="outlined"
-                                value={profileData.activityLevel}
-                                onChange={(e) => setProfileData({ ...profileData, activityLevel: e.target.value })}
-                            >
-                                <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
-                                <MenuItem value="Ligera">{t('light')}</MenuItem>
-                                <MenuItem value="Moderada">{t('moderate')}</MenuItem>
-                                <MenuItem value="Intensa">{t('intense')}</MenuItem>
-                            </TextField>
-                        </IonCol>
-                    </IonRow>
-
-                    <IonRow>
-                        <IonCol size="12">
+                                label={t('new_password')}
+                                type="password"
+                                value={passwords.newPassword}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
+                                onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
                             <TextField
                                 fullWidth
-                                label={t('training_frequency')}
-                                select
                                 variant="outlined"
-                                value={profileData.trainingFrequency}
-                                onChange={(e) => setProfileData({ ...profileData, trainingFrequency: parseInt(e.target.value) })}
-                            >
-                                {[1, 2, 3, 4, 5, 6].map((day) => (
-                                    <MenuItem key={day} value={day}>{day}</MenuItem>
-                                ))}
-                            </TextField>
-                        </IonCol>
-                    </IonRow>
+                                label={t('confirm_password')}
+                                type="password"
+                                value={passwords.confirmPassword}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
+                                onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+                            />
+                        </Grid>
 
-                    <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
-                        <Grid container spacing={2}>
+                        <Grid container spacing={2} sx={{ mt: 2 }}>
                             <Grid item xs={6}>
                                 <Button
-                                    onClick={handleCancel}
-                                    style={{
-                                        border: '1px solid #FF0000',
-                                        backgroundColor: '#FFFFFF',
-                                        color: '#FF0000',
-                                        padding: '3% 0',
-                                        borderRadius: '5px',
-                                        fontSize: '1em',
-                                        width: '100%',
+                                    fullWidth
+                                    variant="outlined"
+                                    sx={{
+                                        color: '#777', borderColor: '#777', fontWeight: 'bold', py: 1, borderRadius: '8px',
                                     }}
+                                    onClick={() => setShowPasswordModal(false)}
                                 >
                                     {t('cancel')}
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
                                 <Button
-                                    type="submit"
-                                    style={{
-                                        border: '1px solid #000',
-                                        backgroundColor: '#FFFFFF',
-                                        color: '#000',
-                                        padding: '3% 0',
-                                        borderRadius: '5px',
-                                        fontSize: '1em',
-                                        width: '100%',
+                                    fullWidth
+                                    variant="contained"
+                                    sx={{
+                                        backgroundColor: '#555', color: '#FFF', fontWeight: 'bold', py: 1, borderRadius: '8px', '&:hover': { backgroundColor: '#333' },
                                     }}
-                                    onClick={handleSave}
+                                    onClick={handleChangePassword}
                                 >
                                     {t('save')}
                                 </Button>
                             </Grid>
                         </Grid>
                     </Grid>
-                </IonGrid>
+                </Box>
+            </Modal>
 
-                <IonModal isOpen={showPasswordModal} onDidDismiss={() => setShowPasswordModal(false)}>
-                    <Header title={t('change_password')} />
-                    <IonContent>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="12">
-                                    <TextField
-                                        fullWidth
-                                        label={t('current_password')}
-                                        variant="outlined"
-                                        type="password"
-                                        value={passwords.currentPassword}
-                                        onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
-                                    />
-                                </IonCol>
-                            </IonRow>
-
-                            <IonRow>
-                                <IonCol size="12">
-                                    <TextField
-                                        fullWidth
-                                        label={t('new_password')}
-                                        variant="outlined"
-                                        type="password"
-                                        value={passwords.newPassword}
-                                        onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                                    />
-                                </IonCol>
-                            </IonRow>
-
-                            <IonRow>
-                                <IonCol size="12">
-                                    <TextField
-                                        fullWidth
-                                        label={t('confirm_password')}
-                                        variant="outlined"
-                                        type="password"
-                                        value={passwords.confirmPassword}
-                                        onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-                                    />
-                                </IonCol>
-                            </IonRow>
-
-                            <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={6}>
-                                        <Button
-                                            onClick={() => setShowPasswordModal(false)}
-                                            style={{
-                                                border: '1px solid #FF0000',
-                                                backgroundColor: '#FFFFFF',
-                                                color: '#FF0000',
-                                                padding: '3% 0',
-                                                borderRadius: '5px',
-                                                fontSize: '1em',
-                                                width: '100%',
-                                            }}
-                                        >
-                                            {t('cancel')}
-                                        </Button>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Button
-                                            type="submit"
-                                            style={{
-                                                border: '1px solid #000',
-                                                backgroundColor: '#FFFFFF',
-                                                color: '#000',
-                                                padding: '3% 0',
-                                                borderRadius: '5px',
-                                                fontSize: '1em',
-                                                width: '100%',
-                                            }}
-                                            onClick={handleChangePassword}
-                                        >
-                                            {t('save')}
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-                        </IonGrid>
-                    </IonContent>
-                </IonModal>
-
-                <IonToast
-                    isOpen={showToast}
-                    onDidDismiss={() => setShowToast(false)}
-                    message={t('changes_saved')}
-                    duration={2000}
-                />
-            </IonContent>
-        </IonPage>
+            <Snackbar
+                open={showToast}
+                autoHideDuration={2000}
+                onClose={() => setShowToast(false)}
+                message={t('changes_saved')}
+            />
+        </Container>
     );
 };
 
