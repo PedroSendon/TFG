@@ -79,20 +79,79 @@ const UserDetailsForm: React.FC = () => {
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
-            sx={{ height: '80vh' }}
+            sx={{
+                height: '95vh',
+                backgroundColor: '#f5f5f5',
+                px: 3,  // Añade un poco de margen horizontal
+            }}
         >
-            <Typography variant="h4" align="center" sx={{ mb: 3 }}>
-                {t('registration_form')}
+            {/* Logo centrado en la parte superior */}
+            <Box
+                component="img"
+                src="/src/components/FitProX.png"
+                alt="App Logo"
+                sx={{
+                    position: 'absolute',
+                    top: '20px',
+                    height: '80px',
+                    objectFit: 'contain',
+                }}
+            />
+
+
+            {/* Título */}
+            <Typography
+                variant="h4"
+                sx={{
+                    mb: 3,
+                    fontWeight: 'bold',
+                    color: '#333',
+                    textAlign: 'center',
+                    fontFamily: 'Arial, sans-serif',
+                    letterSpacing: '1px',
+                    textTransform: 'uppercase',
+                }}
+            >                {t('registration_form')}
             </Typography>
-            <Box sx={{ position: 'fixed', bottom: '10%', width: '80%' }}>
+
+            <Typography
+                variant="body1"
+                align="center"
+                sx={{
+                    mb: 5,
+                    color: '#666666',
+                    fontSize: '1.1rem',         // Tamaño de fuente ligeramente mayor para visibilidad
+                    lineHeight: 1.6,            // Espaciado entre líneas para mejor lectura
+                    maxWidth: '80%',            // Limitar ancho del texto en pantallas grandes
+                    mx: 'auto',                 // Centrar horizontalmente con margen automático
+                }}
+            >
+                {t('welcome_message')}
+            </Typography>
+
+            {/* Botón de inicio */}
+            <Box
+                display="flex"
+                justifyContent="center"
+                sx={{
+                    position: 'fixed',
+                    bottom: '10%',
+                    width: '90%',
+                    padding: '0 16px', // Separación de los bordes de la pantalla
+                }}
+            >
                 <Button
                     onClick={handleNext}
                     variant="contained"
                     fullWidth
                     sx={{
-                        backgroundColor: '#000',
-                        '&:hover': { backgroundColor: '#2AA32A' },
-                        mt: 4,
+                        backgroundColor: '#4d4d4d',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        fontWeight: 'bold',
+                        '&:hover': { backgroundColor: '#333333' },
+                        py: 1.5,
+                        px: 3,
                     }}
                 >
                     {t('start')}
@@ -107,12 +166,46 @@ const UserDetailsForm: React.FC = () => {
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
-            sx={{ height: '80vh' }}
+            sx={{
+                height: '95vh',
+                backgroundColor: '#f5f5f5',
+                padding: '20px',
+                borderRadius: '8px',
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+            }}
         >
-            <Typography variant="h5" sx={{ mb: 3 }}>
+            {/* Logo centrado en la parte superior */}
+            <Box
+                component="img"
+                src="/src/components/FitProX.png"
+                alt="App Logo"
+                sx={{
+                    position: 'absolute',
+                    top: '20px',
+                    height: '80px',
+                    objectFit: 'contain',
+                }}
+            />
+
+
+            {/* Título de la sección */}
+            <Typography
+                variant="h4"
+                sx={{
+                    mb: 3,
+                    fontWeight: 'bold',
+                    color: '#333',
+                    textAlign: 'center',
+                    fontFamily: 'Arial, sans-serif',
+                    letterSpacing: '1px',
+                    textTransform: 'uppercase',
+                }}
+            >
                 {t('personal_data')}
             </Typography>
-            <Grid container spacing={3}>
+
+            {/* Campos de entrada de datos personales */}
+            <Grid container spacing={3} sx={{ width: '100%', maxWidth: '400px' }}>
                 <Grid item xs={12}>
                     <TextField
                         variant="outlined"
@@ -121,6 +214,17 @@ const UserDetailsForm: React.FC = () => {
                         value={formData.height}
                         onChange={handleChange}
                         fullWidth
+                        InputLabelProps={{ style: { color: '#555' } }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#CCCCCC' },
+                                '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                '&.Mui-focused fieldset': { borderColor: '#555555' },
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': {
+                                color: '#555555', // Color gris para la etiqueta al enfocarse
+                            },
+                        }}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -131,22 +235,44 @@ const UserDetailsForm: React.FC = () => {
                         value={formData.weight}
                         onChange={handleChange}
                         fullWidth
+                        InputLabelProps={{ style: { color: '#555' } }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#CCCCCC' },
+                                '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                '&.Mui-focused fieldset': { borderColor: '#555555' },
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': {
+                                color: '#555555', // Color gris para la etiqueta al enfocarse
+                            },
+                        }}
                     />
                 </Grid>
             </Grid>
+
+            {/* Botones de navegación */}
             <Box
                 display="flex"
-                justifyContent="space-between"
-                sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
+                justifyContent="center"
+                sx={{
+                    position: 'fixed',
+                    bottom: '10%',
+                    width: '100%',
+                    padding: '0 16px', // Separación de los bordes de la pantalla
+                }}
             >
                 <Button
                     onClick={handleBack}
                     variant="outlined"
                     sx={{
-                        color: '#000',
-                        borderColor: '#000',
-                        '&:hover': { borderColor: '#2AA32A' },
-                        width: '48%',
+                        color: '#555555',
+                        borderColor: '#555555',
+                        width: '42%',
+                        borderRadius: '8px',
+                        fontWeight: 'bold',
+                        padding: '12px 16px',
+                        mr: 2,  // Margen derecho para separar del siguiente botón
+                        '&:hover': { borderColor: '#333333', color: '#333333' },
                     }}
                 >
                     {t('back')}
@@ -155,14 +281,20 @@ const UserDetailsForm: React.FC = () => {
                     onClick={handleNext}
                     variant="contained"
                     sx={{
-                        backgroundColor: '#000',
-                        '&:hover': { backgroundColor: '#2AA32A' },
-                        width: '48%',
+                        backgroundColor: '#555555',
+                        color: '#ffffff',
+                        width: '42%',
+                        borderRadius: '8px',
+                        fontWeight: 'bold',
+                        padding: '12px 16px',
+                        ml: 2,  // Margen izquierdo para separar del botón anterior
+                        '&:hover': { backgroundColor: '#333333' },
                     }}
                 >
                     {t('next')}
                 </Button>
             </Box>
+
         </Box>
     );
 
@@ -182,11 +314,45 @@ const UserDetailsForm: React.FC = () => {
                 flexDirection="column"
                 justifyContent="center"
                 alignItems="center"
-                sx={{ height: '80vh' }}
+                sx={{
+                    height: '95vh',
+                    backgroundColor: '#f5f5f5',
+                    padding: '20px',
+                    borderRadius: '8px',
+                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                }}
             >
-                <Typography variant="h5" align="center" gutterBottom>
+                {/* Logo centrado en la parte superior */}
+                <Box
+                    component="img"
+                    src="/src/components/FitProX.png"
+                    alt="App Logo"
+                    sx={{
+                        position: 'absolute',
+                        top: '20px',
+                        height: '80px',
+                        objectFit: 'contain',
+                    }}
+                />
+
+
+                {/* Título de la sección */}
+                <Typography
+                    variant="h4"
+                    sx={{
+                        mb: 3,
+                        fontWeight: 'bold',
+                        color: '#333',
+                        textAlign: 'center',
+                        fontFamily: 'Arial, sans-serif',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase',
+                    }}
+                >
                     {t('goals')}
                 </Typography>
+
+                {/* Contenedor de formulario */}
                 <Grid container spacing={3} justifyContent="center">
                     <Grid item xs={12}>
                         <TextField
@@ -197,14 +363,23 @@ const UserDetailsForm: React.FC = () => {
                             value={formData.weightGoal}
                             onChange={handleGoalChange}
                             fullWidth
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#555555', // Color gris para la etiqueta al enfocarse
+                                },
+                            }}
                         >
                             <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
                             <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
                             <MenuItem value="Mantenimiento">{t('maintenance')}</MenuItem>
                         </TextField>
                     </Grid>
-
-
 
                     <Grid item xs={12}>
                         <TextField
@@ -215,6 +390,17 @@ const UserDetailsForm: React.FC = () => {
                             value={formData.weeklyTrainingDays}
                             onChange={handleChange}
                             fullWidth
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#555555', // Color gris para la etiqueta al enfocarse
+                                },
+                            }}
                         >
                             {[1, 2, 3, 4, 5, 6].map(day => (
                                 <MenuItem key={day} value={day}>
@@ -233,6 +419,17 @@ const UserDetailsForm: React.FC = () => {
                             value={formData.dailyTrainingTime}
                             onChange={handleChange}
                             fullWidth
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#555555', // Color gris para la etiqueta al enfocarse
+                                },
+                            }}
                         >
                             <MenuItem value="Menos de 1 hora">{t('less_than_1_hour')}</MenuItem>
                             <MenuItem value="1-2 horas">{t('1_2_hours')}</MenuItem>
@@ -241,19 +438,29 @@ const UserDetailsForm: React.FC = () => {
                     </Grid>
                 </Grid>
 
+                {/* Botones de navegación */}
                 <Box
                     display="flex"
-                    justifyContent="space-between"
-                    sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
+                    justifyContent="center"
+                    sx={{
+                        position: 'fixed',
+                        bottom: '10%',
+                        width: '100%',
+                        padding: '0 16px', // Separación de los bordes de la pantalla
+                    }}
                 >
                     <Button
                         onClick={handleBack}
                         variant="outlined"
                         sx={{
-                            color: '#000',
-                            borderColor: '#000',
-                            '&:hover': { borderColor: '#2AA32A' },
-                            width: '48%',
+                            color: '#555555',
+                            borderColor: '#555555',
+                            width: '42%',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            padding: '12px 16px',
+                            mr: 2, // Margen derecho para separar del siguiente botón
+                            '&:hover': { borderColor: '#333333', color: '#333333' },
                         }}
                     >
                         {t('back')}
@@ -262,9 +469,14 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleNext}
                         variant="contained"
                         sx={{
-                            backgroundColor: '#000',
-                            '&:hover': { backgroundColor: '#2AA32A' },
-                            width: '48%',
+                            backgroundColor: '#555555',
+                            color: '#ffffff',
+                            width: '42%',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            padding: '12px 16px',
+                            ml: 2, // Margen izquierdo para separar del botón anterior
+                            '&:hover': { backgroundColor: '#333333' },
                         }}
                     >
                         {t('next')}
@@ -282,16 +494,47 @@ const UserDetailsForm: React.FC = () => {
                 flexDirection="column"
                 justifyContent="center"
                 alignItems="center"
-                sx={{ height: '80vh' }}
+                sx={{
+                    height: '95vh',
+                    padding: '20px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '8px',
+                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                    position: 'relative',
+                }}
             >
-                {/* Título */}
-                <Typography variant="h5" align="center" gutterBottom>
+                {/* Logo centrado en la parte superior */}
+                <Box
+                    component="img"
+                    src="/src/components/FitProX.png"
+                    alt="App Logo"
+                    sx={{
+                        position: 'absolute',
+                        top: '20px',
+                        height: '80px',
+                        objectFit: 'contain',
+                    }}
+                />
+
+                {/* Título principal con estilo */}
+                <Typography
+                    variant="h4"
+                    sx={{
+                        mb: 3,
+                        fontWeight: 'bold',
+                        color: '#333',
+                        textAlign: 'center',
+                        fontFamily: 'Arial, sans-serif',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase',
+                    }}
+                >
                     {t('physical_activity')}
                 </Typography>
 
-                {/* Contenedor de los campos del formulario */}
+                {/* Contenedor de formulario */}
                 <Grid container spacing={3} justifyContent="center">
-                    {/* Pregunta: ¿Cuál es tu nivel de actividad física actual? */}
+                    {/* Nivel de actividad física */}
                     <Grid item xs={12}>
                         <TextField
                             variant="outlined"
@@ -301,6 +544,17 @@ const UserDetailsForm: React.FC = () => {
                             value={formData.physicalActivityLevel}
                             onChange={handleChange}
                             fullWidth
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#555555', // Color gris para la etiqueta al enfocarse
+                                },
+                            }}
                         >
                             <MenuItem value="Sedentaria">{t('sedentary')}</MenuItem>
                             <MenuItem value="Ligera">{t('light')}</MenuItem>
@@ -309,7 +563,7 @@ const UserDetailsForm: React.FC = () => {
                         </TextField>
                     </Grid>
 
-                    {/* Pregunta: ¿Qué equipos o instalaciones tienes disponibles? */}
+                    {/* Equipamiento disponible */}
                     <Grid item xs={12}>
                         <TextField
                             variant="outlined"
@@ -319,6 +573,17 @@ const UserDetailsForm: React.FC = () => {
                             value={formData.availableEquipment}
                             onChange={handleChange}
                             fullWidth
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#555555', // Color gris para la etiqueta al enfocarse
+                                },
+                            }}
                         >
                             <MenuItem value="Gimnasio">{t('full_gym')}</MenuItem>
                             <MenuItem value="Pesas libres">{t('free_weights')}</MenuItem>
@@ -327,19 +592,29 @@ const UserDetailsForm: React.FC = () => {
                     </Grid>
                 </Grid>
 
+                {/* Botones de navegación */}
                 <Box
                     display="flex"
-                    justifyContent="space-between"
-                    sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
+                    justifyContent="center"
+                    sx={{
+                        position: 'fixed',
+                        bottom: '10%',
+                        width: '100%',
+                        padding: '0 16px',
+                    }}
                 >
                     <Button
                         onClick={handleBack}
                         variant="outlined"
                         sx={{
-                            color: '#000',
-                            borderColor: '#000',
-                            '&:hover': { borderColor: '#2AA32A' },
-                            width: '48%',
+                            color: '#555555',
+                            borderColor: '#555555',
+                            width: '42%',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            padding: '12px 16px',
+                            mr: 2,
+                            '&:hover': { borderColor: '#333333', color: '#333333' },
                         }}
                     >
                         {t('back')}
@@ -348,9 +623,14 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleNext}
                         variant="contained"
                         sx={{
-                            backgroundColor: '#000',
-                            '&:hover': { backgroundColor: '#2AA32A' },
-                            width: '48%',
+                            backgroundColor: '#555555',
+                            color: '#ffffff',
+                            width: '42%',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            padding: '12px 16px',
+                            ml: 2,
+                            '&:hover': { backgroundColor: '#333333' },
                         }}
                     >
                         {t('next')}
@@ -368,14 +648,47 @@ const UserDetailsForm: React.FC = () => {
                 flexDirection="column"
                 justifyContent="center"
                 alignItems="center"
-                sx={{ height: '80vh' }}
+                sx={{
+                    height: '95vh',
+                    padding: '20px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '8px',
+                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                    position: 'relative',
+                }}
             >
-                <Typography variant="h5" align="center" gutterBottom>
+                {/* Logo centrado en la parte superior */}
+                <Box
+                    component="img"
+                    src="/src/components/FitProX.png"
+                    alt="App Logo"
+                    sx={{
+                        position: 'absolute',
+                        top: '20px',
+                        height: '80px',
+                        objectFit: 'contain',
+                    }}
+                />
+
+                {/* Título principal con estilo */}
+                <Typography
+                    variant="h4"
+                    sx={{ 
+                        mb: 3,
+                        fontWeight: 'bold',
+                        color: '#333',
+                        textAlign: 'center',
+                        fontFamily: 'Arial, sans-serif',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase',
+                    }}
+                >
                     {t('diet_and_nutrition')}
                 </Typography>
 
+                {/* Contenedor de formulario */}
                 <Grid container spacing={3} justifyContent="center">
-                    {/* Número de comidas al día */}
+                    {/* Campo de comidas al día */}
                     <Grid item xs={12}>
                         <TextField
                             variant="outlined"
@@ -385,10 +698,23 @@ const UserDetailsForm: React.FC = () => {
                             value={formData.mealsPerDay}
                             onChange={handleChange}
                             fullWidth
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                },
+
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#555555', // Color gris para la etiqueta al enfocarse
+                                },
+
+                            }}
                         />
                     </Grid>
 
-                    {/* Evaluación de la ingesta de macronutrientes */}
+                    {/* Campo de ingesta de macronutrientes */}
                     <Grid item xs={12}>
                         <TextField
                             variant="outlined"
@@ -398,6 +724,17 @@ const UserDetailsForm: React.FC = () => {
                             value={formData.macronutrientIntake}
                             onChange={handleChange}
                             fullWidth
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': {
+                                    color: '#555555', // Color gris para la etiqueta al enfocarse
+                                },
+                            }}
                         >
                             <MenuItem value="Bajo en proteínas">{t('low_protein')}</MenuItem>
                             <MenuItem value="Bajo en carbohidratos">{t('low_carb')}</MenuItem>
@@ -408,19 +745,28 @@ const UserDetailsForm: React.FC = () => {
                     </Grid>
                 </Grid>
 
+                {/* Botones de navegación */}
                 <Box
                     display="flex"
                     justifyContent="space-between"
-                    sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
+                    sx={{
+                        position: 'fixed',
+                        bottom: '10%',
+                        width: 'calc(100% - 32px)', // Asegura espacio a los lados
+                        padding: '0 16px',
+                    }}
                 >
                     <Button
                         onClick={handleBack}
                         variant="outlined"
                         sx={{
-                            color: '#000',
-                            borderColor: '#000',
-                            '&:hover': { borderColor: '#2AA32A' },
+                            color: '#555555',
+                            borderColor: '#555555',
                             width: '48%',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            padding: '12px 16px',
+                            '&:hover': { borderColor: '#333333', color: '#333333' },
                         }}
                     >
                         {t('back')}
@@ -429,9 +775,13 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleNext}
                         variant="contained"
                         sx={{
-                            backgroundColor: '#000',
-                            '&:hover': { backgroundColor: '#2AA32A' },
+                            backgroundColor: '#555555',
+                            color: '#ffffff',
                             width: '48%',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            padding: '12px 16px',
+                            '&:hover': { backgroundColor: '#333333' },
                         }}
                     >
                         {t('next')}
@@ -447,29 +797,82 @@ const UserDetailsForm: React.FC = () => {
                 flexDirection="column"
                 justifyContent="center"
                 alignItems="center"
-                sx={{ height: '80vh' }}
+                sx={{
+                    height: '95vh',
+                    padding: '20px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '8px',
+                    position: 'relative',
+                }}
             >
-                <Typography variant="h5" align="center" gutterBottom>
+                {/* Logo centrado en la parte superior */}
+                <Box
+                    component="img"
+                    src="/src/components/FitProX.png"
+                    alt="App Logo"
+                    sx={{
+                        position: 'absolute',
+                        top: '20px',
+                        height: '80px',
+                        objectFit: 'contain',
+                    }}
+                />
+
+                {/* Título principal con estilo */}
+                <Typography
+                    variant="h4"
+                    sx={{
+                        mb: 3,
+                        fontWeight: 'bold',
+                        color: '#333',
+                        textAlign: 'center',
+                        fontFamily: 'Arial, sans-serif',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase',
+                    }}
+                >
                     {t('form_completed')}
                 </Typography>
 
-                <Typography variant="body1" align="center" sx={{ margin: '20px 0' }}>
+                {/* Mensaje de agradecimiento */}
+                <Typography
+                    variant="body1"
+                    align="center"
+                    sx={{
+                        color: '#666666',
+                        marginBottom: '24px',
+                        padding: '0 16px',
+                        lineHeight: 1.6,
+                    }}
+                >
                     {t('thank_you_message')}
                 </Typography>
 
+                {/* Botones de navegación */}
                 <Box
                     display="flex"
                     justifyContent="space-between"
-                    sx={{ position: 'fixed', bottom: '10%', width: '80%' }}
+                    sx={{
+                        position: 'fixed',
+                        bottom: '10%',
+                        width: 'calc(100% - 32px)', // Asegura espacio a los lados
+                        padding: '0 16px',
+                    }}
                 >
                     <Button
                         onClick={handleBack}
                         variant="outlined"
                         sx={{
-                            color: '#000',
-                            borderColor: '#000',
-                            '&:hover': { borderColor: '#2AA32A' },
+                            color: '#555555',
+                            borderColor: '#555555',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            padding: '12px 16px',
                             width: '48%',
+                            '&:hover': {
+                                borderColor: '#333333',
+                                color: '#333333',
+                            },
                         }}
                     >
                         {t('back')}
@@ -478,9 +881,15 @@ const UserDetailsForm: React.FC = () => {
                         onClick={handleFinish}
                         variant="contained"
                         sx={{
-                            backgroundColor: '#000',
-                            '&:hover': { backgroundColor: '#2AA32A' },
+                            backgroundColor: '#555555',
+                            color: '#ffffff',
+                            borderRadius: '8px',
+                            fontWeight: 'bold',
+                            padding: '12px 16px',
                             width: '48%',
+                            '&:hover': {
+                                backgroundColor: '#333333',
+                            },
                         }}
                     >
                         {t('finish')}
@@ -509,9 +918,7 @@ const UserDetailsForm: React.FC = () => {
     };
 
     return (
-        <Container>
-            {renderStep()}
-        </Container>
+        renderStep()
     );
 };
 

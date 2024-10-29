@@ -4,7 +4,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import './WorkoutDay.css';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
-import { Button } from '@mui/material';
+import { Box, Button, Card, CardContent, CardMedia, Checkbox, Container, LinearProgress, Typography } from '@mui/material';
 import { arrowBackOutline } from 'ionicons/icons';
 import { IonIcon } from '@ionic/react';
 
@@ -123,73 +123,126 @@ const WorkoutDay: React.FC = () => {
   const progressPercentage = Math.round(progress * 100);
 
   return (
-    <IonPage>
+   <Box sx={{ backgroundColor: '#f5f5f5', height: '100%', marginTop:'16%' }}>
       <Header title={t('training_of_the_day')} onBack={handleBack} showBackButton={true} />
 
-      <IonContent>
-        <IonList className="no-lines">
-          {exercises.map((exercise, index) => (
-            <IonItem key={index} className="workout-item no-lines">
-              <div className="workout-container" onClick={(e) => handleExerciseClick(index, e)} >
-                <IonLabel className="workout-label">
-                  <h1>{exercise.name}</h1>
-                  <p>{`${exercise.sets} ${t('sets')} ${t('of')} ${exercise.reps} ${t('repetitions')}`}</p>
-                </IonLabel>
-                <IonImg className="workout-img" src={exercise.imageUrl} alt={`${t('image_of')} ${exercise.name}`} />
-                <IonCheckbox
-                  slot="end"
-                  checked={exercise.completed}
-                  onIonChange={(e: { stopPropagation: () => void; }) => {
-                    e.stopPropagation();
-                    handleCheckboxChange(index);
-                  }}
-                  color="success"
-                  className="checkbox-right"
-                />
-              </div>
-            </IonItem>
-          ))}
-        </IonList>
+      <Box maxWidth="md" sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '20px' }}>
+        {exercises.map((exercise, index) => (
+          <Card
+          key={exercise.id}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mb: 3,
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', // Sombra suave para darle profundidad
+            padding: '16px',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            position: 'relative',
+            border: '1px solid #e0e0e0', // Borde claro para una apariencia limpia
+            transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+            '&:hover': {
+              transform: 'scale(1.02)',
+              boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)',
+            },
+          }}
+          onClick={(e) => handleExerciseClick(index, e)}
+        >
+          <CardMedia
+            component="img"
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: '8px',
+              marginRight: 2,
+              objectFit: 'cover',
+              border: '1px solid #e0e0e0',
+            }}
+            image={exercise.imageUrl}
+            alt={`${t('image_of')} ${exercise.name}`}
+          />
+          <CardContent sx={{ flex: '1 1 auto' }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#333' }}>{exercise.name}</Typography>
+            <Typography variant="body2" sx={{ color: '#666' }}>
+              {`${exercise.sets} ${t('sets')} ${t('of')} ${exercise.reps} ${t('repetitions')}`}
+            </Typography>
+          </CardContent>
+          <Checkbox
+            checked={exercise.completed}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleCheckboxChange(index);
+            }}
+            color="success"
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              color: '#666',
+              zIndex: 10, // Aumenta la z-index para asegurar que el clic lo registre solo el checkbox
+              '& .MuiSvgIcon-root': {
+                borderRadius: '50%',
+              },
+              '&.Mui-checked': {
+                color: '#4CAF50',
+              },
+            }}
+          />
+        </Card>
+        
+        ))}
+      </Box>
 
-        <hr className="divider" />
+      <Box my={3} textAlign="center" >
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#333' }}>{t('training_summary')}</Typography>
+        <Typography sx={{ color: '#555' }}>
+          <strong>{totalSets}</strong> {t('sets')} | <strong>{totalReps}</strong> {t('repetitions')} | <strong>{totalRest}</strong> {t('minutes')}
+        </Typography>
+      </Box>
 
-        <div className="summary-container">
-          <h3>{t('training_summary')}</h3>
-          <p><strong>{totalSets}</strong> {t('sets')} | <strong>{totalReps}</strong> {t('repetitions')} | <strong>{totalRest}</strong> {t('minutes')}</p>
-        </div>
+      <Box my={3}>
+        <Typography align="center" sx={{ color: '#666', fontWeight: 'bold' }} gutterBottom>
+          {progressPercentage}% {t('completed')}
+        </Typography>
+        <LinearProgress
+          variant="determinate"
+          value={progressPercentage}
+          sx={{
+            height: 12,
+            borderRadius: 6,
+            backgroundColor: '#e0e0e0',
+            '& .MuiLinearProgress-bar': {
+              backgroundColor: '#4CAF50',
+            },
+          }}
+        />
+      </Box>
 
-        <hr className="divider" />
+      <Box mt={4} mb={8} display="flex" justifyContent="center" sx={{paddingBottom:'18%'}}>
+        <Button
+          onClick={handleCompleteWorkout}
+          variant="contained"
+          sx={{
+            backgroundColor: '#555555',
+            color: '#ffffff',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            width: '80%',
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+            '&:hover': {
+              backgroundColor: '#333333',
+            },
+          }}
+        >
+          {t('mark_training_completed')}
+        </Button>
+      </Box>
+    </Box>
+);
 
-        <div className="progress-container">
-          <p className="progress-percentage">{progressPercentage}% {t('completed')}</p>
-          <IonProgressBar value={progress} color="success" style={{ height: '10px' }}></IonProgressBar>
-        </div>
 
-        {/* Botón de cerrar sesión actualizado */}
-        <IonGrid style={{ marginBottom: '15%' }}>
-          <IonRow>
-            <IonCol size="12">
-              <Button
-                style={{
-                  border: '1px solid #000',
-                  backgroundColor: '#FFFFFF',
-                  color: '#000',
-                  padding: '3% 0',
-                  borderRadius: '5px',
-                  fontSize: '1em',
-                  width: '100%',
-                }}
-                onClick={handleCompleteWorkout}
-              >
-                {t('mark_training_completed')}
-              </Button>
-            </IonCol>
-          </IonRow>
-        </IonGrid>
-
-      </IonContent>
-    </IonPage>
-  );
 };
 
 export default WorkoutDay;

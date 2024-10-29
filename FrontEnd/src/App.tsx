@@ -94,8 +94,6 @@ const App: React.FC = () => {
         {/* Conditional Navbar Wrapper */}
         <NavbarWrapper />
 
-        {/* Bottom Navigation for Tabs */}
-        <BottomTabs />
       </Router>
     </LanguageProvider>
   );
@@ -104,7 +102,7 @@ const App: React.FC = () => {
 // Component for Navbar Display Control
 const NavbarWrapper: React.FC = () => {
   const location = useLocation();
-  const noNavbarRoutes = ['/login', '/register', '/'];
+  const noNavbarRoutes = ['/login', '/register', '/', '/form'];
   const showNavbar = !noNavbarRoutes.includes(location.pathname);
 
   return showNavbar ? <Navbar /> : null;

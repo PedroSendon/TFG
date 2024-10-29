@@ -69,9 +69,9 @@ const MacronutrientPage: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ width: '100%', padding: 0,  height: '100vh' }}> {/* Eliminamos el margen lateral */}
+    <Box sx={{ width: '100%', padding: 0,  height: '100vh', backgroundColor: '#f5f5f5', marginTop:'16%' }}> {/* Eliminamos el margen lateral */}
       <Header title={t('macros_title')} />
-      <Box sx={{ textAlign: 'center', mt: 2 }}>
+      <Box sx={{ textAlign: 'center', mt: 2 , paddingTop:'5%'}}>
         <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
           {dietType}
         </Typography>
@@ -107,12 +107,7 @@ const MacronutrientPage: React.FC = () => {
         ))}
       </Box>
 
-
-
-      <Box sx={{ textAlign: 'center', marginTop: '20px' }}>
-        <Typography variant="h6" fontWeight="bold" color="textPrimary">
-          {t('macros_distribution')}
-        </Typography>
+      <Box sx={{ textAlign: 'center'}}>
         <PieChart width={300} height={300} style={{ display: 'inline-block', marginTop: '10px' }}>
           <Pie
             data={pieData}

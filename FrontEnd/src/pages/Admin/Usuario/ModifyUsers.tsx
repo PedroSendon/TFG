@@ -1,13 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-    TextField, Button, Grid, Container, MenuItem, Select
+    TextField, Button, Grid, Container, MenuItem, Select,
+    Box,
+    Avatar,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton
 } from '@mui/material';
-import { IonActionSheet, IonAvatar, IonButton, IonIcon, IonPage } from '@ionic/react';
-import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext';
+import { CameraAlt as CameraAltIcon, Close, Delete, PhotoCamera, Image } from '@mui/icons-material';
+
 
 const ModifyUserPage: React.FC = () => {
 
@@ -162,250 +169,352 @@ const ModifyUserPage: React.FC = () => {
     };
 
     return (
-        <IonPage>
-            <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-                <Header title={t('modify_user')} />
+        <Box sx={{ backgroundColor: '#f5f5f5', height: '100vh', marginTop: '17%' }}>
+            {/* Header */}
+            <Header title={t('modify_user')} />
 
-                <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
-                    {/* Sección de cambiar imagen de perfil */}
-                    <IonAvatar
-                        className="custom-avatar"
-                        style={{
-                            width: '100px',
-                            height: '100px',
-                            border: '1.5px solid var(--color-verde-lima)',
-                            borderRadius: '50%',
-                            overflow: 'hidden',
-                            marginBottom: '0px',
+            <Container component="main" maxWidth="xs" sx={{ mb: 4 }}>
+                {/* Cambiar Imagen de Perfil */}
+                <Box sx={{ textAlign: 'center', mb: 2 }}>
+                    <Avatar
+                        src={profilePicture}
+                        alt="Foto de perfil"
+                        sx={{
+                            width: 100,
+                            height: 100,
+                            border: '2px solid var(--color-verde-lima)',
+                            mb: 1,
+                            mx: 'auto', // Centra la imagen horizontalmente
                         }}
-                    >
-                        <img
-                            src={profilePicture}
-                            alt="Foto de perfil"
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                borderRadius: '50%',
-                            }}
-                        />
-                    </IonAvatar>
-                    <IonButton
-                        style={{
-                            color: 'var(--color-verde-lima)',
-                            fontSize: '12px',
-                            margin: '0px'
-                        }}
-                        fill="clear"
+                    />
+                    <Button
+                        variant="text"
+                        startIcon={<CameraAltIcon />}
+                        sx={{ color: 'var(--color-verde-lima)', fontSize: 12 }}
                         onClick={() => setShowActionSheet(true)}
                     >
-                        <IonIcon icon={cameraOutline} style={{ fontSize: '16px' }} />
                         {t('change_photo')}
-                    </IonButton>
+                    </Button>
+                </Box>
 
-                    {/* Action Sheet para opciones de foto */}
-                    <IonActionSheet
-                        isOpen={showActionSheet}
-                        onDidDismiss={() => setShowActionSheet(false)}
-                        buttons={[
-                            {
-                                text: t('upload_photo'),
-                                icon: imageOutline,
-                                handler: () => handlePhotoOption('upload'),
-                            },
-                            {
-                                text: t('take_photo'),
-                                icon: cameraOutline,
-                                handler: () => handlePhotoOption('take'),
-                            },
-                            {
-                                text: t('delete_photo'),
-                                role: 'destructive',
-                                icon: trashOutline,
-                                handler: () => handlePhotoOption('delete'),
-                            },
-                            {
-                                text: t('cancel'),
-                                icon: closeOutline,
-                                role: 'cancel',
-                            },
-                        ]}
-                    />
+                <Dialog
+                    open={showActionSheet}
+                    onClose={() => setShowActionSheet(false)}
+                    sx={{
+                        '& .MuiPaper-root': {
+                            borderRadius: '12px', // Bordes suaves
+                            backgroundColor: '#f9f9f9', // Fondo claro
+                            boxShadow: '0px 6px 20px rgba(0, 0, 0, 0.15)', // Sombra suave
+                        },
+                    }}
+                >
+                    <DialogTitle
+                        sx={{
+                            color: '#333', // Color del texto del título
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            borderBottom: '1px solid #e0e0e0',
+                            pb: 1.5,
+                        }}
+                    >
+                        {t('photo_options')}
+                        <IconButton
+                            edge="end"
+                            onClick={() => setShowActionSheet(false)}
+                            aria-label="close"
+                            sx={{
+                                color: '#888', // Color gris para el botón de cierre
+                                position: 'absolute',
+                                right: 8,
+                                top: 8,
+                                '&:hover': { color: '#555' }, // Cambio de color al hacer hover
+                            }}
+                        >
+                            <Close sx={{marginRight:'20px'}}/>
+                        </IconButton>
+                    </DialogTitle>
 
-                    <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                        onChange={handleFileChange}
-                    />
+                    <DialogContent dividers sx={{ px: 2, py: 1.5 }}>
+                        <Button
+                            startIcon={<Image />}
+                            fullWidth
+                            onClick={() => handlePhotoOption('upload')}
+                            sx={{
+                                justifyContent: 'flex-start',
+                                py: 1,
+                                color: '#333',
+                                '&:hover': { backgroundColor: '#f0f0f0' }, // Fondo claro al hacer hover
+                            }}
+                        >
+                            {t('upload_photo')}
+                        </Button>
+                        <Button
+                            startIcon={<Delete />}
+                            fullWidth
+                            onClick={() => handlePhotoOption('delete')}
+                            sx={{
+                                justifyContent: 'flex-start',
+                                py: 1,
+                                color: 'red',
+                                '&:hover': { backgroundColor: '#fce8e8' }, // Fondo suave al hacer hover
+                            }}
+                        >
+                            {t('delete_photo')}
+                        </Button>
+                    </DialogContent>
 
-                    <form onSubmit={handleSave}>
-                        <Grid container spacing={2}>
-                            {/* Campo de nombre */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    id="firstName"
-                                    label={t('first_name')}
-                                    name="firstName"
-                                    value={profileData.firstName}
-                                    onChange={handleChange}
-                                />
-                            </Grid>
 
-                            {/* Campo de apellidos */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    id="lastName"
-                                    label={t('last_name')}
-                                    name="lastName"
-                                    value={profileData.lastName}
-                                    onChange={handleChange}
-                                />
-                            </Grid>
+                </Dialog>
 
-                            {/* Campo de peso actual */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    type="number"
-                                    id="currentWeight"
-                                    label={t('current_weight')}
-                                    name="currentWeight"
-                                    value={profileData?.currentWeight || ''}  // Agrega verificación
-                                    onChange={handleChange}
-                                />
-                            </Grid>
+                <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                />
 
-                            {/* Selector de meta de peso */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    select
-                                    fullWidth
-                                    id="weightGoal"
-                                    label={t('weight_goal')}
-                                    name="weightGoal"
-                                    value={profileData.weightGoal}
-                                    onChange={handleChange}
-                                >
-                                    <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
-                                    <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
-                                    <MenuItem value="Mantener peso">{t('maintain_weight')}</MenuItem>
-                                </TextField>
-                            </Grid>
-
-                            {/* Selector de nivel de actividad */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    select
-                                    fullWidth
-                                    id="activityLevel"
-                                    label={t('activity_level')}
-                                    name="activityLevel"
-                                    value={profileData.activityLevel}
-                                    onChange={handleChange}
-                                >
-                                    <MenuItem value="Sedentaria">{t('sedentary')}</MenuItem>
-                                    <MenuItem value="Ligera">{t('light')}</MenuItem>
-                                    <MenuItem value="Moderada">{t('moderate')}</MenuItem>
-                                    <MenuItem value="Intensa">{t('intense')}</MenuItem>
-                                </TextField>
-                            </Grid>
- 
-                            {/* Selector de frecuencia de entrenamiento */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    select
-                                    fullWidth
-                                    id="trainingFrequency"
-                                    label={t('training_frequency')}
-                                    name="trainingFrequency"
-                                    value={profileData.trainingFrequency}
-                                    onChange={handleChange}
-                                >
-                                    {[1, 2, 3, 4, 5, 6].map((day) => (
-                                        <MenuItem key={day} value={day}>{day}</MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-
-                            {/* Selector de rol */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    select
-                                    fullWidth
-                                    id="role"
-                                    label={t('role')}
-                                    name="role"
-                                    value={profileData.role}
-                                    onChange={handleSelectChange}
-                                >
-                                    <MenuItem value="cliente">{t('client')}</MenuItem>
-                                    <MenuItem value="administrador">{t('admin')}</MenuItem>
-                                    <MenuItem value="entrenador">{t('trainer')}</MenuItem>
-                                    <MenuItem value="nutricionista">{t('nutritionist')}</MenuItem>
-                                </TextField>
-                            </Grid>
-                        </Grid>
-                    </form>
-                </div>
-
-                {/* Botones de Cancelar y Guardar */}
-                <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
+                {/* Formulario de edición */}
+                <form onSubmit={handleSave}>
                     <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                            <Button
-                                onClick={handleCancel}
-                                style={{
-                                    border: '1px solid #FF0000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#FF0000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
+                        {/* Campo de texto estilo modificado */}
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                required
+                                id="firstName"
+                                label={t('first_name')}
+                                name="firstName"
+                                value={profileData.firstName}
+                                onChange={handleSave}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                required
+                                id="lastName"
+                                label={t('last_name')}
+                                name="lastName"
+                                value={profileData.lastName}
+                                onChange={handleSave}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                required
+                                type="number"
+                                id="currentWeight"
+                                label={t('current_weight')}
+                                name="currentWeight"
+                                value={profileData.currentWeight || ''}
+                                onChange={handleSave}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
+                            />
+                        </Grid>
+
+                        {/* Select fields con estilo modificado */}
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                required
+                                select
+                                id="weightGoal"
+                                label={t('weight_goal')}
+                                name="weightGoal"
+                                value={profileData.weightGoal}
+                                onChange={handleSelectChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
                                 }}
                             >
-                                {t('cancel')}
-                            </Button>
+                                <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
+                                <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
+                                <MenuItem value="Mantener peso">{t('maintain_weight')}</MenuItem>
+                            </TextField>
                         </Grid>
-                        <Grid item xs={6}>
-                            <Button
-                                type="submit"
-                                style={{
-                                    border: '1px solid #000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
+
+                        {/* Nivel de actividad */}
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                required
+                                select
+                                id="activityLevel"
+                                label={t('activity_level')}
+                                name="activityLevel"
+                                value={profileData.activityLevel}
+                                onChange={handleSelectChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
                                 }}
-                                onClick={handleSave}
                             >
-                                {t('save')}
-                            </Button>
+                                <MenuItem value="Sedentaria">{t('sedentary')}</MenuItem>
+                                <MenuItem value="Ligera">{t('light')}</MenuItem>
+                                <MenuItem value="Moderada">{t('moderate')}</MenuItem>
+                                <MenuItem value="Intensa">{t('intense')}</MenuItem>
+                            </TextField>
                         </Grid>
+
+                        {/* Frecuencia de entrenamiento */}
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                required
+                                select
+                                id="trainingFrequency"
+                                label={t('training_frequency')}
+                                name="trainingFrequency"
+                                value={profileData.trainingFrequency}
+                                onChange={handleSelectChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
+                            >
+                                {[1, 2, 3, 4, 5, 6].map((day) => (
+                                    <MenuItem key={day} value={day}>
+                                        {day}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+
+                        {/* Selector de rol */}
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                required
+                                select
+                                id="role"
+                                label={t('role')}
+                                name="role"
+                                value={profileData.role}
+                                onChange={handleSelectChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
+                            >
+                                <MenuItem value="cliente">{t('client')}</MenuItem>
+                                <MenuItem value="administrador">{t('admin')}</MenuItem>
+                                <MenuItem value="entrenador">{t('trainer')}</MenuItem>
+                                <MenuItem value="nutricionista">{t('nutritionist')}</MenuItem>
+                            </TextField>
+                        </Grid>
+                    </Grid>
+                </form>
+
+                {/* Botones de Cancelar y Guardar con tonos grises */}
+                <Grid container spacing={2} sx={{ mt: 1}}>
+                    <Grid item xs={6}>
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            sx={{
+                                borderColor: '#AAAAAA',
+                                color: '#777777',
+                                fontWeight: 'bold',
+                                py: 1,
+                            }}
+                            onClick={handleCancel}
+                        >
+                            {t('cancel')}
+                        </Button>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            sx={{
+                                backgroundColor: '#555555',
+                                color: '#FFFFFF',
+                                fontWeight: 'bold',
+                                py: 1,
+                                '&:hover': {
+                                    backgroundColor: '#333333',
+                                },
+                            }}
+                            onClick={handleSave}
+                        >
+                            {t('save')}
+                        </Button>
                     </Grid>
                 </Grid>
             </Container>
-        </IonPage>
+        </Box>
     );
 };
 

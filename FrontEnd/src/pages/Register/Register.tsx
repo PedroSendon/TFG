@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
 import {
   TextField, IconButton, Button, Grid, Typography, Container,
-  FormControlLabel, Checkbox, Link, MenuItem
+  FormControlLabel, Checkbox, Link, MenuItem,
+  Box
 } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -139,20 +140,20 @@ const Register: React.FC = () => {
           birth_date: formData.birthDate.format('YYYY-MM-DD'),
           gender: formData.gender,
           terms_accepted: formData.termsAccepted,
-        }), 
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
         console.log('Usuario registrado:', data);
-  
+
         // Almacenar los tokens JWT en el localStorage o sessionStorage
         localStorage.setItem('access_token', data.access); // Almacena el token de acceso
         localStorage.setItem('refresh_token', data.refresh); // Almacena el token de refresco
-  
+
         // Redirigir al usuario a otra página, por ejemplo el formulario o dashboard
         history.push('/form');
-      }  else {
+      } else {
         const errorData = await response.json();
         console.log('Error:', errorData);
         setErrors({ apiError: errorData.error });
@@ -161,113 +162,140 @@ const Register: React.FC = () => {
       console.log('Error en la petición:', error);
       setErrors({ apiError: t('connection_error') }); // Mensaje de error traducido
     }
-};
+  };
 
 
   return (
-    <Container component="main" maxWidth="xs">
-      <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <img src="https://via.placeholder.com/150" alt="logo" style={{ marginBottom: '1.5rem' }} />
-
-        <Typography component="h1" variant="h5" marginBottom={"3%"} style={{ color: 'var(--color-verde-lima)' }}>
-          {t('welcome')}
-        </Typography>
+    <Container component="main" maxWidth="xs" sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{
+        width: '100%',
+        backgroundColor: '#ffffff',
+        boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+        borderRadius: 2,
+        p: 4
+      }}>
+        <Box textAlign="center" sx={{ mb: 4 }}>
+          <img src="/src/components/logo.png" alt="logo" style={{ width: '60px', borderRadius: '50%' }} />
+          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333333', mt: 2 }}>
+            {t('welcome')}
+          </Typography>
+        </Box>
 
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            {/* Campo de nombre */}
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 required
                 fullWidth
-                id="firstName"
                 label={t('name')}
                 name="firstName"
                 autoComplete="given-name"
                 onChange={handleChange}
                 error={!!errors.firstName}
                 helperText={errors.firstName}
-                InputLabelProps={{
-                  style: { color: 'var(--color-gris-oscuro)' }
+                InputProps={{ style: { color: '#333333' } }}
+                sx={{
+                  '& label.Mui-focused': { color: '#555555' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: '#CCCCCC' },
+                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                  },
                 }}
               />
             </Grid>
 
-            {/* Campo de apellidos */}
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 required
                 fullWidth
-                id="lastName"
                 label={t('last_name')}
                 name="lastName"
                 autoComplete="family-name"
                 onChange={handleChange}
                 error={!!errors.lastName}
                 helperText={errors.lastName}
-                InputLabelProps={{
-                  style: { color: 'var(--color-gris-oscuro)' }
+                InputProps={{ style: { color: '#333333' } }}
+                sx={{
+                  '& label.Mui-focused': { color: '#555555' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: '#CCCCCC' },
+                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                  },
                 }}
               />
             </Grid>
 
-            {/* Campo de correo electrónico */}
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 required
                 fullWidth
-                id="email"
                 label={t('email')}
                 name="email"
                 autoComplete="email"
                 onChange={handleChange}
                 error={!!errors.email}
                 helperText={errors.email}
-                InputLabelProps={{
-                  style: { color: 'var(--color-gris-oscuro)' }
+                InputProps={{ style: { color: '#333333' } }}
+                sx={{
+                  '& label.Mui-focused': { color: '#555555' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: '#CCCCCC' },
+                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                  },
                 }}
               />
             </Grid>
 
-            {/* Campo de contraseña */}
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 required
                 fullWidth
-                name="password"
                 label={t('password')}
                 type="password"
-                id="password"
+                name="password"
                 autoComplete="current-password"
                 onChange={handleChange}
                 error={!!errors.password}
                 helperText={errors.password}
-                InputLabelProps={{
-                  style: { color: 'var(--color-gris-oscuro)' }
+                InputProps={{ style: { color: '#333333' } }}
+                sx={{
+                  '& label.Mui-focused': { color: '#555555' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: '#CCCCCC' },
+                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                  },
                 }}
               />
             </Grid>
 
-            {/* Selector de género */}
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 required
                 select
                 fullWidth
-                name="gender"
                 label={t('gender')}
-                id="gender"
+                name="gender"
                 value={formData.gender}
                 onChange={handleChange}
                 error={!!errors.gender}
                 helperText={errors.gender}
-                InputLabelProps={{
-                  style: { color: 'var(--color-gris-oscuro)' }
+                InputProps={{ style: { color: '#333333' } }}
+                sx={{
+                  '& label.Mui-focused': { color: '#555555' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: '#CCCCCC' },
+                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                  },
                 }}
               >
                 <MenuItem value="M">{t('male')}</MenuItem>
@@ -276,21 +304,25 @@ const Register: React.FC = () => {
               </TextField>
             </Grid>
 
-            {/* Selector de fecha de nacimiento */}
-            <Grid item xs={12}>
+            <Grid item xs={12} md={8} container justifyContent="center">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label={t('birthdate')}
                   value={formData.birthDate}
                   onChange={handleDateChange}
-                  renderInput={(params: any) => (
+                  renderInput={(params) => (
                     <TextField
                       {...params}
                       fullWidth
                       error={!!errors.birthDate}
                       helperText={errors.birthDate}
-                      InputLabelProps={{
-                        style: { color: 'var(--color-gris-oscuro)' }
+                      sx={{
+                        '& label.Mui-focused': { color: '#555555' },
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': { borderColor: '#CCCCCC' },
+                          '&:hover fieldset': { borderColor: '#AAAAAA' },
+                          '&.Mui-focused fieldset': { borderColor: '#555555 !important' },
+                        },
                       }}
                     />
                   )}
@@ -298,18 +330,17 @@ const Register: React.FC = () => {
               </LocalizationProvider>
             </Grid>
 
-            {/* Checkbox de términos y condiciones */}
             <Grid item xs={12}>
               <FormControlLabel
                 control={
                   <Checkbox
-                    style={{ color: 'var(--color-verde-lima)' }}
+                    sx={{ color: '#555555' }}
                     checked={formData.termsAccepted}
                     onChange={handleCheckboxChange}
                     name="termsAccepted"
                   />
                 }
-                label={t('terms_and_conditions')}
+                label={<Typography variant="body2" sx={{ color: '#555555' }}>{t('terms_and_conditions')}</Typography>}
               />
               {errors.termsAccepted && (
                 <Typography color="error">{errors.termsAccepted}</Typography>
@@ -317,36 +348,51 @@ const Register: React.FC = () => {
             </Grid>
           </Grid>
 
-          {/* Botón de registro */}
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            style={{
-              backgroundColor: 'var(--color-verde-lima)',
-              color: 'var(--color-blanco)',
-              marginTop: '1rem'
+            sx={{
+              backgroundColor: '#666666',
+              color: '#ffffff',
+              mt: 2,
+              borderRadius: 2,
+              fontWeight: 'bold',
+              '&:hover': { backgroundColor: '#555555' },
             }}
             disabled={!isFormValid()}
           >
             {t('register_button')}
           </Button>
 
-          {errors.apiError && <Typography color="error">{errors.apiError}</Typography>}
+          {errors.apiError && (
+            <Typography color="error" sx={{ mt: 1 }}>{errors.apiError}</Typography>
+          )}
 
-          {/* Enlace para iniciar sesión */}
-          <Grid container justifyContent="center" alignItems="center" style={{ marginTop: '1rem' }}>
+
+          <Grid container justifyContent="center" sx={{ mt: 2 }}>
             <Grid item>
-              <Typography component="span" variant="body2" style={{ color: 'var(--color-gris-oscuro)' }}>
+              <Typography component="span" variant="body2" sx={{ color: '#777777' }}>
                 {t('already_have_account')}
               </Typography>
-              <Link href="/login" variant="body2" style={{ marginLeft: '0.5rem', color: 'var(--color-verde-lima)' }}>
+              <Button
+                onClick={() => history.push('/login')}
+                variant="text"
+                sx={{
+                  ml: 1,
+                  color: '#555555',
+                  fontWeight: 'bold',
+                  textTransform: 'none',
+                  padding: 0,
+                  minWidth: 'auto',
+                }}
+              >
                 {t('login_button')}
-              </Link>
+              </Button>
             </Grid>
           </Grid>
         </form>
-      </div>
+      </Box>
     </Container>
   );
 };

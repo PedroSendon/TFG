@@ -1,20 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
-import {
-    IonPage,
-    IonContent,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonButton,
-    IonLabel,
-    IonIcon,
-    IonToast,
-} from '@ionic/react';
-import { arrowBackOutline, arrowForwardOutline, informationCircleOutline } from 'ionicons/icons';
+
+import InfoIcon from '@mui/icons-material/Info';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Header from '../../Header/Header';
 import ExerciseInfoModal from './ExerciceInformation';
 import { useLocation, useParams, useHistory } from 'react-router';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
+import { Box, Chip, CircularProgress, Grid, IconButton, Snackbar, Typography } from '@mui/material';
 
 const ExerciseDetailPage: React.FC = () => {
     const location = useLocation<{ day_id: number, exerciseId: string }>();
@@ -38,6 +31,7 @@ const ExerciseDetailPage: React.FC = () => {
         muscleGroups: [],
         media: [],
     });
+    const [loading, setLoading] = useState(true);
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showToast, setShowToast] = useState(false);
@@ -75,6 +69,8 @@ const ExerciseDetailPage: React.FC = () => {
         } catch (error) {
             console.error('Error fetching exercise details:', error);
             setShowToast(true);
+        }finally {
+            setLoading(false);
         }
     };
 
@@ -97,173 +93,140 @@ const ExerciseDetailPage: React.FC = () => {
             setCurrentImageIndex(currentImageIndex - 1);
         }
     };
-    const handleBack = () => {
-        history.push('/workout/day'); // Navega de regreso a la ruta '/workout'
-    };
+    const handleBack = (id: number) => {
+        history.push({
+            pathname: `/workout/day`,
+            state: { day_id: id },
+          });    };
+
+
     if (!exerciseInfo) {
         return <p>{t('loading_exercise_details')}</p>;
     }
     return (
-        <IonPage>
-            {/* Encabezado del ejercicio */}
-            <Header title={t('exercise_details')} onBack={handleBack} showBackButton={true} />
+        <Box sx={{ minHeight: '92vh', bgcolor: '#f5f5f5', marginTop: '64px' }}>
+            <Header title={t('exercise_details')} onBack={() => handleBack(day_id)} showBackButton={true} />
+            {loading ? (
+                <Box display="flex" justifyContent="center" alignItems="center" height="80vh">
+                    <CircularProgress color="inherit" />
+                </Box>
+            ) : (
+                <Box padding={3}>
 
-            <IonContent>
-                <IonGrid>
-
-                    {/* Visualizador de imágenes con flechas dentro */}
-                    <IonRow className="ion-text-center" style={{ position: 'relative' }}>
-                        <IonCol size="12" style={{ position: 'relative' }}>
-                            <IonButton
+                    {/* Image Viewer */}
+                    <Grid container justifyContent="center" alignItems="center" spacing={2}>
+                        <Grid item xs={12} sx={{ position: 'relative', textAlign: 'center', mb: 3 }}>
+                            <IconButton
                                 onClick={handlePreviousImage}
-                                fill="clear"
-                                style={{
-                                    position: 'absolute',
-                                    left: '5%',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    zIndex: 1,
-                                    color: '#1C1C1E',
+                                sx={{
+                                    position: 'absolute', left: 8, top: '50%',
+                                    transform: 'translateY(-50%)', color: '#333', zIndex: 1,
                                 }}
                             >
-                                <IonIcon icon={arrowBackOutline} style={{ fontSize: '2rem' }} />
-                            </IonButton>
-                            {/* Verifica que exerciseInfo.media y el índice actual existan */}
-                            {exerciseInfo.media && exerciseInfo.media.length > 0 ? (
-                                <img
-                                    src={exerciseInfo.media[currentImageIndex]}
-                                    alt={t('exercise_image')}
-                                    style={{ width: '100%', height: 'auto', borderRadius: '10px' }}
-                                />
-                            ) : (
-                                <p>{t('no_image_available')}</p>  // Mensaje alternativo si no hay imágenes disponibles
-                            )}
-                            <IonButton
+                                <ArrowBackIcon sx={{ fontSize: 32 }} />
+                            </IconButton>
+                            <img
+                                src={exerciseInfo.media[currentImageIndex]}
+                                alt={t('exercise_image')}
+                                style={{
+                                    width: '100%',
+                                    borderRadius: '10px',
+                                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+                                    border: '1px solid #e0e0e0',
+                                }}
+                            />
+                            <IconButton
                                 onClick={handleNextImage}
-                                fill="clear"
-                                style={{
-                                    position: 'absolute',
-                                    right: '5%',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    zIndex: 1,
-                                    color: '#1C1C1E',
+                                sx={{
+                                    position: 'absolute', right: 8, top: '50%',
+                                    transform: 'translateY(-50%)', color: '#333', zIndex: 1,
                                 }}
                             >
-                                <IonIcon icon={arrowForwardOutline} style={{ fontSize: '2rem' }} />
-                            </IonButton>
-                        </IonCol>
-                    </IonRow>
+                                <ArrowForwardIcon sx={{ fontSize: 32 }} />
+                            </IconButton>
+                        </Grid>
 
-
-                    {/* Nombre del ejercicio y botón de información */}
-                    <IonRow>
-                        <IonCol size="10">
-                            <IonLabel style={{ fontWeight: 'bold', fontSize: '20px', display: 'flex', alignItems: 'center' }}>
+                        {/* Exercise Name and Info Button */}
+                        <Grid item xs={10}>
+                            <Typography variant="h5" fontWeight="bold">
                                 {exerciseInfo.name}
-                            </IonLabel>
-                        </IonCol>
-                        <IonCol size="2" className="ion-text-right" style={{ display: 'flex', alignItems: 'center' }}>
-                            <IonButton fill="clear" onClick={() => setShowModal(true)}>
-                                <IonIcon icon={informationCircleOutline} style={{ fontSize: '28px', color: '#000' }} />
-                            </IonButton>
-                        </IonCol>
-                    </IonRow>
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={2} textAlign="right">
+                            <IconButton onClick={() => setShowModal(true)}>
+                                <InfoIcon sx={{ fontSize: 28, color: '#333' }} />
+                            </IconButton>
+                        </Grid>
 
-                    {/* Etiquetas de los músculos trabajados */}
-                    <IonRow>
-                        {exerciseInfo.muscleGroups && exerciseInfo.muscleGroups.map((muscle: string, index) => (
-                            <IonCol key={index} size="auto">
-                                <div style={{
-                                    padding: '4px 8px',
-                                    backgroundColor: '#000',
-                                    color: '#fff',
-                                    borderRadius: '4px',
-                                    fontSize: '12px',
-                                    margin: '4px',
-                                    textAlign: 'center',
-                                    minWidth: '60px',
-                                    display: 'inline-block',
-                                }}>
-                                    {muscle}
-                                </div>
-                            </IonCol>
-                        ))}
-                    </IonRow>
+                        {/* Muscle Groups */}
+                        <Grid item xs={12} sx={{ textAlign: 'center', mb: 3 }}>
+                            {exerciseInfo.muscleGroups.map((muscle, index) => (
+                                <Chip
+                                    key={index}
+                                    label={muscle}
+                                    sx={{
+                                        backgroundColor: '#333',
+                                        color: '#fff',
+                                        fontSize: '12px',
+                                        margin: '4px',
+                                        boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
+                                    }}
+                                />
+                            ))}
+                        </Grid>
 
-                    {/* Parámetros del ejercicio */}
-                    <IonRow className="ion-text-center">
-                        <IonCol>
-                            <div style={{
-                                width: '100px',
-                                height: '100px',
-                                borderRadius: '50%',
-                                border: '3px solid #000',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                margin: '10px auto',
-                            }}>
-                                <IonLabel style={{ fontSize: '14px' }}>{t('sets')}</IonLabel>
-                                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>{exerciseInfo.sets}</p>
-                            </div>
-                        </IonCol>
-                        <IonCol>
-                            <div style={{
-                                width: '100px',
-                                height: '100px',
-                                borderRadius: '50%',
-                                border: '3px solid #000',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                margin: '10px auto',
-                            }}>
-                                <IonLabel style={{ fontSize: '14px' }}>{t('repetitions')}</IonLabel>
-                                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>{exerciseInfo.reps}</p>
-                            </div>
-                        </IonCol>
-                        <IonCol>
-                            <div style={{
-                                width: '100px',
-                                height: '100px',
-                                borderRadius: '50%',
-                                border: '3px solid #000',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                margin: '10px auto',
-                            }}>
-                                <IonLabel style={{ fontSize: '14px' }}>{t('rest')}</IonLabel>
-                                <p style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>{exerciseInfo.rest}</p>
-                            </div>
-                        </IonCol>
-                    </IonRow>
+                        {/* Exercise Parameters */}
+                        <Grid container item xs={12} justifyContent="center" spacing={2}>
+                            {['sets', 'reps', 'rest'].map((param, index) => (
+                                <Grid item key={index} xs={4} textAlign="center">
+                                    <Box
+                                        sx={{
+                                            width: 100,
+                                            height: 100,
+                                            borderRadius: '50%',
+                                            border: '2px solid #333',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            bgcolor: '#fff',
+                                            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                                            transition: 'transform 0.2s',
+                                            '&:hover': {
+                                                transform: 'scale(1.05)',
+                                                boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.2)',
+                                            },
+                                        }}
+                                    >
+                                        <Typography variant="subtitle2" color="#555">{t(param)}</Typography>
+                                        <Typography variant="h6" fontWeight="bold" color="#333">
+                                            {exerciseInfo[param as 'sets' | 'reps' | 'rest']}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            ))}
+                        </Grid>
 
-                </IonGrid>
+                        {/* Modal with detailed exercise info */}
+                        <ExerciseInfoModal
+                            isOpen={showModal}
+                            onClose={() => setShowModal(false)}
+                            exerciseName={exerciseInfo.name || ''}
+                            description={exerciseInfo.description || ''}
+                            steps={exerciseInfo.instructions || []}
+                        />
 
-                {/* Modal con la información detallada del ejercicio */}
-                <ExerciseInfoModal
-                    isOpen={showModal}
-                    onClose={() => setShowModal(false)}
-                    exerciseName={exerciseInfo.name || ''}
-                    description={exerciseInfo.description || ''}
-                    steps={exerciseInfo.instructions ? exerciseInfo.instructions.flat() : []}  // Usa flat() para aplanar la estructura
-                />
-
-
-                {/* Toast para mostrar errores */}
-                <IonToast
-                    isOpen={showToast}
-                    onDidDismiss={() => setShowToast(false)}
-                    message={t('error_fetching_exercise_details')}
-                    duration={2000}
-                />
-            </IonContent>
-        </IonPage>
+                        {/* Snackbar for errors */}
+                        <Snackbar
+                            open={showToast}
+                            autoHideDuration={2000}
+                            onClose={() => setShowToast(false)}
+                            message={t('error_fetching_exercise_details')}
+                        />
+                    </Grid>
+                </Box>
+            )}
+        </Box>
     );
 };
 

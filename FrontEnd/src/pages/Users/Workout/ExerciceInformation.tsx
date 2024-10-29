@@ -1,13 +1,13 @@
 import React, { useContext } from 'react';
 import {
-  IonButton,
-  IonContent,
-  IonLabel,
-  IonModal,
-  IonGrid,
-  IonRow,
-  IonCol,
-} from '@ionic/react';
+  Box,
+  Typography,
+  Modal,
+  Grid,
+  Button,
+  Divider,
+  Paper,
+} from '@mui/material';
 import Header from '../../Header/Header';  // Importamos el componente Header
 import { LanguageContext } from '../../../context/LanguageContext';  // Importamos el contexto de idioma
 
@@ -20,90 +20,118 @@ interface ExerciseInfoModalProps {
 }
 
 const ExerciseInfoModal: React.FC<ExerciseInfoModalProps> = ({ isOpen, onClose, exerciseName, description, steps }) => {
-  const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
+  const { t } = useContext(LanguageContext);
 
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={onClose}>
-      {/* Utilizamos el Header ya creado */}
-      <Header title={t('exercise_information')} />  {/* Texto dinámico de título */}
+    <Modal open={isOpen} onClose={onClose} >
+      <Box
+        sx={{
+          width: '85%',           // Disminuye un poco el ancho
+          maxWidth: 500,           // Ajusta el máximo ancho a 500px
+          bgcolor: '#f5f5f5',
+          borderRadius: '12px',
+          boxShadow: '0px 6px 20px rgba(0, 0, 0, 0.15)',
+          p: 3,
+          mx: 'auto',
+          mt: 10,                 // Aumenta el margen superior para centrarlo mejor
+          overflowY: 'auto',
+        }}
+      >
+        {/* Header del Modal */}
+        <Header title={t('exercise_information')} />
 
-      <IonContent>
-        <IonGrid>
-          <IonRow>
-            <IonCol size="12">
-              {/* Título del ejercicio */}
-              <IonLabel>
-                <h2 style={{ fontWeight: 'bold', fontSize: '1.5em', marginBottom: '20px', marginTop: '20px' }}>
-                  {exerciseName}
-                </h2>
-              </IonLabel>
+        {/* Título del Ejercicio */}
+        <Typography
+                    variant="h4"
+                    sx={{ 
+                        mb: 3,
+                        fontWeight: 'bold',
+                        color: '#333',
+                        textAlign: 'center',
+                        fontFamily: 'Arial, sans-serif',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase',
+                    }}
+                >
+          {exerciseName}
+        </Typography>
 
-              {/* Descripción del ejercicio */}
-              <IonLabel>
-                <p style={{ fontSize: '1em', marginBottom: '20px', textAlign: 'justify' }}>
-                  {description}
-                </p>
-              </IonLabel>
+        {/* Descripción del Ejercicio */}
+        <Typography variant="body1" sx={{ mb: 3, color: '#666', textAlign: 'justify', lineHeight: 1.6 }}>
+          {description}
+        </Typography>
 
-              {/* Instrucciones paso a paso */}
-              <IonLabel>
-                <h2 style={{ color: '#000', marginBottom: '10px' }}>{t('step_by_step_instructions')}</h2>  {/* Texto dinámico */}
-                <IonGrid>
-                  {Array.isArray(steps) ? (
-                    steps.map((step, index) => (
-                      <IonRow key={index} className="ion-justify-content-center">
-                        <IonCol size="12">
-                          <div
-                            style={{
-                              border: '1px solid #d1d1d6',
-                              padding: '10px 15px',
-                              borderRadius: '8px',
-                              marginBottom: '10px',
-                              textAlign: 'left',
-                              fontSize: '1em',
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}
-                          >
-                            <div
-                              style={{
-                                color: '#000',
-                                fontWeight: 'bold',
-                                width: '30px',
-                                height: '30px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                marginRight: '10px'
-                              }}
-                            >
-                              {index + 1}
-                            </div>
-                            <div>{step}</div>
-                          </div>
-                        </IonCol>
-                      </IonRow>
-                    ))) : (
-                    <p>{t('no_instructions_available')}</p> // Mensaje de error o estado alternativo
-                  )}
-                </IonGrid>
-              </IonLabel>
+        {/* Instrucciones Paso a Paso */}
+        <Typography variant="h6" sx={{ mb: 2, color: '#333', textAlign: 'center' }}>
+          {t('step_by_step_instructions')}
+        </Typography>
+        <Divider sx={{ mb: 2, backgroundColor: '#d0d0d0' }} />
 
-              {/* Botón de cerrar */}
-              <IonButton
-                expand="block"
-                fill="outline"
-                className="cancel-button"
-                onClick={onClose}  // Llama a onClose para cerrar el modal
-                style={{ marginTop: '20px' }}
-              >
-                {t('close_button')}  {/* Texto dinámico */}
-              </IonButton>
-            </IonCol>
-          </IonRow>
-        </IonGrid>
-      </IonContent>
-    </IonModal>
+        <Grid container spacing={2}>
+          {Array.isArray(steps) && steps.length > 0 ? (
+            steps.map((step, index) => (
+              <Grid item xs={12} key={index}>
+                <Paper
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    p: 2,
+                    borderRadius: '8px',
+                    bgcolor: '#f9f9f9',
+                    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      bgcolor: '#333',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mr: 2,
+                      color: '#fff',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {index + 1}
+                  </Box>
+                  <Typography variant="body2" sx={{ color: '#555' }}>
+                    {step}
+                  </Typography>
+                </Paper>
+              </Grid>
+            ))
+          ) : (
+            <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', mt: 2 }}>
+              {t('no_instructions_available')}
+            </Typography>
+          )}
+        </Grid>
+
+        {/* Botón de Cerrar */}
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{
+            mt: 4,
+            width: '100%',
+            backgroundColor: '#333',
+            color: '#ffffff',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            '&:hover': {
+              backgroundColor: '#555',
+            },
+            py: 1.5,
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+          }}
+        >
+          {t('close_button')}
+        </Button>
+      </Box>
+    </Modal>
   );
 };
 

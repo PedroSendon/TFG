@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import MenuIcon from '@mui/icons-material/Menu';
 
 interface HeaderProps {
   title: string;  // El título que se pasará como parámetro
@@ -21,17 +20,36 @@ const Header: React.FC<HeaderProps> = ({ title, onBack = () => {}, showBackButto
   };
 
   return (
-    <AppBar position="static" style={{ backgroundColor: '#c1c1c1', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', height: '64px' }}>
-      <Toolbar style={{ display: 'flex', alignItems: 'center' }}>
+    <AppBar position="fixed" sx={{ backgroundColor: '#c1c1c1', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', height: '64px' }}>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        
         {showBackButton && (
           <IconButton edge="start" color="inherit" onClick={onBack} aria-label="back">
             <ArrowBackIcon />
           </IconButton>
         )}
-        <Typography variant="h6" style={{ flexGrow: 1, textAlign: 'center', color: 'black'}}>
-          {title}
-        </Typography>
-        
+
+        {/* Contenedor para el título con alineación condicional */}
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          flexGrow: 1,
+          justifyContent: showBackButton ? 'center' : 'flex-start',  // Centrado si hay flecha de retroceso, alineado a la izquierda si no
+          marginLeft: showBackButton ? 0 : '16px',  // Espaciado opcional para estética cuando está alineado a la izquierda
+        }}>
+          <Typography variant="h6" sx={{ color: 'black', textAlign: showBackButton ? 'center' : 'left' }}>
+            {title}
+          </Typography>
+        </Box>
+
+        {/* Logo en la esquina superior derecha */}
+        <Box>
+          <img
+            src="/src/components/FitProX.png"  // Ruta de la imagen del logo
+            alt="Logo"
+            style={{ width: '80px', height: '80px' }}
+          />
+        </Box>
       </Toolbar>
     </AppBar>
   );

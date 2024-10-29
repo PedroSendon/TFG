@@ -95,7 +95,7 @@ const Graphics: React.FC = () => {
   return (
     <Box sx={{ padding: 1, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '20vh', marginTop:'20px' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '20vh', marginTop: '20px' }}>
           <CircularProgress />
         </Box>
       )}
@@ -107,7 +107,7 @@ const Graphics: React.FC = () => {
       )}
 
       {/* Section for Adding a New Weight Record */}
-      <Grid container  justifyContent="center" sx={{ paddingBottom: '20px', marginTop:'20px'}}>
+      <Grid container justifyContent="center" sx={{ paddingBottom: '20px', marginTop: '20px' }}>
         <Grid item xs={12} sm={8} md={6}>
           <Card sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px' }}>
             <CardContent>
@@ -123,7 +123,18 @@ const Graphics: React.FC = () => {
                   const weight = parseFloat(e.target.value);
                   setNewWeight(!isNaN(weight) ? weight : undefined);
                 }}
-                sx={{ marginBottom: 2 }}
+                sx={{
+                  marginBottom: '5%',
+                  '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                      '& fieldset': { borderColor: '#CCCCCC' },
+                      '&:hover fieldset': { borderColor: '#AAAAAA' },
+                      '&.Mui-focused fieldset': { borderColor: '#555555' },
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#555555', // Color gris para la etiqueta al enfocarse
+                  },
+              }}
               />
               <Button
                 fullWidth
@@ -148,11 +159,11 @@ const Graphics: React.FC = () => {
 
       <Box sx={{ borderTop: '1px solid #333', width: '100%', margin: '20px 0' }} />
 
-                <Grid item xs={12}sx={{ marginTop: '20px', marginBottom:'20px' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: '1.4em', color: '#333' }}>
-                        {t('Evolution')}
-                    </Typography>
-                </Grid>
+      <Grid item xs={12} sx={{ marginTop: '20px', marginBottom: '20px' }}>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: '1.4em', color: '#333' }}>
+          {t('Evolution')}
+        </Typography>
+      </Grid>
 
       {/* Section for Weight Evolution Chart */}
       <Grid container spacing={3} justifyContent="center">

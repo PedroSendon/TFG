@@ -16,7 +16,7 @@ const Progress: React.FC = () => {
     };
 
     return (
-        <Box sx={{ backgroundColor: '#f5f5f5' }}>
+        <Box sx={{ backgroundColor: '#f5f5f5', marginTop:'16%' }}>
             <Header title={t('progress_title')} />  {/* Usamos la variable para el título */}
             <Container maxWidth="md">
                 {/* Etiquetas para seleccionar las secciones */}

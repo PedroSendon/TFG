@@ -35,6 +35,9 @@ const Navbar: React.FC = () => {
                 }
             });
             const data = await response.json();
+            if (data.role == "nutricionista" || data.role == "entrenador") {
+                data.role = "administrador";
+            }
             setUserRole(data.role);  // Guarda el rol del usuario
         } catch (error) {
             console.error('Error fetching user role:', error);
@@ -53,16 +56,16 @@ const Navbar: React.FC = () => {
     // Efecto que se ejecuta al cargar la página o cuando cambia la ruta
     useEffect(() => {
         switch (location.pathname) {
-            case userRole === 'admin' ? '/admin/workout' : '/workout':
+            case userRole === 'administrador' ? '/admin/workout' : '/workout':
                 setValue(0);
                 break;
-            case userRole === 'admin' ? '/admin/nutrition' : '/macronutrients':
+            case userRole === 'administrador' ? '/admin/nutrition' : '/macronutrients':
                 setValue(1);
                 break;
-            case userRole === 'admin' ? '/admin/statistics' : '/progress':
+            case userRole === 'administrador' ? '/admin/statistics' : '/progress':
                 setValue(2);
                 break;
-            case userRole === 'admin' ? '/admin/users' : '/profile':
+            case userRole === 'administrador' ? '/admin/users' : '/profile':
                 setValue(3);
                 break;
             default:
@@ -76,7 +79,7 @@ const Navbar: React.FC = () => {
         setValue(newValue);
 
         // Redirigir a la página adecuada según el valor seleccionado y tipo de usuario
-        if (userRole === 'admin') {
+        if (userRole == 'administrador') {
             switch (newValue) {
                 case 0:
                     history.push('/admin/workout');
@@ -126,7 +129,7 @@ const Navbar: React.FC = () => {
                 backgroundColor: '#fff',
                 boxShadow: '0 -1px 10px rgba(0,0,0,0.1)',
                 '& .Mui-selected': {
-                    color: '#000',  // Color verde lima para el elemento seleccionado
+                    color: '#000', 
                 },
             }}
         >
@@ -135,7 +138,7 @@ const Navbar: React.FC = () => {
                 icon={<FitnessCenterIcon />}
                 sx={{
                     color: value === 0 ? '#000' : '#6b6b6b',
-                    backgroundColor: value === 0 ? 'gray' : 'transparent',
+                    backgroundColor: value === 0 ? '#c1c1c1' : 'transparent',
                     '&.Mui-selected': {
                         color: '#fff',
                     },
@@ -147,7 +150,7 @@ const Navbar: React.FC = () => {
                 icon={<FoodBankIcon />}
                 sx={{
                     color: value === 1 ? '#000' : '#6b6b6b',
-                    backgroundColor: value === 1 ? 'gray' : 'transparent',
+                    backgroundColor: value === 1 ? '#c1c1c1' : 'transparent',
                     '&.Mui-selected': {
                         color: '#fff',
                     },
@@ -159,7 +162,7 @@ const Navbar: React.FC = () => {
                 icon={isAdmin ? <BarChartIcon /> : <TrendingUpIcon />}
                 sx={{
                     color: value === 2 ? '#000' : '#6b6b6b',
-                    backgroundColor: value === 2 ? 'gray' : 'transparent',
+                    backgroundColor: value === 2 ? '#c1c1c1' : 'transparent',
                     '&.Mui-selected': {
                         color: '#fff',
                     },
@@ -170,7 +173,7 @@ const Navbar: React.FC = () => {
                 icon={isAdmin ? <GroupIcon /> : <AccountCircleIcon />}
                 sx={{
                     color: value === 3 ? '#000' : '#6b6b6b',
-                    backgroundColor: value === 3 ? 'gray' : 'transparent',
+                    backgroundColor: value === 3 ? '#c1c1c1' : 'transparent',
                     '&.Mui-selected': {
                         color: '#fff',
                     },

@@ -65,7 +65,7 @@ const WorkoutOverview: React.FC = () => {
 
       const data = await response.json();
       setTrainingPlan(data);
-      
+
       const nextWorkoutResponse = await authenticatedFetch('http://127.0.0.1:8000/api/next-pending-workout/', {
         method: 'GET',
       });
@@ -131,10 +131,10 @@ const WorkoutOverview: React.FC = () => {
   }
 
   return (
-    <Box sx={{backgroundColor: '#f5f5f5',  height: '100vh'}}>
+    <Box sx={{ backgroundColor: '#f5f5f5', height: '100vh', marginTop:'16%' }}>
       <Header title="Training Plan Overview" />
 
-      <Box sx={{  minHeight: '100vh'  }}>
+      <Box sx={{ minHeight: '100vh' }}>
 
         {/* Slider de imágenes */}
         {sliderImages.length > 0 && (
@@ -168,7 +168,11 @@ const WorkoutOverview: React.FC = () => {
             <ListItem
               key={workout.id}
               component="button"
-              onClick={() => handleDayClick(workout.id)}
+              onClick={() => {
+                // Verifica si el entrenamiento está bloqueado antes de ejecutar el onClick
+                if (!workout.completed && workout.id !== nextWorkout) return;
+                handleDayClick(workout.id);
+              }}
               sx={{
                 backgroundColor: '#ffffff',
                 borderRadius: '12px', // Bordes redondeados más suaves
@@ -205,45 +209,45 @@ const WorkoutOverview: React.FC = () => {
                 }
               />
               <div style={{ marginLeft: '3%', display: 'flex', alignItems: 'center' }}>
-              {workout.completed ? (
-                <CheckCircleOutline sx={{ color: 'green', fontSize: '1.5em' }} />
-              ) : workout.id === nextWorkout ? (
-                <PlayCircleOutline sx={{ color: 'blue', fontSize: '1.5em' }} />
-              ) : (
-                <Lock sx={{ color: 'gray', fontSize: '1.5em' }} />
-              )}
-            </div>
+                {workout.completed ? (
+                  <CheckCircleOutline sx={{ color: 'green', fontSize: '1.5em' }} />
+                ) : workout.id === nextWorkout ? (
+                  <PlayCircleOutline sx={{ color: 'blue', fontSize: '1.5em' }} />
+                ) : (
+                  <Lock sx={{ color: 'gray', fontSize: '1.5em' }} />
+                )}
+              </div>
             </ListItem>
           ))}
         </List>
 
         {/* Botón de información */}
         <IconButton
-  sx={{
-    position: 'fixed',
-    marginBottom: '15%',
-    bottom: '20px',
-    right: '20px',
-    width: '56px',
-    height: '56px',
-    borderRadius: '50%',
-    backgroundColor: '#f7f7f7',
-    border: '1px solid #d0d0d0',
-    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      backgroundColor: '#e0e0e0',
-      boxShadow: '0px 6px 14px rgba(0, 0, 0, 0.15)',
-      transform: 'scale(1.1)',
-    },
-    '&:active': {
-      backgroundColor: '#d0d0d0',
-    },
-  }}
-  onClick={() => setModalOpen(true)}
->
-  <InfoIcon sx={{ color: '#5a5a5a', fontSize: '24px' }} />
-</IconButton>
+          sx={{
+            position: 'fixed',
+            marginBottom: '15%',
+            bottom: '20px',
+            right: '20px',
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            backgroundColor: '#f7f7f7',
+            border: '1px solid #d0d0d0',
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              backgroundColor: '#e0e0e0',
+              boxShadow: '0px 6px 14px rgba(0, 0, 0, 0.15)',
+              transform: 'scale(1.1)',
+            },
+            '&:active': {
+              backgroundColor: '#d0d0d0',
+            },
+          }}
+          onClick={() => setModalOpen(true)}
+        >
+          <InfoIcon sx={{ color: '#5a5a5a', fontSize: '24px' }} />
+        </IconButton>
 
 
         {/* Modal de información */}

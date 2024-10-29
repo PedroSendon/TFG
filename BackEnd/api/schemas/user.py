@@ -69,7 +69,7 @@ class UserDetailsSchema(BaseModel):
     weekly_training_days: conint(ge=1, le=7)
     daily_training_time: str
     physical_activity_level: Literal["Sedentario", "Ligera", "Moderada", "Intensa"]  # Opciones específicas para nivel de actividad
-    available_equipment: str  # Equipamiento disponible
+    available_equipment: Literal["Gimnasio Completo", "Pesas Libres", "Sin Equipamiento"]  # Opciones limitadas para el equipamiento
 
     class Config:
         from_attributes = True

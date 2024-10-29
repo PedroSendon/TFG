@@ -46,7 +46,7 @@ const ProfilePage: React.FC = () => {
     };
 
     return (
-        <Box>
+        <Box sx={{marginTop:'16%'}}>
             <Header title={t('profile_title')} />
             <Box style={{ padding: '20px', backgroundColor: '#f5f5f5', paddingBottom: '15%' }}> {/* Margen inferior del 15% */}
 
@@ -54,7 +54,7 @@ const ProfilePage: React.FC = () => {
                 <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ padding: '10px', marginTop: '10px', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
                     <Box display="flex" alignItems="center">
                         <Avatar sx={{ width: '60px', height: '60px', marginRight: '15px' }}>
-                            <img src="https://via.placeholder.com/60" alt={t('profile_picture_alt')} style={{ width: '100%', height: '100%' }} />
+                            <img src="/src/components/perfil.jpg" alt={t('profile_picture_alt')} style={{ width: '100%', height: '100%' }} />
                         </Avatar>
                         <Box>
                             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{userData?.username}</Typography>
@@ -100,7 +100,7 @@ const ProfilePage: React.FC = () => {
                         </Typography>
                         <List dense>
                             <ListItem>
-                                <ListItemText primary={t('weight_goal')} secondary={userData?.weightGoal} />
+                                <ListItemText primary={t('weight_goal')} secondary={t(userData?.weightGoal)} />
                             </ListItem>
                             <Divider component="li" />
                             <ListItem>
@@ -115,7 +115,7 @@ const ProfilePage: React.FC = () => {
                 </Card>
 
                 {/* Botón de cerrar sesión */}
-                <Box display="flex" justifyContent="center" mt={4}>
+                <Box display="flex" justifyContent="center" mt={2} sx={{marginBottom:'5%'}}>
                     <Button
                         onClick={handleLogout}
                         variant="outlined"

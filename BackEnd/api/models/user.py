@@ -38,6 +38,11 @@ class UserDetails(models.Model):
         ('moderate', 'Moderada'),
         ('intense', 'Intensa'),
     ]
+    EQUIPMENT_CHOICES = [
+        ('gimnasio_completo', 'Gimnasio Completo'),
+        ('pesas_libres', 'Pesas Libres'),
+        ('sin_equipamiento', 'Sin Equipamiento'),
+    ]
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='details')
     height = models.PositiveIntegerField()  # En cm
@@ -46,7 +51,7 @@ class UserDetails(models.Model):
     weekly_training_days = models.PositiveIntegerField()
     daily_training_time = models.CharField(max_length=50)  # Ejemplo: '1-2 horas'
     physical_activity_level = models.CharField(max_length=20, choices=ACTIVITY_LEVEL_CHOICES)  # Opciones de nivel de actividad
-    available_equipment = models.CharField(max_length=100, default="None")  # Ejemplo: 'Sin equipamiento'
+    available_equipment = models.CharField(max_length=20, choices=EQUIPMENT_CHOICES, default="sin_equipamiento")  # Opciones limitadas de equipo
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name} - Details'

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { TextField, IconButton, Button, Grid, Typography, Container, FormControlLabel, Checkbox, Link } from '@mui/material';
+import { TextField, IconButton, Button, Grid, Typography, Container, FormControlLabel, Checkbox, Link, Box } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -7,7 +7,7 @@ import { LanguageContext } from '../../context/LanguageContext'; // Importamos e
 
 const Login: React.FC = () => {
     const history = useHistory();
-    const { t } = useContext(LanguageContext); // Usamos la función de traducción t desde el contexto
+    const { t } = useContext(LanguageContext);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -25,13 +25,6 @@ const Login: React.FC = () => {
         });
     };
 
-    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({
-            ...formData,
-            rememberMe: e.target.checked,
-        });
-    };
-
     const handlePasswordVisibilityToggle = () => {
         setFormData({
             ...formData,
@@ -44,20 +37,20 @@ const Login: React.FC = () => {
         return re.test(email);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => { 
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    
+
         const newErrors: any = {};
-    
+
         if (!validateEmail(formData.email)) {
             newErrors.email = t('invalid_email'); // Mensaje de error traducido
         }
-    
+
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
-    
+
         try {
             const response = await fetch('http://127.0.0.1:8000/api/login/', {
                 method: 'POST',
@@ -70,14 +63,13 @@ const Login: React.FC = () => {
                     remember_me: formData.rememberMe,
                 }),
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
-                console.log('Inicio de sesión exitoso:', data);
-                
+
                 localStorage.setItem('access_token', data.access); // Almacena el token de acceso
                 localStorage.setItem('refresh_token', data.refresh); // Almacena el token de refresco
-          
+
                 // Esto forzará que la navbar se vuelva a renderizar
                 localStorage.setItem('navbar_reload', 'true');
                 history.push('/workout');
@@ -91,63 +83,53 @@ const Login: React.FC = () => {
             setErrors({ apiError: 'Error de conexión con el servidor.' });
         }
     };
-    
     return (
-        <Container component="main" maxWidth="xs">
-            <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-                {/* Logo de la aplicación */}
-                <img src="https://via.placeholder.com/150" alt="logo" style={{ marginBottom: '1.5rem' }} />
-
-                {/* Título de bienvenida */}
-                <Typography component="h1" variant="h5" marginBottom={"6%"}>
-                    {t('welcome_back')} {/* Texto traducido */}
-                </Typography>
+        <Container component="main" maxWidth="xs" sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box sx={{
+                width: '100%',
+                backgroundColor: '#ffffff',
+                boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+                borderRadius: 2,
+                p: 4
+            }}>
+                <Box textAlign="center" sx={{ mb: 4 }}>
+                    <img src="/src/components/logo.png" alt="logo" style={{ marginBottom: '1.5rem', width: '100px', borderRadius: '50%' }} />
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333333', mb: 2 }}>
+                        {t('welcome_back')}
+                    </Typography>
+                </Box>
 
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
-                        {/* Input para el correo electrónico */}
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
-                                required
                                 fullWidth
                                 id="email"
-                                label={t('email')} 
+                                label={t('email')}
                                 name="email"
                                 autoComplete="email"
                                 onChange={handleChange}
                                 error={!!errors.email}
                                 helperText={errors.email}
-                                InputLabelProps={{
-                                    style: { color: 'var(--color-gris-oscuro)' }
+                                InputProps={{
+                                    style: { color: '#333333' },
                                 }}
                                 sx={{
-                                    '& label.Mui-focused': {
-                                        color: 'var(--color-verde-lima)',
-                                    },
+                                    '& label.Mui-focused': { color: '#555555' },
                                     '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: 'var(--color-gris-oscuro)',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'var(--color-verde-lima)',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: 'var(--color-verde-lima)',
-                                        },
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
                                     },
-                                }}
-                                InputProps={{
-                                    style: { color: 'var(--color-gris-oscuro)' },
                                 }}
                             />
                         </Grid>
 
-                        {/* Input para la contraseña */}
+
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
-                                required
                                 fullWidth
                                 name="password"
                                 label={t('password')}
@@ -155,83 +137,75 @@ const Login: React.FC = () => {
                                 id="password"
                                 autoComplete="current-password"
                                 onChange={handleChange}
-                                InputLabelProps={{
-                                    style: { color: 'var(--color-gris-oscuro)' }
-                                }}
-                                sx={{
-                                    '& label.Mui-focused': {
-                                        color: 'var(--color-verde-lima)',
-                                    },
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: 'var(--color-gris-oscuro)',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'var(--color-verde-lima)',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: 'var(--color-verde-lima)',
-                                        },
-                                    },
-                                }}
                                 InputProps={{
-                                    style: { color: 'var(--color-gris-oscuro)' },
                                     endAdornment: (
                                         <IconButton onClick={handlePasswordVisibilityToggle}>
                                             {formData.showPassword ? <Visibility /> : <VisibilityOff />}
                                         </IconButton>
                                     ),
                                 }}
+                                sx={{
+                                    '& label.Mui-focused': { color: '#555555' },
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                }}
                             />
                         </Grid>
-
-                        {/* Opción para recordar la sesión */}
+                        {/*
                         <Grid item xs={12}>
                             <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        style={{ color: 'var(--color-verde-lima)' }}
-                                        checked={formData.rememberMe}
-                                        onChange={handleCheckboxChange}
-                                        name="rememberMe"
-                                    />
-                                }
-                                label={t('remember_me')} 
-                                style={{ color: 'var(--color-gris-oscuro)' }}
+                                control={<Checkbox checked={formData.rememberMe} onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })} />}
+                                label={t('remember_me')}
+                                sx={{ color: '#555555' }}
                             />
-                            <Link href="#" variant="body2" style={{ color: 'var(--color-verde-lima)' }}>
-                                {t('forgot_password')} {/* Texto traducido */}
+                            <Link href="#" variant="body2" sx={{ color: '#777777' }}>
+                                {t('forgot_password')}
                             </Link>
-                        </Grid>
+                        </Grid>*/}
                     </Grid>
 
-                    {/* Botón para iniciar sesión */}
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
-                        style={{
-                            backgroundColor: 'var(--color-verde-lima)',
-                            color: 'var(--color-blanco)',
-                            marginTop: '1rem'
+                        sx={{
+                            backgroundColor: '#666666',
+                            color: '#ffffff',
+                            mt: 2,
+                            borderRadius: 2,
+                            fontWeight: 'bold',
+                            '&:hover': { backgroundColor: '#555555' },
                         }}
                     >
-                        {t('login_button')} {/* Texto traducido */}
+                        {t('login_button')}
                     </Button>
 
-                    {/* Enlace para registrarse */}
-                    <Grid container justifyContent="center" alignItems="center" style={{ marginTop: '1rem', color: 'var(--color-gris-oscuro)' }}>
+                    <Grid container justifyContent="center" sx={{ mt: 2 }}>
                         <Grid item>
-                            <Typography component="span" variant="body2">
-                                {t('no_account')} {/* Texto traducido */}
+                            <Typography component="span" variant="body2" sx={{ color: '#777777' }}>
+                                {t('no_account')}
                             </Typography>
-                            <Link href="/register" variant="body2" style={{ marginLeft: '0.5rem', color: 'var(--color-verde-lima)' }}>
-                                {t('sign_up')} {/* Texto traducido */}
-                            </Link>
+                            <Button
+                                onClick={() => history.push('/register')}
+                                variant="text"
+                                sx={{
+                                    ml: 1,
+                                    color: '#555555',
+                                    fontWeight: 'bold',
+                                    textTransform: 'none',
+                                    padding: 0,
+                                    minWidth: 'auto',
+                                }}
+                            >
+                                {t('sign_up')}
+                            </Button>
                         </Grid>
                     </Grid>
                 </form>
-            </div>
+            </Box>
         </Container>
     );
 };
