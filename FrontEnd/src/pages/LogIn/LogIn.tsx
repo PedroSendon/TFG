@@ -84,7 +84,7 @@ const Login: React.FC = () => {
         }
     };
     return (
-        <Container component="main" maxWidth="xs" sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Container component="main" maxWidth="xs" sx={{ backgroundColor:'#f5f5f5',minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Box sx={{
                 width: '100%',
                 backgroundColor: '#ffffff',

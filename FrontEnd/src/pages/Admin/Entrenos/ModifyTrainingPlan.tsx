@@ -1,22 +1,10 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import {
-    IonPage,
-    IonContent,
-    IonAvatar,
-    IonLabel,
-    IonButton,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonToast,
-    IonIcon
-} from '@ionic/react';
-import { cameraOutline, trashOutline, closeOutline } from 'ionicons/icons';
+
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
-import { Box, Chip, InputLabel, MenuItem, OutlinedInput, Select, TextField, Button, Card, CardContent } from '@mui/material';
-import { SelectChangeEvent } from '@mui/material';
+import { Box, Chip, InputLabel, MenuItem, OutlinedInput, Select, TextField, Button, Card, CardContent, Snackbar, Container, Grid, Avatar, IconButton, Typography } from '@mui/material';
 import { LanguageContext } from '../../../context/LanguageContext';
+import { CameraAlt, Delete } from '@mui/icons-material';
 
 interface LocationState {
     data: {
@@ -216,195 +204,244 @@ const ModifyTrainingPlans: React.FC = () => {
         setPlanDetails({ ...planDetails, [name as string]: value });
     };
 
+
     return (
-        <IonPage>
+        <Container maxWidth="sm" sx={{ py: 5, marginTop: '15%' }}>
             <Header title={t('modify_training_plan_title')} />
-
-            <IonContent>
-                <IonGrid>
-
-
-                    <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-
+            <form>
+                <Grid container spacing={2}>
                     {/* Input de Nombre del Plan */}
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12">
-                        <InputLabel>{t('training_plan_name')}</InputLabel>
-                            <TextField
-                                variant="outlined"
-                                fullWidth
-                                name="name"
-                                value={planDetails.name}
-                                onChange={handleChange}
-                            />
-                        </IonCol>
-                    </IonRow>
+                    <Grid item xs={12}>
+                        <TextField
+                            variant="outlined"
+                            fullWidth
+                            name="name"
+                            label={t('name')}
+                            value={planDetails.name}
+                            onChange={handleChange}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                            }}
+                        />
+                    </Grid>
 
                     {/* Input de Descripción */}
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12">
-                        <InputLabel>{t('description')}</InputLabel>
-                            <TextField
-                                variant="outlined"
-                                fullWidth
-                                name="description"
-                                value={planDetails.description}
-                                onChange={handleChange}
-                                multiline
-                            />
-                        </IonCol>
-                    </IonRow>
+                    <Grid item xs={12}>
+                        <TextField
+                            variant="outlined"
+                            fullWidth
+                            name="description"
+                            label={t('description')}
+                            value={planDetails.description}
+                            onChange={handleChange}
+                            multiline
+                            rows={3}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                            }}
+                        />
+                    </Grid>
 
                     {/* Selección de Dificultad */}
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12">
-                            <InputLabel>{t('difficulty')}</InputLabel>
-                            <Select
-                                value={planDetails.difficulty}
-                                onChange={(e) => setPlanDetails({ ...planDetails, difficulty: e.target.value })}
-                                fullWidth
-                            >
-                                <MenuItem value="ligera">{t('difficulty_light')}</MenuItem>
-                                <MenuItem value="moderada">{t('difficulty_moderate')}</MenuItem>
-                                <MenuItem value="intermedia">{t('difficulty_intermediate')}</MenuItem>
-                                <MenuItem value="intensa">{t('difficulty_intense')}</MenuItem>
-                            </Select>
-                        </IonCol>
-                    </IonRow>
+                    <Grid item xs={12}>
+                        <Select
+                            value={planDetails.difficulty}
+                            onChange={(e) => handleChange(e)}
+                            fullWidth
+                            displayEmpty
+                            label={t('difficulty')}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                }, '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+
+                            }}
+                        >
+                            <MenuItem value="">{t('select_difficulty')}</MenuItem>
+                            <MenuItem value="ligera">{t('difficulty_light')}</MenuItem>
+                            <MenuItem value="moderada">{t('difficulty_moderate')}</MenuItem>
+                            <MenuItem value="intermedia">{t('difficulty_intermediate')}</MenuItem>
+                            <MenuItem value="intensa">{t('difficulty_intense')}</MenuItem>
+                        </Select>
+                    </Grid>
 
                     {/* Selección de Equipamiento */}
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12">
-                            <InputLabel>{t('equipment')}</InputLabel>
-                            <Select
-                                value={planDetails.equipment}
-                                onChange={(e) => setPlanDetails({ ...planDetails, equipment: e.target.value })}
-                                fullWidth
-                            >
-                                <MenuItem value="Pesas libres">{t('equipment_free_weights')}</MenuItem>
-                                <MenuItem value="gimnasio">{t('equipment_gym')}</MenuItem>
-                                <MenuItem value="Nada">{t('equipment_none')}</MenuItem>
-                            </Select>
-                        </IonCol>
-                    </IonRow>
+                    <Grid item xs={12}>
+                        <Select
+                            value={planDetails.equipment}
+                            onChange={(e) => handleChange(e)}
+                            fullWidth
+                            displayEmpty
+                            label={t('equipment')}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                }, '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+
+                            }}
+                        >
+                            <MenuItem value="">{t('select_equipment')}</MenuItem>
+                            <MenuItem value="Pesas libres">{t('equipment_free_weights')}</MenuItem>
+                            <MenuItem value="gimnasio">{t('equipment_gym')}</MenuItem>
+                            <MenuItem value="Nada">{t('equipment_none')}</MenuItem>
+                        </Select>
+                    </Grid>
 
                     {/* Input de Duración */}
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12">
-                        <InputLabel>{t('duration')}</InputLabel>
-                            <TextField
-                                variant="outlined"
-                                fullWidth
-                                name="duration"
-                                type="number"
-                                value={planDetails.duration}
-                                onChange={handleChange}
-                            />
-                        </IonCol>
-                    </IonRow>
+                    <Grid item xs={12}>
+                        <TextField
+                            variant="outlined"
+                            fullWidth
+                            label={t('duration')}
+                            name="duration"
+                            type="number"
+                            value={planDetails.duration}
+                            onChange={handleChange}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                }, '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
 
-                    <IonRow style={{ marginTop: '20px' }}>
-                        <IonCol size="12" className="ion-text-center">
-                            <Button
-                                style={{
-                                    border: '1px solid #000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                                onClick={handleAddWorkoutCard}
-                            >
-                                {t('add_workout')}
-                            </Button>
-                        </IonCol>
-                    </IonRow>
+                            }}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <Button
+                            variant="outlined"
+                            onClick={handleAddWorkoutCard}
+                            fullWidth
+                            sx={{
+                                color: '#777',
+                                borderColor: '#777',
+                                fontWeight: 'bold',
+                                py: 1.5,
+                                borderRadius: '8px',
+                                '&:hover': { backgroundColor: '#f5f5f5' },
+                            }}
+                        >
+                            {t('add_workout')}
+                        </Button>
+                    </Grid>
 
                     {workoutSelections.map((workoutSelection) => (
-                        <IonRow key={workoutSelection.id} style={{ marginTop: '20px' }}>
-                            <IonCol size="12">
-                                <Card style={{ position: 'relative', borderRadius: '10px', marginBottom: '15px' }}>
-                                    <CardContent style={{ display: 'flex', alignItems: 'center' }}>
-                                        <Select
-                                            value={workoutSelection.selectedWorkout}
-                                            onChange={(e) => handleWorkoutChange(workoutSelection.id, e.target.value as number)}
-                                            fullWidth
-                                            displayEmpty
-                                        >
-                                            <MenuItem value="" disabled>{t('choose_workout')}</MenuItem>
-                                            {availableWorkouts.map((workout) => (
-                                                <MenuItem key={workout.id} value={workout.id}>
-                                                    {workout.name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                        <Button onClick={() => handleRemoveWorkoutCard(workoutSelection.id)} style={{ color: '#FF0000', marginLeft: '10px' }}>
-                                            <IonIcon icon={trashOutline} />
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            </IonCol>
-                        </IonRow>
+                        <Grid item xs={12} key={workoutSelection.id}>
+                            <Card sx={{ borderRadius: '10px', mb: 2, boxShadow: 2 }}>
+                                <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <Select
+                                        value={workoutSelection.selectedWorkout}
+                                        onChange={(e) =>
+                                            handleWorkoutChange(workoutSelection.id, e.target.value as number)
+                                        }
+                                        fullWidth
+                                        displayEmpty
+                                    >
+
+                                        {/* Mapea `availableWorkouts` para crear las opciones del Select */}
+                                        {availableWorkouts.map((workout) => (
+                                            <MenuItem key={workout.id} value={workout.id}>
+                                                {workout.name}  {/* Asume que `name` es la propiedad que quieres mostrar */}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    <IconButton onClick={() => handleRemoveWorkoutCard(workoutSelection.id)}>
+                                        <Delete style={{ color: '#FF0000' }} />
+                                    </IconButton>
+                                </CardContent>
+                            </Card>
+                        </Grid>
                     ))}
 
-                    <IonRow className="ion-text-center">
-                        <IonCol size="12">
-                            <Button onClick={handleMediaUpload} style={{
-                                    border: '1px solid #000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}>
-                                <IonIcon icon={cameraOutline} /> {t('change_image_video')}
-                            </Button>
-                        </IonCol>
-                    </IonRow>
+                    <Grid item xs={12}>
+                        <Button
+                            variant="outlined"
+                            onClick={handleMediaUpload}
+                            fullWidth
+                            sx={{
+                                color: '#777',
+                                borderColor: '#777',
+                                fontWeight: 'bold',
+                                py: 1.5,
+                                borderRadius: '8px',
+                                '&:hover': { backgroundColor: '#f5f5f5' },
+                            }}
+                        >
+                            <CameraAlt style={{ color: '#777', marginRight: '10px' }} />
+                            {t('change_image_video')}
+                        </Button>
+                        <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
+                        {media && <Box mt={2}><Avatar src={media} alt="Preview" variant="rounded" sx={{ width: '100%', height: 150 }} /></Box>}
+                    </Grid>
 
                     {/* Botones de Cancelar y Guardar */}
-                    <IonRow style={{ marginTop: '20px', marginBottom: '15%' }}>
-                        <IonCol size="6" className="ion-text-center">
-                            <Button
-                                onClick={handleCancel}
-                                style={{
-                                    border: '1px solid #FF0000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#FF0000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                            >
-                                {t('cancel')}
-                            </Button>
-                        </IonCol>
-                        <IonCol size="6" className="ion-text-center">
-                            <Button
-                                onClick={handleSave}
-                                style={{
-                                    border: '1px solid #000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                            >
-                                {t('save')}
-                            </Button>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
-                <IonToast isOpen={showToast} onDidDismiss={() => setShowToast(false)} message={t('toast_success')} duration={2000} />
-            </IonContent>
-        </IonPage>
+                    <Grid item xs={12}>
+                        <Grid container spacing={2} sx={{ mb: 4 }}>
+                            <Grid item xs={6}>
+                                <Button
+                                    fullWidth
+                                    variant="outlined"
+                                    onClick={handleCancel}
+                                    sx={{
+                                        color: '#777',
+                                        borderColor: '#777',
+                                        fontWeight: 'bold',
+                                        py: 1,
+                                        borderRadius: '8px',
+                                    }}
+                                >
+                                    {t('cancel')}
+                                </Button>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    onClick={handleSave}
+                                    sx={{
+                                        backgroundColor: '#555',
+                                        color: '#FFF',
+                                        fontWeight: 'bold',
+                                        py: 1,
+                                        borderRadius: '8px',
+                                        '&:hover': { backgroundColor: '#333' },
+                                    }}
+                                >
+                                    {t('save')}
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </form>
 
+            <Snackbar
+                open={showToast}
+                autoHideDuration={2000}
+                onClose={() => setShowToast(false)}
+                message={t('toast_success')}
+            />
+        </Container>
     );
 };
 

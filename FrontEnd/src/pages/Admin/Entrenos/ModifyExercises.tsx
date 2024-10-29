@@ -1,18 +1,4 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import {
-    IonPage,
-    IonActionSheet,
-    IonContent,
-    IonAvatar,
-    IonLabel,
-    IonButton,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonToast,
-    IonIcon,
-} from '@ionic/react';
-import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicons/icons';
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { Box, Chip, InputLabel, MenuItem, OutlinedInput, Select, TextField, Button, Container, Snackbar, Card, Grid, Avatar } from '@mui/material';
@@ -31,9 +17,6 @@ const ModifyExercises: React.FC = () => {
     const history = useHistory();
     const location = useLocation();
     const { t, language } = useContext(LanguageContext); // Usar el contexto de idioma
-    const muscleGroupsCa: MuscleGroupsData = musclesCa;
-    const muscleGroupsEs: MuscleGroupsData = musclesEs;
-    const muscleGroupsEn: MuscleGroupsData = musclesEn;
     const data = (location.state as { data: any })?.data || null;
 
     const [exerciseDetails, setExerciseDetails] = useState({
@@ -45,7 +28,6 @@ const ModifyExercises: React.FC = () => {
 
     const [media, setMedia] = useState<string | null>(data?.media || null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [showActionSheet, setShowActionSheet] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [muscleGroupsList, setMuscleGroupsList] = useState<string[]>([]); // Lista de grupos musculares
 
@@ -273,15 +255,22 @@ const ModifyExercises: React.FC = () => {
                             />
                         </Grid>
 
-                        <Grid container spacing={2} sx={{ mt: 2 }}>
+                        {/* Botones de Cancelar y Guardar */}
+                    <Grid item xs={12}>
+                        <Grid container spacing={2} sx={{ mb: 4 }}>
                             <Grid item xs={6}>
                                 <Button
                                     fullWidth
                                     variant="outlined"
                                     onClick={handleCancel}
                                     sx={{
-                                        color: '#777', borderColor: '#777', fontWeight: 'bold', py: 1, borderRadius: '8px',
-                                      }}                                >
+                                        color: '#777',
+                                        borderColor: '#777',
+                                        fontWeight: 'bold',
+                                        py: 1,
+                                        borderRadius: '8px',
+                                    }}
+                                >
                                     {t('cancel')}
                                 </Button>
                             </Grid>
@@ -291,12 +280,19 @@ const ModifyExercises: React.FC = () => {
                                     variant="contained"
                                     onClick={handleSave}
                                     sx={{
-                                        backgroundColor: '#555', color: '#FFF', fontWeight: 'bold', py: 1, borderRadius: '8px', '&:hover': { backgroundColor: '#333' },
-                                      }}                                >
+                                        backgroundColor: '#555',
+                                        color: '#FFF',
+                                        fontWeight: 'bold',
+                                        py: 1,
+                                        borderRadius: '8px',
+                                        '&:hover': { backgroundColor: '#333' },
+                                    }}
+                                >
                                     {t('save')}
                                 </Button>
                             </Grid>
                         </Grid>
+                    </Grid>
                     </Grid>
                 </form>
             </Box>

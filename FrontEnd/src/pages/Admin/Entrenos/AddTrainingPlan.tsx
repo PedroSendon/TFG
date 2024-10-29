@@ -15,22 +15,29 @@ import { cameraOutline, imageOutline, trashOutline, closeOutline } from 'ionicon
 import Header from '../../Header/Header';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
-import { Button, Select, InputLabel, Grid, SelectChangeEvent } from '@mui/material';
+import { Button, Select, InputLabel, Grid, SelectChangeEvent, Container, Box, Avatar, Chip } from '@mui/material';
 import { LanguageContext } from '../../../context/LanguageContext';
 import { useHistory } from 'react-router';
+import { CameraAlt } from '@mui/icons-material';
 
 interface Training {
     id: string;
     name: string;
 }
 
+interface Workout {
+    id: number;
+    name: string;
+    description: string;
+    media?: string | null; // Si media es opcional
+}
+
 const CreateTrainingPlan: React.FC = () => {
     const { t } = useContext(LanguageContext); // Usar el contexto de idioma
     const history = useHistory();
-    const [trainings, setTrainings] = useState<Training[]>([]);  // Lista de entrenamientos
     const [planData, setPlanData] = useState({
         name: '',
-        selectedTraining: '',
+        selectedTraining: [],
         equipment: '',
         difficulty: '',
         duration: 0,
@@ -38,52 +45,44 @@ const CreateTrainingPlan: React.FC = () => {
     const [media, setMedia] = useState<string | null>(null);
     const [showActionSheet, setShowActionSheet] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [availableWorkouts, setAvailableWorkouts] = useState<Workout[]>([]);
 
-    // Llamada al backend para obtener la lista de entrenamientos
-    const fetchTrainings = async () => {
+
+
+    const fetchAvailableWorkouts = async () => {
+        const accessToken = localStorage.getItem('access_token');
         try {
-            const accessToken = localStorage.getItem('access_token');
-      
-      if (!accessToken) {
-        console.error(t('no_token'));
-        return;
-      }
-            const response = await fetch('http://127.0.0.1:8000/api/workouts/', {
+            const response = await fetch(`http://127.0.0.1:8000/api/workouts/`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                    'Authorization': `Bearer ${accessToken}`,
                 },
             });
-            const data = await response.json();
-            console.log('Entrenamientos:', data);
-            setTrainings(data.data);
+
+            if (response.ok) {
+                const data = await response.json();
+                setAvailableWorkouts(data.data);
+            } else {
+                console.error(t('error_loading_workouts'));
+            }
         } catch (error) {
-            console.error('Error fetching trainings:', error);
+            console.error(t('connection_error'), error);
         }
     };
 
     useEffect(() => {
-        fetchTrainings();
+        fetchAvailableWorkouts();
     }, []);
 
     const handleSave = async () => {
-        const trainingPlanData = {
-            name: planData.name,
-            workout_ids: [planData.selectedTraining],  // Debes enviar los IDs de los entrenamientos seleccionados
-            equipment: planData.equipment,
-            difficulty: planData.difficulty,
-            duration: planData.duration,
-            media: media || null,  // Puedes enviar media como null si no se seleccionó
-        };
-    
+
         try {
             const accessToken = localStorage.getItem('access_token');
-      
-      if (!accessToken) {
-        console.error(t('no_token'));
-        return;
-      }
+
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
             const response = await fetch('http://127.0.0.1:8000/api/trainingplans/create/', {
                 method: 'POST',
                 headers: {
@@ -91,7 +90,7 @@ const CreateTrainingPlan: React.FC = () => {
                     'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
                 },
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
                 console.log('Plan de entrenamiento creado:', data);
@@ -104,7 +103,7 @@ const CreateTrainingPlan: React.FC = () => {
             console.error('Error al conectar con el servidor:', error);
         }
     };
-    
+
 
     const handleCancel = () => {
         history.push('/admin/workout');
@@ -123,6 +122,13 @@ const CreateTrainingPlan: React.FC = () => {
         setPlanData({
             ...planData,
             [name as string]: value,
+        });
+    };
+
+    const handleSelectChangeWorkout = (event) => {
+        setPlanData({
+            ...planData,
+            selectedTraining: event.target.value, // Maneja múltiples selecciones como array
         });
     };
 
@@ -149,7 +155,6 @@ const CreateTrainingPlan: React.FC = () => {
         }
     };
 
-    // Opciones para los menús desplegables
     const equipmentOptions = [
         { value: 'Gimnasio completo', label: t('full_gym') },
         { value: 'Pesas libres', label: t('free_weights') },
@@ -161,16 +166,16 @@ const CreateTrainingPlan: React.FC = () => {
         { value: 'Ligero', label: t('light') },
         { value: 'Moderado', label: t('moderate') },
         { value: 'Avanzado', label: t('advanced') },
-
     ];
 
     return (
-        <IonPage>
-            <Header title={t('add_training_plan')} /> {/* Título del header */}
-            <IonContent>
-                <IonGrid>
-                    <IonRow>
-                        <IonCol size="12">
+        <Box sx={{ pb: 10, pt: 5, backgroundColor: '#f5f5f5' }}>
+            <Header title={t('add_training_plan')} />
+
+            <Box sx={{ p: 3, mt: 2, backgroundColor: '#f5f5f5' }}>
+                <form>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
                                 fullWidth
@@ -178,127 +183,136 @@ const CreateTrainingPlan: React.FC = () => {
                                 name="name"
                                 value={planData.name}
                                 onChange={handleChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
-                        </IonCol>
-                    </IonRow>
+                        </Grid>
 
-                    <IonRow>
-                        <IonCol size="12">
-                            <InputLabel id="training-label">{t('select_training')}</InputLabel>
+                        <Grid item xs={12}>
+                            <InputLabel>{t('select_training')}</InputLabel>
                             <Select
-                                labelId="training-label"
-                                id="selectedTraining"
                                 name="selectedTraining"
+                                multiple
                                 value={planData.selectedTraining}
                                 onChange={handleSelectChange}
                                 fullWidth
+                                displayEmpty
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                }}
+                                renderValue={(selected) => (
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                        {selected.map((value) => (
+                                            <Chip key={value} label={availableWorkouts.find(workout => workout.id === value)?.name} />
+                                        ))}
+                                    </Box>
+                                )}
                             >
-                                {trainings && trainings.length > 0 ? (
-                                    trainings.map((training) => (
-                                        <MenuItem key={training.id} value={training.id}>
-                                            {training.name}
+                                {availableWorkouts.length > 0 ? (
+                                    availableWorkouts.map((workout) => (
+                                        <MenuItem key={workout.id} value={workout.id}>
+                                            {workout.name}
                                         </MenuItem>
                                     ))
                                 ) : (
-                                    <MenuItem disabled>{t('no_trainings_available')}</MenuItem> // Texto para cuando no haya entrenamientos
+                                    <MenuItem value="" disabled>{t('no_trainings_available')}</MenuItem>
                                 )}
                             </Select>
+                        </Grid>
 
-                        </IonCol>
-                    </IonRow>
-
-                    <IonRow>
-                        <IonCol size="12">
-                            <InputLabel id="equipment-label">{t('equipment')}</InputLabel>
+                        <Grid item xs={12}>
+                            <InputLabel>{t('equipment')}</InputLabel>
                             <Select
-                                labelId="equipment-label"
-                                id="equipment"
                                 name="equipment"
                                 value={planData.equipment}
                                 onChange={handleSelectChange}
                                 fullWidth
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                }}
                             >
-                                {equipmentOptions.map((option) => (
-                                    <MenuItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </MenuItem>
+                                {equipmentOptions.map(option => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                                 ))}
                             </Select>
-                        </IonCol>
-                    </IonRow>
+                        </Grid>
 
-                    <IonRow>
-                        <IonCol size="12">
-                            <InputLabel id="difficulty-label">{t('difficulty')}</InputLabel>
+                        <Grid item xs={12}>
+                            <InputLabel>{t('difficulty')}</InputLabel>
                             <Select
-                                labelId="difficulty-label"
-                                id="difficulty"
                                 name="difficulty"
                                 value={planData.difficulty}
                                 onChange={handleSelectChange}
                                 fullWidth
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                }}
                             >
-                                {difficultyOptions.map((option) => (
-                                    <MenuItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </MenuItem>
+                                {difficultyOptions.map(option => (
+                                    <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                                 ))}
                             </Select>
-                        </IonCol>
-                    </IonRow>
-                    
-                    <IonRow>
-                        <IonCol size="12">
+                        </Grid>
+
+                        <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
                                 fullWidth
-                                style={{ marginTop: '3%' }}
                                 label={t('duration_minutes')}
                                 name="duration"
                                 type="number"
                                 value={planData.duration}
                                 onChange={handleChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
-                        </IonCol>
-                    </IonRow>
+                        </Grid>
 
-                    {/* Subida de imagen */}
-                    <IonRow>
-                        <IonCol size="12" className="ion-text-center">
-                            <IonButton
-                                onClick={() => setShowActionSheet(true)}
-                                fill="clear"
-                                style={{ color: '#000', borderColor: '#000' }}
+                        <Grid item xs={12} textAlign="center">
+                            <Button
+                                variant="outlined"
+                                onClick={() => fileInputRef.current?.click()}
+                                fullWidth
+                                sx={{
+                                    color: '#777',
+                                    borderColor: '#777',
+                                    fontWeight: 'bold',
+                                    py: 1.5,
+                                    borderRadius: '8px',
+                                    '&:hover': { backgroundColor: '#f5f5f5' },
+                                }}
                             >
-                                <IonIcon icon={cameraOutline} /> {t('upload_image')}
-                            </IonButton>
-                            {media && (
-                                <IonAvatar style={{ width: '100px', height: '100px', margin: '10px auto' }}>
-                                    <img src={media} alt="Vista previa" />
-                                </IonAvatar>
-                            )}
-
-                            <IonActionSheet
-                                isOpen={showActionSheet}
-                                onDidDismiss={() => setShowActionSheet(false)}
-                                buttons={[
-                                    {
-                                        text: t('upload_photo'),
-                                        icon: imageOutline,
-                                        handler: () => handlePhotoOption('upload'),
-                                    },
-                                    {
-                                        text: t('delete_photo'),
-                                        icon: trashOutline,
-                                        handler: () => handlePhotoOption('delete'),
-                                    },
-                                    {
-                                        text: t('cancel'),
-                                        icon: closeOutline,
-                                        role: 'cancel',
-                                    },
-                                ]}
-                            />
+                                <CameraAlt sx={{ mr: 1 }} /> {t('upload_image')}
+                            </Button>
                             <input
                                 type="file"
                                 accept="image/*"
@@ -306,46 +320,55 @@ const CreateTrainingPlan: React.FC = () => {
                                 style={{ display: 'none' }}
                                 onChange={handleFileChange}
                             />
-                        </IonCol>
-                    </IonRow>
+                            {media && (
+                                <Box mt={2} textAlign="center">
+                                    <Avatar src={media} alt="Preview" sx={{ width: 100, height: 100, margin: 'auto' }} />
+                                </Box>
+                            )}
+                        </Grid>
 
-                    <IonRow>
-                        <IonCol size="6" className="ion-text-center">
-                            <Button
-                                onClick={handleCancel}
-                                style={{
-                                    border: '1px solid #FF0000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#FF0000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                            >
-                                {t('cancel')}
-                            </Button>
-                        </IonCol>
-                        <IonCol size="6" className="ion-text-center">
-                            <Button
-                                onClick={handleSave}
-                                style={{
-                                    border: '1px solid #000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
-                                }}
-                            >
-                                {t('save')}
-                            </Button>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
-            </IonContent>
-        </IonPage>
+                        {/* Botones de Cancelar y Guardar */}
+                        <Grid item xs={12}>
+                            <Grid container spacing={2} sx={{ mb: 4 }}>
+                                <Grid item xs={6}>
+                                    <Button
+                                        fullWidth
+                                        variant="outlined"
+                                        onClick={handleCancel}
+                                        sx={{
+                                            color: '#777',
+                                            borderColor: '#777',
+                                            fontWeight: 'bold',
+                                            py: 1,
+                                            borderRadius: '8px',
+                                        }}
+                                    >
+                                        {t('cancel')}
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Button
+                                        fullWidth
+                                        variant="contained"
+                                        onClick={handleSave}
+                                        sx={{
+                                            backgroundColor: '#555',
+                                            color: '#FFF',
+                                            fontWeight: 'bold',
+                                            py: 1,
+                                            borderRadius: '8px',
+                                            '&:hover': { backgroundColor: '#333' },
+                                        }}
+                                    >
+                                        {t('save')}
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </form>
+            </Box>
+        </Box>
     );
 };
 

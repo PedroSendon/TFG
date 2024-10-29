@@ -10,7 +10,8 @@ import {
     Box,
     Chip,
     Typography,
-    SelectChangeEvent
+    SelectChangeEvent,
+    InputLabel
 } from '@mui/material'; // Importación de componentes de Material UI.
 import { useHistory } from 'react-router-dom'; // Hook para redirección.
 import { IonFabButton, IonIcon, IonContent, IonPage } from '@ionic/react';
@@ -20,6 +21,7 @@ import { LanguageContext } from '../../../context/LanguageContext';
 import musclesCa from '../../../locales/muscles_ca.json';
 import musclesEs from '../../../locales/muscles_es.json';
 import musclesEn from '../../../locales/muscles_en.json';
+import { CameraAlt } from '@mui/icons-material';
 
 interface MuscleGroupsData {
     muscleGroups: string[];
@@ -29,7 +31,7 @@ const AddExercises: React.FC = () => {
     const history = useHistory();
     const [media, setMedia] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { t, language  } = useContext(LanguageContext); // Usar el contexto de idioma
+    const { t, language } = useContext(LanguageContext); // Usar el contexto de idioma
     const muscleGroupsCa: MuscleGroupsData = musclesCa;
     const muscleGroupsEs: MuscleGroupsData = musclesEs;
     const muscleGroupsEn: MuscleGroupsData = musclesEn;
@@ -134,235 +136,176 @@ const AddExercises: React.FC = () => {
     };
 
     const handleCancel = () => {
-        history.push('/admin/exercises');
+        history.push('/admin/workout');
     };
 
 
     return (
-        <IonPage>
-            {/* Header reutilizable */}
-            <Header title={t('add_exercise_title')} /> {/* Reemplaza el título con la variable de idioma */}
+        <Box sx={{ pb: 10, pt: 5, backgroundColor: '#f5f5f5' }}>
+            <Header title={t('add_exercise_title')} />
 
-            <IonContent>
-                <Container component="main" maxWidth="xs" style={{ paddingBottom: '80px' }}>
-                    <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-                        {/* Formulario */}
-                        <form onSubmit={handleSubmit}>
-                            <Grid container spacing={2}>
-                                {/* Campo de nombre */}
-                                <Grid item xs={12}>
-                                    <TextField
-                                        variant="outlined"
-                                        required
-                                        fullWidth
-                                        id="name"
-                                        label={t('exercise_name')}
-                                        name="name"
-                                        onChange={handleChange}
-                                        error={!!errors.name}
-                                        helperText={errors.name}
-                                        InputLabelProps={{
-                                            style: { color: 'var(--color-gris-oscuro)' },
-                                        }}
-                                        sx={{
-                                            '& label.Mui-focused': {
-                                                color: 'var(--color-verde-lima)',
-                                            },
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: 'var(--color-gris-oscuro)',
-                                                },
-                                                '&:hover fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                                '&.Mui-focused fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                            },
-                                        }}
-                                    />
-                                </Grid>
-
-                                {/* Campo de descripción */}
-                                <Grid item xs={12}>
-                                    <TextField
-                                        variant="outlined"
-                                        fullWidth
-                                        id="description"
-                                        label={t('description')}
-                                        name="description"
-                                        multiline
-                                        rows={3}
-                                        onChange={handleChange}
-                                        InputLabelProps={{
-                                            style: { color: 'var(--color-gris-oscuro)' },
-                                        }}
-                                        sx={{
-                                            '& label.Mui-focused': {
-                                                color: 'var(--color-verde-lima)',
-                                            },
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: 'var(--color-gris-oscuro)',
-                                                },
-                                                '&:hover fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                                '&.Mui-focused fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                            },
-                                        }}
-                                    />
-                                </Grid>
-
-                                {/* Selección múltiple de grupos musculares */}
-                                <Grid item xs={12}>
-                                    <TextField
-                                        variant="outlined"
-                                        fullWidth
-                                        select
-                                        label={t('muscle_groups')}
-                                        value={formData.muscleGroups}
-                                        onChange={(event) => handleMuscleGroupChange(event as SelectChangeEvent<string[]>)}
-                                        SelectProps={{
-                                            multiple: true,
-                                            renderValue: (selected) => (
-                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                    {(selected as string[]).map((value) => (
-                                                        <Chip key={value} label={value} />
-                                                    ))}
-                                                </Box>
-                                            ),
-                                        }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: 'var(--color-gris-oscuro)',
-                                                },
-                                                '&:hover fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                                '&.Mui-focused fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                            },
-                                        }}
-                                    >
-                                        {muscleGroupsList.map((muscle) => (
-                                            <MenuItem key={muscle} value={muscle}>
-                                                {muscle}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Grid>
-
-                                {/* Campo de instrucciones */}
-                                <Grid item xs={12}>
-                                    <TextField
-                                        variant="outlined"
-                                        fullWidth
-                                        id="instructions"
-                                        label={t('instructions')}
-                                        name="instructions"
-                                        multiline
-                                        rows={4}
-                                        onChange={handleChange}
-                                        InputLabelProps={{
-                                            style: { color: 'var(--color-gris-oscuro)' },
-                                        }}
-                                        sx={{
-                                            '& label.Mui-focused': {
-                                                color: 'var(--color-verde-lima)',
-                                            },
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: 'var(--color-gris-oscuro)',
-                                                },
-                                                '&:hover fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                                '&.Mui-focused fieldset': {
-                                                    borderColor: 'var(--color-verde-lima)',
-                                                },
-                                            },
-                                        }}
-                                    />
-                                </Grid>
-
-                                {/* Botón para subir imagen o video */}
-                                <Grid item xs={12} className="ion-text-center">
-                                    <Button
-                                        onClick={handleMediaUpload}
-                                        variant="contained"
-                                        style={{
-                                            border: '1px solid #000',
-                                            backgroundColor: '#FFFFFF',
-                                            color: '#000',
-                                            padding: '3% 0',
-                                            borderRadius: '5px',
-                                            fontSize: '1em',
-                                            minWidth: '100%',
-                                        }}
-                                    >
-                                        <IonIcon icon={cameraOutline} style={{ color: '#000', marginRight: '10px' }} />
-                                        {t('upload_image_video')} {/* Texto traducido */}
-                                    </Button>
-
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        style={{ display: 'none' }}
-                                        onChange={handleFileChange}
-                                    />
-
-                                    {media && <img src={media} alt="Preview" style={{ width: '100%', marginTop: '10px' }} />}
-                                </Grid>
-
-                            </Grid>
-                        </form>
-                    </div>
-                </Container>
-
-                {/* Botones de Cancelar y Guardar */}
-                <Grid item xs={12}>
+            <Box sx={{ p: 3, mt: 2, backgroundColor: '#f5f5f5' }}>
+                <form>
                     <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                            <Button
-                                onClick={handleCancel}
-                                style={{
-                                    border: '1px solid #FF0000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#FF0000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                label={t('exercise_name')}
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
                                 }}
-                            >
-                                {t('cancel')} {/* Texto traducido */}
-                            </Button>
+                            />
                         </Grid>
-                        <Grid item xs={6}>
-                            <Button
-                                type="submit"
-                                style={{
-                                    border: '1px solid #000',
-                                    backgroundColor: '#FFFFFF',
-                                    color: '#000',
-                                    padding: '3% 0',
-                                    borderRadius: '5px',
-                                    fontSize: '1em',
-                                    width: '100%',
+
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                label={t('description')}
+                                name="description"
+                                multiline
+                                rows={3}
+                                value={formData.description}
+                                onChange={handleChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <InputLabel sx={{ color: '#555555', marginBottom: 1 }}>{t('muscle_groups')}</InputLabel>
+                            <Select
+                                fullWidth
+                                multiple
+                                value={formData.muscleGroups}
+                                onChange={handleMuscleGroupChange}
+                                input={<OutlinedInput />}
+                                renderValue={(selected) => (
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                        {(selected as string[]).map((value) => (
+                                            <Chip key={value} label={value} />
+                                        ))}
+                                    </Box>
+                                )}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
                                 }}
                             >
-                                {t('save')} {/* Texto traducido */}
+                                {muscleGroupsList.map((muscle) => (
+                                    <MenuItem key={muscle} value={muscle}>
+                                        {muscle}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                label={t('instructions')}
+                                name="instructions"
+                                multiline
+                                rows={4}
+                                value={formData.instructions}
+                                onChange={handleChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Button
+                                onClick={handleMediaUpload}
+                                fullWidth
+                                variant="outlined"
+                                startIcon={<CameraAlt />}
+                                sx={{
+                                    color: '#000',
+                                    borderColor: '#000',
+                                    fontWeight: 'bold',
+                                    py: 1.5,
+                                    '&:hover': { backgroundColor: '#f5f5f5' },
+                                }}
+                            >
+                                {t('upload_image_video')}
                             </Button>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleFileChange}
+                            />
+                            {media && <Box mt={2}><img src={media} alt="Preview" style={{ width: '100%' }} /></Box>}
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Box display="flex" gap={2} sx={{ mt: 2 }}>
+                                <Button
+                                    fullWidth
+                                    variant="outlined"
+                                    onClick={handleCancel}
+                                    sx={{
+                                        color: '#777',
+                                        borderColor: '#777',
+                                        fontWeight: 'bold',
+                                        py: 1,
+                                        borderRadius: '8px',
+                                    }}
+                                >
+                                    {t('cancel')}
+                                </Button>
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    onClick={handleSubmit}
+                                    sx={{
+                                        backgroundColor: '#555',
+                                        color: '#FFF',
+                                        fontWeight: 'bold',
+                                        py: 1,
+                                        borderRadius: '8px',
+                                        '&:hover': { backgroundColor: '#333' },
+                                    }}
+                                >
+                                    {t('save')}
+                                </Button>
+                            </Box>
                         </Grid>
                     </Grid>
-                </Grid>
-            </IonContent>
-        </IonPage>
+                </form>
+            </Box>
+        </Box>
     );
 };
 export default AddExercises;
