@@ -135,11 +135,11 @@ const Users: React.FC = () => {
 
 
   return (
-    <Box sx={{ backgroundColor: '#f5f5f5', height: '100vh', marginTop: '16%' }}>
+    <Box sx={{ backgroundColor: '#f5f5f5', maxHeight: '100vh', marginTop: '16%' }}>
       {/* Header */}
       <Header title={t('users')} />
 
-      <Container sx={{ mt: 10 }}>
+      <Container sx={{ mt: 10 , paddingBottom:'18%'}}>
         {/* Listado de usuarios */}
         <Grid container spacing={2}>
           {users.map((user) => (

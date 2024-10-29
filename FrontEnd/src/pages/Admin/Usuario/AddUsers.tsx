@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-    TextField, Button, Grid, MenuItem, Container
+    TextField, Button, Grid, MenuItem, Container,
+    Box
 } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -166,59 +167,89 @@ const AddUsers: React.FC = () => {
     };
 
     return (
-        <IonPage>
-        <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '90vh', paddingBottom: '16px', marginTop:'16%' }}>
             <Header title={t('add_user')} />
-            <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
-                <form onSubmit={handleSubmit}>
+
+            <Container component="main" maxWidth="xs" sx={{ mt: 8 , paddingTop:'5%'}}>
+                <form onSubmit={(e) => e.preventDefault()}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
-                                required
                                 fullWidth
+                                required
                                 id="firstName"
                                 label={t('first_name')}
                                 name="firstName"
                                 onChange={handleChange}
                                 error={!!errors.firstName}
                                 helperText={errors.firstName}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
                             />
                         </Grid>
-
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
-                                required
                                 fullWidth
+                                required
                                 id="lastName"
                                 label={t('last_name')}
                                 name="lastName"
                                 onChange={handleChange}
                                 error={!!errors.lastName}
                                 helperText={errors.lastName}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
                             />
                         </Grid>
-
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
-                                required
                                 fullWidth
+                                required
                                 id="email"
                                 label={t('email')}
                                 name="email"
                                 onChange={handleChange}
                                 error={!!errors.email}
                                 helperText={errors.email}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
                             />
                         </Grid>
-
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
-                                required
                                 fullWidth
+                                required
                                 name="password"
                                 label={t('password')}
                                 type="password"
@@ -226,42 +257,69 @@ const AddUsers: React.FC = () => {
                                 onChange={handleChange}
                                 error={!!errors.password}
                                 helperText={errors.password}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
                             />
                         </Grid>
-
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
+                                fullWidth
                                 required
                                 select
-                                fullWidth
                                 name="gender"
                                 label={t('gender')}
                                 id="gender"
                                 value={formData.gender}
                                 onChange={handleChange}
-                                error={!!errors.gender}
-                                helperText={errors.gender}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
                             >
                                 <MenuItem value="M">{t('male')}</MenuItem>
                                 <MenuItem value="F">{t('female')}</MenuItem>
                                 <MenuItem value="Otro">{t('other')}</MenuItem>
                             </TextField>
                         </Grid>
-
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
+                                fullWidth
                                 required
                                 select
-                                fullWidth
                                 name="role"
                                 label={t('role')}
                                 id="role"
                                 value={formData.role}
                                 onChange={handleChange}
-                                error={!!errors.role}
-                                helperText={errors.role}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: '#555555',
+                                    },
+                                }}
                             >
                                 <MenuItem value="cliente">{t('client')}</MenuItem>
                                 <MenuItem value="administrador">{t('admin')}</MenuItem>
@@ -269,58 +327,74 @@ const AddUsers: React.FC = () => {
                                 <MenuItem value="nutricionista">{t('nutritionist')}</MenuItem>
                             </TextField>
                         </Grid>
-
                         <Grid item xs={12}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DatePicker
                                     label={t('birthdate')}
                                     value={formData.birthDate}
                                     onChange={handleDateChange}
+                                    renderInput={(params: any) => (
+                                        <TextField
+                                            {...params}
+                                            fullWidth
+                                            error={!!errors.birthDate}
+                                            helperText={errors.birthDate}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: '8px',
+                                                    '& fieldset': { borderColor: '#CCCCCC' },
+                                                    '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                                    '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                                },
+                                                '& .MuiInputLabel-root.Mui-focused': {
+                                                    color: '#555555',
+                                                },
+                                            }}
+                                        />
+                                    )}
                                 />
                             </LocalizationProvider>
                         </Grid>
                     </Grid>
                 </form>
-            </div>
-            <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
-                <Grid container spacing={2}>
+
+                <Grid container spacing={2} sx={{ mt: 4 }}>
                     <Grid item xs={6}>
                         <Button
-                            onClick={handleCancel}
-                            style={{
-                                border: '1px solid #FF0000',
-                                backgroundColor: '#FFFFFF',
-                                color: '#FF0000',
-                                padding: '3% 0',
-                                borderRadius: '5px',
-                                fontSize: '1em',
-                                width: '100%',
+                            fullWidth
+                            variant="outlined"
+                            sx={{
+                                borderColor: '#AAAAAA',
+                                color: '#777777',
+                                fontWeight: 'bold',
+                                py: 1,
                             }}
+                            onClick={handleCancel}
                         >
                             {t('cancel')}
                         </Button>
                     </Grid>
                     <Grid item xs={6}>
                         <Button
-                            type="submit"
-                            style={{
-                                border: '1px solid #000',
-                                backgroundColor: '#FFFFFF',
-                                color: '#000',
-                                padding: '3% 0',
-                                borderRadius: '5px',
-                                fontSize: '1em',
-                                width: '100%',
+                            fullWidth
+                            variant="contained"
+                            sx={{
+                                backgroundColor: '#555555',
+                                color: '#FFFFFF',
+                                fontWeight: 'bold',
+                                py: 1,
+                                '&:hover': {
+                                    backgroundColor: '#333333',
+                                },
                             }}
                             onClick={handleSubmit}
-                            disabled={!isFormValid()}                        >
-                            {t('add')}
+                        >
+                            {t('save')}
                         </Button>
                     </Grid>
                 </Grid>
-            </Grid>
-        </Container>
-        </IonPage>
+            </Container>
+        </Box>
     );
 };
 

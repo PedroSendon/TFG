@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { IonPage, IonContent, IonGrid, IonRow, IonCol } from '@ionic/react';
 import Header from '../../Header/Header';
-import { Select, MenuItem, Button, Grid } from '@mui/material';
+import { Select, MenuItem, Button, Grid, Container, Box, Typography, TextField } from '@mui/material';
 import { useHistory, useLocation } from 'react-router-dom';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
 
@@ -141,95 +140,116 @@ const AssignPlans: React.FC = () => {
   };
 
   return (
-    <IonPage>
+    <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '95vh' }}>
       <Header title={t('assign_plans')} />
 
-      <IonContent>
-        <IonGrid>
-          {/* Selector de planes de entrenamiento */}
-          <IonRow style={{ marginTop: '20px' }}>
-            <IonCol size="12">
-              <Select
-                value={selectedTrainingPlan}
-                onChange={(e) => setSelectedTrainingPlan(e.target.value as string)}
-                fullWidth
-                displayEmpty
-                style={{ border: '1px solid #d1d1d6', borderRadius: '8px', padding: '10px' }}
-              >
-                <MenuItem value="" disabled>
-                  {t('select_training_plan')}
-                </MenuItem>
-                {trainingPlanOptions.map((plan) => (
-                  <MenuItem key={plan.id} value={plan.id}>
-                    {plan.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </IonCol>
-          </IonRow>
+      <Container maxWidth="sm" sx={{ mt: 4, paddingTop:'3%' }}>
+        {/* Selector de planes de entrenamiento */}
+        <Typography variant="subtitle1" sx={{ mt: 4, color: '#555555', fontWeight: 'bold' }}>
+          {t('select_training_plan')}
+        </Typography>
+        <TextField
+          select
+          value={selectedTrainingPlan}
+          onChange={(e) => setSelectedTrainingPlan(e.target.value as string)}
+          fullWidth
+          variant="outlined"
+          sx={{
+            mt: 1,
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+              '& fieldset': { borderColor: '#CCCCCC' },
+              '&:hover fieldset': { borderColor: '#AAAAAA' },
+              '&.Mui-focused fieldset': { borderColor: '#555555' },
+            },
+            '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+          }}
+          label={t('select_training_plan')}
+        >
+          <MenuItem value="" disabled>
+            {t('select_training_plan')}
+          </MenuItem>
+          {trainingPlanOptions.map((plan) => (
+            <MenuItem key={plan.id} value={plan.id}>
+              {plan.name}
+            </MenuItem>
+          ))}
+        </TextField>
 
-          {/* Selector de planes nutricionales */}
-          <IonRow style={{ marginTop: '20px' }}>
-            <IonCol size="12">
-              <Select
-                value={selectedPlan}
-                onChange={(e) => setSelectedPlan(e.target.value as string)}
-                fullWidth
-                displayEmpty
-                style={{ border: '1px solid #d1d1d6', borderRadius: '8px', padding: '10px' }}
-              >
-                <MenuItem value="" disabled>
-                  {t('select_nutrition_plan')}
-                </MenuItem>
-                {nutritionPlans.map((plan) => (
-                  <MenuItem key={plan.id} value={plan.id}>
-                    {plan.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </IonCol>
-          </IonRow>
+        {/* Selector de planes nutricionales */}
+        <Typography variant="subtitle1" sx={{ mt: 4, color: '#555555', fontWeight: 'bold' }}>
+          {t('select_nutrition_plan')}
+        </Typography>
+        <TextField
+          select
+          value={selectedPlan}
+          onChange={(e) => setSelectedPlan(e.target.value as string)}
+          fullWidth
+          variant="outlined"
+          sx={{
+            mt: 1,
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+              '& fieldset': { borderColor: '#CCCCCC' },
+              '&:hover fieldset': { borderColor: '#AAAAAA' },
+              '&.Mui-focused fieldset': { borderColor: '#555555' },
+            },
+            '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+          }}
+          label={t('select_nutrition_plan')}
+        >
+          <MenuItem value="" disabled>
+            {t('select_nutrition_plan')}
+          </MenuItem>
+          {nutritionPlans.map((plan) => (
+            <MenuItem key={plan.id} value={plan.id}>
+              {plan.name}
+            </MenuItem>
+          ))}
+        </TextField>
 
-          {/* Botones de Cancelar y Guardar */}
-          <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Button
-                  onClick={handleCancel}
-                  style={{
-                    border: '1px solid #FF0000',
-                    backgroundColor: '#FFFFFF',
-                    color: '#FF0000',
-                    padding: '3% 0',
-                    borderRadius: '5px',
-                    fontSize: '1em',
-                    width: '100%',
-                  }}
-                >
-                  {t('cancel')}
-                </Button>
-              </Grid>
-              <Grid item xs={6}>
-                <Button
-                  onClick={handleSave}
-                  style={{
-                    border: '1px solid #000',
-                    backgroundColor: '#FFFFFF',
-                    color: '#000',
-                    padding: '3% 0',
-                    borderRadius: '5px',
-                    fontSize: '1em',
-                    width: '100%',
-                  }}
-                >
-                  {t('save')}
-                </Button>
-              </Grid>
-            </Grid>
+        {/* Botones de Cancelar y Guardar */}
+        <Grid container spacing={2} sx={{ mt: 4 }}>
+          <Grid item xs={6}>
+            <Button
+              onClick={handleCancel}
+              fullWidth
+              variant="outlined"
+              sx={{
+                borderColor: '#AAAAAA',
+                color: '#555555',
+                fontWeight: 'bold',
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#f0f0f0',
+                  borderColor: '#888888',
+                },
+              }}
+            >
+              {t('cancel')}
+            </Button>
           </Grid>
-        </IonGrid>
-      </IonContent>
-    </IonPage>
+          <Grid item xs={6}>
+            <Button
+              onClick={handleSave}
+              fullWidth
+              variant="contained"
+              sx={{
+                backgroundColor: '#555555',
+                color: '#FFFFFF',
+                fontWeight: 'bold',
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#777777',
+                },
+              }}
+            >
+              {t('save')}
+            </Button>
+          </Grid>
+        </Grid>
+      </Container>
+    </Box>
   );
 };
 
