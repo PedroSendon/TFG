@@ -185,7 +185,7 @@ const MacrosAdmin: React.FC = () => {
                             >
                                 <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                                     {/* Título del macro alineado a la izquierda y ocupando todo el ancho */}
-                                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#000', textAlign: 'left' }}>
+                                    <Typography sx={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
                                         {macro.name || 'Macro Plan'}
                                     </Typography>
 

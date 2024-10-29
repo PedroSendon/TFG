@@ -13,7 +13,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext';
-import { CameraAlt as CameraAltIcon, Close, Delete, PhotoCamera, Image } from '@mui/icons-material';
+import { CameraAlt as CameraAltIcon, Close, Delete, PhotoCamera, Image, CameraAlt } from '@mui/icons-material';
 
 
 const ModifyUserPage: React.FC = () => {
@@ -169,32 +169,30 @@ const ModifyUserPage: React.FC = () => {
     };
 
     return (
-        <Box sx={{ backgroundColor: '#f5f5f5', height: '100vh', marginTop: '17%' }}>
+        <Box sx={{ backgroundColor: '#f5f5f5', height: '100vh', marginTop: '17%', paddingBottom:'5%' }}>
             {/* Header */}
             <Header title={t('modify_user')} />
 
-            <Container component="main" maxWidth="xs" sx={{ mb: 4 }}>
-                {/* Cambiar Imagen de Perfil */}
-                <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Container component="main" maxWidth="xs" sx={{ mb: 4}}>
+
+                {/* Image Section */}
+                <Box textAlign="center" mb={3} sx={{ paddingTop: '2%' }}>
                     <Avatar
                         src={profilePicture}
-                        alt="Foto de perfil"
+                        alt="Preview"
                         sx={{
-                            width: 100,
-                            height: 100,
-                            border: '2px solid var(--color-verde-lima)',
-                            mb: 1,
-                            mx: 'auto', // Centra la imagen horizontalmente
+                            width: 150, height: 150, margin: '0 auto', borderRadius: '10px', border: '2px solid #000',
                         }}
                     />
                     <Button
-                        variant="text"
-                        startIcon={<CameraAltIcon />}
-                        sx={{ color: 'var(--color-verde-lima)', fontSize: 12 }}
+                        variant="outlined"
+                        startIcon={<CameraAlt />}
                         onClick={() => setShowActionSheet(true)}
+                        sx={{ color: '#000', borderColor: '#000', mt: 1 }}
                     >
                         {t('change_photo')}
                     </Button>
+                    <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
                 </Box>
 
                 <Dialog
@@ -230,7 +228,7 @@ const ModifyUserPage: React.FC = () => {
                                 '&:hover': { color: '#555' }, // Cambio de color al hacer hover
                             }}
                         >
-                            <Close sx={{marginRight:'20px'}}/>
+                            <Close sx={{ marginRight: '20px' }} />
                         </IconButton>
                     </DialogTitle>
 
@@ -478,7 +476,7 @@ const ModifyUserPage: React.FC = () => {
                 </form>
 
                 {/* Botones de Cancelar y Guardar con tonos grises */}
-                <Grid container spacing={2} sx={{ mt: 1}}>
+                <Grid container spacing={2} sx={{ mt: 1 }}>
                     <Grid item xs={6}>
                         <Button
                             fullWidth

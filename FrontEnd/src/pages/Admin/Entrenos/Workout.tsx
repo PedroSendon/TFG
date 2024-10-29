@@ -13,11 +13,11 @@ import {
     IonSegment,
     IonSegmentButton
 } from '@ionic/react';
-import { Add, AssignmentOutlined, FitnessCenter } from '@mui/icons-material';
+import { Add, AssignmentOutlined, FitnessCenter, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import Header from '../../Header/Header';
 import Navbar from '../../Navbar/Navbar';
 import { useHistory } from 'react-router';
-import { Button } from '@mui/material';
+import { Box, Button, Card, CardContent, Container, Fab, Grid, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importamos el contexto de idioma
 
 interface Workout {
@@ -83,12 +83,12 @@ const WorkoutsExercises: React.FC = () => {
     const fetchTrainingPlans = async () => {
         try {
             const accessToken = localStorage.getItem('access_token');
-    
+
             if (!accessToken) {
                 console.error("Token no encontrado");
                 return;
             }
-    
+
             const response = await fetch('http://127.0.0.1:8000/api/trainingplans/', {
                 method: 'GET',
                 headers: {
@@ -96,13 +96,13 @@ const WorkoutsExercises: React.FC = () => {
                     'Authorization': `Bearer ${accessToken}`,
                 },
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error("Detalles del error:", errorData);
                 throw new Error(`Error fetching training plans: ${response.status}`);
             }
-    
+
             const data = await response.json();
             setTrainingPlans(data.data.map((plan: any) => ({
                 id: plan.id,
@@ -118,8 +118,8 @@ const WorkoutsExercises: React.FC = () => {
             console.error("Error al obtener planes de entrenamiento:", error);
         }
     };
-    
-    
+
+
 
     const fetchExercises = async () => {
         try {
@@ -148,19 +148,19 @@ const WorkoutsExercises: React.FC = () => {
 
     const handleDelete = async (id: number, type: string) => {
         const accessToken = localStorage.getItem('access_token');
-    
+
         if (!accessToken) {
             console.error(t('no_token'));
             return;
         }
-    
-        const deleteUrl = 
+
+        const deleteUrl =
             type === 'workout'
                 ? `http://127.0.0.1:8000/api/workouts/${id}/delete/`
                 : type === 'exercise'
-                ? `http://127.0.0.1:8000/api/exercises/${id}/delete/`
-                : `http://127.0.0.1:8000/api/trainingplans/${id}/delete/`;
-    
+                    ? `http://127.0.0.1:8000/api/exercises/${id}/delete/`
+                    : `http://127.0.0.1:8000/api/trainingplans/${id}/delete/`;
+
         try {
             const response = await fetch(deleteUrl, {
                 method: 'DELETE',
@@ -169,7 +169,7 @@ const WorkoutsExercises: React.FC = () => {
                     'Authorization': `Bearer ${accessToken}`,
                 },
             });
-    
+
             if (response.ok) {
                 // Refrescar la lista después de eliminar el elemento
                 if (type === 'workout') {
@@ -187,13 +187,16 @@ const WorkoutsExercises: React.FC = () => {
             console.error('Error en la solicitud de eliminación:', error);
         }
     };
-    
+
+    const handleSectionChange = (event: React.SyntheticEvent, newValue: string) => {
+        setSelectedSection(newValue);
+    };
+
 
     const handleEdit = (id: number, type: string) => {
         const selectedData = type === 'workout'
             ? workouts.find((workout) => workout.id === id)
             : exercises.find((exercise) => exercise.id === id);
-
         if (!selectedData) {
             console.error(t('not_found'));
             return;
@@ -210,254 +213,133 @@ const WorkoutsExercises: React.FC = () => {
     };
 
     return (
-        <IonPage>
+        <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Header title={t(selectedSection === 'workouts' ? 'workouts' : 'exercises')} />
-            <IonContent style={{ backgroundColor: '#000000' }}>
-           
-                    <IonSegment
+            <Container maxWidth="sm" sx={{ mt: 8, pb: 10, flexGrow: 1 }}>
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        backgroundColor: '#f5f5f5',
+                        paddingTop: '16%',
+                        zIndex: 1000,
+                        borderBottom: '1px solid #ccc', // Línea inferior para separación
+                    }}
+                >
+                    <Tabs
                         value={selectedSection}
-                        onIonChange={(e: CustomEvent) => setSelectedSection(e.detail.value!)}
-                        className="custom-segment"
-                        color="success"
-                        style={{
-                            position: 'fixed',   // Posición fija
-                            top: '56px',         // Ajustar la posición debajo del Header
-                            width: '100%',
-                            zIndex: 1000,        // Asegura que esté sobre el contenido
-                            backgroundColor: '#ffffff',
-                            borderBottom: '1px solid #ccc',
+                        onChange={handleSectionChange}
+                        centered
+                        sx={{
+                            color: 'gray',
+                            '.MuiTab-root': {
+                                color: '#b0b0b0',
+                                '&.Mui-selected': {
+                                    color: 'gray', // Color gris para el texto seleccionado
+                                },
+                            },
+                            '.MuiTabs-indicator': {
+                                backgroundColor: 'gray', // Color gris para el indicador seleccionado
+                            },
                         }}
                     >
-                        <IonSegmentButton value="workouts">
-                            <IonLabel>{t('workouts')}</IonLabel>
-                        </IonSegmentButton>
-                        <IonSegmentButton value="exercises">
-                            <IonLabel>{t('exercises')}</IonLabel>
-                        </IonSegmentButton>
-                        <IonSegmentButton value="trainingPlans">
-                            <IonLabel>{t('training_plans')}</IonLabel> {/* Nueva opción */}
-                        </IonSegmentButton>
-                    </IonSegment>
+                        <Tab label={t('workouts')} value="workouts" />
+                        <Tab label={t('exercises')} value="exercises" />
+                        <Tab label={t('training_plans')} value="trainingPlans" />
+                    </Tabs>
+                </Box>
+                <Box sx={{ mt: 4, paddingTop: '9%' }}>
+                    <Grid container spacing={2}>
+                        {(selectedSection === 'workouts' ? workouts : selectedSection === 'trainingPlans' ? trainingPlans : exercises).map((item) => (
+                            <Grid item xs={12} key={item.id}>
+                                <Card sx={{
+                                    backgroundColor: '#FFFFFF',
+                                    borderRadius: '10px',
+                                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                                    border: '1px solid #e0e0e0',
+                                    paddingX: 2,
+                                    '&:hover': {
+                                        transform: 'scale(1.02)',
+                                        boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)'
+                                    },
+                                    transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                                }}>
+                                    <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Typography sx={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
+                                            {item.name}
+                                        </Typography>
+                                        {/* Botones alineados a la derecha */}
+                                        <Box sx={{ display: 'flex', gap: '7px' }}>
+                                            <IconButton
+                                                onClick={() => handleEdit(item.id, selectedSection)}
+                                                sx={{
+                                                    border: '1px solid #000',
+                                                    backgroundColor: '#FFFFFF',
+                                                    color: '#000',
+                                                    borderRadius: '5px',
+                                                    padding: '4px',
+                                                    fontSize: '0.8em',
+                                                    '&:hover': { backgroundColor: '#f3f3f3' },
+                                                }}
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                            <IconButton
+                                                onClick={() => handleDelete(item.id, selectedSection)}
+                                                sx={{
+                                                    border: '1px solid #FF0000',
+                                                    backgroundColor: '#FFFFFF',
+                                                    color: '#FF0000',
+                                                    borderRadius: '5px',
+                                                    padding: '4px',
+                                                    fontSize: '0.8em',
+                                                    '&:hover': { backgroundColor: '#f3f3f3' },
+                                                }}
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
 
-                    <div style={{ marginTop: '10%' }}> 
-                <IonGrid >
-                    {selectedSection === 'workouts' ? (
-                        <IonRow>
-                            {workouts.map((workout) => (
-                                <IonCol size="12" key={workout.id}>
-                                    <IonCard
-                                        style={{
-                                            backgroundColor: '#FFFFFF',
-                                            borderRadius: '10px',
-                                            padding: '8px',
-                                            margin: '10px auto',
-                                            maxWidth: '95%',
-                                            boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
-                                        }}
-                                    >
-                                        <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
-                                                <IonLabel style={{ color: '#000000', fontWeight: 'bold', fontSize: '1em', display: 'block', marginBottom: '8px' }}>
-                                                    {workout.name}
-                                                </IonLabel>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </Box>
 
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '5px' }}>
-                                                <Button
-                                                    onClick={() => handleEdit(workout.id, 'workout')}
-                                                    style={{
-                                                        border: '1px solid #000',
-                                                        backgroundColor: '#FFFFFF',
-                                                        color: '#000',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '5px',
-                                                        fontSize: '0.7em',
-                                                        minWidth: '55px',
-                                                    }}
-                                                >
-                                                    {t('modify')}
-                                                </Button>
-                                                <Button
-                                                    onClick={() => handleDelete(workout.id, 'workout')}
-                                                    style={{
-                                                        border: '1px solid #FF0000',
-                                                        backgroundColor: '#FFFFFF',
-                                                        color: '#FF0000',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '5px',
-                                                        fontSize: '0.7em',
-                                                        minWidth: '55px',
-                                                    }}
-                                                >
-                                                    {t('delete')}
-                                                </Button>
-                                            </div>
-                                        </IonCardContent>
-                                    </IonCard>
-                                </IonCol>
-                            ))}
-                        </IonRow>
-                    ) : selectedSection === 'trainingPlans' ? (
-                        <IonRow>
-                            {trainingPlans.map((plan) => (
-                                <IonCol size="12" key={plan.id}>
-                                    <IonCard
-                                        style={{
-                                            backgroundColor: '#FFFFFF',
-                                            borderRadius: '10px',
-                                            padding: '8px',
-                                            margin: '10px auto',
-                                            maxWidth: '95%',
-                                            boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
-                                        }}
-                                    >
-                                        <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
-                                                <IonLabel style={{ color: '#000000', fontWeight: 'bold', fontSize: '1em', display: 'block', marginBottom: '8px' }}>
-                                                    {plan.name}
-                                                </IonLabel>
-                        
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '5px' }}>
-                                                <Button
-                                                    onClick={() => handleEdit(plan.id, 'trainingplan')}
-                                                    style={{
-                                                        border: '1px solid #000',
-                                                        backgroundColor: '#FFFFFF',
-                                                        color: '#000',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '5px',
-                                                        fontSize: '0.7em',
-                                                        minWidth: '55px',
-                                                    }}
-                                                >
-                                                    {t('modify')}
-                                                </Button>
-                                                <Button
-                                                    onClick={() => handleDelete(plan.id, 'plan')}
-                                                    style={{
-                                                        border: '1px solid #FF0000',
-                                                        backgroundColor: '#FFFFFF',
-                                                        color: '#FF0000',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '5px',
-                                                        fontSize: '0.7em',
-                                                        minWidth: '55px',
-                                                    }}
-                                                >
-                                                    {t('delete')}
-                                                </Button>
-                                            </div>
-                                        </IonCardContent>
-                                    </IonCard>
-                                </IonCol>
-                            ))}
-                        </IonRow>
+                {/* Botones flotantes para agregar elementos */}
+                <Fab
+                    onClick={() => handleAdd(selectedSection)}
+                    sx={{
+                        position: 'fixed',
+                        bottom: '10%',
+                        right: '5%',
+                        backgroundColor: '#FFFFFF',
+                        color: '#000',
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        border: '2px solid #000',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)',
+                        '&:hover': {
+                            backgroundColor: '#f5f5f5',
+                        },
+                    }}
+                >
+                    {selectedSection === 'trainingPlans' ? (
+                        <AssignmentOutlined sx={{ fontSize: 28, color: '#000' }} />
                     ) : (
-                        <IonRow>
-                            {exercises.map((exercise) => (
-                                <IonCol size="12" key={exercise.id}>
-                                    <IonCard
-                                        style={{
-                                            backgroundColor: '#FFFFFF',
-                                            borderRadius: '10px',
-                                            padding: '8px',
-                                            margin: '10px auto',
-                                            maxWidth: '95%',
-                                            boxShadow: '2px 2px 8px rgba(0,0,0,0.1)',
-                                        }}
-                                    >
-                                        <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
-                                                <IonLabel style={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
-                                                    {exercise.name}
-                                                </IonLabel>
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '5px' }}>
-                                                <Button
-                                                    onClick={() => handleEdit(exercise.id, 'exercise')}
-                                                    style={{
-                                                        border: '1px solid #000',
-                                                        backgroundColor: '#FFFFFF',
-                                                        color: '#000',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '5px',
-                                                        fontSize: '0.7em',
-                                                        minWidth: '55px',
-                                                    }}
-                                                >
-                                                    {t('modify')}
-                                                </Button>
-                                                <Button
-                                                    onClick={() => handleDelete(exercise.id, 'exercise')}
-                                                    style={{
-                                                        border: '1px solid #FF0000',
-                                                        backgroundColor: '#FFFFFF',
-                                                        color: '#FF0000',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '5px',
-                                                        fontSize: '0.7em',
-                                                        minWidth: '55px',
-                                                    }}
-                                                >
-                                                    {t('delete')}
-                                                </Button>
-                                            </div>
-                                        </IonCardContent>
-                                    </IonCard>
-                                </IonCol>
-                            ))}
-                        </IonRow>
+                        <FitnessCenter sx={{ fontSize: 28, color: '#000' }} />
                     )}
-                </IonGrid>
-                </div>
-                {/* Botón flotante para añadir elementos */}
-
-                <IonFab vertical="bottom" horizontal="end" style={{ marginBottom: '15%', position: 'fixed' }}>
-                    <Button
-                        onClick={() => handleAdd(selectedSection === 'workouts' ? 'workout' : 'exercise')}
-                        style={{
-                            backgroundColor: '#FFFFFF',
-                            color: '#000',
-                            width: '60px',
-                            height: '60px',
-                            borderRadius: '50%',
-                            border: '2px solid #000',
-                            zIndex: 1000,
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <FitnessCenter style={{ fontSize: '24px', color: '#000' }} /> {/* Icono de mancuerna */}
-                    </Button>
-                </IonFab>
-
-                {selectedSection === 'trainingPlans' && (
-                    <IonFab vertical="bottom" horizontal="end" style={{ marginBottom: '15%', position: 'fixed' }}>
-                        <Button
-                            onClick={handleAddTrainingPlan}
-                            style={{
-                                backgroundColor: '#FFFFFF',
-                                color: '#000',
-                                width: '60px',
-                                height: '60px',
-                                borderRadius: '50%',
-                                border: '2px solid #000',
-                                zIndex: 1000,
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <AssignmentOutlined style={{ fontSize: '24px', color: '#000' }} /> {/* Icono de plan de entrenamiento */}
-                        </Button>
-                    </IonFab>
-                )}
-
-            </IonContent>
+                </Fab>
+            </Container>
             <Navbar />
-        </IonPage>
+        </Box>
     );
 };
 
