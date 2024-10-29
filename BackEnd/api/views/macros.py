@@ -205,7 +205,6 @@ def get_mealplans_by_category(request, category):
         return Response({"error": "No se encontraron planes de comidas"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
 def list_diet_categories(request):
     """
     Endpoint para listar las categorías de dieta hardcodeadas.

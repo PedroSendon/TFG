@@ -1,39 +1,31 @@
 import React, { useEffect, useState, useContext } from 'react';
 import {
-    TextField, Button, Grid, Container, MenuItem
-} from '@mui/material'; // Importación de componentes de Material UI.
+    TextField, Button, Grid, Container, MenuItem, Box
+} from '@mui/material';
 import { useHistory } from 'react-router-dom';
-import Header from '../../Header/Header'; // Componente de header reutilizable
-import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
-import { IonPage } from '@ionic/react';
+import Header from '../../Header/Header';
+import { LanguageContext } from '../../../context/LanguageContext';
 
 const AddMacros: React.FC = () => {
-    const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
-    const history = useHistory(); // Hook para navegación.
+    const { t } = useContext(LanguageContext);
+    const history = useHistory();
 
-    // Estado del formulario.
     const [formData, setFormData] = useState({
         kcal: '',
         proteins: '',
         carbs: '',
         fats: '',
         dietType: '',
-        description: '', // Nueva descripción de la dieta
+        description: '',
     });
 
-    // Estado para manejar los errores de validación.
     const [errors, setErrors] = useState<any>({});
-
-    // Estado para los tipos de dieta.
     const [dietTypes, setDietTypes] = useState<{ value: string; label: string }[]>([]);
 
-    // Obtener los tipos de dieta desde la base de datos al cargar el componente.
     useEffect(() => {
-
         const fetchDietTypes = async () => {
             try {
                 const accessToken = localStorage.getItem('access_token');
-
                 if (!accessToken) {
                     console.error(t('no_token'));
                     return;
@@ -42,28 +34,22 @@ const AddMacros: React.FC = () => {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                        'Authorization': `Bearer ${accessToken}`,
                     },
                 });
                 const data = await response.json();
-
-                // Mapeamos las categorías
                 const types = data.categories.map((category: any) => ({
                     value: category.name,
-                    label: category.description || category.name, // Ajusta según el formato de tu backend
+                    label: category.description || category.name,
                 }));
-
-                setDietTypes(types); // Guardar en el estado
+                setDietTypes(types);
             } catch (error) {
                 console.error('Error fetching diet types:', error);
             }
         };
-
         fetchDietTypes();
     }, []);
 
-
-    // Validaciones básicas.
     const validateField = (name: string, value: string) => {
         if (!value || isNaN(Number(value))) {
             return `${t(name)} ${t('validation_error')}`;
@@ -84,19 +70,16 @@ const AddMacros: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Manejar los cambios en el formulario.
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    // Manejar el envío del formulario.
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (validateForm()) {
             try {
                 const accessToken = localStorage.getItem('access_token');
-
                 if (!accessToken) {
                     console.error(t('no_token'));
                     return;
@@ -105,48 +88,33 @@ const AddMacros: React.FC = () => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                        'Authorization': `Bearer ${accessToken}`,
                     },
-                    body: JSON.stringify({
-                        kcal: formData.kcal,
-                        proteins: formData.proteins,
-                        carbs: formData.carbs,
-                        fats: formData.fats,
-                        dietType: formData.dietType,
-                        description: formData.description,
-                    }),
+                    body: JSON.stringify(formData),
                 });
-
                 if (response.ok) {
-                    const data = await response.json();
-                    console.log(t('recommendation_added'), data);
                     history.push({
                         pathname: '/admin/macros',
-                        state: { reload: true }  // Pasar un estado para indicar recarga
+                        state: { reload: true },
                     });
                 } else {
                     const errorData = await response.json();
-                    console.error(t('error_adding_recommendation'), errorData);
                     setErrors({ submit: errorData.error || t('unknown_error') });
                 }
             } catch (error) {
-                console.error(t('connection_error'), error);
                 setErrors({ submit: t('server_connection_error') });
             }
-        } else {
-            console.log(t('form_errors'));
         }
     };
 
     const handleCancel = () => {
-        history.push('/admin/nutrition');  // Cancelar y redirigir a la lista de ejercicios
+        history.push('/admin/nutrition');
     };
 
     return (
-        <IonPage>
-        <Container component="main" maxWidth="xs" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column', marginTop:'16%' }}>
             <Header title={t('add_macros_title')} />
-            <div style={{ marginTop: '2rem', textAlign: 'center', flexGrow: 1 }}>
+            <Container component="main" maxWidth="xs" sx={{ mt: 4, flexGrow: 1 }}>
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
                         {/* Campo de Kcal */}
@@ -161,6 +129,15 @@ const AddMacros: React.FC = () => {
                                 onChange={handleChange}
                                 error={!!errors.kcal}
                                 helperText={errors.kcal}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
                         </Grid>
 
@@ -176,6 +153,15 @@ const AddMacros: React.FC = () => {
                                 onChange={handleChange}
                                 error={!!errors.proteins}
                                 helperText={errors.proteins}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
                         </Grid>
 
@@ -191,6 +177,15 @@ const AddMacros: React.FC = () => {
                                 onChange={handleChange}
                                 error={!!errors.carbs}
                                 helperText={errors.carbs}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
                         </Grid>
 
@@ -206,6 +201,15 @@ const AddMacros: React.FC = () => {
                                 onChange={handleChange}
                                 error={!!errors.fats}
                                 helperText={errors.fats}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
                         </Grid>
 
@@ -223,6 +227,15 @@ const AddMacros: React.FC = () => {
                                 onChange={handleChange}
                                 error={!!errors.dietType}
                                 helperText={errors.dietType}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             >
                                 {dietTypes.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
@@ -240,56 +253,64 @@ const AddMacros: React.FC = () => {
                                 id="description"
                                 label={t('description')}
                                 name="description"
-                                onChange={handleChange}
                                 value={formData.description}
+                                onChange={handleChange}
                                 helperText={t('description_helper')}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
                             />
                         </Grid>
                     </Grid>
                 </form>
-            </div>
 
-            {/* Botones de Cancelar y Guardar */}
-            <Grid item xs={12} style={{ padding: '1rem 0', marginBottom: '15%' }}>
-                <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                        <Button
-                            onClick={handleCancel}
-                            style={{
-                                border: '1px solid #FF0000',
-                                backgroundColor: '#FFFFFF',
-                                color: '#FF0000',
-                                padding: '3% 0',
-                                borderRadius: '5px',
-                                fontSize: '1em',
-                                width: '100%',
-                            }}
-                        >
-                            {t('cancel')}
-                        </Button>
+                {/* Botones de Cancelar y Guardar */}
+                <Box sx={{ mt: 3, pb: 2, textAlign: 'center', width: '100%' }}>
+                    <Grid container spacing={2} justifyContent="center">
+                        <Grid item xs={6}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                sx={{
+                                    borderColor: '#AAAAAA',
+                                    color: '#777777',
+                                    fontWeight: 'bold',
+                                    py: 1,
+                                }}
+                                onClick={handleCancel}
+                            >
+                                {t('cancel')}
+                            </Button>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                sx={{
+                                    backgroundColor: '#555555',
+                                    color: '#FFFFFF',
+                                    fontWeight: 'bold',
+                                    py: 1,
+                                    '&:hover': {
+                                        backgroundColor: '#333333',
+                                    },
+                                }}
+                                onClick={handleSubmit}
+                                disabled={!formData.kcal || !formData.proteins || !formData.carbs || !formData.fats || !formData.dietType}
+                            >
+                                {t('save')}
+                            </Button>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                        <Button
-                            type="submit"
-                            style={{
-                                border: '1px solid #000',
-                                backgroundColor: '#FFFFFF',
-                                color: '#000',
-                                padding: '3% 0',
-                                borderRadius: '5px',
-                                fontSize: '1em',
-                                width: '100%',
-                            }}
-                            onClick={handleSubmit}
-                            disabled={!formData.kcal || !formData.proteins || !formData.carbs || !formData.fats || !formData.dietType}
-                        >
-                            {t('add')}
-                        </Button>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Container>
-        </IonPage>
+                </Box>
+            </Container>
+        </Box>
     );
 };
 
