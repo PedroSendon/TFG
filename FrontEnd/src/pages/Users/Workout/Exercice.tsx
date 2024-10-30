@@ -44,16 +44,15 @@ const ExerciseDetailPage: React.FC = () => {
     );
 
     const handleMarkAsComplete = () => {
-        const updatedCompletedExercises = { ...completedExercises, [exerciseId]: true }; // Añade el ejercicio actual como completado
+        const updatedCompletedExercises = { ...completedExercises, [exerciseId]: true };
+        setCompletedExercises(updatedCompletedExercises);
+        localStorage.setItem(`completedExercises_${day_id}`, JSON.stringify(updatedCompletedExercises)); // Guardamos en Local Storage
+    
         history.push({
             pathname: '/workout/day',
-            state: {
-                day_id,
-                completedExercises: updatedCompletedExercises, // Pasa el estado actualizado
-            },
+            state: { day_id, completedExercises: updatedCompletedExercises },
         });
     };
-
     const fetchExerciseDetails = async (day_id: number, exerciseId: string) => {
         try {
             const accessToken = localStorage.getItem('access_token');

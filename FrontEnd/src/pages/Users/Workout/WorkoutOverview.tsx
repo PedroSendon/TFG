@@ -1,21 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
-import {
-  IonPage,
-  IonContent,
-  IonList,
-  IonItem,
-  IonIcon,
-  IonButton,
-  IonModal,
-} from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { lockClosedOutline, playCircleOutline, checkmarkCircleOutline, informationCircleOutline } from 'ionicons/icons';
 import { LanguageContext } from '../../../context/LanguageContext';
 import Header from '../../Header/Header';
 import { authenticatedFetch } from '../../../utils/authFetch';
-
-import { AppBar, Toolbar, Typography, IconButton, Box, Card, CardContent, Divider, Modal, List, ListItem, ListItemText } from '@mui/material';
+import { Typography, IconButton, Box, Card, CardContent, Divider, Modal, List, ListItem, ListItemText } from '@mui/material';
 import { Close as CloseIcon, Info as InfoIcon, PlayCircleOutline, CheckCircleOutline, Lock } from '@mui/icons-material';
+
 interface Workout {
   id: number;
   name: string;
@@ -110,28 +100,32 @@ const WorkoutOverview: React.FC = () => {
 
   if (loading) {
     return (
-      <IonPage>
+      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <Header title={t('loading_workouts')} />
-        <IonContent>
-          <p>{t('loading')}...</p>
-        </IonContent>
-      </IonPage>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+          <Typography variant="h6" color="textSecondary">
+            {t('loading')}...
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <IonPage>
+      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <Header title={t('error')} />
-        <IonContent>
-          <p>{error}</p>
-        </IonContent>
-      </IonPage>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+          <Typography variant="h6" color="error">
+            {error}
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <Box sx={{ backgroundColor: '#f5f5f5', height: '100vh', marginTop:'15%' }}>
+    <Box sx={{ backgroundColor: '#f5f5f5', height: '100vh', marginTop: '15%' }}>
       <Header title="Training Plan Overview" />
 
       <Box sx={{ minHeight: '100vh' }}>
@@ -163,7 +157,7 @@ const WorkoutOverview: React.FC = () => {
 
         )}
 
-        <List sx={{ padding: '0 20px', pb:'14%' }}>
+        <List sx={{ padding: '0 20px', pb: '14%' }}>
           {trainingPlan && trainingPlan.workouts.map((workout) => (
             <ListItem
               key={workout.id}
@@ -189,7 +183,7 @@ const WorkoutOverview: React.FC = () => {
             >
               <ListItemText
                 primary={
-                  <Typography  sx={{ fontWeight: 'bold', fontSize: '1.1em', color: '#333' }}>
+                  <Typography sx={{ fontWeight: 'bold', fontSize: '1.1em', color: '#333' }}>
                     {workout.name}
                   </Typography>
                 }
@@ -252,58 +246,58 @@ const WorkoutOverview: React.FC = () => {
 
 
         {/* Modal de información */}
-<Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-  <Box sx={{
-    position: 'absolute', top: '50%', left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: '80%', bgcolor: 'background.paper', p: 4, borderRadius: '10px',
-  }}>
-    <IconButton onClick={() => setModalOpen(false)} sx={{ position: 'absolute', top: '10px', right: '10px', color: '#6b6b6b', zIndex: 1 }}>
-      <CloseIcon />
-    </IconButton>
-    <Box sx={{ textAlign: 'center' }}>
-      <Typography sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
-        {t('training_plan_name')}
-      </Typography>
-      <Divider sx={{ margin: '10px 0', backgroundColor: '#b0b0b0' }} />
-      <Typography fontSize={'0.85em'} sx={{ color: '#555', marginBottom: '20px' }}>
-        {t('training_plan_description')}
-      </Typography>
-      <Divider sx={{ margin: '20px 0', backgroundColor: '#b0b0b0' }} />
-      <Card sx={{
-        backgroundColor: '#f9f9f9',
-        padding: '20px',
-        borderRadius: '10px',
-        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-        border: '1px solid #b0b0b0',
-      }}>
-        <CardContent>
-          <Typography sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
-            {t('training_information')}
-          </Typography>
-          <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
-          <Typography fontSize={'0.9em'} sx={{ marginBottom: '10px', color: '#333' }}>
-            <Typography component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
-              {t('training_difficulty')}:
-            </Typography> {trainingPlan?.difficulty}
-          </Typography>
-          <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
-          <Typography fontSize={'0.9em'} sx={{ marginBottom: '10px', color: '#333' }}>
-            <Typography component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
-              {t('training_equipment')}:
-            </Typography> {trainingPlan?.equipment}
-          </Typography>
-          <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
-          <Typography fontSize={'0.9em'} sx={{ color: '#333' }}>
-            <Typography component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
-              {t('training_duration')}:
-            </Typography> {trainingPlan?.duration} {t('training_duration_unit')}
-          </Typography>
-        </CardContent>
-      </Card>
-    </Box>
-  </Box>
-</Modal>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+          <Box sx={{
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%', bgcolor: 'background.paper', p: 4, borderRadius: '10px',
+          }}>
+            <IconButton onClick={() => setModalOpen(false)} sx={{ position: 'absolute', top: '10px', right: '10px', color: '#6b6b6b', zIndex: 1 }}>
+              <CloseIcon />
+            </IconButton>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+                {t('training_plan_name')}
+              </Typography>
+              <Divider sx={{ margin: '10px 0', backgroundColor: '#b0b0b0' }} />
+              <Typography fontSize={'0.85em'} sx={{ color: '#555', marginBottom: '20px' }}>
+                {t('training_plan_description')}
+              </Typography>
+              <Divider sx={{ margin: '20px 0', backgroundColor: '#b0b0b0' }} />
+              <Card sx={{
+                backgroundColor: '#f9f9f9',
+                padding: '20px',
+                borderRadius: '10px',
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #b0b0b0',
+              }}>
+                <CardContent>
+                  <Typography sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+                    {t('training_information')}
+                  </Typography>
+                  <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
+                  <Typography fontSize={'0.9em'} sx={{ marginBottom: '10px', color: '#333' }}>
+                    <Typography component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
+                      {t('training_difficulty')}:
+                    </Typography> {trainingPlan?.difficulty}
+                  </Typography>
+                  <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
+                  <Typography fontSize={'0.9em'} sx={{ marginBottom: '10px', color: '#333' }}>
+                    <Typography component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
+                      {t('training_equipment')}:
+                    </Typography> {trainingPlan?.equipment}
+                  </Typography>
+                  <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
+                  <Typography fontSize={'0.9em'} sx={{ color: '#333' }}>
+                    <Typography component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
+                      {t('training_duration')}:
+                    </Typography> {trainingPlan?.duration} {t('training_duration_unit')}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Box>
+          </Box>
+        </Modal>
 
       </Box>
     </Box>

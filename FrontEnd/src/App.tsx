@@ -31,7 +31,7 @@ import AdminMacronutrientModify from './pages/Admin/Nutricion/ModifyMacros';
 import AssignPlans from './pages/Admin/Usuario/AssignPlans';
 import CreateTrainingPlan from './pages/Admin/Entrenos/AddTrainingPlan';
 import ModifyTrainingPlan from './pages/Admin/Entrenos/ModifyTrainingPlan';
-
+import PendingPlans from './pages/Users/Loading/PendingPlans';
 /* MUI icons */
 import TriangleIcon from '@mui/icons-material/ChangeHistory';  // Replace with icons that resemble Ionic icons
 import CircleIcon from '@mui/icons-material/PanoramaFishEye';
@@ -55,6 +55,9 @@ const App: React.FC = () => {
 
           {/* Macros Route */}
           <Route exact path="/macronutrients" component={Macros} />
+
+          {/* Macros Route */}
+          <Route exact path="/pendingplans" component={PendingPlans} />
 
           {/* Progress Route */}
           <Route exact path="/progress" component={Progress} />

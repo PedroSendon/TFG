@@ -46,26 +46,36 @@ const ProfilePage: React.FC = () => {
     };
 
     return (
-        <Box sx={{marginTop:'16%'}}>
+        <Box sx={{ marginTop: '16%' }}>
             <Header title={t('profile_title')} />
             <Box style={{ padding: '20px', backgroundColor: '#f5f5f5', paddingBottom: '15%' }}> {/* Margen inferior del 15% */}
 
                 {/* Encabezado con Avatar, Nombre, Email y Botón de edición */}
-                <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ padding: '10px', marginTop: '10px', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
-                    <Box display="flex" alignItems="center">
-                        <Avatar sx={{ width: '60px', height: '60px', marginRight: '15px' }}>
-                            <img src="/src/components/perfil.jpg" alt={t('profile_picture_alt')} style={{ width: '100%', height: '100%' }} />
-                        </Avatar>
-                        <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{userData?.username}</Typography>
-                            <Typography variant="body2" color="textSecondary">{userData?.email}</Typography>
+                <Card
+                    sx={{
+                        padding: '10px',
+                        marginTop: '10px',
+                        backgroundColor: '#fff',
+                        borderRadius: '8px',
+                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+                        border: '1px solid #e0e0e0', // Color de borde gris claro
+                    }}
+                >
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                        <Box display="flex" alignItems="center">
+                            <Avatar sx={{ width: '60px', height: '60px', marginRight: '15px' }}>
+                                <img src="/src/components/perfil.jpg" alt={t('profile_picture_alt')} style={{ width: '100%', height: '100%' }} />
+                            </Avatar>
+                            <Box>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{userData?.username}</Typography>
+                                <Typography variant="body2" color="textSecondary">{userData?.email}</Typography>
+                            </Box>
                         </Box>
+                        <IconButton onClick={handleEdit} sx={{ color: '#000' }}>
+                            <EditIcon />
+                        </IconButton>
                     </Box>
-                    <IconButton onClick={handleEdit} sx={{ color: '#000' }}>
-                        <EditIcon />
-                    </IconButton>
-                </Box>
-
+                </Card>
                 {/* Información personal en tarjeta en formato de lista */}
                 <Card variant="outlined" sx={{ marginTop: '15px', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
                     <CardContent>
@@ -115,7 +125,7 @@ const ProfilePage: React.FC = () => {
                 </Card>
 
                 {/* Botón de cerrar sesión */}
-                <Box display="flex" justifyContent="center" mt={2} sx={{marginBottom:'5%'}}>
+                <Box display="flex" justifyContent="center" mt={2} sx={{ marginBottom: '5%' }}>
                     <Button
                         onClick={handleLogout}
                         variant="outlined"

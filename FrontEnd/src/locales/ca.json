@@ -315,5 +315,8 @@
   "training_difficulty": "Dificultat",
   "training_equipment": "Equipament",
   "training_duration": "Durada",
-  "training_duration_unit": "minuts"
+  "training_duration_unit": "minuts",
+  "plan_assignment_status": "Estat d'assignació de plans",
+  "preparing_your_plan": "Estem preparant el teu pla",
+  "reviewing_goals_message": "Els nostres entrenadors i nutricionistes estan revisant els teus objectius per assignar-te un pla personalitzat. Rebràs una notificació quan estigui llest."
 }

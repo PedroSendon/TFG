@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Box, Button, Card, CardContent, CardMedia, Checkbox, LinearProgress, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, CardMedia, Checkbox, Divider, LinearProgress, Typography } from '@mui/material';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext';
 
@@ -123,20 +123,21 @@ const WorkoutDay: React.FC = () => {
             const exerciseId = exercises[index].id;
             history.push({
                 pathname: `/workout/day/exercise`,
-                state: { day_id, exerciseId, completedExercises }, // Pasa el estado de completedExercises
+                state: { day_id, exerciseId, completedExercises }, // Pasamos el estado de completedExercises
             });
         }
     };
+    
 
 
     const progress = exercises.length > 0 ? completedCount / exercises.length : 0;
     const progressPercentage = Math.round(progress * 100);
 
     return (
-        <Box sx={{ backgroundColor: '#f5f5f5', height: '100%', marginTop: '16%' }}>
+        <Box sx={{ backgroundColor: '#f5f5f5', height: '100%', marginTop: '15%' }}>
             <Header title={t('training_of_the_day')} onBack={handleBack} showBackButton={true} />
-            <Box sx={{ backgroundColor: '#f5f5f5', paddingTop: '16px', paddingX: '20px', marginBottom: '16px' }}>
-                <Box>
+            <Box sx={{ backgroundColor: '#f5f5f5', paddingTop: '16px', marginBottom: '16px', zIndex: 11, position: 'fixed',width: '100%',}}>
+                <Box sx={{paddingX: '20px'}}>
                     <Typography align="center" sx={{ color: '#666', fontWeight: 'bold', marginBottom: 1 }}>
                         {progressPercentage}% {t('completed')}
                     </Typography>
@@ -153,8 +154,9 @@ const WorkoutDay: React.FC = () => {
                         }}
                     />
                 </Box>
+                <Divider sx={{ marginTop: 2}} />
             </Box>
-            <Box maxWidth="md" sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '20px' }}>
+            <Box maxWidth="md" sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '20px', pt:'22%' }}>
                 {exercises.map((exercise, index) => (
                     <Card
                         key={exercise.id}
@@ -223,7 +225,7 @@ const WorkoutDay: React.FC = () => {
                         onClick={handleCompleteWorkout}
                         variant="contained"
                         sx={{
-                            backgroundColor: '#555555',
+                            backgroundColor: '#primary',
                             color: '#ffffff',
                             padding: '12px 24px',
                             borderRadius: '8px',

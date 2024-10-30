@@ -316,5 +316,8 @@
   "training_difficulty": "Dificultad",
   "training_equipment": "Equipo",
   "training_duration": "Duración",
-  "training_duration_unit": "minutos"
+  "training_duration_unit": "minutos",
+  "plan_assignment_status": "Estado de asignación de planes",
+  "preparing_your_plan": "Estamos preparando tu plan",
+  "reviewing_goals_message": "Nuestros entrenadores y nutricionistas están revisando tus objetivos para asignarte un plan personalizado. Recibirás una notificación cuando esté listo."
 }
