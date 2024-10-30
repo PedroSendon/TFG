@@ -120,9 +120,7 @@ def get_training_plans(request):
     Obtener todos los planes de entrenamiento.
     """
     try:
-        print("Request received for training plans.")  # Debug 1
         training_plans = TrainingPlanRepository.get_all_training_plans()
-        print(f"Fetched training plans: {training_plans}")  # Debug 2
 
         if not training_plans:
             return Response({"message": "No training plans found."}, status=status.HTTP_404_NOT_FOUND)

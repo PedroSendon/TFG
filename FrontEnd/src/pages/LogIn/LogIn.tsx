@@ -39,18 +39,18 @@ const Login: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+    
         const newErrors: any = {};
-
+    
         if (!validateEmail(formData.email)) {
-            newErrors.email = t('invalid_email'); // Mensaje de error traducido
+            newErrors.email = t('invalid_email');
         }
-
+    
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
-
+    
         try {
             const response = await fetch('http://127.0.0.1:8000/api/login/', {
                 method: 'POST',
@@ -63,16 +63,46 @@ const Login: React.FC = () => {
                     remember_me: formData.rememberMe,
                 }),
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
-
-                localStorage.setItem('access_token', data.access); // Almacena el token de acceso
-                localStorage.setItem('refresh_token', data.refresh); // Almacena el token de refresco
-
-                // Esto forzará que la navbar se vuelva a renderizar
-                localStorage.setItem('navbar_reload', 'true');
-                history.push('/workout');
+    
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh);
+    
+                // Obtener los detalles del usuario después del login
+                const userResponse = await fetch('http://127.0.0.1:8000/api/user/role/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${data.access}`,
+                    },
+                });
+    
+                if (userResponse.ok) {
+                    const userRole = await userResponse.json();
+                    console.log('Rol de usuario:', userRole);
+                    // Redirigir en función del rol del usuario
+                    switch (userRole.role) {
+                        case 'cliente':
+                            history.push('/workout');
+                            break;
+                        case 'entrenador':
+                            history.push('/admin/workout');
+                            break;
+                        case 'nutricionista':
+                            history.push('/admin/nutrition');
+                            break;
+                        case 'administrador':
+                            history.push('/admin/workout');
+                            break;
+                        default:
+                            console.error('Rol de usuario desconocido');
+                            break;
+                    }
+                } else {
+                    setErrors({ apiError: 'No se pudieron obtener los detalles del usuario.' });
+                }
             } else {
                 const errorData = await response.json();
                 console.log('Error:', errorData);
@@ -83,6 +113,7 @@ const Login: React.FC = () => {
             setErrors({ apiError: 'Error de conexión con el servidor.' });
         }
     };
+    
     return (
         <Container component="main" maxWidth="xs" sx={{ backgroundColor:'#f5f5f5',minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Box sx={{

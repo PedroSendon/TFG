@@ -13,6 +13,17 @@ from django.db.models import Q
 class UserRepository:
 
     @staticmethod
+    def get_unassigned_users(user):
+        # Devuelve usuarios con el estado 'awaiting_assignment'
+        if not isinstance(user, User):
+            user = User.objects.get(id=user.id)
+       
+        if user.role not in ['entrenador', 'nutricionista']:
+            return None
+
+        return User.objects.filter(status='awaiting_assignment')
+
+    @staticmethod
     def ger_user_role(user_id):
         """
         Obtener el rol de un usuario.
@@ -207,6 +218,7 @@ class UserRepository:
         try:
             print(f"Intentando asignar el plan de entrenamiento {training_plan_id} al usuario {user_id}")
             user = User.objects.get(id=user_id)
+            user.status = 'assigned'
             training_plan = TrainingPlan.objects.get(id=training_plan_id)
 
             user_workout = UserWorkout.objects.create(user=user, training_plan=training_plan)
@@ -267,12 +279,10 @@ class UserRepository:
             }
         except User.DoesNotExist:
             return None
-
+    """
     @staticmethod
     def complete_user_registration(user):
-        """
         Completa el proceso de registro del usuario asignando entrenamiento y plan nutricional.
-        """
         workout_assigned, workout_message = UserRepository.assign_training_plan_to_user(
             user)
         nutrition_assigned, nutrition_message = UserRepository.assign_nutrition_plan_to_user(
@@ -285,9 +295,8 @@ class UserRepository:
 
     @staticmethod
     def assign_nutrition_plan_to_user(user):
-        """
         Asigna un plan nutricional adecuado basado en el peso, objetivo de calorías y preferencias del usuario.
-        """
+      
         try:
             # Calcular los gramos de proteínas que necesita el usuario (por ejemplo, 2-2.2g por kg de peso)
             proteins_needed = user.details.weight * 2
@@ -311,13 +320,13 @@ class UserRepository:
 
         except Exception as e:
             return False, str(e)
-
+    
     @staticmethod
     def assign_training_plan_to_user(user):
-        """
+       
         Asigna un plan de entrenamiento adecuado a un usuario basándose en su actividad física,
         preferencias de entrenamiento y equipo disponible.
-        """
+      
         print("Assigning training plan to user...")
         try:
             # Filtrar planes de entrenamiento según los días semanales, la duración diaria, el equipo disponible y la preferencia de entrenamiento
@@ -349,6 +358,66 @@ class UserRepository:
 
         except Exception as e:
             return False, str(e)
+    """
+
+    @staticmethod
+    def get_user_all_details(user_id):
+        try:
+            user = UserRepository.get_user_by_id(user_id)
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+            # Fetch user details with related fields
+            user_data = User.objects.select_related('details', 'diet_preferences').filter(id=user.id).first()
+            if not user_data:
+                return None
+
+            # Structure the essential data in a dictionary, handling missing related data gracefully
+            user_details = {
+                'id': user_data.id,
+                'first_name': user_data.first_name,
+                'last_name': user_data.last_name,
+                'email': user_data.email,
+                'birth_date': user_data.birth_date,
+                'gender': user_data.gender,
+                'profile_photo': user_data.profile_photo if user_data.profile_photo else None,
+                'status': user_data.status,
+                'role': user_data.role,
+
+                # User Details (providing default values if missing)
+                'details': {
+                    'height': user_data.details.height if user_data.details else None,
+                    'weight': user_data.details.weight if user_data.details else None,
+                    'weight_goal': user_data.details.weight_goal if user_data.details else None,
+                    'weekly_training_days': user_data.details.weekly_training_days if user_data.details else None,
+                    'daily_training_time': user_data.details.daily_training_time if user_data.details else None,
+                    'physical_activity_level': user_data.details.physical_activity_level if user_data.details else None,
+                    'available_equipment': user_data.details.available_equipment if user_data.details else None,
+                } if user_data.details else {
+                    'height': None,
+                    'weight': None,
+                    'weight_goal': None,
+                    'weekly_training_days': None,
+                    'daily_training_time': None,
+                    'physical_activity_level': None,
+                    'available_equipment': None,
+                },
+
+                # Diet Preferences (providing default values if missing)
+                'diet_preferences': {
+                    'diet_type': user_data.diet_preferences.diet_type if user_data.diet_preferences else None,
+                    'meals_per_day': user_data.diet_preferences.meals_per_day if user_data.diet_preferences else None,
+                } if user_data.diet_preferences else {
+                    'diet_type': None,
+                    'meals_per_day': None,
+                },
+            }
+
+            return user_details
+
+        except Exception as e:
+            print(f"Error fetching user details: {e}")
+            return None
+
 
 
 class UserDetailsRepository:

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 class User(models.Model):
     ROLE_CHOICES = [
@@ -7,7 +8,10 @@ class User(models.Model):
         ('entrenador', 'Entrenador'),
         ('nutricionista', 'Nutricionista'),
     ]
-    
+    STATUS_CHOICES = [
+        ('awaiting_assignment', 'Awaiting Assignment'),
+        ('assigned', 'Assigned'),
+    ]
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -16,7 +20,8 @@ class User(models.Model):
     gender_choices = [('M', 'Male'), ('F', 'Female'), ('O', 'Other')]
     gender = models.CharField(max_length=1, choices=gender_choices)
     profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
-    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='awaiting_assignment')
+
     # Rol del usuario
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='cliente')
 
@@ -59,8 +64,14 @@ class UserDetails(models.Model):
 
 
 class DietPreferences(models.Model):
+    DIET_TYPE_CHOICES = [
+        ('low_protein', 'Bajo en proteínas'),
+        ('low_carbs', 'Bajo en carbohidratos'),
+        ('low_fats', 'Bajo en grasas'),
+        ('balanced', 'Balanceado'),
+    ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='diet_preferences')
-    diet_type = models.CharField(max_length=100)  # Tipo de dieta
+    diet_type = models.CharField(max_length=20, choices=DIET_TYPE_CHOICES, default='balanced')  # Tipo de dieta limitado a opciones
     meals_per_day = models.PositiveIntegerField()
 
     def __str__(self):

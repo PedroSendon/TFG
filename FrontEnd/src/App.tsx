@@ -32,6 +32,8 @@ import AssignPlans from './pages/Admin/Usuario/AssignPlans';
 import CreateTrainingPlan from './pages/Admin/Entrenos/AddTrainingPlan';
 import ModifyTrainingPlan from './pages/Admin/Entrenos/ModifyTrainingPlan';
 import PendingPlans from './pages/Users/Loading/PendingPlans';
+import PendingUsers from './pages/Admin/Pending/PendingUsers';
+import UserDetails from './pages/Admin/Pending/UserInformation';
 /* MUI icons */
 import TriangleIcon from '@mui/icons-material/ChangeHistory';  // Replace with icons that resemble Ionic icons
 import CircleIcon from '@mui/icons-material/PanoramaFishEye';
@@ -71,6 +73,8 @@ const App: React.FC = () => {
           <Route exact path="/admin/users/modify" component={AdminModifyUsers} />
           <Route exact path="/admin/users/add" component={AdminAddUsers} />
           <Route exact path="/admin/users/assign" component={AssignPlans} />
+          <Route exact path="/admin/pending-users" component={PendingUsers} />
+          <Route exact path="/admin/users/details" component={UserDetails} />
 
           {/* Admin Workout Routes */}
           <Route exact path="/admin/workout" component={AdminWorkout} />

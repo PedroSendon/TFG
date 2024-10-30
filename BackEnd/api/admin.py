@@ -10,9 +10,10 @@ from .models.trainingplan import TrainingPlan
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'email', 'role']
+    list_display = ['first_name', 'last_name', 'email', 'role', 'status']
     search_fields = ['first_name', 'last_name', 'email']
-    list_filter = ['role']
+    list_filter = ['role', 'status']
+    list_editable = ['status']
 
 @admin.register(UserDetails)
 class UserDetailsAdmin(admin.ModelAdmin):
@@ -25,7 +26,7 @@ class DietPreferencesAdmin(admin.ModelAdmin):
     list_display = ['user', 'diet_type', 'meals_per_day']
     search_fields = ['user__first_name', 'user__last_name']
     list_filter = ['diet_type']
-
+    
 @admin.register(WeightRecord)
 class WeightRecordAdmin(admin.ModelAdmin):
     list_display = ['user', 'weight', 'date']
