@@ -300,5 +300,10 @@
   "progress_title": "Progrés",
   "control_panel_label": "Control",
   "workout_label": "Entrenament",
-  "weight_graph_label": "Pes"
+  "weight_graph_label": "Pes",
+  "start_rest_timer": "Inicia el Temporitzador de Descans",
+  "mark_exercise_complete": "Marca l'Exercici com a Completat",
+  "timer_finished": "Temporitzador Finalitzat",
+  "well_done_message": "Molt bé! Fes un descans i continua quan estiguis a punt.",
+  "ok": "D'acord"
 }

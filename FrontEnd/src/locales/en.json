@@ -300,5 +300,10 @@
   "progress_title": "Progress",
   "control_panel_label": "Control",
   "workout_label": "Workout",
-  "weight_graph_label": "Weight"
+  "weight_graph_label": "Weight",
+  "start_rest_timer": "Start Rest Timer",
+  "mark_exercise_complete": "Mark Exercise as Complete",
+  "timer_finished": "Timer Finished",
+  "well_done_message": "Well done! Take a break and continue when you're ready.",
+  "ok": "OK"
 }

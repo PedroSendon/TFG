@@ -301,5 +301,10 @@
   "progress_title": "Progreso",
   "control_panel_label": "Control",
   "workout_label": "Entrenamiento",
-  "weight_graph_label": "Peso"
+  "weight_graph_label": "Peso",
+  "start_rest_timer": "Iniciar Temporizador de Descanso",
+  "mark_exercise_complete": "Marcar Ejercicio como Completado",
+  "timer_finished": "Temporizador Finalizado",
+  "well_done_message": "¡Bien hecho! Tómate un descanso y continúa cuando estés listo.",
+  "ok": "Aceptar"
 }
