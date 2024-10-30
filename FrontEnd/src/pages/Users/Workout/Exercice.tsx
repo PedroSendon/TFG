@@ -4,6 +4,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Header from '../../Header/Header';
 import ExerciseInfoModal from './ExerciceInformation';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useLocation, useHistory } from 'react-router';
 import { LanguageContext } from '../../../context/LanguageContext';
 import { Box, Chip, CircularProgress, Grid, IconButton, Snackbar, Typography, Button, Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
@@ -214,8 +215,8 @@ const ExerciseDetailPage: React.FC = () => {
                             ))}
                         </Grid>
 
-                        <Grid container item xs={12} justifyContent="space-between" spacing={2} alignItems="center">
-                            {/* Sets */}
+                        {/* Sets and Reps row */}
+                        <Grid container justifyContent="center" spacing={4} sx={{ mb: 1 }}>
                             <Grid item xs={3} textAlign="center">
                                 <Box
                                     sx={{
@@ -229,11 +230,6 @@ const ExerciseDetailPage: React.FC = () => {
                                         alignItems: 'center',
                                         bgcolor: '#fff',
                                         boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                                        transition: 'transform 0.2s',
-                                        '&:hover': {
-                                            transform: 'scale(1.05)',
-                                            boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.2)',
-                                        },
                                     }}
                                 >
                                     <Typography fontSize={'0.8em'} color="#555">{t('sets_disc')}</Typography>
@@ -243,48 +239,6 @@ const ExerciseDetailPage: React.FC = () => {
                                 </Box>
                             </Grid>
 
-                            {/* Rest timer circle */}
-                            <Grid item xs={4} textAlign="center" display="flex" justifyContent="center">
-                                <Box
-                                    sx={{
-                                        width: isCounting ? 90 : 70, // Mantén el cambio sutil para evitar desplazamientos
-                                        height: isCounting ? 90 : 70,
-                                        borderRadius: '50%',
-                                        position: 'relative',
-                                        border: '2px solid #333',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        bgcolor: '#fff',
-                                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                                        transition: 'width 0.3s ease, height 0.3s ease',
-                                    }}
-                                >
-                                    {isCounting && (
-                                        <CircularProgress
-                                            variant="determinate"
-                                            value={(timer || 0) / (exerciseInfo.rest || 1) * 100}
-                                            size={90} // Tamaño sincronizado con el contenedor
-                                            thickness={4}
-                                            sx={{
-                                                color: '#007bff',
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
-                                            }}
-                                        />
-                                    )}
-                                    <Typography fontSize={'0.8em'} color="#555">
-                                        {t('rest_disc')}
-                                    </Typography>
-                                    <Typography variant="h6" fontWeight="bold" color="#333">
-                                        {isCounting ? `${timer}s` : exerciseInfo.rest}
-                                    </Typography>
-                                </Box>
-                            </Grid>
-
-                            {/* Reps */}
                             <Grid item xs={3} textAlign="center">
                                 <Box
                                     sx={{
@@ -298,11 +252,6 @@ const ExerciseDetailPage: React.FC = () => {
                                         alignItems: 'center',
                                         bgcolor: '#fff',
                                         boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                                        transition: 'transform 0.2s',
-                                        '&:hover': {
-                                            transform: 'scale(1.05)',
-                                            boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.2)',
-                                        },
                                     }}
                                 >
                                     <Typography fontSize={'0.8em'} color="#555">{t('repetitions_disc')}</Typography>
@@ -313,27 +262,74 @@ const ExerciseDetailPage: React.FC = () => {
                             </Grid>
                         </Grid>
 
-
-                        {/* Start Timer Button */}
-                        <Grid item xs={12} textAlign="center" mt={3}>
-                            <Button
-                                variant="contained"
-                                onClick={handleStartTimer}
-                                disabled={isCounting}
+                        {/* Rest Timer */}
+                        <Grid container justifyContent="center">
+                            <Box
                                 sx={{
-                                    backgroundColor: isCounting ? '#d3d3d3' : '#555',
-                                    color: '#fff',
-                                    '&:hover': { backgroundColor: '#5a6268' },
-                                    fontWeight: 'bold',
-                                    fontSize: '0.8rem',
-                                    borderRadius: '8px',
+                                    width: 160,
+                                    height: 160,
+                                    borderRadius: '50%',
+                                    border: '2px solid #333',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    bgcolor: '#fff',
+                                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                                    position: 'relative',
+                                    textAlign: 'center',
                                 }}
                             >
-                                {t('start_rest_timer')}
-                            </Button>
+                                {isCounting && (
+                                    <CircularProgress
+                                        variant="determinate"
+                                        value={(timer || 0) / (exerciseInfo.rest || 1) * 100}
+                                        size={160}
+                                        thickness={1.5} // Grosor más fino para la barra de progreso
+                                        sx={{
+                                            color: '#007bff',
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                        }}
+                                    />
+                                )}
+
+                                {/* Top Label for Rest */}
+                                <Typography fontSize={'0.9rem'} color="#555" sx={{ position: 'absolute', top: '15%' }}>
+                                    {t('rest_disc')}
+                                </Typography>
+
+                                {/* Centered Play Button */}
+                                <IconButton
+                                    onClick={handleStartTimer}
+                                    sx={{
+                                        backgroundColor: isCounting ? 'grey' : 'transparent',
+                                        color: 'blue',
+                                        width: 60,
+                                        height: 60,
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
+                                        '&:hover': { backgroundColor: '#0056b3' },
+                                        '&.Mui-disabled': { backgroundColor: 'transparent' },
+                                    }}
+                                    disabled={isCounting}
+                                >
+                                    <PlayArrowIcon sx={{ fontSize: 36 }} />
+                                </IconButton>
+
+                                {/* Bottom Timer */}
+                                <Typography fontSize={'1.4rem'} fontWeight="bold" color="#333" sx={{ position: 'absolute', bottom: '15%' }}>
+                                    {timer}s
+                                </Typography>
+                            </Box>
                         </Grid>
 
-                        <Box mt={4} mb={8} display="flex" justifyContent="center" width="100%" sx={{ position: 'fixed', bottom: 0, left: 0, padding: '16px', boxSizing: 'border-box' }}>
+
+                        <Box mt={4} mb={8} display="flex" justifyContent="center" width="100%" sx={{  bottom: 0, left: 0, padding: '16px', boxSizing: 'border-box' }}>
                             <Button
                                 onClick={handleMarkAsComplete}
                                 variant="contained"
@@ -352,7 +348,7 @@ const ExerciseDetailPage: React.FC = () => {
                                     },
                                 }}
                             >
-                                {t('mark_exercise_complete')}
+                                {t('mark_training_completed')}
                             </Button>
                         </Box>
 
