@@ -8,6 +8,9 @@ import GroupIcon from '@mui/icons-material/Group';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import { useHistory, useLocation } from 'react-router-dom';
 import { LanguageContext } from '../../context/LanguageContext';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+
 
 const Navbar: React.FC = () => {
   const { t } = useContext(LanguageContext);
@@ -69,7 +72,7 @@ const Navbar: React.FC = () => {
       }}
     >
       <BottomNavigationAction
-        icon={<FitnessCenterIcon />}
+        icon={isAdminView ? <AssignmentIcon  sx={{ fontSize: value === 0 ? 35 : 24 }} /> : <FitnessCenterIcon sx={{ fontSize: value === 0 ? 35 : 24 }} />}
         sx={{
           color: value === 0 ? '#FFFFFF' : '#6b6b6b',
           backgroundColor: value === 0 ? '#c1c1c1' : 'transparent',
@@ -79,7 +82,7 @@ const Navbar: React.FC = () => {
         }}
       />
       <BottomNavigationAction
-        icon={<FoodBankIcon />}
+        icon={isAdminView ? <MenuBookIcon sx={{ fontSize: value === 1 ? 35 : 24 }} /> : <FoodBankIcon sx={{ fontSize: value === 1 ? 35 : 24 }} />}
         sx={{
           color: value === 1 ? '#FFFFFF' : '#6b6b6b',
           backgroundColor: value === 1 ? '#c1c1c1' : 'transparent',
@@ -89,7 +92,7 @@ const Navbar: React.FC = () => {
         }}
       />
       <BottomNavigationAction
-        icon={isAdminView ? <BarChartIcon /> : <TrendingUpIcon />}
+        icon={(isAdminView ? <BarChartIcon sx={{ fontSize: value === 2 ? 35 : 24 }} /> : <TrendingUpIcon sx={{ fontSize: value === 2 ? 35 : 24 }} />)} // Cambia el tamaño aquí
         sx={{
           color: value === 2 ? '#FFFFFF' : '#6b6b6b',
           backgroundColor: value === 2 ? '#c1c1c1' : 'transparent',
@@ -99,7 +102,7 @@ const Navbar: React.FC = () => {
         }}
       />
       <BottomNavigationAction
-        icon={isAdminView ? <GroupIcon /> : <AccountCircleIcon />}
+        icon={(isAdminView ? <GroupIcon sx={{ fontSize: value === 3 ? 35 : 24 }} /> : <AccountCircleIcon sx={{ fontSize: value === 3 ? 35 : 24 }} />)} // Cambia el tamaño aquí
         sx={{
           color: value === 3 ? '#FFFFFF' : '#6b6b6b',
           backgroundColor: value === 3 ? '#c1c1c1' : 'transparent',
@@ -108,6 +111,7 @@ const Navbar: React.FC = () => {
           },
         }}
       />
+
     </BottomNavigation>
   );
 };

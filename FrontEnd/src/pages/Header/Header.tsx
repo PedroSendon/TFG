@@ -74,7 +74,7 @@ const Header: React.FC<HeaderProps> = ({ title, onBack = () => {}, showBackButto
             onClick={toggleView}
             sx={{ color: 'black', fontSize: '0.8rem' }}
           >
-            {isAdminView ? 'Modo Cliente' : 'Modo Admin'}
+            {isAdminView ? 'Cliente' : 'Admin'}
           </Button>
         ) : (
           <Box>
