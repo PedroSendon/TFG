@@ -182,7 +182,6 @@ const WorkoutDay: React.FC = () => {
                                 width: 80,
                                 height: 80,
                                 borderRadius: '8px',
-                                marginRight: 2,
                                 objectFit: 'cover',
                                 border: '1px solid #e0e0e0',
                             }}
@@ -190,8 +189,8 @@ const WorkoutDay: React.FC = () => {
                             alt={`${t('image_of')} ${exercise.name}`}
                         />
                         <CardContent sx={{ flex: '1 1 auto' }}>
-                            <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#333' }}>{exercise.name}</Typography>
-                            <Typography variant="body2" sx={{ color: '#666' }}>
+                            <Typography  sx={{ fontWeight: 'bold', color: '#333', fontSize:'0.95em'}}>{exercise.name}</Typography>
+                            <Typography  sx={{ color: '#666', fontSize:'0.8em'}}>
                                 {`${exercise.sets} ${t('sets')} ${t('of')} ${exercise.reps} ${t('repetitions')}`}
                             </Typography>
                         </CardContent>

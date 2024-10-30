@@ -127,11 +127,11 @@ const ControlPanel: React.FC = () => {
     };
 
     return (
-        <Box sx={{ padding: 1, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+        <Box sx={{ padding: 1, backgroundColor: '#f5f5f5', minHeight: '80vh' }}>
             <Grid container>
 
                 {/* Próximo entrenamiento */}
-                <Grid item xs={12} sx={{ marginTop: '20px', marginBottom:'20px' }}>
+                <Grid item xs={12} sx={{marginBottom:'20px' }}>
                     <Card
                         onClick={handleStartWorkout}
                         sx={{
@@ -160,10 +160,10 @@ const ControlPanel: React.FC = () => {
                                 />
                             </Box>
                             <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.2em', color: '#000' }}>
+                            <Typography sx={{ fontWeight: 'bold', fontSize: '1em', color: '#000' }}>
                                     {nextWorkout ? nextWorkout.name : t('no_pending_workouts')}
                                 </Typography>
-                                <Typography variant="body1" sx={{ color: 'gray', fontWeight: 'bold', marginTop: '10px' }}>
+                                <Typography  sx={{ color: 'gray', marginTop: '10px', fontSize: '0.9em', }}>
                                     {nextWorkout ? t('days_for_next_workout') : t('all_workouts_completed')}
                                 </Typography>
                             </Box>
@@ -175,7 +175,7 @@ const ControlPanel: React.FC = () => {
 
                
                 <Grid item xs={12} >
-                    <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: '1.4em', color: '#333' }}>
+                    <Typography sx={{ textAlign: 'center',fontWeight: 'bold', fontSize: '1.1em', color: '#333'  }}>
                         {t('training_schedule')}
                     </Typography>
                 </Grid>

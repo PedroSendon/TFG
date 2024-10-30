@@ -77,13 +77,13 @@ const WorkoutHistory: React.FC = () => {
     return (
         <Box sx={{ padding: 1, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
             <Grid container>
-                <Grid item xs={12} sx={{ marginTop: '20px', marginBottom:'20px' }}>
+                <Grid item xs={12} sx={{ marginBottom:'20px' }}>
                     <Card sx={{ color: 'gray', borderRadius: '12px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.2)' }}>
                         <CardContent sx={{ textAlign: 'center' }}>
-                            <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.2em', color: '#000' }}>
+                            <Typography sx={{ fontWeight: 'bold', fontSize: '1em', color: '#000' }}>
                                 {completedWorkouts} {t('of')} {totalWorkouts} {t('completed_training')}
                             </Typography>
-                            <Typography variant="body1" sx={{ color: 'gray', fontWeight: 'bold', marginTop: '10px' }}>
+                            <Typography  sx={{ color: 'gray', marginTop: '10px', fontSize: '0.9em' }}>
                                 {getMotivationMessage()}
                             </Typography>
                         </CardContent>
@@ -93,14 +93,14 @@ const WorkoutHistory: React.FC = () => {
                 <Box sx={{ borderTop: '1px solid #333', width: '100%', margin: '20px 0' }} />
 
                 <Grid item xs={12} >
-                    <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: '1.4em', color: '#333' }}>
-                        {t('completed_training_history')}
+                <Typography sx={{ textAlign: 'center',fontWeight: 'bold', fontSize: '1.1em', color: '#333'  }}>
+                {t('completed_training_history')}
                     </Typography>
                 </Grid>
 
                 <Grid item xs={12} sx={{ marginTop: '20px', marginBottom:'20px' }}>
                     {completedWorkouts === 0 ? (
-                        <Typography sx={{ textAlign: 'center', color: 'gray' }}>
+                        <Typography sx={{ fontSize: '0.9em', textAlign: 'center', color: 'gray' }}>
                             {t('no_completed_workouts')}
                         </Typography>
                     ) : (
@@ -113,11 +113,11 @@ const WorkoutHistory: React.FC = () => {
                                 >
                                     <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff' }}>
                                         <Box>
-                                            <Typography variant="h6" sx={{ margin: 0, fontWeight: 'bold', fontSize: '1.2em', color: '#000' }}>
+                                            <Typography sx={{ margin: 0, fontWeight: 'bold', fontSize: '1em', color: '#000' }}>
                                                 {workout.name}
                                             </Typography>
-                                            <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '1em', color: 'gray' }}>
-                                                {t('completed_day').replace('{day}', workout.id.toString())}
+                                            <Typography variant="body2" sx={{  fontSize: '0.9em', color: 'gray' }}>
+                                                {t('completed_day').replace('{day}', workout.progress.toString()) + '%'}
                                             </Typography>
                                         </Box>
                                         <LinearProgress

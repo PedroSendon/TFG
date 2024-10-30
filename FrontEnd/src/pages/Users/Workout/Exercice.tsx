@@ -188,7 +188,7 @@ const ExerciseDetailPage: React.FC = () => {
                         </Grid>
 
                         <Grid item xs={10}>
-                            <Typography variant="h5" fontWeight="bold">
+                            <Typography fontSize={'1.2em'} fontWeight="bold">
                                 {exerciseInfo.name}
                             </Typography>
                         </Grid>
@@ -206,7 +206,7 @@ const ExerciseDetailPage: React.FC = () => {
                                     sx={{
                                         backgroundColor: '#333',
                                         color: '#fff',
-                                        fontSize: '12px',
+                                        fontSize: '0.7em',
                                         margin: '4px',
                                         boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
                                     }}
@@ -236,7 +236,7 @@ const ExerciseDetailPage: React.FC = () => {
                                         },
                                     }}
                                 >
-                                    <Typography variant="subtitle2" color="#555">{t('sets')}</Typography>
+                                    <Typography fontSize={'0.8em'} color="#555">{t('sets_disc')}</Typography>
                                     <Typography variant="h6" fontWeight="bold" color="#333">
                                         {exerciseInfo.sets}
                                     </Typography>
@@ -275,8 +275,8 @@ const ExerciseDetailPage: React.FC = () => {
                                             }}
                                         />
                                     )}
-                                    <Typography variant="subtitle2" color="#555">
-                                        {t('rest')}
+                                    <Typography fontSize={'0.8em'} color="#555">
+                                        {t('rest_disc')}
                                     </Typography>
                                     <Typography variant="h6" fontWeight="bold" color="#333">
                                         {isCounting ? `${timer}s` : exerciseInfo.rest}
@@ -305,7 +305,7 @@ const ExerciseDetailPage: React.FC = () => {
                                         },
                                     }}
                                 >
-                                    <Typography variant="subtitle2" color="#555">{t('reps')}</Typography>
+                                    <Typography fontSize={'0.8em'} color="#555">{t('repetitions_disc')}</Typography>
                                     <Typography variant="h6" fontWeight="bold" color="#333">
                                         {exerciseInfo.reps}
                                     </Typography>
@@ -325,15 +325,15 @@ const ExerciseDetailPage: React.FC = () => {
                                     color: '#fff',
                                     '&:hover': { backgroundColor: '#5a6268' },
                                     fontWeight: 'bold',
-                                    paddingX: 4,
-                                    mt: 2,
+                                    fontSize: '0.8rem',
+                                    borderRadius: '8px',
                                 }}
                             >
                                 {t('start_rest_timer')}
                             </Button>
                         </Grid>
 
-                        <Box mt={4} mb={8} display="flex" justifyContent="center" width="100%">
+                        <Box mt={4} mb={8} display="flex" justifyContent="center" width="100%" sx={{ position: 'fixed', bottom: 0, left: 0, padding: '16px', boxSizing: 'border-box' }}>
                             <Button
                                 onClick={handleMarkAsComplete}
                                 variant="contained"
@@ -344,7 +344,7 @@ const ExerciseDetailPage: React.FC = () => {
                                     borderRadius: '8px',
                                     fontSize: '1rem',
                                     fontWeight: 'bold',
-                                    width: '95%', // Aumenta el ancho del botón para ocupar casi todo el ancho
+                                    width: '100%',
                                     maxWidth: '600px', // Limita el ancho máximo en pantallas grandes
                                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                                     '&:hover': {
@@ -355,6 +355,7 @@ const ExerciseDetailPage: React.FC = () => {
                                 {t('mark_exercise_complete')}
                             </Button>
                         </Box>
+
 
                         <ExerciseInfoModal
                             isOpen={showModal}

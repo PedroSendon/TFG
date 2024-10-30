@@ -80,22 +80,25 @@ const Graphics: React.FC = () => {
   }, []);
 
   const chartData = {
-    labels: weightRecords.map(record => new Date(record.date).toLocaleDateString()),
+    labels: weightRecords.map(record =>
+        new Date(record.date).toLocaleDateString(undefined, { day: '2-digit', month: 'short' })
+    ),
     datasets: [
-      {
-        label: t('Weight Evolution'),
-        data: weightRecords.map(record => record.weight),
-        borderColor: 'rgba(70, 130, 180, 1)', // Color gris azulado
-        backgroundColor: 'rgba(70, 130, 180, 0.2)', // Fondo claro
-        fill: true,
-      },
+        {
+            label: t('Weight Evolution'),
+            data: weightRecords.map(record => record.weight),
+            borderColor: 'rgba(70, 130, 180, 1)',
+            backgroundColor: 'rgba(70, 130, 180, 0.2)',
+            fill: true,
+        },
     ],
-  };
+};
+
 
   return (
-    <Box sx={{ padding: 1, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+    <Box sx={{ padding: 1, backgroundColor: '#f5f5f5', minHeight: '80vh' }}>
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '20vh', marginTop: '20px' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '20vh' }}>
           <CircularProgress />
         </Box>
       )}
@@ -107,14 +110,15 @@ const Graphics: React.FC = () => {
       )}
 
       {/* Section for Adding a New Weight Record */}
-      <Grid container justifyContent="center" sx={{ paddingBottom: '20px', marginTop: '20px' }}>
+      <Grid container justifyContent="center" sx={{ paddingBottom: '20px'}}>
         <Grid item xs={12} sm={8} md={6}>
           <Card sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px' }}>
             <CardContent>
-              <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#333' }}>
+              <Typography fontSize={'1em'} fontWeight="bold" gutterBottom sx={{ color: '#333' }}>
                 {t('Add Weight Record')}
               </Typography>
               <TextField
+                
                 fullWidth
                 type="number"
                 label={t('Enter your weight')}
@@ -160,7 +164,7 @@ const Graphics: React.FC = () => {
       <Box sx={{ borderTop: '1px solid #333', width: '100%', margin: '20px 0' }} />
 
       <Grid item xs={12} sx={{ marginTop: '20px', marginBottom: '20px' }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: '1.4em', color: '#333' }}>
+        <Typography sx={{textAlign: 'center', fontWeight: 'bold', fontSize: '1.1em', color: '#333' }}>
           {t('Evolution')}
         </Typography>
       </Grid>
@@ -178,7 +182,7 @@ const Graphics: React.FC = () => {
                     legend: { display: false },
                   },
                   scales: {
-                    x: { title: { display: true, text: t('Date') } },
+                    x: { title: { display: true, text: t('Date')} },
                     y: { title: { display: true, text: t('Weight (kg)') } },
                   },
                 }}

@@ -69,14 +69,11 @@ const MacronutrientPage: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ width: '100%', padding: 0,  height: '100vh', backgroundColor: '#f5f5f5', marginTop:'16%' }}> {/* Eliminamos el margen lateral */}
+    <Box sx={{ width: '100%', height: '92vh', backgroundColor: '#f5f5f5', marginTop: '16%' }}> {/* Eliminamos el margen lateral */}
       <Header title={t('macros_title')} />
-      <Box sx={{ textAlign: 'center', mt: 2 , paddingTop:'5%'}}>
-        <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+      <Box sx={{ textAlign: 'center', mt: 2, paddingTop: '5%' }}>
+        <Typography fontSize={'1.2em'} fontWeight="bold">
           {dietType}
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          {totalKcal} {t('macros_total_kcal')}
         </Typography>
       </Box>
 
@@ -93,11 +90,13 @@ const MacronutrientPage: React.FC = () => {
               textAlign: 'center',
             }}
           >
-            <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              {/* Texto totalmente alineado a la izquierda */}
-              <Typography variant="body2" color="textPrimary" sx={{ alignSelf: 'flex-start' }}>
-                {t(`macros_${macro}`)}
-              </Typography>
+            <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, p: 1 }}>
+              {/* Envolvemos el título en un Box para alinearlo sin márgenes adicionales */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                <Typography variant="body2" color="textPrimary">
+                  {t(`macros_${macro}`)}
+                </Typography>
+              </Box>
               {/* Número centrado */}
               <Typography variant="subtitle1" sx={{ color: macros[macro as keyof typeof macros].color, fontSize: '16px' }}>
                 {macros[macro as keyof typeof macros].grams}g
@@ -107,7 +106,7 @@ const MacronutrientPage: React.FC = () => {
         ))}
       </Box>
 
-      <Box sx={{ textAlign: 'center'}}>
+      <Box sx={{ textAlign: 'center' }}>
         <PieChart width={300} height={300} style={{ display: 'inline-block', marginTop: '10px' }}>
           <Pie
             data={pieData}
@@ -132,15 +131,26 @@ const MacronutrientPage: React.FC = () => {
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
+          {/* Texto en el centro de la gráfica */}
+          <text
+            x={150}
+            y={150}
+            textAnchor="middle"
+            dominantBaseline="central"
+            style={{ fontSize: '18px', fontWeight: 'bold', fill: '#333' }}
+          >
+            {totalKcal} kcal
+          </text>
           <Legend />
           <Tooltip />
         </PieChart>
       </Box>
 
+
       <Box sx={{ borderTop: '1px solid #ccc', width: '80%', m: '20px auto' }} />
 
-      <Box sx={{ textAlign: 'center', mt: 3, paddingBottom:'15%'}}>
-        <Typography variant="h6" fontWeight="bold" color="#333">
+      <Box sx={{ textAlign: 'center', mt: 3, paddingBottom: '15%', }}>
+        <Typography sx={{ mb: 2, color: '#333', textAlign: 'center', fontWeight: 'bold' }}>
           {t('meal_distribution')}
         </Typography>
         <Table

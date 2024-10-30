@@ -4,40 +4,55 @@ import ControlPanel from './ControlPanel';
 import WorkoutHistory from './WorkoutHistory';
 import Graphics from './Graphics';
 import Header from '../../Header/Header';
-import { LanguageContext } from '../../../context/LanguageContext'; // Contexto de idioma
+import { LanguageContext } from '../../../context/LanguageContext';
 
 const Progress: React.FC = () => {
     const [selectedSection, setSelectedSection] = useState<number>(0);
-    const { t } = useContext(LanguageContext); // Hook para obtener la función de traducción
+    const { t } = useContext(LanguageContext);
 
-    // Función para manejar el cambio de pestañas
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setSelectedSection(newValue);
     };
 
     return (
-        <Box sx={{ backgroundColor: '#f5f5f5', marginTop:'16%' }}>
-            <Header title={t('progress_title')} />  {/* Usamos la variable para el título */}
-            <Container maxWidth="md">
-                {/* Etiquetas para seleccionar las secciones */}
-                <Tabs
-                    value={selectedSection}
-                    onChange={handleTabChange}
-                    centered
-                    textColor="inherit"
-                    indicatorColor="secondary"
+        <Box sx={{ backgroundColor: '#f5f5f5', paddingTop: '16%' }}>
+            <Header title={t('progress_title')} /> 
+            
+            {/* Navbar fija */}
+            <Box
                     sx={{
-                        color: 'gray',
-                        '.Mui-selected': { color: 'gray' }, // Color de pestaña seleccionada
-                        '.MuiTabs-indicator': { backgroundColor: 'gray' }, // Color del indicador
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        backgroundColor: '#f5f5f5',
+                        paddingTop: '16%',
+                        zIndex: 1000,
+                        borderBottom: '1px solid #ccc', // Línea inferior para separación
                     }}
                 >
-                    <Tab label={t('control_panel_label')} />
-                    <Tab label={t('workout_label')} />
-                    <Tab label={t('weight_graph_label')} />
-                </Tabs>
+                <Container maxWidth="md">
+                    <Tabs
+                        value={selectedSection}
+                        onChange={handleTabChange}
+                        centered
+                        textColor="inherit"
+                        indicatorColor="secondary"
+                        sx={{
+                            color: 'gray',
+                            '.Mui-selected': { color: 'gray' },
+                            '.MuiTabs-indicator': { backgroundColor: 'gray' },
+                        }}
+                    >
+                        <Tab label={t('control_panel_label')} />
+                        <Tab label={t('workout_label')} />
+                        <Tab label={t('weight_graph_label')} />
+                    </Tabs>
+                </Container>
+            </Box>
 
-                {/* Mostrar la sección seleccionada */}
+            {/* Contenido de las secciones con margen superior */}
+            <Container maxWidth="md" sx={{ mt: 10, paddingBottom: '16px' }}>
                 {selectedSection === 0 && <ControlPanel />}
                 {selectedSection === 1 && <WorkoutHistory />}
                 {selectedSection === 2 && <Graphics />}

@@ -131,7 +131,7 @@ const WorkoutOverview: React.FC = () => {
   }
 
   return (
-    <Box sx={{ backgroundColor: '#f5f5f5', height: '100vh', marginTop:'16%' }}>
+    <Box sx={{ backgroundColor: '#f5f5f5', height: '100vh', marginTop:'15%' }}>
       <Header title="Training Plan Overview" />
 
       <Box sx={{ minHeight: '100vh' }}>
@@ -163,7 +163,7 @@ const WorkoutOverview: React.FC = () => {
 
         )}
 
-        <List sx={{ padding: '0 20px' }}>
+        <List sx={{ padding: '0 20px', pb:'14%' }}>
           {trainingPlan && trainingPlan.workouts.map((workout) => (
             <ListItem
               key={workout.id}
@@ -189,7 +189,7 @@ const WorkoutOverview: React.FC = () => {
             >
               <ListItemText
                 primary={
-                  <Typography sx={{ fontWeight: 'bold', fontSize: '1.2em', color: '#333' }}>
+                  <Typography  sx={{ fontWeight: 'bold', fontSize: '1.1em', color: '#333' }}>
                     {workout.name}
                   </Typography>
                 }
@@ -200,6 +200,7 @@ const WorkoutOverview: React.FC = () => {
                       textOverflow: 'ellipsis',
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
+                      fontSize: '1em',
                       WebkitBoxOrient: 'vertical',
                       color: '#666', // Color de texto más suave
                     }}
@@ -251,52 +252,59 @@ const WorkoutOverview: React.FC = () => {
 
 
         {/* Modal de información */}
-        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-          <Box sx={{
-            position: 'absolute', top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '80%', bgcolor: 'background.paper', p: 4, borderRadius: '10px',
-          }}>
-            <IconButton onClick={() => setModalOpen(false)} sx={{ position: 'absolute', top: '10px', right: '10px', color: '#6b6b6b', zIndex: 1 }}>
-              <CloseIcon />
-            </IconButton>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
-                {trainingPlan?.name}
-              </Typography>
-              <Divider sx={{ margin: '10px 0', backgroundColor: '#b0b0b0' }} />
-              <Typography variant="body1" sx={{ color: '#555', marginBottom: '20px' }}>
-                {trainingPlan?.description}
-              </Typography>
-              <Divider sx={{ margin: '20px 0', backgroundColor: '#b0b0b0' }} />
-              <Card sx={{
-                backgroundColor: '#f9f9f9',
-                padding: '20px',
-                borderRadius: '10px',
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #b0b0b0',
-              }}>
-                <CardContent>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
-                    Information
-                  </Typography>
-                  <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
-                  <Typography sx={{ marginBottom: '10px', color: '#333' }}>
-                    <strong>Difficulty:</strong> {trainingPlan?.difficulty}
-                  </Typography>
-                  <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
-                  <Typography sx={{ marginBottom: '10px', color: '#333' }}>
-                    <strong>Equipment:</strong> {trainingPlan?.equipment}
-                  </Typography>
-                  <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
-                  <Typography sx={{ color: '#333' }}>
-                    <strong>Duration:</strong> {trainingPlan?.duration} minutes
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Box>
-          </Box>
-        </Modal>
+<Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+  <Box sx={{
+    position: 'absolute', top: '50%', left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '80%', bgcolor: 'background.paper', p: 4, borderRadius: '10px',
+  }}>
+    <IconButton onClick={() => setModalOpen(false)} sx={{ position: 'absolute', top: '10px', right: '10px', color: '#6b6b6b', zIndex: 1 }}>
+      <CloseIcon />
+    </IconButton>
+    <Box sx={{ textAlign: 'center' }}>
+      <Typography sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+        {t('training_plan_name')}
+      </Typography>
+      <Divider sx={{ margin: '10px 0', backgroundColor: '#b0b0b0' }} />
+      <Typography fontSize={'0.85em'} sx={{ color: '#555', marginBottom: '20px' }}>
+        {t('training_plan_description')}
+      </Typography>
+      <Divider sx={{ margin: '20px 0', backgroundColor: '#b0b0b0' }} />
+      <Card sx={{
+        backgroundColor: '#f9f9f9',
+        padding: '20px',
+        borderRadius: '10px',
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+        border: '1px solid #b0b0b0',
+      }}>
+        <CardContent>
+          <Typography sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+            {t('training_information')}
+          </Typography>
+          <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
+          <Typography fontSize={'0.9em'} sx={{ marginBottom: '10px', color: '#333' }}>
+            <Typography component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
+              {t('training_difficulty')}:
+            </Typography> {trainingPlan?.difficulty}
+          </Typography>
+          <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
+          <Typography fontSize={'0.9em'} sx={{ marginBottom: '10px', color: '#333' }}>
+            <Typography component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
+              {t('training_equipment')}:
+            </Typography> {trainingPlan?.equipment}
+          </Typography>
+          <Divider sx={{ margin: '10px 0', backgroundColor: '#d3d3d3' }} />
+          <Typography fontSize={'0.9em'} sx={{ color: '#333' }}>
+            <Typography component="span" sx={{ fontWeight: 'bold', color: '#333' }}>
+              {t('training_duration')}:
+            </Typography> {trainingPlan?.duration} {t('training_duration_unit')}
+          </Typography>
+        </CardContent>
+      </Card>
+    </Box>
+  </Box>
+</Modal>
+
       </Box>
     </Box>
   );
