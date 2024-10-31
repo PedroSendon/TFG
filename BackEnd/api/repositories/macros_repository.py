@@ -43,11 +43,12 @@ class MacrosRepository:
     @staticmethod
     def get_user_mealplan(user):
         """
-        Obtener los datos de macronutrientes del usuario.
+        Obtener los datos de macronutrientes del usuario y la distribución de comidas.
         """
         try:
             if not isinstance(user, User):
                 user = User.objects.get(id=user.id)
+            
             # Obtener el plan de nutrición del usuario
             user_nutrition_plan = UserNutritionPlan.objects.get(user=user)
             meal_plan = user_nutrition_plan.plan
@@ -55,6 +56,7 @@ class MacrosRepository:
             # Calcular macronutrientes y calorías
             macros_data = {
                 "totalKcal": meal_plan.calories,
+                "name": meal_plan.name,
                 "macros": {
                     "carbs": {
                         "grams": meal_plan.carbs,
@@ -74,7 +76,11 @@ class MacrosRepository:
                         "percentage": round((meal_plan.fats * 9 / meal_plan.calories) * 100),
                         "color": "#ffd11a"
                     }
-                }
+                },
+                # Nueva variable de distribución de comidas
+                "meal_distribution": meal_plan.meal_distribution,  # Esto debe devolver la lista de porcentajes
+                "dietType": meal_plan.diet_type,
+                "description": meal_plan.description,
             }
 
             return macros_data
@@ -98,15 +104,17 @@ class MacrosRepository:
                 "proteins": float(mealplan.proteins),
                 "carbs": float(mealplan.carbs),
                 "fats": float(mealplan.fats),
+                "description": mealplan.description,
                 "dietType": mealplan.diet_type,  # Tipo de dieta asociado al MealPlan
-                "description": None  # Si deseas agregar un campo de descripción más adelante
+                "name": mealplan.name,  # Si deseas agregar un campo de descripción más adelante
+                "meal_distribution": mealplan.meal_distribution  # Distribución de comidas
             }
         except MealPlan.DoesNotExist:
             return None
 
 
     @staticmethod
-    def add_mealplan(user, kcal, proteins, carbs, fats, diet_type):
+    def add_mealplan(user, kcal, proteins, carbs, fats, diet_type, meal_distribution, name, description):
         """
         Añadir un nuevo plan de comidas (MealPlan).
         :param user: El usuario asociado al plan de comida.
@@ -118,13 +126,20 @@ class MacrosRepository:
         :return: Un diccionario con los detalles del plan de comida o None si ocurrió un error.
         """
         try:
+            # Validación de meal_distribution
+            if meal_distribution and (not isinstance(meal_distribution, list) or sum(meal_distribution) != 100):
+                raise ValueError("meal_distribution debe ser una lista de porcentajes que sumen 100.")
+
             meal_plan = MealPlan.objects.create(
                 user=user,  # Relación con el usuario
+                name=name,
                 calories=kcal,
                 proteins=proteins,
                 carbs=carbs,
                 fats=fats,
-                diet_type=diet_type  # Asegúrate de que diet_type sea uno de los valores permitidos en MealPlan
+                description=description,
+                diet_type=diet_type,  # Asegúrate de que diet_type sea uno de los valores permitidos en MealPlan
+                meal_distribution=meal_distribution  # Distribución de comidas
             )
             return {
                 "id": meal_plan.id,
@@ -133,6 +148,7 @@ class MacrosRepository:
                 "carbs": float(meal_plan.carbs),
                 "fats": float(meal_plan.fats),
                 "dietType": meal_plan.diet_type,
+                "meal_distribution": meal_plan.meal_distribution
             }
         except Exception as e:
             # Manejo de errores
@@ -141,7 +157,7 @@ class MacrosRepository:
 
 
     @staticmethod
-    def update_mealplan(user, mealplan_id, kcal, proteins, carbs, fats, diet_type):
+    def update_mealplan(user, mealplan_id, kcal, proteins, carbs, fats, diet_type, meal_distribution, name, description):
         """
         Modificar un plan de comidas existente.
         :param user: El usuario que posee el plan.
@@ -158,10 +174,13 @@ class MacrosRepository:
             meal_plan = MealPlan.objects.get(id=mealplan_id, user=user, diet_type=diet_type)
 
             # Actualizar los valores del plan de comidas
+            meal_plan.name = name
             meal_plan.calories = kcal
+            description = description
             meal_plan.proteins = proteins
             meal_plan.carbs = carbs
             meal_plan.fats = fats
+            meal_plan.meal_distribution = meal_distribution
             meal_plan.save()
 
             return True
@@ -204,7 +223,11 @@ class MacrosRepository:
                 "kcal": meal_plan.calories,
                 "proteins": float(meal_plan.proteins),
                 "carbs": float(meal_plan.carbs),
-                "fats": float(meal_plan.fats)
+                "fats": float(meal_plan.fats),
+                "dietType": meal_plan.diet_type,
+                "meal_distribution": meal_plan.meal_distribution,
+                "name": meal_plan.name,
+                "description": meal_plan.description
             }
         except MealPlan.DoesNotExist:
             return None
@@ -226,7 +249,9 @@ class MacrosRepository:
                 "kcal": meal_plan.calories,
                 "proteins": float(meal_plan.proteins),
                 "carbs": float(meal_plan.carbs),
-                "fats": float(meal_plan.fats)
+                "fats": float(meal_plan.fats),
+                "meal_distribution": meal_plan.meal_distribution,
+                "description": meal_plan.description
             }
             for meal_plan in meal_plans
         ]

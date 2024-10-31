@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import {
-    TextField, Button, Grid, Container, MenuItem, Box
+    TextField, Button, Grid, Container, MenuItem, Box,
+    Typography
 } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import Header from '../../Header/Header';
@@ -9,6 +10,7 @@ import { LanguageContext } from '../../../context/LanguageContext';
 const AddMacros: React.FC = () => {
     const { t } = useContext(LanguageContext);
     const history = useHistory();
+    const [mealCount, setMealCount] = useState<number>(); // Número de comidas (inicialmente 2)
 
     const [formData, setFormData] = useState({
         kcal: '',
@@ -18,6 +20,7 @@ const AddMacros: React.FC = () => {
         dietType: '',
         description: '',
     });
+    const [mealDistribution, setMealDistribution] = useState<number[]>([25, 25, 25, 25]); // Distribución inicial para 4 comidas
 
     const [errors, setErrors] = useState<any>({});
     const [dietTypes, setDietTypes] = useState<{ value: string; label: string }[]>([]);
@@ -66,6 +69,9 @@ const AddMacros: React.FC = () => {
         if (!formData.dietType) {
             newErrors.dietType = t('validation_select_diet_type');
         }
+        if (mealDistribution.reduce((a, b) => a + b, 0) !== 100) {
+            newErrors.mealDistribution = t('distribution_error');
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -90,7 +96,7 @@ const AddMacros: React.FC = () => {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${accessToken}`,
                     },
-                    body: JSON.stringify(formData),
+                    body: JSON.stringify({ ...formData, meal_distribution: mealDistribution }),
                 });
                 if (response.ok) {
                     history.push({
@@ -106,17 +112,50 @@ const AddMacros: React.FC = () => {
             }
         }
     };
+    const handleMealCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const count = parseInt(e.target.value);
+        setMealCount(count);
+        setMealDistribution(Array(count).fill(Math.floor(100 / count))); // Inicializa la distribución al porcentaje más cercano
+    };
+    const handleMealDistributionChange = (index: number, value: string) => {
+        const newDistribution = [...mealDistribution];
+        newDistribution[index] = Number(value);
+        setMealDistribution(newDistribution);
+    };
 
     const handleCancel = () => {
         history.push('/admin/nutrition');
     };
 
     return (
-        <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column', marginTop:'16%' }}>
+        <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column', marginTop: '16%' }}>
             <Header title={t('add_macros_title')} />
             <Container component="main" maxWidth="xs" sx={{ mt: 4, flexGrow: 1 }}>
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
+
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                required
+                                fullWidth
+                                id="name"
+                                label={t('name')}
+                                name="name"
+                                onChange={handleChange}
+                                error={!!errors.name}
+                                helperText={errors.name}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
+                            />
+                        </Grid>
                         {/* Campo de Kcal */}
                         <Grid item xs={12}>
                             <TextField
@@ -244,6 +283,66 @@ const AddMacros: React.FC = () => {
                                 ))}
                             </TextField>
                         </Grid>
+                        {/* Selección del número de comidas */}
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                select
+                                fullWidth
+                                label={t('meal_count')}
+                                value={mealCount || ''}
+                                onChange={handleMealCountChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
+                            >
+                                {[2, 3, 4, 5, 6].map((count) => (
+                                    <MenuItem key={count} value={count}>
+                                        {count} {t('meals_per_day')}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+
+                        {/* Distribución de comidas */}
+                        {mealCount && (
+                            <Grid item xs={12}>
+                                <Typography sx={{ mb: 1, color:'gray' }}>
+                                    {t('meal_distribution')}
+                                </Typography>
+                                <Grid container spacing={1}>
+                                    {mealDistribution.map((percentage, index) => (
+                                        <Grid item xs={6} key={index}>
+                                            <TextField
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                                label={`${t('meal')} ${index + 1} (%)`}
+                                                value={percentage}
+                                                onChange={(e) => handleMealDistributionChange(index, e.target.value)}
+                                                error={!!errors.mealDistribution}
+                                                helperText={index === mealDistribution.length - 1 && errors.mealDistribution}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '8px',
+                                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                                    },
+                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                                }}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Grid>
+                        )}
 
                         {/* Campo para la descripción adicional */}
                         <Grid item xs={12}>

@@ -74,6 +74,9 @@ def add_mealplan(request):
     carbs = request.data.get('carbs')
     fats = request.data.get('fats')
     diet_type = request.data.get('dietType')
+    name = request.data.get('name')
+    meal_distribution = request.data.get('mealDistribution')
+    description = request.data.get('description')
 
     # Validar que todos los campos requeridos están presentes
     if not all([ kcal, proteins, carbs, fats, diet_type]):
@@ -93,7 +96,10 @@ def add_mealplan(request):
         proteins=proteins,
         carbs=carbs,
         fats=fats,
-        diet_type=diet_type
+        diet_type=diet_type,
+        name=name,
+        meal_distribution=meal_distribution,
+        description=description
     )
 
     if meal_plan_data is None:
@@ -123,6 +129,9 @@ def update_mealplan(request, id):
     carbs = request.data.get('carbs')
     fats = request.data.get('fats')
     diet_type = request.data.get('dietType')
+    name = request.data.get('name')
+    meal_distribution = request.data.get('mealDistribution')
+    description = request.data.get('description')
 
     # Validar que todos los campos requeridos están presentes
     if not all([kcal, proteins, carbs, fats, diet_type]):
@@ -130,7 +139,7 @@ def update_mealplan(request, id):
                         status=status.HTTP_400_BAD_REQUEST)
 
     # Modificar el plan de comidas
-    success = MacrosRepository.update_mealplan(user, id, kcal, proteins, carbs, fats, diet_type)
+    success = MacrosRepository.update_mealplan(user, id, kcal, proteins, carbs, fats, diet_type, name, meal_distribution, description)
 
     if success:
         return Response({"message": "Plan de comidas actualizado correctamente"}, status=status.HTTP_200_OK)

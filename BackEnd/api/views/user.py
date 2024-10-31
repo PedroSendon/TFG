@@ -224,32 +224,36 @@ def update_user_profile(request):
 @permission_classes([IsAuthenticated])
 def assign_plans(request, user_id):
     """
-    Asignar un plan de entrenamiento y un plan nutricional a un usuario.
+    Asignar un plan de entrenamiento y/o un plan nutricional a un usuario.
     """
     workout_id = request.data.get('workout_id')
     nutrition_plan_id = request.data.get('nutrition_plan_id')
 
-    # Verificar si se recibieron los IDs correctamente
-    if not workout_id or not nutrition_plan_id:
-        return Response({"error": "ID del plan de entrenamiento o plan nutricional no proporcionado."}, status=status.HTTP_400_BAD_REQUEST)
+    # Verificamos si workout_id y/o nutrition_plan_id están presentes y válidos
+    if workout_id:
+        print("Asignando workout_id:", workout_id)
+        # Llamar al repositorio para asignar el entrenamiento
+        success_workout, message_workout = UserRepository.assign_concret_training_plan_to_user(user_id, workout_id)
 
-    print("Asignando workout_id:", workout_id, "nutrition_plan_id:", nutrition_plan_id)
+        if not success_workout:
+            return Response({"error": message_workout}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Llamar al repositorio para asignar el entrenamiento
-    success_workout, message_workout = UserRepository.assign_concret_training_plan_to_user(user_id, workout_id)
+    if nutrition_plan_id:
+        print("Asignando nutrition_plan_id:", nutrition_plan_id)
+        # Llamar al repositorio para asignar el plan nutricional
+        success_plan, message_plan = UserRepository.assign_concret_nutrition_plan_to_user(user_id, nutrition_plan_id)
 
-    if not success_workout:
-        return Response({"error": message_workout}, status=status.HTTP_400_BAD_REQUEST)
+        if not success_plan:
+            return Response({"error": message_plan}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Llamar al repositorio para asignar el plan nutricional
-    success_plan, message_plan = UserRepository.assign_concret_nutrition_plan_to_user(user_id, nutrition_plan_id)
-
-    if not success_plan:
-        return Response({"error": message_plan}, status=status.HTTP_400_BAD_REQUEST)
-
-    return Response({
-        "message": "Entrenamiento y plan nutricional asignados exitosamente."
-    }, status=status.HTTP_200_OK)
+    # Si al menos uno de los planes fue asignado con éxito
+    if workout_id or nutrition_plan_id:
+        return Response({
+            "message": "Planes asignados exitosamente."
+        }, status=status.HTTP_200_OK)
+    else:
+        # Si ninguno de los planes fue proporcionado
+        return Response({"error": "No se proporcionó ningún ID de plan para asignar."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -568,6 +572,14 @@ def get_unassigned_users_for_training(request):
     ]
 
     return Response(unassigned_users_data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_status(request):
+    user_status = UserRepository.get_user_status(request.user.id)
+    if user_status is None:
+        return Response({"error": "User not found."}, status=404)
+    return Response({"status": user_status}, status=200)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

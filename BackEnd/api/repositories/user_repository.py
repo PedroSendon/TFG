@@ -56,6 +56,14 @@ class UserRepository:
             return None
 
     @staticmethod
+    def get_user_status(user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            return user.status
+        except User.DoesNotExist:
+            return None
+
+    @staticmethod
     def create_user(user_data):
         """
         Crear un nuevo usuario en la base de datos.
@@ -234,15 +242,17 @@ class UserRepository:
     @staticmethod
     def assign_concret_training_plan_to_user(user_id, training_plan_id):
         """
-        Asigna un plan de entrenamiento a un usuario.
+        Asigna un plan de entrenamiento a un usuario, eliminando el plan anterior si existe.
         """
         try:
             print(f"Intentando asignar el plan de entrenamiento {training_plan_id} al usuario {user_id}")
             user = User.objects.get(id=user_id)
             training_plan = TrainingPlan.objects.get(id=training_plan_id)
 
-            # Verificar si el usuario ya tiene un plan nutricional asignado
-            has_nutrition_plan = UserNutritionPlan.objects.filter(user=user).exists()
+            # Eliminar cualquier plan de entrenamiento existente
+            existing_workout = UserWorkout.objects.filter(user=user).first()
+            if existing_workout:
+                existing_workout.delete()  # Eliminar el plan de entrenamiento actual
 
             # Crear el UserWorkout y asignar el plan de entrenamiento
             user_workout = UserWorkout.objects.create(user=user, training_plan=training_plan)
@@ -251,13 +261,13 @@ class UserRepository:
             for workout in training_plan.workouts.all():
                 WeeklyWorkout.objects.create(user_workout=user_workout, workout=workout, completed=False)
 
+            # Verificar si el usuario ya tiene un plan nutricional asignado
+            has_nutrition_plan = UserNutritionPlan.objects.filter(user=user).exists()
+
             # Actualizar el estado del usuario en función de los planes asignados
-            if has_nutrition_plan:
-                user.status = 'assigned'
-            else:
-                user.status = 'training_only'
-            
+            user.status = 'assigned' if has_nutrition_plan else 'training_only'
             user.save()
+
             return True, "Plan de entrenamiento asignado exitosamente."
 
         except User.DoesNotExist:
@@ -267,30 +277,31 @@ class UserRepository:
         except Exception as e:
             return False, str(e)
 
-    # Asignación de plan nutricional
     @staticmethod
     def assign_concret_nutrition_plan_to_user(user_id, plan_id):
         """
-        Asigna un plan nutricional a un usuario.
+        Asigna un plan nutricional a un usuario, eliminando el plan anterior si existe.
         """
         try:
             print(f"Intentando asignar el plan nutricional {plan_id} al usuario {user_id}")
             user = User.objects.get(id=user_id)
             nutrition_plan = MealPlan.objects.get(id=plan_id)
 
-            # Verificar si el usuario ya tiene un plan de entrenamiento asignado
-            has_training_plan = UserWorkout.objects.filter(user=user).exists()
+            # Eliminar cualquier plan nutricional existente
+            existing_nutrition_plan = UserNutritionPlan.objects.filter(user=user).first()
+            if existing_nutrition_plan:
+                existing_nutrition_plan.delete()  # Eliminar el plan nutricional actual
 
             # Crear el UserNutritionPlan y asignar el plan nutricional
             UserNutritionPlan.objects.create(user=user, plan=nutrition_plan)
 
-            # Actualizar el estado del usuario en función de los planes asignados
-            if has_training_plan:
-                user.status = 'assigned'
-            else:
-                user.status = 'nutrition_only'
+            # Verificar si el usuario ya tiene un plan de entrenamiento asignado
+            has_training_plan = UserWorkout.objects.filter(user=user).exists()
 
+            # Actualizar el estado del usuario en función de los planes asignados
+            user.status = 'assigned' if has_training_plan else 'nutrition_only'
             user.save()
+
             return True, "Plan nutricional asignado exitosamente."
 
         except User.DoesNotExist:
@@ -299,6 +310,7 @@ class UserRepository:
             return False, "Plan nutricional no encontrado."
         except Exception as e:
             return False, str(e)
+
 
 
     @staticmethod
@@ -585,21 +597,32 @@ class UserDetailsRepository:
             user = User.objects.get(id=user_id)
             user_details = user.details
 
+            # Variables para verificar si `weightGoal` o `trainingFrequency` cambian
+            weight_goal_changed = profile_data.get('weightGoal') != user_details.weight_goal
+            training_frequency_changed = profile_data.get('trainingFrequency') != user_details.weekly_training_days
+
             # Actualizar los campos básicos
             user.first_name = profile_data.get('firstName', user.first_name)
             user.last_name = profile_data.get('lastName', user.last_name)
             user.save()
 
             # Actualizar los detalles del usuario
-            user_details.weight = profile_data.get(
-                'currentWeight', user_details.weight)
-            user_details.weight_goal = profile_data.get(
-                'weightGoal', user_details.weight_goal)
-            user_details.physical_activity_level = profile_data.get(
-                'activityLevel', user_details.physical_activity_level)
-            user_details.weekly_training_days = profile_data.get(
-                'trainingFrequency', user_details.weekly_training_days)
+            user_details.weight = profile_data.get('currentWeight', user_details.weight)
+            user_details.weight_goal = profile_data.get('weightGoal', user_details.weight_goal)
+            user_details.physical_activity_level = profile_data.get('activityLevel', user_details.physical_activity_level)
+            user_details.weekly_training_days = profile_data.get('trainingFrequency', user_details.weekly_training_days)
             user_details.save()
+
+            # Verificar si hubo cambios en `weightGoal` o `trainingFrequency`
+            if weight_goal_changed or training_frequency_changed:
+                # Cambiar el status del usuario a 'awaiting_assignment'
+                user.status = 'awaiting_assignment'
+                user.save()
+
+                # Eliminar asignaciones de planes actuales
+                # Asumiendo que UserWorkout y UserNutritionPlan son las tablas que almacenan las asignaciones
+                UserWorkout.objects.filter(user=user).delete()
+                UserNutritionPlan.objects.filter(user=user).delete()
 
             return {
                 "username": f"{user.first_name} {user.last_name}",
@@ -609,8 +632,9 @@ class UserDetailsRepository:
                 "trainingFrequency": user_details.weekly_training_days
             }
 
-        except User.DoesNotExist:  # Asegúrate de que `User` esté definido correctamente
+        except User.DoesNotExist:
             return None
+
 
     @staticmethod
     def change_user_password(user_id, current_password, new_password, confirm_password):

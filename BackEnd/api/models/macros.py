@@ -1,5 +1,6 @@
 from django.db import models
 from .user import User  # Asegúrate de que 'User' esté definido en otro archivo de modelos
+from django.contrib.postgres.fields import JSONField  # Importa JSONField si estás usando PostgreSQL
 
 class DietCategory(models.Model):
     name = models.CharField(max_length=50, unique=True)  # Nombre de la categoría (p.ej., 'weightLoss', 'muscleGain', 'maintenance')
@@ -15,6 +16,8 @@ class MealPlan(models.Model):
     proteins = models.DecimalField(max_digits=5, decimal_places=2)  # Proteínas en gramos
     carbs = models.DecimalField(max_digits=5, decimal_places=2)  # Carbohidratos en gramos
     fats = models.DecimalField(max_digits=5, decimal_places=2)  # Grasas en gramos
+    meal_distribution = models.JSONField(default=dict, blank=True, null=True, help_text="Distribución de comidas en porcentajes. Ejemplo: {'desayuno': 20, 'almuerzo': 40, 'cena': 25, 'merienda': 15}")
+    description = models.TextField(blank=True, null=True)  # Descripción opcional de la categoría
 
     def __str__(self):
         return f"Meal plan: {self.name} ({self.diet_type})"

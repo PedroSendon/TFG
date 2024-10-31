@@ -34,6 +34,7 @@ urlpatterns = [
     path('users/<int:user_id>/assign-plans/', user.assign_plans, name='assign-plans'),
     path('users/details/<int:user_id>/', user.get_user_details, name='get-user-details'),
     path('user/role/', user.get_user_role, name='get_user_role'),
+    path('user/status/', user.get_user_status, name='get_user_status'),
     path('user/unassigned/nutrition/', user.get_unassigned_users_for_nutrition, name='get_unassigned_users_for_nutrition'),
     path('user/unassigned/training/', user.get_unassigned_users_for_training, name='get_unassigned_users_for_training'),
     path('users/all-details/<int:user_id>/', user.get_user_all_details, name='get-all-details'),

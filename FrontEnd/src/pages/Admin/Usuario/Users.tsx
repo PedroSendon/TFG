@@ -146,7 +146,7 @@ const Users: React.FC = () => {
       {/* Header */}
       <Header title={t('users')} />
 
-      <Container sx={{ mt: 10 , paddingBottom:'18%'}}>
+      <Container sx={{ mt: 10, paddingBottom: '18%' }}>
         {/* Listado de usuarios */}
         <Grid container spacing={2}>
           {users.map((user) => (
@@ -154,14 +154,14 @@ const Users: React.FC = () => {
               <Card
                 sx={{
                   backgroundColor: '#ffffff',
-                  borderRadius: '12px', // Bordes redondeados más suaves
-                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', // Sombra suave para darle profundidad
-                  border: '1px solid #e0e0e0', // Borde claro para una apariencia limpia
-                  padding: '16px', // Espaciado interno
+                  borderRadius: '12px',
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid #e0e0e0',
+                  padding: '16px',
                   transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
                   '&:hover': {
-                    transform: 'scale(1.02)', // Leve efecto de agrandamiento al pasar el cursor
-                    boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)', // Aumenta la sombra al hacer hover
+                    transform: 'scale(1.02)',
+                    boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)',
                   },
                 }}
                 onClick={() => handleUserInformation(user.id)}
@@ -172,17 +172,18 @@ const Users: React.FC = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     padding: '0px',
-                    }}
+                  }}
                 >
-                  {/* Información del usuario */}
                   <Typography sx={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
                     {user.name}
                   </Typography>
 
-                  {/* Botones Modificar y Eliminar juntos pero compactos */}
                   <Box sx={{ display: 'flex', gap: '7px' }}>
                     <IconButton
-                      onClick={() => handleAssign(user.id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleAssign(user.id);
+                      }}
                       sx={{
                         border: '1px solid #9C27B0',
                         backgroundColor: '#FFFFFF',
@@ -190,6 +191,7 @@ const Users: React.FC = () => {
                         borderRadius: '5px',
                         padding: '4px',
                         fontSize: '0.8em',
+                        zIndex: 3,
                         '&:hover': {
                           backgroundColor: '#f3f3f3',
                         },
@@ -199,13 +201,17 @@ const Users: React.FC = () => {
                     </IconButton>
 
                     <IconButton
-                      onClick={() => handleEdit(user.id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleEdit(user.id);
+                      }}
                       sx={{
                         border: '1px solid #000',
                         backgroundColor: '#FFFFFF',
                         color: '#000',
                         borderRadius: '5px',
                         padding: '4px',
+                        zIndex: 3,
                         fontSize: '0.8em',
                         '&:hover': {
                           backgroundColor: '#f3f3f3',
@@ -216,13 +222,17 @@ const Users: React.FC = () => {
                     </IconButton>
 
                     <IconButton
-                      onClick={() => openDeleteDialog(user.id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openDeleteDialog(user.id);
+                      }}
                       sx={{
                         border: '1px solid #FF0000',
                         backgroundColor: '#FFFFFF',
                         color: '#FF0000',
                         borderRadius: '5px',
                         padding: '4px',
+                        zIndex: 3,
                         fontSize: '0.8em',
                         '&:hover': {
                           backgroundColor: '#f3f3f3',
@@ -237,6 +247,7 @@ const Users: React.FC = () => {
             </Grid>
           ))}
         </Grid>
+
 
         {/* Botón flotante para añadir un nuevo usuario */}
         <Fab
@@ -264,7 +275,7 @@ const Users: React.FC = () => {
         </Fab>
       </Container>
 
-          {/* Diálogo de confirmación de eliminación */}
+      {/* Diálogo de confirmación de eliminación */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>
           {t('confirm_delete')}

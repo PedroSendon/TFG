@@ -76,7 +76,6 @@ const AssignPlans: React.FC = () => {
       });
 
       const result = await response.json();
-      console.log(result);
       if (response.ok) {
         setNutritionPlans(result.data); // Accede a `data` si los datos están envueltos
       } else {
@@ -104,10 +103,6 @@ const AssignPlans: React.FC = () => {
         return;
       }
 
-      console.log("Enviando datos:", {
-        training_plan_id: selectedTrainingPlan,
-        nutrition_plan_id: selectedPlan,
-      });
 
       const response = await fetch(`http://127.0.0.1:8000/api/users/${userId}/assign-plans/`, {
         method: 'POST',
@@ -123,7 +118,6 @@ const AssignPlans: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(t('assign_success'), data);
         history.push('/admin/users');
       } else {
         const errorData = await response.json();

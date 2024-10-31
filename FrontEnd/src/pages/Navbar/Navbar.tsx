@@ -7,17 +7,17 @@ import { useHistory } from 'react-router-dom';
 
 const Navbar = () => {
   const [userRole, setUserRole] = useState(null);
-  const [plansAssigned, setPlansAssigned] = useState(false); // Determina si ambos planes están asignados
+  const [plansAssigned, setPlansAssigned] = useState(false); // Determina si el plan está completamente asignado
   const history = useHistory();
 
-  const fetchUserRole = async () => {
+  const fetchUserDetails = async () => {
     const accessToken = localStorage.getItem('access_token');
     if (!accessToken) {
       history.push('/login');
       return;
     }
     try {
-      // Obtener rol del usuario
+      // Obtener el rol del usuario
       const roleResponse = await fetch('http://127.0.0.1:8000/api/user/role/', {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${accessToken}` },
@@ -25,37 +25,42 @@ const Navbar = () => {
       const roleData = await roleResponse.json();
       const role = roleData.role;
       setUserRole(role);
-      // Verificar si ambos planes están asignados
-      const trainingPlanResponse = await fetch('http://127.0.0.1:8000/api/assigned-training-plan/', {
+
+      // Obtener el estado del usuario
+      const statusResponse = await fetch('http://127.0.0.1:8000/api/user/status/', {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${accessToken}` },
       });
+      const statusData = await statusResponse.json();
 
-      const mealPlanResponse = await fetch('http://127.0.0.1:8000/api/mealplans/', {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${accessToken}` },
-      });
-
-      // Si ambos endpoints responden con 200, setear `plansAssigned` en `true`
-      if (trainingPlanResponse.ok && mealPlanResponse.ok) {
+      // Verificar el estado del usuario
+      if (statusData.status === 'assigned') {
         setPlansAssigned(true);
+      } else {
+        setPlansAssigned(false);
       }
     } catch (error) {
-      console.error('Error fetching user role or plan assignment:', error);
+      console.error('Error fetching user role or status:', error);
     }
   };
 
   useEffect(() => {
-    fetchUserRole();
+    fetchUserDetails();
   }, []);
 
-  // Renderizar la navbar en función del rol y el estado de los planes
+  // Redirigir a "pending plans" si no están ambos planes asignados
+  if (!plansAssigned && userRole === 'cliente') {
+    history.push('/pending-plans');
+    return null;
+  }
+
+  // Renderizar la navbar en función del rol del usuario
   if (userRole === 'administrador') {
-    return <NavbarAdmin/>;
+    return <NavbarAdmin />;
   } else if (userRole === 'cliente') {
     return <NavbarCliente plansAssigned={plansAssigned} />;
   } else if (userRole === 'nutricionista' || userRole === 'entrenador') {
-    return <NavbarTrainerNutritionist/>;
+    return <NavbarTrainerNutritionist />;
   } else {
     return null;
   }

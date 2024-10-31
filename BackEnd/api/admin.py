@@ -42,9 +42,10 @@ class ExerciseAdmin(admin.ModelAdmin):
 
 @admin.register(MealPlan)
 class MealPlanAdmin(admin.ModelAdmin):
-    list_display = ['name', 'diet_type', 'calories', 'proteins', 'carbs', 'fats']
+    list_display = ['name', 'diet_type', 'calories', 'proteins', 'carbs', 'fats', 'description']  # Añadido 'description'
     search_fields = ['name', 'diet_type']
     list_filter = ['diet_type']
+    fields = ['name', 'diet_type', 'calories', 'proteins', 'carbs', 'fats', 'meal_distribution', 'description']  # Añadido 'description' en 'fields'
 
 @admin.register(DietCategory)
 class DietCategoryAdmin(admin.ModelAdmin):
