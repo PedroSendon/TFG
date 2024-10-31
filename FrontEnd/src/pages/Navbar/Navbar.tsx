@@ -60,7 +60,7 @@ const Navbar = () => {
   } else if (userRole === 'cliente') {
     return <NavbarCliente plansAssigned={plansAssigned} />;
   } else if (userRole === 'nutricionista' || userRole === 'entrenador') {
-    return <NavbarTrainerNutritionist />;
+    return <NavbarCliente plansAssigned={plansAssigned} />;
   } else {
     return null;
   }

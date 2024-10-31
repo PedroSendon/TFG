@@ -23,6 +23,7 @@ const MacronutrientPage: React.FC = () => {
   });
   const [totalKcal, setTotalKcal] = useState(0);
   const [dietType, setDietType] = useState('');
+  const [mealDistribution, setMealDistribution] = useState<{ [key: string]: number }>({});
 
   const fetchUserMacros = async () => {
     try {
@@ -50,6 +51,7 @@ const MacronutrientPage: React.FC = () => {
           fat: { grams: data.macros.fat.grams, kcal: data.macros.fat.kcal, percentage: data.macros.fat.percentage, color: '#ffd11a' }
         });
         setDietType(data.dietType || t('diet_type_default'));
+        setMealDistribution(data.meal_distribution);
       } else {
         console.error('Error fetching user macros:', response.statusText);
       }
@@ -69,7 +71,7 @@ const MacronutrientPage: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ width: '100%', height: '92vh', backgroundColor: '#f5f5f5', marginTop: '16%' }}> {/* Eliminamos el margen lateral */}
+    <Box sx={{ width: '100%', height: '92vh', backgroundColor: '#f5f5f5', marginTop: '16%' }}>
       <Header title={t('macros_title')} />
       <Box sx={{ textAlign: 'center', mt: 2, paddingTop: '5%' }}>
         <Typography fontSize={'1.2em'} fontWeight="bold">
@@ -91,13 +93,11 @@ const MacronutrientPage: React.FC = () => {
             }}
           >
             <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, p: 1 }}>
-              {/* Envolvemos el título en un Box para alinearlo sin márgenes adicionales */}
               <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                 <Typography variant="body2" color="textPrimary">
                   {t(`macros_${macro}`)}
                 </Typography>
               </Box>
-              {/* Número centrado */}
               <Typography variant="subtitle1" sx={{ color: macros[macro as keyof typeof macros].color, fontSize: '16px' }}>
                 {macros[macro as keyof typeof macros].grams}g
               </Typography>
@@ -131,7 +131,6 @@ const MacronutrientPage: React.FC = () => {
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          {/* Texto en el centro de la gráfica */}
           <text
             x={150}
             y={150}
@@ -146,10 +145,10 @@ const MacronutrientPage: React.FC = () => {
         </PieChart>
       </Box>
 
-
       <Box sx={{ borderTop: '1px solid #ccc', width: '80%', m: '20px auto' }} />
 
-      <Box sx={{ textAlign: 'center', mt: 3, paddingBottom: '15%', }}>
+      {/* Meal Distribution Table based on dynamic columns */}
+      <Box sx={{ textAlign: 'center', mt: 3, paddingBottom: '15%' }}>
         <Typography sx={{ mb: 2, color: '#333', textAlign: 'center', fontWeight: 'bold' }}>
           {t('meal_distribution')}
         </Typography>
@@ -165,18 +164,20 @@ const MacronutrientPage: React.FC = () => {
         >
           <TableHead>
             <TableRow sx={{ backgroundColor: '#333' }}>
-              <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{t('breakfast')}</TableCell>
-              <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{t('lunch')}</TableCell>
-              <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{t('dinner')}</TableCell>
-              <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>{t('snacks')}</TableCell>
+              {Object.keys(mealDistribution).map((meal, index) => (
+                <TableCell key={index} align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>
+                  {t(meal)}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
-              <TableCell align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>{t('percentage_20')}</TableCell>
-              <TableCell align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>{t('percentage_40')}</TableCell>
-              <TableCell align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>{t('percentage_30')}</TableCell>
-              <TableCell align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>{t('percentage_10')}</TableCell>
+              {Object.values(mealDistribution).map((percentage, index) => (
+                <TableCell key={index} align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>
+                  {`${percentage}%`}
+                </TableCell>
+              ))}
             </TableRow>
           </TableBody>
         </Table>
