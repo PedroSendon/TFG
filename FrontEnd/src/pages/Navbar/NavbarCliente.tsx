@@ -1,12 +1,14 @@
 // NavbarCliente.js
-import React, { useState } from 'react';
+import React from 'react';
 import { AppBar, BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import FoodBankIcon from '@mui/icons-material/FoodBank';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+import { useContext } from 'react';
+import { LanguageContext } from '../../context/LanguageContext';
 
 interface NavbarClienteProps {
   plansAssigned: boolean;
@@ -14,10 +16,46 @@ interface NavbarClienteProps {
 
 const NavbarCliente: React.FC<NavbarClienteProps> = ({ plansAssigned }) => {
   const history = useHistory();
-  const [value, setValue] = useState(0);
+  const location = useLocation();
+  const { t } = useContext(LanguageContext);
 
-  const handleNavigation = (path: string, index: number) => {
-    setValue(index);
+  // Labels for navigation items
+  const labels = {
+    workout: t('workout_label'),
+    macronutrients: t('macronutrients_label'),
+    progress: t('progress_label'),
+    profile: t('profile_label'),
+    pendingPlans: t('pending_plans_label'),
+  };
+
+  // Asignar el índice de la pestaña en función de la URL actual
+  const getValueFromPath = (path: string) => {
+    if (plansAssigned) {
+      switch (path) {
+        case '/workout':
+          return 0;
+        case '/macronutrients':
+          return 1;
+        case '/progress':
+          return 2;
+        case '/profile':
+          return 3;
+        default:
+          return 0;
+      }
+    } else {
+      switch (path) {
+        case '/profile':
+          return 0;
+        case '/pendingplans':
+          return 1;
+        default:
+          return 0;
+      }
+    }
+  };
+
+  const handleNavigation = (path: string) => {
     history.push(path);
   };
 
@@ -33,71 +71,79 @@ const NavbarCliente: React.FC<NavbarClienteProps> = ({ plansAssigned }) => {
     >
       <Paper elevation={3}>
         <BottomNavigation
-          value={value}
-          onChange={(event, newValue) => setValue(newValue)}
+          value={getValueFromPath(location.pathname)}
+          onChange={(event, newValue) => {
+            const path = plansAssigned
+              ? (newValue === 0 ? '/workout' : newValue === 1 ? '/macronutrients' : newValue === 2 ? '/progress' : '/profile')
+              : (newValue === 0 ? '/profile' : '/pendingplans');
+            handleNavigation(path);
+          }}
           sx={{ backgroundColor: 'transparent' }}
+          showLabels
         >
-          {plansAssigned ? (
-            <>
-              <BottomNavigationAction
-                icon={<FitnessCenterIcon sx={{ fontSize: value === 0 ? 35 : 22 }} />}
-                onClick={() => handleNavigation('/workout', 0)}
-                sx={{
-                  color: value === 0 ? '#FFFFFF' : '#6b6b6b',
-                  backgroundColor: value === 0 ? '#c1c1c1' : 'transparent',
-                  '&.Mui-selected': { color: '#FFFFFF' },
-                }}
-              />
-              <BottomNavigationAction
-                icon={<FoodBankIcon sx={{ fontSize: value === 1 ? 35 : 22 }} />}
-                onClick={() => handleNavigation('/macronutrients', 1)}
-                sx={{
-                  color: value === 1 ? '#FFFFFF' : '#6b6b6b',
-                  backgroundColor: value === 1 ? '#c1c1c1' : 'transparent',
-                  '&.Mui-selected': { color: '#FFFFFF' },
-                }}
-              />
-              <BottomNavigationAction
-                icon={<TrendingUpIcon sx={{ fontSize: value === 2 ? 35 : 22 }} />}
-                onClick={() => handleNavigation('/progress', 2)}
-                sx={{
-                  color: value === 2 ? '#FFFFFF' : '#6b6b6b',
-                  backgroundColor: value === 2 ? '#c1c1c1' : 'transparent',
-                  '&.Mui-selected': { color: '#FFFFFF' },
-                }}
-              />
-              <BottomNavigationAction
-                icon={<AccountCircleIcon sx={{ fontSize: value === 3 ? 35 : 22 }} />}
-                onClick={() => handleNavigation('/profile', 3)}
-                sx={{
-                  color: value === 3 ? '#FFFFFF' : '#6b6b6b',
-                  backgroundColor: value === 3 ? '#c1c1c1' : 'transparent',
-                  '&.Mui-selected': { color: '#FFFFFF' },
-                }}
-              />
-            </>
-          ) : (
-            <>
-              <BottomNavigationAction
-                icon={<AccountCircleIcon sx={{ fontSize: value === 0 ? 35 : 22 }} />}
-                onClick={() => handleNavigation('/profile', 0)}
-                sx={{
-                  color: value === 0 ? '#FFFFFF' : '#6b6b6b',
-                  backgroundColor: value === 0 ? '#c1c1c1' : 'transparent',
-                  '&.Mui-selected': { color: '#FFFFFF' },
-                }}
-              />
-              <BottomNavigationAction
-                icon={<HourglassEmptyIcon sx={{ fontSize: value === 1 ? 35 : 22 }} />}
-                onClick={() => handleNavigation('/pendingplans', 1)}
-                sx={{
-                  color: value === 1 ? '#FFFFFF' : '#6b6b6b',
-                  backgroundColor: value === 1 ? '#c1c1c1' : 'transparent',
-                  '&.Mui-selected': { color: '#FFFFFF' },
-                }}
-              />
-            </>
-          )}
+          {plansAssigned ? [
+            <BottomNavigationAction
+              key="workout"
+              label={labels.workout}
+              icon={<FitnessCenterIcon sx={{ fontSize: 24 }} />}
+              sx={{
+                color: getValueFromPath(location.pathname) === 0 ? '#FFFFFF' : '#6b6b6b',
+                backgroundColor: getValueFromPath(location.pathname) === 0 ? '#c1c1c1' : 'transparent',
+                '&.Mui-selected': { color: '#FFFFFF', backgroundColor: '#c1c1c1' },
+              }}
+            />,
+            <BottomNavigationAction
+              key="macronutrients"
+              label={labels.macronutrients}
+              icon={<FoodBankIcon sx={{ fontSize: 24 }} />}
+              sx={{
+                color: getValueFromPath(location.pathname) === 1 ? '#FFFFFF' : '#6b6b6b',
+                backgroundColor: getValueFromPath(location.pathname) === 1 ? '#c1c1c1' : 'transparent',
+                '&.Mui-selected': { color: '#FFFFFF', backgroundColor: '#c1c1c1' },
+              }}
+            />,
+            <BottomNavigationAction
+              key="progress"
+              label={labels.progress}
+              icon={<TrendingUpIcon sx={{ fontSize: 24 }} />}
+              sx={{
+                color: getValueFromPath(location.pathname) === 2 ? '#FFFFFF' : '#6b6b6b',
+                backgroundColor: getValueFromPath(location.pathname) === 2 ? '#c1c1c1' : 'transparent',
+                '&.Mui-selected': { color: '#FFFFFF', backgroundColor: '#c1c1c1' },
+              }}
+            />,
+            <BottomNavigationAction
+              key="profile"
+              label={labels.profile}
+              icon={<AccountCircleIcon sx={{ fontSize: 24 }} />}
+              sx={{
+                color: getValueFromPath(location.pathname) === 3 ? '#FFFFFF' : '#6b6b6b',
+                backgroundColor: getValueFromPath(location.pathname) === 3 ? '#c1c1c1' : 'transparent',
+                '&.Mui-selected': { color: '#FFFFFF', backgroundColor: '#c1c1c1' },
+              }}
+            />
+          ] : [
+            <BottomNavigationAction
+              key="profile"
+              label={labels.profile}
+              icon={<AccountCircleIcon sx={{ fontSize: 24 }} />}
+              sx={{
+                color: getValueFromPath(location.pathname) === 0 ? '#FFFFFF' : '#6b6b6b',
+                backgroundColor: getValueFromPath(location.pathname) === 0 ? '#c1c1c1' : 'transparent',
+                '&.Mui-selected': { color: '#FFFFFF', backgroundColor: '#c1c1c1' },
+              }}
+            />,
+            <BottomNavigationAction
+              key="pendingPlans"
+              label={labels.pendingPlans}
+              icon={<HourglassEmptyIcon sx={{ fontSize: 24 }} />}
+              sx={{
+                color: getValueFromPath(location.pathname) === 1 ? '#FFFFFF' : '#6b6b6b',
+                backgroundColor: getValueFromPath(location.pathname) === 1 ? '#c1c1c1' : 'transparent',
+                '&.Mui-selected': { color: '#FFFFFF', backgroundColor: '#c1c1c1' },
+              }}
+            />
+          ]}
         </BottomNavigation>
       </Paper>
     </AppBar>

@@ -318,7 +318,7 @@
   "training_duration_unit": "minuts",
   "plan_assignment_status": "Estat d'assignació de plans",
   "preparing_your_plan": "Estem preparant el teu pla",
-  "reviewing_goals_message": "Els nostres entrenadors i nutricionistes estan revisant els teus objectius per assignar-te un pla personalitzat. Rebràs una notificació quan estigui llest.",
+  "reviewing_goals_message": "Els nostres entrenadors i nutricionistes estan revisant els teus objectius per assignar-te un pla personalitzat.",
   "user_information": "Informació de l'Usuari",
   "birth_date": "Data de Naixement",
   "status": "Estat",
@@ -356,5 +356,13 @@
   "create_new_plan_admin": "Crear Nou Pla",
   "years_admin": "anys",
   "days_per_week_admin": "dies per setmana",
-  "meals_admin": "àpats"
+  "meals_admin": "àpats",
+  "workouts_label": "Entrenaments",
+  "nutrition_label": "Nutrició",
+  "unassigned_users_label": "Assignacions",
+  "all_users_label": "Usuaris",
+  "macronutrients_label": "Macronutrients",
+  "progress_label": "Progrés",
+  "profile_label": "Perfil",
+  "pending_plans_label": "Plans pendents"
 }

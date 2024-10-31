@@ -9,9 +9,11 @@ class User(models.Model):
         ('nutricionista', 'Nutricionista'),
     ]
     STATUS_CHOICES = [
-        ('awaiting_assignment', 'Awaiting Assignment'),
-        ('assigned', 'Assigned'),
-    ]
+    ('awaiting_assignment', 'Awaiting Assignment'),
+    ('assigned', 'Assigned'),
+    ('training_only', 'Training Plan Assigned Only'),
+    ('nutrition_only', 'Nutrition Plan Assigned Only'),
+]
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)

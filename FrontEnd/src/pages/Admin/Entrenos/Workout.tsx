@@ -152,12 +152,13 @@ const WorkoutsExercises: React.FC = () => {
             });
 
             if (response.ok) {
+                // Llamar a los fetch correspondientes para actualizar los datos
                 if (type === 'workout') {
-                    setWorkouts((prev) => prev.filter((workout) => workout.id !== id));
+                    await fetchWorkouts();
                 } else if (type === 'exercise') {
-                    setExercises((prev) => prev.filter((exercise) => exercise.id !== id));
+                    await fetchExercises();
                 } else if (type === 'trainingplan') {
-                    setTrainingPlans((prev) => prev.filter((plan) => plan.id !== id));
+                    await fetchTrainingPlans();
                 }
             } else {
                 console.error('Error al eliminar el elemento');
@@ -169,6 +170,7 @@ const WorkoutsExercises: React.FC = () => {
             setDeleteDetails(null);
         }
     };
+
 
     const openDeleteDialog = (id: number, type: string) => {
         setDeleteDetails({ id, type });

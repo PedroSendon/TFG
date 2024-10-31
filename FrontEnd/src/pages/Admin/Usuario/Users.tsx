@@ -13,6 +13,7 @@ import { useHistory, useLocation } from 'react-router';
 import { Box, Button, Card, CardContent, Container, Dialog, DialogActions, DialogContent, DialogTitle, Fab, Grid, IconButton, Typography } from '@mui/material';
 import { useContext } from 'react';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
+import { h } from 'vue';
 
 const Users: React.FC = () => {
   const history = useHistory();
@@ -132,6 +133,13 @@ const Users: React.FC = () => {
     });
   };
 
+  const handleUserInformation = (userId: number) => {
+    history.push({
+      pathname: `/admin/users/details`,
+      state: { userId, showPlanSection: false },
+    });
+  };
+
 
   return (
     <Box sx={{ backgroundColor: '#f5f5f5', maxHeight: '100vh', marginTop: '16%' }}>
@@ -156,6 +164,7 @@ const Users: React.FC = () => {
                     boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)', // Aumenta la sombra al hacer hover
                   },
                 }}
+                onClick={() => handleUserInformation(user.id)}
               >
                 <CardContent
                   sx={{

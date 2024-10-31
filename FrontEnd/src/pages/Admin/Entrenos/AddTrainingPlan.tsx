@@ -25,6 +25,8 @@ const CreateTrainingPlan: React.FC = () => {
     const [planData, setPlanData] = useState({
         name: '',
         selectedTraining: [],
+        description: '',
+        media: '',
         equipment: '',
         difficulty: '',
         duration: 0,
@@ -70,12 +72,21 @@ const CreateTrainingPlan: React.FC = () => {
                 console.error(t('no_token'));
                 return;
             }
+            console.log('Plan de entrenamiento creado:', planData);
             const response = await fetch('http://127.0.0.1:8000/api/trainingplans/create/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
-                },
+                }, body: JSON.stringify({
+                    name: planData.name,
+                    selectedTraining: planData.selectedTraining,
+                    description: planData.description,
+                    media: planData.media,
+                    equipment: planData.equipment,
+                    difficulty: planData.difficulty,
+                    duration: planData.duration,
+                }),
             });
 
             if (response.ok) {
@@ -181,6 +192,30 @@ const CreateTrainingPlan: React.FC = () => {
                                 }}
                             />
                         </Grid>
+
+                        {/* Campo de descripción */}
+                        <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                multiline
+                                rows={3}
+                                label={t('description')}
+                                name="description"
+                                value={planData.description}  // Aquí cambiamos "descriptcion" a "description"
+                                onChange={handleChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
+                            />
+                        </Grid>
+
 
                         <Grid item xs={12}>
                             <InputLabel>{t('select_training')}</InputLabel>

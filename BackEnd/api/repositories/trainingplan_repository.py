@@ -37,6 +37,8 @@ class TrainingPlanRepository:
         :param duration: Duración del plan.
         :return: Un diccionario con los detalles del plan creado.
         """
+        print("Creating training plan...")
+        print(workout_ids)
         workouts = Workout.objects.filter(id__in=workout_ids)
 
         if not workouts.exists():
@@ -120,20 +122,7 @@ class TrainingPlanRepository:
         except TrainingPlan.DoesNotExist:
             return None
 
-    @staticmethod
-    def delete_training_plan_by_id(plan_id: int) -> bool:
-        """
-        Elimina un plan de entrenamiento por su ID.
 
-        :param plan_id: ID del plan de entrenamiento a eliminar.
-        :return: True si el plan fue eliminado, False si no se encontró.
-        """
-        try:
-            training_plan = TrainingPlan.objects.get(id=plan_id)
-            training_plan.delete()
-            return True
-        except TrainingPlan.DoesNotExist:
-            return False
 
     @staticmethod
     def get_training_plan_by_id2(training_plan_id):

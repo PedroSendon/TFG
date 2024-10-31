@@ -155,8 +155,7 @@ def save_user_details(request):
         # Guardar los detalles del usuario usando el repositorio
         UserDetailsRepository.create_user_details(
             user, user_details_data.dict())
-        UserRepository.assign_nutrition_plan_to_user(user.id)
-        UserRepository.assign_workout_to_user(user.id)
+
         return Response({"message": "Detalles del usuario guardados correctamente"}, status=status.HTTP_200_OK)
 
     except Exception as e:
@@ -255,7 +254,7 @@ def assign_plans(request, user_id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def assign_single_plan(request, user_id):
+def assign_single_plan(request, user_id): 
     """
     Asignar un único plan (entrenamiento o nutricional) a un usuario.
     """
@@ -533,14 +532,30 @@ def get_latest_weight_record(request):
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_unassigned_users(request):
-    # Verifica si el usuario tiene el rol de entrenador o nutricionista
-    
-    # Llama al repositorio para obtener los usuarios no asignados
-    unassigned_users = UserRepository.get_unassigned_users(request.user)
-    if unassigned_users is None:
-        return Response({"error": "No se encontraron usuarios no asignados."}, status=status.HTTP_404_NOT_FOUND)
-    
+def get_unassigned_users_for_nutrition(request):
+
+    # Llama al repositorio para obtener los usuarios no asignados para nutrición
+    unassigned_users = UserRepository.get_unassigned_users_for_nutrition(request.user)
+    unassigned_users_data = [
+        {
+            'id': user.id,
+            'name': f"{user.first_name} {user.last_name}",
+            'email': user.email,
+            'status': user.status,
+            'profile_photo': user.profile_photo if user.profile_photo else None
+        }
+        for user in unassigned_users
+    ]
+
+    return Response(unassigned_users_data, status=status.HTTP_200_OK)
+
+# Endpoint para obtener usuarios no asignados para entrenamiento
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_unassigned_users_for_training(request):
+
+    # Llama al repositorio para obtener los usuarios no asignados para entrenamiento
+    unassigned_users = UserRepository.get_unassigned_users_for_training(request.user)
     unassigned_users_data = [
         {
             'id': user.id,

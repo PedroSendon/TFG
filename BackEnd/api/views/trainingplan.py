@@ -6,37 +6,20 @@ from rest_framework import status
 from api.repositories.trainingplan_repository import TrainingPlanRepository
 from api.schemas.workout import TrainingPlanSchema
 
-
-
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])  # Solo usuarios autenticados pueden acceder
-def delete_training_plan(request, plan_id):
-    """
-    Endpoint para eliminar un plan de entrenamiento.
-    
-    :param plan_id: ID del plan de entrenamiento a eliminar.
-    :return: Respuesta con mensaje de éxito o error.
-    """
-    # Llamar al repositorio para eliminar el plan de entrenamiento
-    success = TrainingPlanRepository.delete_training_plan_by_id(plan_id)
-    
-    if success:
-        return Response({"message": "Plan de entrenamiento eliminado exitosamente."}, status=status.HTTP_200_OK)
-    else:
-        return Response({"error": "Plan de entrenamiento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
-    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_training_plan(request, training_plan_id):
     """
     Obtener los detalles de un plan de entrenamiento específico.
     """
-    training_plan, error = TrainingPlanRepository.get_training_plan_by_id2(training_plan_id)
-    
+    training_plan, error = TrainingPlanRepository.get_training_plan_by_id2(
+        training_plan_id)
+
     if error:
         return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
-    
+
     return Response(training_plan, status=status.HTTP_200_OK)
+
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -46,12 +29,14 @@ def update_training_plan(request, training_plan_id):
     """
     data = request.data
 
-    updated_plan, error = TrainingPlanRepository.update_training_plan(training_plan_id, data)
-    
+    updated_plan, error = TrainingPlanRepository.update_training_plan(
+        training_plan_id, data)
+
     if error:
         return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     return Response(updated_plan, status=status.HTTP_200_OK)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -59,12 +44,14 @@ def delete_training_plan(request, training_plan_id):
     """
     Eliminar un plan de entrenamiento específico.
     """
-    success, message = TrainingPlanRepository.delete_training_plan(training_plan_id)
+    success, message = TrainingPlanRepository.delete_training_plan(
+        training_plan_id)
 
     if not success:
         return Response({"error": message}, status=status.HTTP_404_NOT_FOUND)
 
     return Response({"message": message}, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -73,34 +60,39 @@ def get_assigned_training_plan(request):
     Obtener el plan de entrenamiento asignado al usuario autenticado.
     """
     user_id = request.user.id  # Obtener el ID del usuario autenticado desde el token
-    
+
     # Llamar al repositorio para obtener el plan de entrenamiento del usuario
-    training_plan, error = TrainingPlanRepository.get_training_plan_by_user_id(user_id)
-    
+    training_plan, error = TrainingPlanRepository.get_training_plan_by_user_id(
+        user_id)
+
     if error:
         return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
-    
+
     return Response(training_plan, status=status.HTTP_200_OK)
 
+
 @api_view(['POST'])
-@permission_classes([IsAuthenticated]) 
+@permission_classes([IsAuthenticated])
 def create_training_plan(request):
     """
     Endpoint para crear un nuevo plan de entrenamiento.
     """
     try:
-        # Validar los datos de la solicitud usando el schema
-        schema = TrainingPlanSchema(**request.data)
-        
+        print("Request data:")
+        print(request.data)  # Esto mostrará la estructura de request.data
+
+        # Convertir duration a entero si es posible
+        duration = int(request.data['duration'])
+
         # Crear el plan de entrenamiento usando el repositorio
         plan = TrainingPlanRepository.create_training_plan(
-            name=schema.name,
-            description=schema.description,
-            workout_ids=schema.workouts,
-            media=schema.media,
-            difficulty=schema.difficulty,
-            equipment=schema.equipment,
-            duration=schema.duration
+            name=request.data['name'],
+            description=request.data['description'],
+            workout_ids=request.data['selectedTraining'],
+            media=request.data.get('media', None),
+            difficulty=request.data['difficulty'],
+            equipment=request.data['equipment'],
+            duration=duration
         )
 
         return Response({
@@ -111,7 +103,11 @@ def create_training_plan(request):
     except ValueError as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        import traceback
+        # Mostrar detalles del error en la consola
+        print("Error:", traceback.format_exc())
         return Response({"error": "Ocurrió un error inesperado."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -145,6 +141,7 @@ def get_training_plans(request):
         print("Error:", traceback.format_exc())
         return Response({"error": f"Error fetching training plans: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_next_pending_workout(request):
@@ -159,16 +156,20 @@ def get_next_pending_workout(request):
 
     return Response(next_workout, status=status.HTTP_200_OK)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def mark_workout_complete(request, day_id):
     user = request.user
-    progress = request.data.get('progress', 0)  # Obtener el progreso del request
-    success, message = TrainingPlanRepository.mark_workout_as_complete(user, day_id, progress)
+    # Obtener el progreso del request
+    progress = request.data.get('progress', 0)
+    success, message = TrainingPlanRepository.mark_workout_as_complete(
+        user, day_id, progress)
 
     if success:
         return Response({"message": message}, status=status.HTTP_200_OK)
     return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 def get_training_plan_images(request):

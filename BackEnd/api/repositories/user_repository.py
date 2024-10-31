@@ -12,16 +12,37 @@ from django.db.models import Q
 
 class UserRepository:
 
+    # Repositorio de usuarios
     @staticmethod
-    def get_unassigned_users(user):
-        # Devuelve usuarios con el estado 'awaiting_assignment'
+    def get_unassigned_users_for_nutrition(user):
+        """
+        Devuelve usuarios con los estados 'awaiting_assignment' o 'training_only'
+        para asignación de planes de nutrición.
+        """
         if not isinstance(user, User):
             user = User.objects.get(id=user.id)
-       
-        if user.role not in ['entrenador', 'nutricionista']:
-            return None
+        
+        # Verificamos que el rol sea 'nutricionista' en lugar de 'entrenador'
+        if user.role == 'nutricionista':
+            return User.objects.filter(status__in=['awaiting_assignment', 'training_only'])
+        else:
+            raise ValueError("No tienes permiso para ver esta información.")
 
-        return User.objects.filter(status='awaiting_assignment')
+    @staticmethod
+    def get_unassigned_users_for_training(user):
+        """
+        Devuelve usuarios con los estados 'awaiting_assignment' o 'nutrition_only'
+        para asignación de planes de entrenamiento.
+        """
+        if not isinstance(user, User):
+            user = User.objects.get(id=user.id)
+
+        # Verificamos que el rol sea 'entrenador' en lugar de 'nutricionista'
+        if user.role == 'entrenador':
+            return User.objects.filter(status__in=['awaiting_assignment', 'nutrition_only'])
+        else:
+            raise ValueError("No tienes permiso para ver esta información.")
+
 
     @staticmethod
     def ger_user_role(user_id):
@@ -218,16 +239,25 @@ class UserRepository:
         try:
             print(f"Intentando asignar el plan de entrenamiento {training_plan_id} al usuario {user_id}")
             user = User.objects.get(id=user_id)
-            user.status = 'assigned'
             training_plan = TrainingPlan.objects.get(id=training_plan_id)
 
+            # Verificar si el usuario ya tiene un plan nutricional asignado
+            has_nutrition_plan = UserNutritionPlan.objects.filter(user=user).exists()
+
+            # Crear el UserWorkout y asignar el plan de entrenamiento
             user_workout = UserWorkout.objects.create(user=user, training_plan=training_plan)
 
             # Crear WeeklyWorkout para cada entrenamiento en el TrainingPlan y marcar como incompleto
             for workout in training_plan.workouts.all():
                 WeeklyWorkout.objects.create(user_workout=user_workout, workout=workout, completed=False)
 
-
+            # Actualizar el estado del usuario en función de los planes asignados
+            if has_nutrition_plan:
+                user.status = 'assigned'
+            else:
+                user.status = 'training_only'
+            
+            user.save()
             return True, "Plan de entrenamiento asignado exitosamente."
 
         except User.DoesNotExist:
@@ -236,7 +266,8 @@ class UserRepository:
             return False, "Plan de entrenamiento no encontrado."
         except Exception as e:
             return False, str(e)
-    
+
+    # Asignación de plan nutricional
     @staticmethod
     def assign_concret_nutrition_plan_to_user(user_id, plan_id):
         """
@@ -247,7 +278,19 @@ class UserRepository:
             user = User.objects.get(id=user_id)
             nutrition_plan = MealPlan.objects.get(id=plan_id)
 
+            # Verificar si el usuario ya tiene un plan de entrenamiento asignado
+            has_training_plan = UserWorkout.objects.filter(user=user).exists()
+
+            # Crear el UserNutritionPlan y asignar el plan nutricional
             UserNutritionPlan.objects.create(user=user, plan=nutrition_plan)
+
+            # Actualizar el estado del usuario en función de los planes asignados
+            if has_training_plan:
+                user.status = 'assigned'
+            else:
+                user.status = 'nutrition_only'
+
+            user.save()
             return True, "Plan nutricional asignado exitosamente."
 
         except User.DoesNotExist:
@@ -256,6 +299,7 @@ class UserRepository:
             return False, "Plan nutricional no encontrado."
         except Exception as e:
             return False, str(e)
+
 
     @staticmethod
     def get_user_by_id2(user_id):
@@ -370,6 +414,9 @@ class UserRepository:
             user_data = User.objects.select_related('details', 'diet_preferences').filter(id=user.id).first()
             if not user_data:
                 return None
+            
+            # Calculate age using the birth date
+            age = UserDetailsRepository.calculate_age(user_data.birth_date)
 
             # Structure the essential data in a dictionary, handling missing related data gracefully
             user_details = {
@@ -378,6 +425,7 @@ class UserRepository:
                 'last_name': user_data.last_name,
                 'email': user_data.email,
                 'birth_date': user_data.birth_date,
+                'age': age,
                 'gender': user_data.gender,
                 'profile_photo': user_data.profile_photo if user_data.profile_photo else None,
                 'status': user_data.status,
@@ -475,7 +523,7 @@ class UserDetailsRepository:
             profile_data = {
                 "username": f"{user.first_name} {user.last_name}",
                 "email": user.email,
-                "age": UserRepository.calculate_age(user.birth_date),
+                "age": UserDetailsRepository.calculate_age(user.birth_date),
                 "height": user_details.height,
                 "initialWeight": user_details.weight,
                 # Suponiendo que `weight` es el peso actual, podría ser separado

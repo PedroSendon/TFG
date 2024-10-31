@@ -34,7 +34,8 @@ urlpatterns = [
     path('users/<int:user_id>/assign-plans/', user.assign_plans, name='assign-plans'),
     path('users/details/<int:user_id>/', user.get_user_details, name='get-user-details'),
     path('user/role/', user.get_user_role, name='get_user_role'),
-    path('unassigned-users/', user.get_unassigned_users, name='unassigned-users'),
+    path('user/unassigned/nutrition/', user.get_unassigned_users_for_nutrition, name='get_unassigned_users_for_nutrition'),
+    path('user/unassigned/training/', user.get_unassigned_users_for_training, name='get_unassigned_users_for_training'),
     path('users/all-details/<int:user_id>/', user.get_user_all_details, name='get-all-details'),
     path('assign-single-plan/<int:user_id>/', user.assign_single_plan, name='assign-single-plan'),
 
@@ -61,7 +62,7 @@ urlpatterns = [
     # Planes de entrenamiento
     path('trainingplans/create/', trainingplan.create_training_plan, name='create-training-plan'),
     path('trainingplans/', trainingplan.get_training_plans, name='training-plans'),
-    path('trainingplans/<int:plan_id>/delete/', trainingplan.delete_training_plan, name='delete-training-plan'),
+    path('trainingplans/<int:training_plan_id>/delete/', trainingplan.delete_training_plan, name='delete-training-plan'),
     path('training-plans/<int:training_plan_id>/', trainingplan.get_training_plan, name='get-training-plan'),
     path('training-plans/<int:training_plan_id>/update/', trainingplan.update_training_plan, name='update-training-plan'),
     path('training-plans/<int:training_plan_id>/delete/', trainingplan.delete_training_plan, name='delete-training-plan'),

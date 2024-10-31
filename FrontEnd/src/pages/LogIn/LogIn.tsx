@@ -81,7 +81,6 @@ const Login: React.FC = () => {
     
                 if (userResponse.ok) {
                     const userRole = await userResponse.json();
-                    console.log('Rol de usuario:', userRole);
                     // Redirigir en función del rol del usuario
                     switch (userRole.role) {
                         case 'cliente':

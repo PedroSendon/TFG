@@ -319,7 +319,7 @@
   "training_duration_unit": "minutos",
   "plan_assignment_status": "Estado de asignación de planes",
   "preparing_your_plan": "Estamos preparando tu plan",
-  "reviewing_goals_message": "Nuestros entrenadores y nutricionistas están revisando tus objetivos para asignarte un plan personalizado. Recibirás una notificación cuando esté listo.",
+  "reviewing_goals_message": "Nuestros entrenadores y nutricionistas están revisando tus objetivos para asignarte un plan personalizado.",
   "user_information": "Información del Usuario",
   "birth_date": "Fecha de Nacimiento",
   "status": "Estado",
@@ -357,5 +357,13 @@
   "create_new_plan_admin": "Crear Nuevo Plan",
   "years_admin": "años",
   "days_per_week_admin": "días por semana",
-  "meals_admin": "comidas"
+  "meals_admin": "comidas",
+  "workouts_label": "Entrenamientos",
+  "nutrition_label": "Nutrición",
+  "unassigned_users_label": "Asignaciones",
+  "all_users_label": "Usuarios",
+  "macronutrients_label": "Macronutrientes",
+  "progress_label": "Progreso",
+  "profile_label": "Perfil",
+  "pending_plans_label": "Planes pendientes"
 }
