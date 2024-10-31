@@ -34,6 +34,11 @@ import ModifyTrainingPlan from './pages/Admin/Entrenos/ModifyTrainingPlan';
 import PendingPlans from './pages/Users/Loading/PendingPlans';
 import PendingUsers from './pages/Admin/Pending/PendingUsers';
 import UserDetails from './pages/Admin/Pending/UserInformation';
+import MealPlanDetails from './pages/Admin/Nutricion/MealPlanDetails';
+import WorkoutDetails from './pages/Admin/Entrenos/WorkoutDetails';
+import TrainingPlanDetails from './pages/Admin/Entrenos/TrainingPlanDetails';
+import ExerciseDetails from './pages/Admin/Entrenos/ExerciseDetails';
+
 /* MUI icons */
 import TriangleIcon from '@mui/icons-material/ChangeHistory';  // Replace with icons that resemble Ionic icons
 import CircleIcon from '@mui/icons-material/PanoramaFishEye';
@@ -78,12 +83,19 @@ const App: React.FC = () => {
 
           {/* Admin Workout Routes */}
           <Route exact path="/admin/workout" component={AdminWorkout} />
-          <Route exact path="/admin/exercises/add" component={AdminAddExercise} />
-          <Route exact path="/admin/exercises/modify" component={AdminModifyExercise} />
+          <Route exact path="/admin/workout/details" component={WorkoutDetails} />
           <Route exact path="/admin/workouts/add" component={AdminAddWorkout} />
           <Route exact path="/admin/workouts/modify" component={AdminModifyWorkout} />
+
+          <Route exact path="/admin/exercises/add" component={AdminAddExercise} />
+          <Route exact path="/admin/exercises/modify" component={AdminModifyExercise} />
+          <Route exact path="/admin/exercises/details" component={ExerciseDetails} />
+
+          {/* Admin Training Plan Routes */}
+
           <Route exact path="/admin/trainingplans/add" component={CreateTrainingPlan} />
           <Route exact path="/admin/trainingplans/modify" component={ModifyTrainingPlan} />
+          <Route exact path="/admin/trainingplans/details" component={TrainingPlanDetails} />
 
           {/* Admin Statistics Route */}
           <Route exact path="/admin/statistics" component={AdminStatistics} />
@@ -92,10 +104,7 @@ const App: React.FC = () => {
           <Route exact path="/admin/nutrition" component={AdminMacronutrient} />
           <Route exact path="/admin/nutrition/add" component={AdminMacronutrientAdd} />
           <Route exact path="/admin/nutrition/modify" component={AdminMacronutrientModify} />
-
-          {/* Bottom Tabs Navigation */}
-          <Route path="/tab1" component={Tab1} />
-          <Route path="/tab2" component={Tab2} />
+          <Route exact path="/admin/nutrition/mealplan" component={MealPlanDetails} />
         </Switch>
 
         {/* Conditional Navbar Wrapper */}

@@ -201,6 +201,25 @@ const WorkoutsExercises: React.FC = () => {
         history.push(`/admin/${type}/add`);
     };
 
+    const handleCardClick = (id: number) => {
+        if (selectedSection === 'workouts') {
+            history.push({
+                pathname: '/admin/workout/details',
+                state: { workoutId: id },
+            });
+        } else if (selectedSection === 'exercises') {
+            history.push({
+                pathname: '/admin/exercises/details',
+                state: { exerciseId: id },
+            });
+        } else if (selectedSection === 'trainingPlans') {
+            history.push({
+                pathname: '/admin/trainingplans/details',
+                state: { trainingPlanId: id },
+            });
+        }
+    };
+
     return (
         <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Header title={t(selectedSection === 'workouts' ? 'workouts' : 'exercises')} />
@@ -254,7 +273,9 @@ const WorkoutsExercises: React.FC = () => {
                                         boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)'
                                     },
                                     transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                                }}>
+                                    }}
+                                onClick={() => handleCardClick(item.id)} // Añadimos el evento onClick
+                                >
                                     <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <Typography sx={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
                                             {item.name}
@@ -262,7 +283,7 @@ const WorkoutsExercises: React.FC = () => {
                                         {/* Botones alineados a la derecha */}
                                         <Box sx={{ display: 'flex', gap: '7px' }}>
                                             <IconButton
-                                                onClick={() => handleEdit(item.id, selectedSection)}
+                                                onClick={(e) => { e.stopPropagation(); handleEdit(item.id, selectedSection); }}
                                                 sx={{
                                                     border: '1px solid #000',
                                                     backgroundColor: '#FFFFFF',
@@ -276,7 +297,7 @@ const WorkoutsExercises: React.FC = () => {
                                                 <EditIcon fontSize="small" />
                                             </IconButton>
                                             <IconButton
-                                                onClick={() => openDeleteDialog(item.id, selectedSection)}
+                                                onClick={(e) => { e.stopPropagation(); openDeleteDialog(item.id, selectedSection); }}
                                                 sx={{
                                                     border: '1px solid #FF0000',
                                                     backgroundColor: '#FFFFFF',

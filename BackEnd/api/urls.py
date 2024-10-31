@@ -76,6 +76,7 @@ urlpatterns = [
     # Exercises
     path('exercises/create/', exercise.create_exercise, name='create-exercise'),
     path('exercises/details/', exercise.get_exercise_details, name='get-exercise-details'),
+    path('exercises/<int:exercise_id>/', exercise.get_exercise_by_id, name='get-exercise-by-id'),
     path('exercises/all/', exercise.list_all_exercises, name='list-all-exercises'),
     path('exercises/by-train/', exercise.get_exercises_by_training, name='get-exercises-by-training'),
     path('exercises/<int:exercise_id>/', exercise.update_exercise, name='update-exercise'),
@@ -84,6 +85,7 @@ urlpatterns = [
     # Macros
     path('mealplans/all/', macros.get_all_mealplans, name='get-all-mealplans'),  # Primero la ruta más específica
     path('mealplans/<str:category>/<int:id>/', macros.get_mealplan, name='get-mealplan'),
+    path('mealplans/<int:id>/', macros.get_mealplan_by_id, name='get-mealplan'),
     path('mealplans/<str:category>/<int:id>/update/', macros.update_mealplan, name='update-mealplan'),
     path('mealplans/<str:category>/<int:id>/delete/', macros.delete_mealplan, name='delete-mealplan'),
     path('mealplans/', macros.get_user_mealplan, name='get-mealplans'),

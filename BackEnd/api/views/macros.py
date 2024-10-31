@@ -111,7 +111,18 @@ def add_mealplan(request):
     }, status=status.HTTP_201_CREATED)
 
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_mealplan_by_id(request, id):
+    """
+    Obtener los detalles de un plan de comidas específico por ID y categoría.
+    """
+    mealplan = MacrosRepository.get_mealplan_by_id(id)
+    
+    if mealplan:
+        return Response(mealplan, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Plan de comidas no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])

@@ -30,6 +30,26 @@ class ExerciseRepository:
         return [{"exercise": entry['exercise__name'], "timesRepeated": entry['times_repeated']} for entry in popularity]
 
     @staticmethod
+    def get_exercise_by_id(exercise_id):
+        """
+        Obtener un ejercicio específico por su ID.
+        :param exercise_id: ID del ejercicio.
+        :return: Un diccionario con los detalles del ejercicio o None si no se encuentra.
+        """
+        try:
+            exercise = Exercise.objects.get(id=exercise_id)
+            return {
+                "id": exercise.id,
+                "name": exercise.name,
+                "description": exercise.description,
+                "muscleGroups": exercise.get_muscle_groups(),
+                "instructions": exercise.get_instructions_list(),
+                "media": exercise.media,
+            }
+        except Exercise.DoesNotExist:
+            return None
+
+    @staticmethod
     def create_exercise(name, description, muscle_groups, instructions, media=None):
         """
         Crear un nuevo ejercicio en el sistema.

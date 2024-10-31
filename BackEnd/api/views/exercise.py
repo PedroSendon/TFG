@@ -73,6 +73,19 @@ def create_exercise(request):
         "data": exercise_data
     }, status=status.HTTP_201_CREATED)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_exercise_by_id(request, exercise_id):
+    """
+    Obtener los detalles de un ejercicio específico por su ID.
+    """
+    exercise = ExerciseRepository.get_exercise_by_id(exercise_id)
+    
+    if exercise:
+        return Response(exercise, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Exercise not found."}, status=status.HTTP_404_NOT_FOUND)
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])  # Solo usuarios autenticados pueden acceder
 def delete_exercise(request, exercise_id):

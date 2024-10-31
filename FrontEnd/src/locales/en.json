@@ -364,5 +364,13 @@
   "macronutrients_label": "Macronutrients",
   "progress_label": "Progress",
   "profile_label": "Profile",
-  "pending_plans_label": "Pending plans"
+  "pending_plans_label": "Pending plans",
+  "meal_plan_details": "Meal Plan Details",
+  "loading_meal_plan": "Loading meal plan...",
+  "no_description": "No description",
+  "macronutrient_info": "Macronutrient Information",
+  "calories": "Calories",
+  "meal": "Meal",
+  "training_plan_details": "Training Plan Details",
+    "workout_details": "Workout Details"
 }

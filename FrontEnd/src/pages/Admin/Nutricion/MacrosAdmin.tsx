@@ -138,6 +138,12 @@ const MacrosAdmin: React.FC = () => {
         history.push(`/admin/nutrition/add`);
     };
 
+    const handleDetailsMacros = (id: number) => {
+        history.push({
+            pathname: `/admin/nutrition/mealplan`,
+            state: { mealPlanId: id }, // Cambia "id" a "mealPlanId" para ser consistente con el nombre en MealPlanDetails
+        });
+    };
     return (
         <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '3rem 0' }}>
             <Header title={t('nutrition_management_title')} />
@@ -182,6 +188,7 @@ const MacrosAdmin: React.FC = () => {
                                     border: '1px solid #e0e0e0',
                                     paddingX: '16px',
                                 }}
+                                onClick={() => handleDetailsMacros(macro.id)}
                             >
                                 <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                                     {/* Título del macro alineado a la izquierda y ocupando todo el ancho */}
@@ -199,7 +206,10 @@ const MacrosAdmin: React.FC = () => {
                                         {/* Botones alineados a la derecha */}
                                         <Box sx={{ display: 'flex', gap: '7px' }}>
                                             <IconButton
-                                                onClick={() => handleEditMacros(macro)}
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    handleEditMacros(macro);
+                                                }}
                                                 sx={{
                                                     border: '1px solid #000',
                                                     backgroundColor: '#FFFFFF',
@@ -213,7 +223,10 @@ const MacrosAdmin: React.FC = () => {
                                                 <EditIcon fontSize="small" />
                                             </IconButton>
                                             <IconButton
-                                                onClick={() => openDeleteDialog(macro.id)}
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    handleEditMacros(macro.id);
+                                                }}
                                                 sx={{
                                                     border: '1px solid #FF0000',
                                                     backgroundColor: '#FFFFFF',
