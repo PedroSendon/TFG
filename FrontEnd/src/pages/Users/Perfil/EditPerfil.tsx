@@ -6,6 +6,7 @@ import './EditPerfil.css';
 import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importa el contexto de idioma
+import { usePlansContext } from '../../../context/PlansContext'; // Importa el hook personalizado
 import { CameraAlt } from '@mui/icons-material';
 
 const EditProfilePage: React.FC = () => {
@@ -34,45 +35,44 @@ const EditProfilePage: React.FC = () => {
 
     const [profilePicture, setProfilePicture] = useState('https://via.placeholder.com/150');
     const [showToast, setShowToast] = useState(false);
-    const [showActionSheet, setShowActionSheet] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);  // Modal para cambiar la contraseña
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { setPlansAssigned } = usePlansContext(); // Usa el hook para obtener `setPlansAssigned`
 
     const handleSave = async () => {
         try {
-            const accessToken = localStorage.getItem('access_token');
-
-            if (!accessToken) {
-                console.error(t('no_token'));
-                return;
-            }
-            const response = await fetch('http://127.0.0.1:8000/api/profile/update/', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
-                },
-                body: JSON.stringify({
-                    firstName: profileData.firstName,
-                    lastName: profileData.lastName,
-                    currentWeight: profileData.currentWeight,
-                    weightGoal: profileData.weightGoal,
-                    activityLevel: profileData.activityLevel,
-                    trainingFrequency: profileData.trainingFrequency,
-                }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log(t('profile_updated'), data);
-                history.push('/profile'); // Redirige al perfil
-            } else {
-                console.error(t('profile_update_error'), response.statusText);
-            }
+          const accessToken = localStorage.getItem('access_token');
+    
+          if (!accessToken) {
+            console.error(t('no_token'));
+            return;
+          }
+          const response = await fetch('http://127.0.0.1:8000/api/profile/update/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+              firstName: profileData.firstName,
+              lastName: profileData.lastName,
+              currentWeight: profileData.currentWeight,
+              weightGoal: profileData.weightGoal,
+              activityLevel: profileData.activityLevel,
+              trainingFrequency: profileData.trainingFrequency,
+            }),
+          });
+    
+          if (response.ok) {
+            setPlansAssigned(false); // Cambia el estado en el contexto
+            history.push('/profile'); // Redirige al perfil
+          } else {
+            console.error(t('profile_update_error'), response.statusText);
+          }
         } catch (error) {
-            console.error(t('request_error'), error);
+          console.error(t('request_error'), error);
         }
-    };
+      };
 
     const handleCancel = () => {
         history.push('/profile'); // Redirige al perfil sin guardar cambios

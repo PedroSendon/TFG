@@ -1,5 +1,4 @@
-// NavbarCliente.js
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { AppBar, BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import FoodBankIcon from '@mui/icons-material/FoodBank';
@@ -7,17 +6,47 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useContext } from 'react';
 import { LanguageContext } from '../../context/LanguageContext';
+import { usePlansContext } from '../../context/PlansContext';
 
-interface NavbarClienteProps {
-  plansAssigned: boolean;
-}
-
-const NavbarCliente: React.FC<NavbarClienteProps> = ({ plansAssigned }) => {
+const NavbarCliente: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
   const { t } = useContext(LanguageContext);
+  const { plansAssigned, setPlansAssigned } = usePlansContext(); // Usa el contexto aquí
+  
+
+  useEffect(() => {
+    const fetchUserStatus = async () => {
+      try {
+        const accessToken = localStorage.getItem('access_token');
+        if (!accessToken) {
+          console.error(t('no_token'));
+          return;
+        }
+        
+        const response = await fetch('http://127.0.0.1:8000/api/user/status/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Si el status es distinto de 'assigned', mostramos `pendingPlans`
+          setPlansAssigned(data.status === 'assigned');
+        } else {
+          console.error('Error fetching user status:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching user status:', error);
+      }
+    };
+
+    fetchUserStatus();
+  }, []);
 
   // Labels for navigation items
   const labels = {
@@ -28,7 +57,6 @@ const NavbarCliente: React.FC<NavbarClienteProps> = ({ plansAssigned }) => {
     pendingPlans: t('pending_plans_label'),
   };
 
-  // Asignar el índice de la pestaña en función de la URL actual
   const getValueFromPath = (path: string) => {
     if (plansAssigned) {
       switch (path) {
