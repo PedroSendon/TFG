@@ -199,42 +199,25 @@ def update_workout(request, workout_id):
     """
     Actualizar un entrenamiento existente en el sistema.
     """
-    user = request.user
-    if user.role != 'entrenador' and user.role != 'administrador':
-        return Response({"error": "No tienes permisos para actualizar entrenamientos"}, status=status.HTTP_403_FORBIDDEN)
-    
-    # Obtener los datos del cuerpo de la solicitud
-    name = request.data.get('name')
-    description = request.data.get('description')
-    exercises = request.data.get('exercises')
-    media = request.data.get('media', None)
-
-    # Validar que todos los campos obligatorios están presentes
-    if not all([name, description, exercises]):
-        return Response({"error": "Faltan parámetros obligatorios o hay valores no válidos."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    # Validar que exercises sea una lista de diccionarios
-    if not isinstance(exercises, list) or not all(isinstance(ex, dict) for ex in exercises):
-        return Response({"error": "El parámetro 'exercises' debe ser una lista de objetos."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    # Actualizar el entrenamiento
-    workout_data = WorkoutRepository.update_workout(
+    # Llamamos al repositorio y le pasamos el usuario y los datos necesarios para la actualización
+    result = WorkoutRepository.update_workout(
+        user=request.user,
         workout_id=workout_id,
-        name=name,
-        description=description,
-        exercises=exercises,
-        media=media
+        name=request.data.get('name'),
+        description=request.data.get('description'),
+        exercises=request.data.get('exercises'),
+        media=request.data.get('media', None)
     )
 
-    if workout_data:
-        return Response({
-            "message": "Entrenamiento actualizado con éxito.",
-            "data": workout_data
-        }, status=status.HTTP_200_OK)
-    else:
-        return Response({"error": "Entrenamiento no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+    # Si hay un error, devolvemos una respuesta con el mensaje de error
+    if 'error' in result:
+        return Response(result, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response({
+        "message": "Entrenamiento actualizado con éxito.",
+        "data": result
+    }, status=status.HTTP_200_OK)
+
     
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])

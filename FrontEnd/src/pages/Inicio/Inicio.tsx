@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Select, MenuItem, Container, Button, Box } from '@mui/material';
+import { Select, MenuItem, Container, Button, Box, OutlinedInput } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { LanguageContext } from '../../context/LanguageContext';
 
@@ -35,13 +35,13 @@ const MainScreen: React.FC = () => {
 <Select
   value={language}
   onChange={(e) => changeLanguage(e.target.value as 'en' | 'es' | 'ca')}
-  disableUnderline
-  IconComponent={() => null}
+  IconComponent={() => null} // Elimina el icono de flecha
+  input={<OutlinedInput notched={false} />}
   sx={{
     position: 'absolute',
     top: '16px',
     right: '16px',
-    width: '50px',
+    width: '50px', // Tamaño ajustado
     height: '50px',
     padding: 0,
     border: '1px solid #d0d0d0',
@@ -56,32 +56,22 @@ const MainScreen: React.FC = () => {
   }}
   renderValue={() => (
     <Box
+      component="img"
+      src={
+        language === 'en'
+          ? 'https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg'
+          : language === 'es'
+          ? 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg'
+          : 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Catalonia.svg'
+      }
+      alt={language}
       sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        height: '100%',
+        width: '32px', // Ocupa todo el ancho disponible
+        height: '100%', // Ocupa toda la altura disponible
+        objectFit: 'cover', // Ajusta la imagen
+        marginLeft: '30px', // Espacio entre la imagen y el texto
       }}
-    >
-      <Box
-        component="img"
-        src={
-          language === 'en'
-            ? 'https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg'
-            : language === 'es'
-            ? 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg'
-            : 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Catalonia.svg'
-        }
-        alt={language}
-        sx={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          borderRadius: '8px',
-        }}
-      />
-    </Box>
+    />
   )}
 >
   <MenuItem value="en">

@@ -180,7 +180,7 @@ const WorkoutsExercises: React.FC = () => {
     const handleSectionChange = (event: React.SyntheticEvent, newValue: string) => {
         setSelectedSection(newValue);
     };
-
+ 
 
     const handleEdit = (id: number, type: string) => {
         const selectedData = type === 'workout'

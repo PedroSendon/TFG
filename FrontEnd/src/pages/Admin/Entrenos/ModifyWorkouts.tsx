@@ -21,12 +21,13 @@ const ModifyWorkoutPage: React.FC = () => {
   const { t } = useContext(LanguageContext);
 
   const { data } = (location.state || { data: {} }) as { data: any };
+  const workoutId = data?.id; // Obtener el ID del entrenamiento desde el estado
 
   const [workoutDetails, setWorkoutDetails] = useState({
-    name: data?.name || '',
-    description: data?.description || '',
-    exercises: data?.exercises || [],
-    duration: data?.duration || 30,
+    name: '',
+    description: '',
+    exercises: [] as Exercise[],
+    duration: 30,
   });
 
   const [media, setMedia] = useState<string | null>(data?.media || null);
@@ -34,6 +35,38 @@ const ModifyWorkoutPage: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
 
+  useEffect(() => {
+    const fetchWorkoutDetails = async () => {
+      if (!workoutId) return;
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/workouts/details/?id=${workoutId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al obtener los detalles del entrenamiento');
+        }
+
+        const data = await response.json();
+        setWorkoutDetails({
+          name: data.name,
+          description: data.description,
+          exercises: data.exercises,
+          duration: data.duration || 30,
+        });
+        setMedia(data.media || null);
+      } catch (error) {
+        console.error('Error fetching workout details:', error);
+      }
+    };
+
+    fetchWorkoutDetails();
+  }, [workoutId]);
+
+  // Llamada a la API para obtener los ejercicios disponibles
   useEffect(() => {
     const fetchExercises = async () => {
       try {
@@ -53,9 +86,53 @@ const ModifyWorkoutPage: React.FC = () => {
   }, []);
 
   const handleSave = async () => {
-    setShowToast(true);
-    history.push('/admin/workout');
+    try {
+      // Mostrar el toast mientras se procesa la solicitud
+      setShowToast(true);
+  
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        console.error('No token found');
+        return;
+      }
+  
+      const response = await fetch(`http://127.0.0.1:8000/api/workouts/${data.id}/update/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          name: workoutDetails.name,
+          description: workoutDetails.description,
+          media: media,  // Enviar media si está disponible
+          exercises: workoutDetails.exercises.map(exercise => ({
+            name: exercise.name,
+            series: exercise.sets,
+            reps: exercise.reps,
+            rest: exercise.rest,
+          })),
+        }),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        // Mostrar mensaje de éxito y redirigir
+        console.log('Entrenamiento actualizado con éxito:', result);
+        history.push('/admin/workout');
+      } else {
+        // Manejo de errores
+        console.error('Error al actualizar el entrenamiento:', result.error);
+        alert(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error en la solicitud de actualización:', error);
+    } finally {
+      setShowToast(false);  // Ocultar el toast después de completar la solicitud
+    }
   };
+  
 
   const handleCancel = () => {
     history.push('/admin/workout');
@@ -164,7 +241,7 @@ const ModifyWorkoutPage: React.FC = () => {
               label={t('duration_minutes')}
               type="number"
               value={workoutDetails.duration}
-              onChange={(e) => setWorkoutDetails({ ...workoutDetails, duration: e.target.value })}
+              onChange={(e) => setWorkoutDetails({ ...workoutDetails, duration: Number(e.target.value) })}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '8px',

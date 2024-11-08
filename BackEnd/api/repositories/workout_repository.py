@@ -261,18 +261,29 @@ class WorkoutRepository:
         }
 
     @staticmethod
-    def update_workout(workout_id, name, description, exercises, media=None):
+    def update_workout(user, workout_id, name, description, exercises, media=None):
         """
         Actualizar un entrenamiento existente en el sistema.
+        :param user: El usuario que realiza la solicitud.
         :param workout_id: ID del entrenamiento a actualizar.
         :param name: Nuevo nombre del entrenamiento.
         :param description: Nueva descripción del entrenamiento.
         :param exercises: Lista de ejercicios asociados al entrenamiento.
         :param media: Nueva URL o base64 de la imagen o video asociado al entrenamiento (opcional).
-        :return: Un diccionario con los datos del entrenamiento actualizado o None si no existe.
+        :return: Un diccionario con los datos del entrenamiento actualizado o un mensaje de error.
         """
         try:
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+            
+            # Validar el rol del usuario
+            if user.role not in ['entrenador', 'administrador']:
+                return {"error": "No tienes permisos para actualizar entrenamientos"}
+            
+            # Obtener el entrenamiento
             workout = Workout.objects.get(id=workout_id)
+            
+            # Actualizar los detalles del entrenamiento
             workout.name = name
             workout.description = description
             workout.media = media
@@ -282,6 +293,7 @@ class WorkoutRepository:
             WorkoutExercise.objects.filter(workout=workout).delete()
 
             # Añadir los nuevos ejercicios al entrenamiento
+            exercises_data = []
             for exercise in exercises:
                 try:
                     existing_exercise = Exercise.objects.get(name=exercise['name'])
@@ -292,17 +304,16 @@ class WorkoutRepository:
                         reps=exercise['reps'],
                         rest=exercise['rest']
                     )
+                    exercises_data.append({
+                        "name": exercise['name'],
+                        "series": exercise['series'],
+                        "reps": exercise['reps'],
+                        "rest": exercise['rest']
+                    })
                 except Exercise.DoesNotExist:
-                    continue  # Si no existe el ejercicio, se ignora
+                    continue  # Ignorar el ejercicio si no existe
 
-            # Recopilar los datos de los ejercicios actualizados
-            exercises_data = [{
-                "name": ex['name'],
-                "series": ex['series'],
-                "reps": ex['reps'],
-                "rest": ex['rest']
-            } for ex in exercises]
-
+            # Devolver los datos del entrenamiento actualizado
             return {
                 "id": workout.id,
                 "name": workout.name,
@@ -310,8 +321,9 @@ class WorkoutRepository:
                 "exercises": exercises_data,
                 "media": workout.media
             }
+
         except Workout.DoesNotExist:
-            return None
+            return {"error": "Entrenamiento no encontrado"}
         
     @staticmethod
     def delete_workout(workout_id):

@@ -1,11 +1,8 @@
 from rest_framework.response import Response  # type: ignore
 from rest_framework.decorators import api_view, parser_classes, permission_classes, authentication_classes  # type: ignore
 from rest_framework import status  # type: ignore
-from api.repositories.trainingplan_repository import TrainingPlanRepository
 from api.repositories.user_repository import UserRepository, ImagenRepository, WeightRecordRepository
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
-from rest_framework.parsers import MultiPartParser, FormParser
 from api.schemas.user import UserCreate, UserDetailsSchema, LoginSchema, UserAdminCreate
 from django.contrib.auth.hashers import make_password
 from api.repositories.user_repository import UserDetailsRepository

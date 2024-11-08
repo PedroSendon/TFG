@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 
 interface Exercise {
+    id: number;
     name: string;
     sets: number;
     reps: number;
@@ -27,13 +28,6 @@ import { useHistory } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext';
 import { CameraAlt, Close, Delete } from '@mui/icons-material';
-
-interface Exercise {
-    name: string;
-    sets: number;
-    reps: number;
-    rest: number;
-}
 
 const AddWorkouts: React.FC = () => {
     const history = useHistory();
@@ -163,12 +157,23 @@ const AddWorkouts: React.FC = () => {
     // Llamada al backend para obtener los ejercicios
     const fetchExercises = async () => {
         try {
+            const accessToken = localStorage.getItem('access_token'); // Asegúrate de que 'access_token' sea el nombre correcto
+            if (!accessToken) {
+                console.error('No access token found');
+                return;
+            }
+
             const response = await fetch('http://127.0.0.1:8000/api/exercises/all/', {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Si usas JWT
+                    'Authorization': `Bearer ${accessToken}`, // Usa el nombre correcto del token
                 },
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
             const data = await response.json();
             setExercisesList(data.data); // Actualiza el estado con los ejercicios obtenidos
         } catch (error) {
@@ -182,7 +187,7 @@ const AddWorkouts: React.FC = () => {
     }, []);
 
     return (
-        <Container  sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', marginTop: '20%' }}>
+        <Container sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', marginTop: '20%' }}>
             <Header title={t('add_workout_title')} />
             <Box mt={4}>
                 <form>
@@ -259,7 +264,7 @@ const AddWorkouts: React.FC = () => {
                                 fullWidth
                                 sx={{
                                     color: '#777', borderColor: '#777', fontWeight: 'bold', width: '100%', borderRadius: '8px', padding: '8px',
-                                  }}
+                                }}
                             >
                                 {t('upload_image')}
                             </Button>
@@ -333,8 +338,11 @@ const AddWorkouts: React.FC = () => {
                                                     '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
                                                 }}
                                             >
-                                                <MenuItem value="Exercise 1">Exercise 1</MenuItem>
-                                                <MenuItem value="Exercise 2">Exercise 2</MenuItem>
+                                                {exercisesList.map((ex) => (
+                                                    <MenuItem key={ex.id} value={ex.name}>
+                                                        {ex.name}
+                                                    </MenuItem>
+                                                ))}
                                             </TextField>
                                         </Grid>
                                         <Grid item xs={4}>
@@ -411,7 +419,7 @@ const AddWorkouts: React.FC = () => {
                                 variant="outlined"
                                 sx={{
                                     color: '#777', borderColor: '#777', fontWeight: 'bold', width: '100%', borderRadius: '8px', padding: '8px',
-                                  }}
+                                }}
                             >
 
                                 {t('add_exercise')}
@@ -424,8 +432,8 @@ const AddWorkouts: React.FC = () => {
                                 variant="outlined"
                                 sx={{
                                     color: '#777', borderColor: '#777', fontWeight: 'bold', py: 1, borderRadius: '8px',
-                                  }}
-                                  onClick={handleCancel}
+                                }}
+                                onClick={handleCancel}
                             >
                                 {t('cancel')}
                             </Button>
@@ -436,8 +444,8 @@ const AddWorkouts: React.FC = () => {
                                 variant="contained"
                                 sx={{
                                     backgroundColor: '#555', color: '#FFF', fontWeight: 'bold', py: 1, borderRadius: '8px', '&:hover': { backgroundColor: '#333' },
-                                  }}
-                                  onClick={handleSave}
+                                }}
+                                onClick={handleSave}
                             >
                                 {t('save')}
                             </Button>
