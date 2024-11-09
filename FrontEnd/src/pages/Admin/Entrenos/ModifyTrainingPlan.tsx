@@ -81,7 +81,6 @@ const ModifyTrainingPlans: React.FC = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log(t('training_plan_loaded'), data);
                     setPlanDetails({
                         name: data.name,
                         description: data.description,
@@ -142,11 +141,14 @@ const ModifyTrainingPlans: React.FC = () => {
             history.push('/admin/workout');
             return;
         }
+        // Extraer solo los IDs de los entrenamientos en lugar de objetos completos
+        const workoutIds = workouts.map(workout => workout.id);
 
         const updatedTrainingPlan = {
+            training_plan_id: trainingPlanId,  // Agregar el ID aquí
             ...planDetails,
             media,
-            workouts,
+            workouts: workoutIds,  // Solo enviar los IDs
         };
 
         try {
@@ -155,7 +157,7 @@ const ModifyTrainingPlans: React.FC = () => {
                 console.error(t('no_token'));
                 return;
             }
-            const response = await fetch(`http://127.0.0.1:8000/api/training-plans/${trainingPlanId}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/api/training-plans/update/`, {  // Cambiar la URL
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -168,7 +170,7 @@ const ModifyTrainingPlans: React.FC = () => {
                 const data = await response.json();
                 console.log(t('training_plan_saved'), data);
                 setShowToast(true);
-                history.push('/admin/training-plans');
+                history.push('/admin/workout');
             } else {
                 const errorData = await response.json();
                 console.error(t('error_saving_training_plan'), errorData);
@@ -179,6 +181,7 @@ const ModifyTrainingPlans: React.FC = () => {
             setShowToast(true);
         }
     };
+
 
     const handleCancel = () => {
         history.push('/admin/workout');
@@ -257,7 +260,7 @@ const ModifyTrainingPlans: React.FC = () => {
                     {/* Selección de Dificultad */}
                     <Grid item xs={12}>
                         <Select
-                            value={planDetails.difficulty}
+                            value={["ligera", "moderada", "intermedia", "intensa"].includes(planDetails.difficulty) ? planDetails.difficulty : ""}
                             onChange={(e) => handleChange(e)}
                             fullWidth
                             displayEmpty
@@ -268,11 +271,19 @@ const ModifyTrainingPlans: React.FC = () => {
                                     '& fieldset': { borderColor: '#CCCCCC' },
                                     '&:hover fieldset': { borderColor: '#AAAAAA' },
                                     '&.Mui-focused fieldset': { borderColor: '#555555' },
-                                }, '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
-
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                            }}
+                            renderValue={(selected) => {
+                                if (selected === "") {
+                                    return <em>{t('select_difficulty_placeholder')}</em>;
+                                }
+                                return selected;
                             }}
                         >
-                            <MenuItem value="">{t('select_difficulty')}</MenuItem>
+                            <MenuItem value="" disabled>
+                                <em>{t('select_difficulty_placeholder')}</em>
+                            </MenuItem>
                             <MenuItem value="ligera">{t('difficulty_light')}</MenuItem>
                             <MenuItem value="moderada">{t('difficulty_moderate')}</MenuItem>
                             <MenuItem value="intermedia">{t('difficulty_intermediate')}</MenuItem>
@@ -280,10 +291,15 @@ const ModifyTrainingPlans: React.FC = () => {
                         </Select>
                     </Grid>
 
+
                     {/* Selección de Equipamiento */}
                     <Grid item xs={12}>
                         <Select
-                            value={planDetails.equipment}
+                            value={
+                                ["Pesas libres", "gimnasio", "Nada"].includes(planDetails.equipment)
+                                    ? planDetails.equipment
+                                    : ""
+                            }
                             onChange={(e) => handleChange(e)}
                             fullWidth
                             displayEmpty
@@ -294,16 +310,26 @@ const ModifyTrainingPlans: React.FC = () => {
                                     '& fieldset': { borderColor: '#CCCCCC' },
                                     '&:hover fieldset': { borderColor: '#AAAAAA' },
                                     '&.Mui-focused fieldset': { borderColor: '#555555' },
-                                }, '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
-
+                                },
+                                '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                            }}
+                            renderValue={(selected) => {
+                                if (selected === "") {
+                                    return <em>{t('select_equipment_placeholder')}</em>;
+                                }
+                                return selected;
                             }}
                         >
-                            <MenuItem value="">{t('select_equipment')}</MenuItem>
+                            <MenuItem value="" disabled>
+                                <em>{t('select_equipment_placeholder')}</em>
+                            </MenuItem>
                             <MenuItem value="Pesas libres">{t('equipment_free_weights')}</MenuItem>
                             <MenuItem value="gimnasio">{t('equipment_gym')}</MenuItem>
                             <MenuItem value="Nada">{t('equipment_none')}</MenuItem>
                         </Select>
                     </Grid>
+
+
 
                     {/* Input de Duración */}
                     <Grid item xs={12}>
@@ -350,18 +376,27 @@ const ModifyTrainingPlans: React.FC = () => {
                             <Card sx={{ borderRadius: '10px', mb: 2, boxShadow: 2 }}>
                                 <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
                                     <Select
-                                        value={workoutSelection.selectedWorkout}
+                                        value={workoutSelection.selectedWorkout || ''}  // Aseguramos que no sea null
                                         onChange={(e) =>
                                             handleWorkoutChange(workoutSelection.id, e.target.value as number)
                                         }
                                         fullWidth
                                         displayEmpty
+                                        renderValue={(value) =>
+                                            value
+                                                ? availableWorkouts.find((workout) => workout.id === value)?.name
+                                                : t('select_workout_placeholder')  // Texto de marcador de posición
+                                        }
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: '8px',
+                                            },
+                                        }}
                                     >
-
                                         {/* Mapea `availableWorkouts` para crear las opciones del Select */}
                                         {availableWorkouts.map((workout) => (
                                             <MenuItem key={workout.id} value={workout.id}>
-                                                {workout.name}  {/* Asume que `name` es la propiedad que quieres mostrar */}
+                                                {workout.name}
                                             </MenuItem>
                                         ))}
                                     </Select>
@@ -372,6 +407,7 @@ const ModifyTrainingPlans: React.FC = () => {
                             </Card>
                         </Grid>
                     ))}
+
 
                     <Grid item xs={12}>
                         <Button

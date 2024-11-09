@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 
 class ExerciseSchema(BaseModel):
@@ -29,3 +29,16 @@ class ExerciseUpdateSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+class CreateExerciseSchema(BaseModel):
+    name: str
+    description: str
+    muscleGroups: list
+    instructions: str
+    media: str = None
+
+    @validator('muscleGroups')
+    def muscle_groups_must_be_list_of_strings(cls, v):
+        if not isinstance(v, list) or not all(isinstance(item, str) for item in v):
+            raise ValueError("El parámetro 'muscleGroups' debe ser una lista de cadenas de texto.")
+        return v

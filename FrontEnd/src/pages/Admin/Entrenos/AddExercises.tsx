@@ -97,34 +97,48 @@ const AddExercises: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+    
         // Validar los campos antes de enviarlos al backend
         if (!formData.name || !formData.description || !formData.muscleGroups.length || !formData.instructions) {
             setErrors({ ...errors, form: 'Todos los campos son obligatorios' });
             return;
         }
-
+        const accessToken = localStorage.getItem('access_token');
+    
+        if (!accessToken) {
+            console.error(t('no_token'));
+            return;
+        }
+    
+        console.log('Datos que se enviarán:', JSON.stringify({
+            name: formData.name,
+            description: formData.description,
+            muscleGroups: formData.muscleGroups,
+            instructions: formData.instructions,
+            media: media,
+        }));
+    
         // Realizar la solicitud al backend
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/exercises/create/', {
+            const response = await fetch('http://127.0.0.1:8000/api/exercises/create/', { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Si usas JWT
+                    'Authorization': `Bearer ${accessToken}`, 
                 },
                 body: JSON.stringify({
                     name: formData.name,
                     description: formData.description,
                     muscleGroups: formData.muscleGroups,
                     instructions: formData.instructions,
-                    media: media,
+                    media: media || "",  // Envía una cadena vacía si `media` es `null`
                 }),
             });
-
+    
             const data = await response.json();
             if (response.ok) {
                 console.log('Ejercicio creado con éxito:', data);
-                history.push('/admin/exercises');
+                history.push('/admin/workout');
             } else {
                 console.error('Error al crear el ejercicio:', data);
                 setErrors({ ...errors, form: 'Error al crear el ejercicio. Verifique los datos.' });
@@ -134,6 +148,7 @@ const AddExercises: React.FC = () => {
             setErrors({ ...errors, form: 'Error de conexión. Inténtelo más tarde.' });
         }
     };
+    
 
     const handleCancel = () => {
         history.push('/admin/workout');

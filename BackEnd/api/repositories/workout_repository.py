@@ -1,9 +1,10 @@
+from api.repositories.user_repository import UserRepository
 from api.models.user import User
 from api.models.workout import Workout, WorkoutExercise, Exercise, UserWorkout
-from api.models.trainingplan import TrainingPlan
 from api.models.exercise import Exercise
 from api.models.process import ProgressTracking, ExerciseLog
 from django.utils import timezone
+from rest_framework import status
 
 class WorkoutRepository:
 
@@ -202,31 +203,39 @@ class WorkoutRepository:
 
         
     @staticmethod
-    def create_workout(name, description, exercises, media=None, days_per_week=None, duration=None, difficulty=None, equipment=None):
+    def create_workout(user, data):
         """
         Crear un nuevo entrenamiento en el sistema.
-        :param name: Nombre del entrenamiento.
-        :param description: Descripción del entrenamiento.
-        :param exercises: Lista de ejercicios asociados al entrenamiento.
-        :param media: URL o base64 de la imagen o video asociado al entrenamiento (opcional).
-        :param days_per_week: Número de días a la semana que se realiza el entrenamiento.
-        :param duration: Duración total del entrenamiento en minutos.
-        :param difficulty: Nivel de dificultad del entrenamiento.
-        :param equipment: Equipos necesarios para realizar el entrenamiento.
-        :return: Un diccionario con los datos del entrenamiento creado.
+        :param user: Usuario que realiza la solicitud.
+        :param data: Datos del entrenamiento.
+        :return: Un diccionario con los datos del entrenamiento creado o un mensaje de error.
         """
+        # Verificar el rol del usuario
+        check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
+        if "error" in check_result:
+            return check_result
+
+        # Validar los datos obligatorios
+        required_fields = ['name', 'description', 'exercises', 'duration']
+        if not all(field in data and data[field] for field in required_fields):
+            return {"error": "Faltan parámetros obligatorios o hay valores no válidos.", "status": status.HTTP_400_BAD_REQUEST}
+
+        exercises = data.get('exercises')
+        
+        # Validar que 'exercises' sea una lista de diccionarios
+        if not isinstance(exercises, list) or not all(isinstance(ex, dict) for ex in exercises):
+            return {"error": "El parámetro 'exercises' debe ser una lista de objetos.", "status": status.HTTP_400_BAD_REQUEST}
+
         # Crear el entrenamiento
         workout = Workout.objects.create(
-            name=name,
-            description=description,
-            media=media,
-            days_per_week=days_per_week,
-            duration=duration,
-            difficulty=difficulty,
-            equipment=equipment,
+            name=data['name'],
+            description=data['description'],
+            media=data.get('media'),
+            duration=data['duration']
         )
 
         # Añadir los ejercicios al entrenamiento
+        exercises_data = []
         for exercise in exercises:
             try:
                 existing_exercise = Exercise.objects.get(name=exercise['name'])
@@ -237,27 +246,24 @@ class WorkoutRepository:
                     reps=exercise['reps'],
                     rest=exercise['rest']
                 )
+                exercises_data.append({
+                    "name": exercise['name'],
+                    "sets": exercise['sets'],
+                    "reps": exercise['reps'],
+                    "rest": exercise['rest']
+                })
             except Exercise.DoesNotExist:
                 continue  # Si no existe el ejercicio, se ignora
 
-        # Recopilar los datos de los ejercicios añadidos
-        exercises_data = [{
-            "name": ex['name'],
-            "sets": ex['sets'],
-            "reps": ex['reps'],
-            "rest": ex['rest']
-        } for ex in exercises]
-
         return {
-            "id": workout.id,
-            "name": workout.name,
-            "description": workout.description,
-            "exercises": exercises_data,
-            "media": workout.media,
-            "days_per_week": workout.days_per_week,
-            "duration": workout.duration,
-            "difficulty": workout.difficulty,
-            "equipment": workout.equipment,
+            "data": {
+                "id": workout.id,
+                "name": workout.name,
+                "description": workout.description,
+                "exercises": exercises_data,
+                "media": workout.media,
+                "duration": workout.duration
+            }
         }
 
     @staticmethod
@@ -326,16 +332,27 @@ class WorkoutRepository:
             return {"error": "Entrenamiento no encontrado"}
         
     @staticmethod
-    def delete_workout(workout_id):
+    def delete_workout(user, workout_id):
         """
         Eliminar un entrenamiento existente en el sistema.
+        :param user: Usuario que realiza la solicitud.
         :param workout_id: ID del entrenamiento a eliminar.
-        :return: True si el entrenamiento fue eliminado, False si no se encontró.
+        :return: True si el entrenamiento fue eliminado, False si no se encontró, o un mensaje de error.
         """
+        # Verificar el rol del usuario
+        check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
+        if "error" in check_result:
+            return {"error": check_result["error"], "status": check_result["status"]}
+
         try:
             workout = Workout.objects.get(id=workout_id)
+            
+            # Si el modelo tiene relaciones a través de WorkoutExercise, asegúrate de eliminar esas relaciones.
+            workout.exercises.clear()  # Elimina la relación ManyToMany antes de eliminar el workout
+
             workout.delete()
             return True
         except Workout.DoesNotExist:
             return False
-        
+        except Exception as e:
+            return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}

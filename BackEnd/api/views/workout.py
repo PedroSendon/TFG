@@ -4,7 +4,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from api.repositories.user_repository import UserWorkoutRepository
 from api.repositories.workout_repository import WorkoutRepository
-from api.utils.decorators import role_required
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
@@ -154,42 +153,19 @@ def get_workouts_by_user(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@role_required(['entrenador', 'administrador'])
 def create_workout(request):
     """
     Crear un nuevo entrenamiento en el sistema.
     """
-    # Obtener los datos del cuerpo de la solicitud
-    name = request.data.get('name')
-    description = request.data.get('description')
-    exercises = request.data.get('exercises')
-    media = request.data.get('media', None)
-    duration = request.data.get('duration')  # Nuevo campo
+    result = WorkoutRepository.create_workout(request.user, request.data)
 
-    # Validar que todos los campos obligatorios están presentes
-    if not all([name, description, exercises, duration]):
-        return Response({"error": "Faltan parámetros obligatorios o hay valores no válidos."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    # Validar que exercises sea una lista de diccionarios
-    if not isinstance(exercises, list) or not all(isinstance(ex, dict) for ex in exercises):
-        return Response({"error": "El parámetro 'exercises' debe ser una lista de objetos."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    # Crear el entrenamiento
-    workout_data = WorkoutRepository.create_workout(
-        name=name,
-        description=description,
-        exercises=exercises,
-        media=media,
-        duration=duration
-    )
-
+    if 'error' in result:
+        return Response({"error": result['error']}, status=result.get('status', status.HTTP_400_BAD_REQUEST))
+    
     return Response({
         "message": "Entrenamiento creado con éxito.",
-        "data": workout_data
+        "data": result['data']
     }, status=status.HTTP_201_CREATED)
-
 
 
 
@@ -225,14 +201,11 @@ def delete_workout(request, workout_id):
     """
     Eliminar un entrenamiento existente en el sistema.
     """
-    user = request.user
-    if user.role != 'entrenador' and user.role != 'administrador':
-        return Response({"error": "No tienes permisos para eliminar entrenamientos"}, status=status.HTTP_403_FORBIDDEN)
-    
-    # Intentar eliminar el entrenamiento
-    success = WorkoutRepository.delete_workout(workout_id)
+    result = WorkoutRepository.delete_workout(request.user, workout_id)
 
-    if success:
+    if result is True:
         return Response({"message": "Entrenamiento eliminado con éxito."}, status=status.HTTP_200_OK)
+    elif isinstance(result, dict) and "error" in result:
+        return Response({"error": result["error"]}, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
     else:
         return Response({"error": "Entrenamiento no encontrado."}, status=status.HTTP_404_NOT_FOUND)

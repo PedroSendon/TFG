@@ -373,5 +373,20 @@
   "calories": "Calorías",
   "meal": "Comida",
   "training_plan_details": "Detalles del plan de entrenamiento",
-    "workout_details": "Detalles del entrenamiento"
+  "workout_details": "Detalles del entrenamiento",
+  "equipment_free_weights": "Pesas libres",
+  "equipment_gym": "Gimnasio",
+  "equipment_none": "Nada",
+  "difficulty_light": "Ligera",
+  "difficulty_moderate": "Moderada",
+  "difficulty_intermediate": "Intermedia",
+  "difficulty_intense": "Intensa",
+  "modify_training_plan_title": "Modificar Plan de Entrenamiento",
+  "add_workout": "Añadir Entrenamiento",
+  "select_workout_placeholder": "Selecciona un Entrenamiento",
+  "select_difficulty_placeholder": "Selecciona Dificultad",
+  "select_equipment_placeholder": "Selecciona Equipamiento"
+
+
+
 }

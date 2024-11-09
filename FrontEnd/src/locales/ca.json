@@ -372,5 +372,20 @@
   "calories": "Calories",
   "meal": "Menjar",
   "training_plan_details": "Detalls del pla d'entrenament",
-    "workout_details": "Detalls de l'entrenament"
+  "workout_details": "Detalls de l'entrenament",
+  "equipment_free_weights": "Pesos lliures",
+  "equipment_gym": "Gimnàs",
+  "equipment_none": "Res",
+  "difficulty_light": "Lleugera",
+  "difficulty_moderate": "Moderada",
+  "difficulty_intermediate": "Intermèdia",
+  "difficulty_intense": "Intensa",
+  "modify_training_plan_title": "Modificar Pla d'Entrenament",
+  "add_workout": "Afegir Entrenament",
+  "select_workout_placeholder": "Selecciona un Entrenament",
+  "select_difficulty_placeholder": "Selecciona la Dificultat",
+  "select_equipment_placeholder": "Selecciona l'Equipament"
+
+
+
 }

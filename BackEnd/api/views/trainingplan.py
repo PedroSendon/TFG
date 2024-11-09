@@ -23,20 +23,20 @@ def get_training_plan(request, training_plan_id):
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def update_training_plan(request, training_plan_id):
+def update_training_plan(request):
     """
     Modificar los detalles de un plan de entrenamiento específico.
     """
-    data = request.data
+    training_plan_id = request.data.get('training_plan_id')
+    if not training_plan_id:
+        return Response({"error": "El ID del plan de entrenamiento es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
-    updated_plan, error = TrainingPlanRepository.update_training_plan(
-        training_plan_id, data)
+    updated_plan, error = TrainingPlanRepository.update_training_plan(request.user, training_plan_id, request.data)
 
     if error:
         return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(updated_plan, status=status.HTTP_200_OK)
-
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])

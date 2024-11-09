@@ -7,7 +7,7 @@ from api.models.user import User, UserDetails, DietPreferences, WeightRecord
 from api.models.process import ProgressTracking
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
-from django.db.models import Q
+from rest_framework import status
 
 
 class UserRepository:
@@ -123,6 +123,27 @@ class UserRepository:
         except Exception as e:
             print(f"Error al actualizar el usuario: {e}")
             return False, "Error al actualizar el usuario."
+
+    @staticmethod
+    def check_user_role(user, allowed_roles):
+        """
+        Verifica que el usuario tiene uno de los roles permitidos.
+        :param user: Objeto de usuario o instancia de User.
+        :param allowed_roles: Lista de roles permitidos.
+        :return: El objeto de usuario si tiene permisos o un diccionario de error.
+        """
+        # Asegurarse de que user es una instancia de User
+        if not isinstance(user, User):
+            try:
+                user = User.objects.get(id=user.id)
+            except User.DoesNotExist:
+                return {"error": "Usuario no encontrado.", "status": status.HTTP_404_NOT_FOUND}
+        
+        # Verificar si el usuario tiene uno de los roles permitidos
+        if user.role not in allowed_roles:
+            return {"error": "No tienes permisos para realizar esta acción", "status": status.HTTP_403_FORBIDDEN}
+        
+        return {"user": user}
 
     @staticmethod
     def create_user_admin(user_data):

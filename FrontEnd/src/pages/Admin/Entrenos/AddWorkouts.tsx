@@ -12,14 +12,9 @@ import {
     Button,
     Grid,
     Container,
-    InputLabel,
-    Select,
-    OutlinedInput,
     MenuItem,
     Box,
-    Chip,
     Typography,
-    Divider,
     SelectChangeEvent,
     Card,
     IconButton
@@ -44,7 +39,6 @@ const AddWorkouts: React.FC = () => {
         duration: 30, // Nuevo campo
     });
 
-    const [errors, setErrors] = useState<any>({});
     const [exercisesList, setExercisesList] = useState<Exercise[]>([]); // Estado para la lista de ejercicios
 
     const handleAddExercise = () => {
@@ -57,7 +51,7 @@ const AddWorkouts: React.FC = () => {
     const handleCancel = () => {
         history.push('/admin/workout');
     };
-
+ 
     const handleSave = async () => {
         try {
             const accessToken = localStorage.getItem('access_token');
@@ -70,7 +64,7 @@ const AddWorkouts: React.FC = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Si usas JWT
+                    'Authorization': `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify({
                     name: formData.name,
@@ -84,7 +78,7 @@ const AddWorkouts: React.FC = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Entrenamiento creado con éxito:', data);
-                history.push('/admin/workouts');
+                history.push('/admin/workout');
             } else {
                 const errorData = await response.json();
                 console.error('Error al crear el entrenamiento:', errorData);

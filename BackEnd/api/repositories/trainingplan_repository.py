@@ -5,6 +5,7 @@ from api.models.user import User
 from api.schemas.workout import TrainingPlanSchema  # Import TrainingPlanSchema
 from api.models.workout import UserWorkout, WeeklyWorkout, Workout
 from api.models.trainingplan import TrainingPlan
+from rest_framework import status
 
 
 class TrainingPlanRepository:
@@ -155,10 +156,17 @@ class TrainingPlanRepository:
             return None, "Training Plan not found."
 
     @staticmethod
-    def update_training_plan(training_plan_id, data):
+    def update_training_plan(user, training_plan_id, data):
         """
         Actualiza un plan de entrenamiento específico con los datos proporcionados.
         """
+        # Verificar si el objeto `user` es una instancia de `User`
+        if not isinstance(user, User):
+            user = User.objects.get(id=user.id)
+            
+        if user.role not in ['entrenador', 'administrador']:
+            return {"error": "No tienes permisos para modificar ejercicios", "status": status.HTTP_403_FORBIDDEN}
+        
         try:
             training_plan = TrainingPlan.objects.get(id=training_plan_id)
 

@@ -35,43 +35,16 @@ def create_exercise(request):
     """
     Crear un nuevo ejercicio en el sistema.
     """
-    user = request.user
-    if user.role not in ['entrenador', 'administrador']:
-        return Response({"error": "No tienes permisos para crear entrenamientos"}, status=status.HTTP_403_FORBIDDEN)
-    
-    # Obtener los datos del cuerpo de la solicitud
-    name = request.data.get('name')
-    description = request.data.get('description')
-    muscle_groups = request.data.get('muscleGroups')
-    instructions = request.data.get('instructions')
-    media = request.data.get('media', None)
+    result = ExerciseRepository.create_exercise(request.user, request.data)
 
-    # Validar que todos los campos obligatorios están presentes
-    if not all([name, description, muscle_groups, instructions]):
-        return Response({"error": "Faltan parámetros obligatorios o hay valores no válidos."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    # Validar que muscle_groups sea una lista de cadenas de texto
-    if not isinstance(muscle_groups, list) or not all(isinstance(group, str) for group in muscle_groups):
-        return Response({"error": "El parámetro 'muscleGroups' debe ser una lista de cadenas de texto."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    # Convertir la lista de muscle_groups a una cadena separada por comas
-    muscle_groups_str = ','.join(muscle_groups)
-
-    # Crear el ejercicio
-    exercise_data = ExerciseRepository.create_exercise(
-        name=name,
-        description=description,
-        muscle_groups=muscle_groups_str,  # Guardamos la cadena de grupos musculares
-        instructions=instructions,
-        media=media
-    )
+    if 'error' in result:
+        return Response({"error": result['error']}, status=result.get('status', status.HTTP_400_BAD_REQUEST))
 
     return Response({
         "message": "Ejercicio creado con éxito.",
-        "data": exercise_data
+        "data": result['data']
     }, status=status.HTTP_201_CREATED)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -162,24 +135,23 @@ def get_exercises_by_training(request):
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def update_exercise(request, exercise_id):
+def update_exercise(request):
     """
-    Modificar un ejercicio existente
+    Modificar un ejercicio existente.
     """
-    user = request.user
-    if user.role not in ['entrenador', 'administrador']:
-        return Response({"error": "No tienes permisos para modificar ejercicios"}, status=status.HTTP_403_FORBIDDEN)
+    # Obtener el ID del ejercicio desde el cuerpo de la solicitud
+    exercise_id = request.data.get('id')
 
-    # Validar los datos con el schema
-    schema = ExerciseUpdateSchema(**request.data)
-    
+    if not exercise_id:
+        return Response({"error": "El parámetro 'id' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+
     # Llamar al repositorio para actualizar el ejercicio
-    updated_exercise = ExerciseRepository.update_exercise(exercise_id, schema.dict(exclude_unset=True))
+    result = ExerciseRepository.update_exercise(exercise_id, request.user, request.data)
     
-    if not updated_exercise:
-        return Response({"error": "Ejercicio no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    if 'error' in result:
+        return Response({"error": result['error']}, status=result.get('status', status.HTTP_400_BAD_REQUEST))
 
     return Response({
         "message": "Ejercicio modificado con éxito.",
-        "data": updated_exercise
+        "data": result['data']
     }, status=status.HTTP_200_OK)

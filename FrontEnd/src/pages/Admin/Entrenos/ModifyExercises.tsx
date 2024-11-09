@@ -52,7 +52,6 @@ const ModifyExercises: React.FC = () => {
         setMuscleGroupsList(muscleData.muscleGroups);
     }, [language]); // Escuchar los cambios en el idioma
 
-
     const handleSave = async () => {
         const exerciseId = data?.id; // Obtener el ID del ejercicio
         if (!exerciseId) {
@@ -60,22 +59,23 @@ const ModifyExercises: React.FC = () => {
             history.push('/admin/exercises');
             return;
         }
-
-
+    
         const updatedExercise = {
+            id: exerciseId,  // Ahora enviamos el ID en el cuerpo
             ...exerciseDetails,
             muscle_groups: exerciseDetails.muscleGroups,
             media,
         };
-
+    
         try {
             const accessToken = localStorage.getItem('access_token');
-
+    
             if (!accessToken) {
                 console.error(t('no_token'));
                 return;
             }
-            const response = await fetch(`http://127.0.0.1:8000/api/exercises/${exerciseId}/`, {
+    
+            const response = await fetch('http://127.0.0.1:8000/api/exercises/update/', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ const ModifyExercises: React.FC = () => {
                 },
                 body: JSON.stringify(updatedExercise),
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
                 console.log('Datos del ejercicio guardados:', data);
@@ -99,6 +99,7 @@ const ModifyExercises: React.FC = () => {
             setShowToast(true);
         }
     };
+    
 
 
     const handleCancel = () => {

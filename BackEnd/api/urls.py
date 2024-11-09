@@ -65,7 +65,7 @@ urlpatterns = [
     path('trainingplans/', trainingplan.get_training_plans, name='training-plans'),
     path('trainingplans/<int:training_plan_id>/delete/', trainingplan.delete_training_plan, name='delete-training-plan'),
     path('training-plans/<int:training_plan_id>/', trainingplan.get_training_plan, name='get-training-plan'),
-    path('training-plans/<int:training_plan_id>/update/', trainingplan.update_training_plan, name='update-training-plan'),
+    path('training-plans/update/', trainingplan.update_training_plan, name='update-training-plan'),
     path('training-plans/<int:training_plan_id>/delete/', trainingplan.delete_training_plan, name='delete-training-plan'),
     path('assigned-training-plan/', trainingplan.get_assigned_training_plan, name='get-assigned-training-plan'),
     path('next-pending-workout/', trainingplan.get_next_pending_workout, name='get-next-pending-workout'),
@@ -79,7 +79,7 @@ urlpatterns = [
     path('exercises/<int:exercise_id>/', exercise.get_exercise_by_id, name='get-exercise-by-id'),
     path('exercises/all/', exercise.list_all_exercises, name='list-all-exercises'),
     path('exercises/by-train/', exercise.get_exercises_by_training, name='get-exercises-by-training'),
-    path('exercises/<int:exercise_id>/', exercise.update_exercise, name='update-exercise'),
+    path('exercises/update/', exercise.update_exercise, name='update-exercise'),
     path('exercises/<int:exercise_id>/delete/', exercise.delete_exercise, name='delete-exercise'),
 
     # Macros

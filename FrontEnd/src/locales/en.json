@@ -372,5 +372,18 @@
   "calories": "Calories",
   "meal": "Meal",
   "training_plan_details": "Training Plan Details",
-    "workout_details": "Workout Details"
+  "workout_details": "Workout Details",
+  "equipment_free_weights": "Free Weights",
+  "equipment_gym": "Gym",
+  "equipment_none": "None",
+  "difficulty_light": "Light",
+  "difficulty_moderate": "Moderate",
+  "difficulty_intermediate": "Intermediate",
+  "difficulty_intense": "Intense",
+  "modify_training_plan_title": "Modify Training Plan",
+  "add_workout": "Add Workout",
+  "select_workout_placeholder": "Select a Workout",
+  "select_difficulty_placeholder": "Select Difficulty",
+  "select_equipment_placeholder": "Select Equipment"
+
 }

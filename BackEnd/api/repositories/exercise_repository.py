@@ -1,9 +1,13 @@
+from pydantic import ValidationError
+from api.schemas.exercise import ExerciseUpdateSchema, CreateExerciseSchema
 from api.models.user import User
 from api.models.exercise import Exercise
 from api.models.workout import UserWorkout, Workout, WorkoutExercise
 from api.models.process import ExerciseLog
 from django.db.models import Sum
 from datetime import datetime
+from rest_framework import status
+
 
 class ExerciseRepository:
 
@@ -50,71 +54,111 @@ class ExerciseRepository:
             return None
 
     @staticmethod
-    def create_exercise(name, description, muscle_groups, instructions, media=None):
+    def create_exercise(user, data):
         """
         Crear un nuevo ejercicio en el sistema.
-        :param name: Nombre del ejercicio.
-        :param description: Descripción del ejercicio.
-        :param muscle_groups: Lista de grupos musculares trabajados.
-        :param instructions: Instrucciones para realizar el ejercicio.
-        :param media: URL o base64 de la imagen o video del ejercicio (opcional).
-        :return: Un diccionario con los datos del ejercicio creado.
+        :param user: El usuario que realiza la solicitud.
+        :param data: Los datos de la solicitud.
+        :return: Un diccionario con los datos del ejercicio creado o un mensaje de error.
         """
-        # Crear un nuevo ejercicio
-        exercise = Exercise.objects.create(
-            name=name,
-            description=description,
-            instructions=instructions,
-            media=media
-        )
-        
-        # Usar el método set_muscle_groups para almacenar la lista como una cadena separada por comas
-        exercise.set_muscle_groups(muscle_groups)
-        exercise.save()
-
-        return {
-            "id": exercise.id,
-            "name": exercise.name,
-            "description": exercise.description,
-            "muscleGroups": exercise.get_muscle_groups(),
-            "instructions": exercise.instructions,
-            "media": exercise.media
-        }
-
-    
-    @staticmethod
-    def update_exercise(exercise_id: int, data: dict):
+        # Crear el nuevo ejercicio
         try:
-            exercise = Exercise.objects.get(id=exercise_id)
-            if 'name' in data:
-                exercise.name = data['name']
-            if 'description' in data:
-                exercise.description = data['description']
-            if 'muscle_groups' in data:
-                exercise.muscle_groups = ','.join(data['muscle_groups'])
-            if 'instructions' in data:
-                exercise.instructions = data['instructions']
-            if 'media' in data:
-                exercise.media = data['media']
-            
+            # Verificar si el objeto `user` es una instancia de `User`
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+
+            # Verificar permisos
+            if user.role not in ['entrenador', 'administrador']:
+                return {"error": "No tienes permisos para crear ejercicios", "status": status.HTTP_403_FORBIDDEN}
+
+            schema = CreateExerciseSchema(**data)
+            validated_data = schema.dict()
+            exercise = Exercise.objects.create(
+                name=validated_data['name'],
+                description=validated_data['description'],
+                instructions=validated_data['instructions'],
+                media=validated_data.get('media')
+            )
+
+            # Usar el método set_muscle_groups para almacenar la lista como una cadena separada por comas
+            muscle_groups_str = ','.join(validated_data['muscleGroups'])
+            exercise.set_muscle_groups(muscle_groups_str)
             exercise.save()
 
             return {
-                "id": exercise.id,
-                "name": exercise.name,
-                "description": exercise.description,
-                "muscle_groups": exercise.muscle_groups.split(","),
-                "instructions": exercise.instructions,
-                "media": exercise.media
+                "data": {
+                    "id": exercise.id,
+                    "name": exercise.name,
+                    "description": exercise.description,
+                    "muscleGroups": exercise.get_muscle_groups(),
+                    "instructions": exercise.instructions,
+                    "media": exercise.media
+                }
+            }
+        except Exception as e:
+            return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
+    @staticmethod
+    def update_exercise(exercise_id: int, user, data: dict):
+        """
+        Modificar un ejercicio existente.
+        :param exercise_id: ID del ejercicio a modificar.
+        :param user: Usuario que realiza la petición.
+        :param data: Datos actualizados del ejercicio.
+        :return: Un diccionario con los datos del ejercicio actualizado o un mensaje de error.
+        """
+
+        # Verificar si el objeto `user` es una instancia de `User`
+        if not isinstance(user, User):
+            user = User.objects.get(id=user.id)
+
+        if user.role not in ['entrenador', 'administrador']:
+            return {"error": "No tienes permisos para modificar ejercicios", "status": status.HTTP_403_FORBIDDEN}
+
+        # Validar los datos con el schema
+        try:
+            schema = ExerciseUpdateSchema(**data)
+            validated_data = schema.dict(exclude_unset=True)
+        except ValidationError as e:
+            return {"error": "Datos no válidos", "status": status.HTTP_400_BAD_REQUEST}
+
+        # En la función update_exercise del repositorio
+        try:
+            exercise = Exercise.objects.get(id=exercise_id)
+
+            if 'name' in validated_data:
+                exercise.name = validated_data['name']
+            if 'description' in validated_data:
+                exercise.description = validated_data['description']
+            if 'muscleGroups' in validated_data:  # Cambia aquí el nombre del campo si es necesario
+                exercise.muscleGroups = ','.join(
+                    validated_data['muscleGroups'])
+            if 'instructions' in validated_data:
+                exercise.instructions = validated_data['instructions']
+            if 'media' in validated_data:
+                exercise.media = validated_data['media']
+
+            exercise.save()
+
+            return {
+                "data": {
+                    "id": exercise.id,
+                    "name": exercise.name,
+                    "description": exercise.description,
+                    # Cambia aquí si el nombre es correcto
+                    "muscleGroups": exercise.muscleGroups.split(","),
+                    "instructions": exercise.instructions,
+                    "media": exercise.media
+                }
             }
         except Exercise.DoesNotExist:
-            return None
-        
+            return {"error": "Ejercicio no encontrado", "status": status.HTTP_404_NOT_FOUND}
+
     @staticmethod
     def delete_exercise_by_id(exercise_id: int) -> bool:
         """
         Elimina un ejercicio por su ID.
-        
+
         :param exercise_id: ID del ejercicio a eliminar.
         :return: True si el ejercicio fue eliminado, False si no se encontró.
         """
@@ -136,13 +180,12 @@ class ExerciseRepository:
             "id": exercise.id,
             "name": exercise.name,
             "description": exercise.description,
-            "muscleGroups": exercise.get_muscle_groups(),  # Acceder directamente a la lista de grupos musculares
+            # Acceder directamente a la lista de grupos musculares
+            "muscleGroups": exercise.get_muscle_groups(),
             "instructions": exercise.instructions,
             "media": exercise.media
         } for exercise in exercises]
 
-
-        
     @staticmethod
     def get_exercise_by_user_workout_and_id(user, workout_id, exercise_id):
         """
@@ -160,7 +203,7 @@ class ExerciseRepository:
             # Primero, obtenemos el UserWorkout y el TrainingPlan asociado
             user_workout = UserWorkout.objects.get(user=user)
             training_plan = user_workout.training_plan
-            
+
             # Iteramos sobre los workouts en el training plan
             for workout in training_plan.workouts.all():
                 if workout.id == workout_id:
@@ -180,8 +223,9 @@ class ExerciseRepository:
                                 "reps": workout_exercise.reps,
                                 "rest": workout_exercise.rest
                             }
-            
-            print(f"No se encontró el ejercicio con ID {exercise_id} en el workout con ID {workout_id}")
+
+            print(f"No se encontró el ejercicio con ID {
+                  exercise_id} en el workout con ID {workout_id}")
             return None
         except UserWorkout.DoesNotExist:
             print(f"No se encontró un UserWorkout para el usuario {user}")
@@ -190,11 +234,6 @@ class ExerciseRepository:
             print(f"Error inesperado: {e}")
             return None
 
-
-
-
-
-        
     @staticmethod
     def get_exercises_by_training(training_id):
         """
@@ -212,7 +251,8 @@ class ExerciseRepository:
             "id": exercise.exercise.id,
             "name": exercise.exercise.name,
             "description": exercise.exercise.description,
-            "muscleGroups": exercise.exercise.get_muscle_groups(),  # Acceder directamente a la lista de grupos musculares
+            # Acceder directamente a la lista de grupos musculares
+            "muscleGroups": exercise.exercise.get_muscle_groups(),
             "instructions": exercise.exercise.instructions,
             "media": exercise.exercise.media,
             "sets": exercise.sets,

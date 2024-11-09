@@ -33,13 +33,19 @@ const WorkoutsExercises: React.FC = () => {
     const [trainingPlans, setTrainingPlans] = useState<TrainingPlan[]>([]); // Nueva constante
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteDetails, setDeleteDetails] = useState<{ id: number; type: string } | null>(null);
+    const [refreshData, setRefreshData] = useState(false); // Nueva variable de estado
 
-    // Obtener entrenamientos desde el BE
+    // Función para obtener datos desde el BE
+    const fetchData = async () => {
+        await fetchWorkouts();
+        await fetchExercises();
+        await fetchTrainingPlans();
+    };
+
+    // Obtener datos al cargar el componente o cuando `refreshData` cambie
     useEffect(() => {
-        fetchWorkouts();
-        fetchExercises();
-        fetchTrainingPlans(); // Obtener los planes de entrenamiento
-    }, []);
+        fetchData();
+    }, [refreshData]);
 
     const fetchWorkouts = async () => {
         try {
@@ -131,16 +137,31 @@ const WorkoutsExercises: React.FC = () => {
 
 
 
+    const openDeleteDialog = (id: number, type: string) => {
+        if (['workout', 'exercise', 'trainingPlan'].includes(type)) { // Asegura que el tipo sea válido
+            setDeleteDetails({ id, type });
+            setOpenDialog(true);
+        } else {
+            console.error(`Tipo no válido para eliminación: ${type}`);
+        }
+    };
+
     const handleDelete = async () => {
         if (!deleteDetails) return;
         const { id, type } = deleteDetails;
         const accessToken = localStorage.getItem('access_token');
-        const deleteUrl =
-            type === 'workout'
-                ? `http://127.0.0.1:8000/api/workouts/${id}/delete/`
-                : type === 'exercise'
-                    ? `http://127.0.0.1:8000/api/exercises/${id}/delete/`
-                    : `http://127.0.0.1:8000/api/trainingplans/${id}/delete/`;
+
+        let deleteUrl = '';
+        if (type === 'workout') {
+            deleteUrl = `http://127.0.0.1:8000/api/workouts/${id}/delete/`;
+        } else if (type === 'exercise') {
+            deleteUrl = `http://127.0.0.1:8000/api/exercises/${id}/delete/`;
+        } else if (type === 'trainingPlan') {
+            deleteUrl = `http://127.0.0.1:8000/api/trainingplans/${id}/delete/`;
+        } else {
+            console.error('Tipo de eliminación no válido');
+            return;
+        }
 
         try {
             const response = await fetch(deleteUrl, {
@@ -152,14 +173,7 @@ const WorkoutsExercises: React.FC = () => {
             });
 
             if (response.ok) {
-                // Llamar a los fetch correspondientes para actualizar los datos
-                if (type === 'workout') {
-                    await fetchWorkouts();
-                } else if (type === 'exercise') {
-                    await fetchExercises();
-                } else if (type === 'trainingplan') {
-                    await fetchTrainingPlans();
-                }
+                setRefreshData(!refreshData); // Actualiza `refreshData` para forzar el reload
             } else {
                 console.error('Error al eliminar el elemento');
             }
@@ -172,15 +186,10 @@ const WorkoutsExercises: React.FC = () => {
     };
 
 
-    const openDeleteDialog = (id: number, type: string) => {
-        setDeleteDetails({ id, type });
-        setOpenDialog(true);
-    };
-
     const handleSectionChange = (event: React.SyntheticEvent, newValue: string) => {
         setSelectedSection(newValue);
     };
- 
+
 
     const handleEdit = (id: number, type: string) => {
         const selectedData = type === 'workout'
@@ -273,8 +282,8 @@ const WorkoutsExercises: React.FC = () => {
                                         boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)'
                                     },
                                     transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                                    }}
-                                onClick={() => handleCardClick(item.id)} // Añadimos el evento onClick
+                                }}
+                                    onClick={() => handleCardClick(item.id)} // Añadimos el evento onClick
                                 >
                                     <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <Typography sx={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
@@ -297,7 +306,13 @@ const WorkoutsExercises: React.FC = () => {
                                                 <EditIcon fontSize="small" />
                                             </IconButton>
                                             <IconButton
-                                                onClick={(e) => { e.stopPropagation(); openDeleteDialog(item.id, selectedSection); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const type = selectedSection === 'workouts' ? 'workout' :
+                                                        selectedSection === 'exercises' ? 'exercise' :
+                                                            'trainingPlan';
+                                                    openDeleteDialog(item.id, type);
+                                                }}
                                                 sx={{
                                                     border: '1px solid #FF0000',
                                                     backgroundColor: '#FFFFFF',
@@ -310,6 +325,7 @@ const WorkoutsExercises: React.FC = () => {
                                             >
                                                 <DeleteIcon fontSize="small" />
                                             </IconButton>
+
                                         </Box>
 
                                     </CardContent>
@@ -348,7 +364,6 @@ const WorkoutsExercises: React.FC = () => {
                     )}
                 </Fab>
             </Container>
-            {/* Diálogo de confirmación de eliminación */}
             {/* Diálogo de confirmación de eliminación */}
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
                 <DialogTitle>
