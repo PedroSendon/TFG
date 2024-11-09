@@ -91,7 +91,7 @@ const MealPlanDetails: React.FC = () => {
                 </Card>
 
                 {/* Meal Distribution Table based on dynamic columns */}
-                {mealPlanData?.meal_distribution && (
+                {mealPlanData?.meal_distribution && Object.keys(mealPlanData.meal_distribution).length > 0 && (
                     <Box sx={{ textAlign: 'center', mt: 3, paddingBottom: '15%' }}>
                         <Typography sx={{ mb: 2, color: '#333', textAlign: 'center', fontWeight: 'bold' }}>
                             {t('meal_distribution')}
@@ -127,6 +127,7 @@ const MealPlanDetails: React.FC = () => {
                         </Table>
                     </Box>
                 )}
+
 
 
             </Box>
