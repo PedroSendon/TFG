@@ -3,6 +3,7 @@ import { Button, Card, CardContent, Divider, Typography, Box, List, ListItem, Li
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext';
+import { h } from 'vue';
 
 const UserInformation: React.FC = () => {
     const location = useLocation<{ userId: number; showPlanSection: boolean }>();
@@ -106,7 +107,7 @@ const UserInformation: React.FC = () => {
 
                 if (response.ok) {
                     const result = await response.json();
-                    console.log(result.message);
+                    history.push('/admin/pending-users');
                 } else {
                     console.error("Failed to assign the plan");
                 }
@@ -247,7 +248,20 @@ const UserInformation: React.FC = () => {
                                 variant="contained"
                                 color="primary"
                                 fullWidth
-                                sx={{ mt: 2 }}
+                                sx={{
+                                    backgroundColor: '#primary',
+                                    color: '#ffffff',
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    fontSize: '1rem',
+                                    fontWeight: 'bold',
+                                    mt: 2,
+                                    width: '100%',
+                                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                                    '&:hover': {
+                                        backgroundColor: '#333333',
+                                    },
+                                }}
                                 onClick={handlePlanAssign}
                             >
                                 {t("assign_plan_admin")}

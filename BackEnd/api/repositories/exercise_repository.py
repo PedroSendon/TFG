@@ -1,4 +1,5 @@
 from pydantic import ValidationError
+from api.repositories.user_repository import UserRepository
 from api.schemas.exercise import ExerciseUpdateSchema, CreateExerciseSchema
 from api.models.user import User
 from api.models.exercise import Exercise
@@ -64,12 +65,9 @@ class ExerciseRepository:
         # Crear el nuevo ejercicio
         try:
             # Verificar si el objeto `user` es una instancia de `User`
-            if not isinstance(user, User):
-                user = User.objects.get(id=user.id)
-
-            # Verificar permisos
-            if user.role not in ['entrenador', 'administrador']:
-                return {"error": "No tienes permisos para crear ejercicios", "status": status.HTTP_403_FORBIDDEN}
+            check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
+            if "error" in check_result:
+                return check_result
 
             schema = CreateExerciseSchema(**data)
             validated_data = schema.dict()

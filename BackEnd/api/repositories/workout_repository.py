@@ -279,12 +279,9 @@ class WorkoutRepository:
         :return: Un diccionario con los datos del entrenamiento actualizado o un mensaje de error.
         """
         try:
-            if not isinstance(user, User):
-                user = User.objects.get(id=user.id)
-            
-            # Validar el rol del usuario
-            if user.role not in ['entrenador', 'administrador']:
-                return {"error": "No tienes permisos para actualizar entrenamientos"}
+            check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
+            if "error" in check_result:
+                return check_result
             
             # Obtener el entrenamiento
             workout = Workout.objects.get(id=workout_id)
