@@ -21,6 +21,7 @@ const Users: React.FC = () => {
   const location = useLocation<{ reload?: boolean }>();  // Obtener la ubicación actual con tipo definido
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [userRole, setUserRole] = useState('');
 
 
   interface User {
@@ -34,6 +35,8 @@ const Users: React.FC = () => {
 
   // Llamar al backend para obtener los usuarios cuando el componente se monta
   useEffect(() => {
+    const role = localStorage.getItem('role');
+    setUserRole(role || ''); // Guardar el rol del usuario en el estado
     fetchUsers();  // Llama a la función para obtener los usuarios
     // Comprobar si necesitamos recargar los usuarios después de añadir un nuevo usuario
     if (location.state?.reload) {
@@ -179,68 +182,77 @@ const Users: React.FC = () => {
                   </Typography>
 
                   <Box sx={{ display: 'flex', gap: '7px' }}>
-                    <IconButton
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleAssign(user.id);
-                      }}
-                      sx={{
-                        border: '1px solid #9C27B0',
-                        backgroundColor: '#FFFFFF',
-                        color: '#9C27B0',
-                        borderRadius: '5px',
-                        padding: '4px',
-                        fontSize: '0.8em',
-                        zIndex: 3,
-                        '&:hover': {
-                          backgroundColor: '#f3f3f3',
-                        },
-                      }}
-                    >
-                      <DescriptionIcon fontSize="small" />
-                    </IconButton>
+                    {/* Botón de asignar, visible para roles entrenador, nutricionista y administrador */}
+                    {['entrenador', 'nutricionista', 'administrador'].includes(userRole) && (
+                      <IconButton
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleAssign(user.id);
+                        }}
+                        sx={{
+                          border: '1px solid #9C27B0',
+                          backgroundColor: '#FFFFFF',
+                          color: '#9C27B0',
+                          borderRadius: '5px',
+                          padding: '4px',
+                          fontSize: '0.8em',
+                          zIndex: 3,
+                          '&:hover': {
+                            backgroundColor: '#f3f3f3',
+                          },
+                        }}
+                      >
+                        <DescriptionIcon fontSize="small" />
+                      </IconButton>
+                    )}
 
-                    <IconButton
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleEdit(user.id);
-                      }}
-                      sx={{
-                        border: '1px solid #000',
-                        backgroundColor: '#FFFFFF',
-                        color: '#000',
-                        borderRadius: '5px',
-                        padding: '4px',
-                        zIndex: 3,
-                        fontSize: '0.8em',
-                        '&:hover': {
-                          backgroundColor: '#f3f3f3',
-                        },
-                      }}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
+                    {/* Botón de editar, visible solo para rol de administrador */}
+                    {userRole === 'administrador' && (
+                      <IconButton
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleEdit(user.id);
+                        }}
+                        sx={{
+                          border: '1px solid #000',
+                          backgroundColor: '#FFFFFF',
+                          color: '#000',
+                          borderRadius: '5px',
+                          padding: '4px',
+                          zIndex: 3,
+                          fontSize: '0.8em',
+                          '&:hover': {
+                            backgroundColor: '#f3f3f3',
+                          },
+                        }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    )}
 
-                    <IconButton
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        openDeleteDialog(user.id);
-                      }}
-                      sx={{
-                        border: '1px solid #FF0000',
-                        backgroundColor: '#FFFFFF',
-                        color: '#FF0000',
-                        borderRadius: '5px',
-                        padding: '4px',
-                        zIndex: 3,
-                        fontSize: '0.8em',
-                        '&:hover': {
-                          backgroundColor: '#f3f3f3',
-                        },
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    {/* Botón de eliminar, visible solo para rol de administrador */}
+                    {userRole === 'administrador' && (
+                      <IconButton
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          openDeleteDialog(user.id);
+                        }}
+                        sx={{
+                          border: '1px solid #FF0000',
+                          backgroundColor: '#FFFFFF',
+                          color: '#FF0000',
+                          borderRadius: '5px',
+                          padding: '4px',
+                          zIndex: 3,
+                          fontSize: '0.8em',
+                          '&:hover': {
+                            backgroundColor: '#f3f3f3',
+                          },
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </Box>
                 </CardContent>
               </Card>

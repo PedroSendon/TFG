@@ -23,6 +23,7 @@ const Navbar = () => {
       });
       const roleData = await roleResponse.json();
       const role = roleData.role;
+      localStorage.setItem('role', role);
       setUserRole(role);
 
     } catch (error) {

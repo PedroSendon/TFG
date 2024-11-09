@@ -406,7 +406,7 @@ def get_all_users(request):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def delete_user(request, user_id):
     """
     Eliminar un usuario por su ID.
