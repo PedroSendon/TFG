@@ -124,38 +124,19 @@ def get_mealplan_by_id(request, id):
     else:
         return Response({"error": "Plan de comidas no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
+
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def update_mealplan(request, id):
+def update_mealplan(request, category, id):
     """
     Modificar un plan de comidas existente.
     """
-    user = request.user
-    if user.role != 'nutricionista' and user.role != 'administrador':
-        return Response({"error": "No tienes permisos para actualizar planes de nutrición"}, status=status.HTTP_403_FORBIDDEN)
+    result = MacrosRepository.update_mealplan(request.user, id, category, request.data)
 
-    # Obtener los datos del cuerpo de la solicitud
-    kcal = request.data.get('kcal')
-    proteins = request.data.get('proteins')
-    carbs = request.data.get('carbs')
-    fats = request.data.get('fats')
-    diet_type = request.data.get('dietType')
-    name = request.data.get('name')
-    meal_distribution = request.data.get('mealDistribution')
-    description = request.data.get('description')
+    if 'error' in result:
+        return Response({"error": result['error']}, status=result.get('status', status.HTTP_400_BAD_REQUEST))
 
-    # Validar que todos los campos requeridos están presentes
-    if not all([kcal, proteins, carbs, fats, diet_type]):
-        return Response({"error": "Todos los campos (kcal, proteins, carbs, fats, dietType) son obligatorios."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    # Modificar el plan de comidas
-    success = MacrosRepository.update_mealplan(user, id, kcal, proteins, carbs, fats, diet_type, name, meal_distribution, description)
-
-    if success:
-        return Response({"message": "Plan de comidas actualizado correctamente"}, status=status.HTTP_200_OK)
-    else:
-        return Response({"error": "Plan de comidas no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    return Response({"message": "Plan de comidas actualizado correctamente"}, status=status.HTTP_200_OK)
 
     
 @api_view(['DELETE'])

@@ -384,6 +384,6 @@
   "add_workout": "Add Workout",
   "select_workout_placeholder": "Select a Workout",
   "select_difficulty_placeholder": "Select Difficulty",
-  "select_equipment_placeholder": "Select Equipment"
-
+  "select_equipment_placeholder": "Select Equipment",
+  "meal_count": "Select number of meals"
 }

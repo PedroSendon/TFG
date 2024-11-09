@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Card, CardContent, Typography, Box, Divider, List, ListItem, ListItemText } from '@mui/material';
+import { Card, CardContent, Typography, Box, Divider, List, ListItem, ListItemText, TableBody, Table, TableRow, TableCell, TableHead } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext';
@@ -90,27 +90,44 @@ const MealPlanDetails: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                {/* Meal Distribution */}
+                {/* Meal Distribution Table based on dynamic columns */}
                 {mealPlanData?.meal_distribution && (
-                    <Card variant="outlined" sx={{
-                        borderRadius: '8px',
-                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-                        marginBottom: '15px'
-                    }}>
-                        <CardContent>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#333', marginBottom: '10px' }}>
-                                {t('meal_distribution')}
-                            </Typography>
-                            <List dense>
-                                {Object.entries(mealPlanData.meal_distribution).map(([meal, percentage], index) => (
-                                    <ListItem key={index}>
-                                        <ListItemText primary={`${t('meal')} ${index + 1}`} secondary={`${percentage}%`} />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </CardContent>
-                    </Card>
+                    <Box sx={{ textAlign: 'center', mt: 3, paddingBottom: '15%' }}>
+                        <Typography sx={{ mb: 2, color: '#333', textAlign: 'center', fontWeight: 'bold' }}>
+                            {t('meal_distribution')}
+                        </Typography>
+                        <Table
+                            sx={{
+                                maxWidth: '90%',
+                                margin: '20px auto',
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                backgroundColor: '#fff',
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <TableHead>
+                                <TableRow sx={{ backgroundColor: '#333' }}>
+                                    {Object.keys(mealPlanData.meal_distribution).map((meal, index) => (
+                                        <TableCell key={index} align="center" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '14px' }}>
+                                            {`${t('meal')} ${index + 1}`}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                <TableRow>
+                                    {Object.values(mealPlanData.meal_distribution).map((percentage, index) => (
+                                        <TableCell key={index} align="center" sx={{ fontSize: '13px', fontWeight: 'bold' }}>
+                                            {`${percentage}%`}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </Box>
                 )}
+
 
             </Box>
         </Box>

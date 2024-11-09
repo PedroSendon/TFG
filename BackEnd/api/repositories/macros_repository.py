@@ -1,5 +1,7 @@
+from api.repositories.user_repository import UserRepository
 from api.models.user import User
 from api.models.macros import MealPlan, DietCategory, UserNutritionPlan
+from rest_framework import status
 
 
 class MacrosRepository:
@@ -11,7 +13,7 @@ class MacrosRepository:
         :return: Una lista de nombres de categorías.
         """
         return list(DietCategory.objects.values_list('name', flat=True))
-    
+
     @staticmethod
     def get_all_mealplans():
         """
@@ -39,7 +41,6 @@ class MacrosRepository:
             print(f"Error al obtener los planes de comida: {e}")
             raise e
 
-    
     @staticmethod
     def get_user_mealplan(user):
         """
@@ -48,7 +49,7 @@ class MacrosRepository:
         try:
             if not isinstance(user, User):
                 user = User.objects.get(id=user.id)
-            
+
             # Obtener el plan de nutrición del usuario
             user_nutrition_plan = UserNutritionPlan.objects.get(user=user)
             meal_plan = user_nutrition_plan.plan
@@ -78,7 +79,8 @@ class MacrosRepository:
                     }
                 },
                 # Nueva variable de distribución de comidas
-                "meal_distribution": meal_plan.meal_distribution,  # Esto debe devolver la lista de porcentajes
+                # Esto debe devolver la lista de porcentajes
+                "meal_distribution": meal_plan.meal_distribution,
                 "dietType": meal_plan.diet_type,
                 "description": meal_plan.description,
             }
@@ -112,7 +114,6 @@ class MacrosRepository:
         except MealPlan.DoesNotExist:
             return None
 
-
     @staticmethod
     def add_mealplan(user, kcal, proteins, carbs, fats, diet_type, meal_distribution, name, description):
         """
@@ -128,7 +129,8 @@ class MacrosRepository:
         try:
             # Validación de meal_distribution
             if meal_distribution and (not isinstance(meal_distribution, list) or sum(meal_distribution) != 100):
-                raise ValueError("meal_distribution debe ser una lista de porcentajes que sumen 100.")
+                raise ValueError(
+                    "meal_distribution debe ser una lista de porcentajes que sumen 100.")
 
             meal_plan = MealPlan.objects.create(
                 user=user,  # Relación con el usuario
@@ -138,7 +140,8 @@ class MacrosRepository:
                 carbs=carbs,
                 fats=fats,
                 description=description,
-                diet_type=diet_type,  # Asegúrate de que diet_type sea uno de los valores permitidos en MealPlan
+                # Asegúrate de que diet_type sea uno de los valores permitidos en MealPlan
+                diet_type=diet_type,
                 meal_distribution=meal_distribution  # Distribución de comidas
             )
             return {
@@ -155,38 +158,44 @@ class MacrosRepository:
             print(f"Error al agregar el plan de comidas: {e}")
             return None
 
-
     @staticmethod
-    def update_mealplan(user, mealplan_id, kcal, proteins, carbs, fats, diet_type, meal_distribution, name, description):
+    def update_mealplan(user, mealplan_id, category, data):
         """
         Modificar un plan de comidas existente.
-        :param user: El usuario que posee el plan.
-        :param mealplan_id: El ID del plan de comidas a modificar.
-        :param kcal: Calorías recomendadas.
-        :param proteins: Gramos de proteínas.
-        :param carbs: Gramos de carbohidratos.
-        :param fats: Gramos de grasas.
-        :param diet_type: Tipo de dieta (weightLoss, muscleGain, maintenance).
-        :return: True si se actualizó correctamente, False si no se encontró el plan de comidas.
+        :param user: Usuario que realiza la solicitud.
+        :param mealplan_id: ID del plan de comidas a modificar.
+        :param category: Tipo de dieta (weightLoss, muscleGain, maintenance).
+        :param data: Datos de actualización.
+        :return: Un diccionario con el mensaje de éxito o error y el código de estado.
         """
+        # Validar permisos
+        check_result = UserRepository.check_user_role(user, ['nutricionista', 'administrador'])
+        if "error" in check_result:
+            return check_result
+
+        # Validar datos requeridos
+        required_fields = ['kcal', 'proteins', 'carbs', 'fats', 'mealDistribution']
+        missing_fields = [field for field in required_fields if field not in data or data[field] is None]
+        if missing_fields:
+            return {"error": f"Faltan los campos obligatorios: {', '.join(missing_fields)}", "status": status.HTTP_400_BAD_REQUEST}
+
         try:
-            # Buscar el MealPlan por ID y el usuario
-            meal_plan = MealPlan.objects.get(id=mealplan_id, user=user, diet_type=diet_type)
+            # Obtener el MealPlan por su ID y diet_type
+            meal_plan = MealPlan.objects.get(id=mealplan_id, diet_type=category)
 
             # Actualizar los valores del plan de comidas
-            meal_plan.name = name
-            meal_plan.calories = kcal
-            description = description
-            meal_plan.proteins = proteins
-            meal_plan.carbs = carbs
-            meal_plan.fats = fats
-            meal_plan.meal_distribution = meal_distribution
+            meal_plan.name = data.get('name', meal_plan.name)
+            meal_plan.calories = data['kcal']
+            meal_plan.proteins = data['proteins']
+            meal_plan.carbs = data['carbs']
+            meal_plan.fats = data['fats']
+            meal_plan.meal_distribution = data['mealDistribution']
+            meal_plan.description = data['description']
             meal_plan.save()
 
-            return True
+            return {"message": "Plan de comidas actualizado correctamente"}
         except MealPlan.DoesNotExist:
-            return False
-
+            return {"error": "El plan de comidas no existe o el tipo de dieta no coincide.", "status": status.HTTP_404_NOT_FOUND}
 
     @staticmethod
     def delete_mealplan(user, mealplan_id, diet_type):
@@ -199,12 +208,12 @@ class MacrosRepository:
         """
         try:
             # Buscar el MealPlan por ID, usuario y tipo de dieta
-            meal_plan = MealPlan.objects.get(id=mealplan_id, user=user, diet_type=diet_type)
+            meal_plan = MealPlan.objects.get(
+                id=mealplan_id, user=user, diet_type=diet_type)
             meal_plan.delete()
             return True
         except MealPlan.DoesNotExist:
             return False
-
 
     @staticmethod
     def get_mealplan(user, mealplan_id, diet_type):
@@ -217,7 +226,8 @@ class MacrosRepository:
         """
         try:
             # Buscar el MealPlan por ID, usuario y tipo de dieta
-            meal_plan = MealPlan.objects.get(id=mealplan_id, user=user, diet_type=diet_type)
+            meal_plan = MealPlan.objects.get(
+                id=mealplan_id, user=user, diet_type=diet_type)
             return {
                 "id": meal_plan.id,
                 "kcal": meal_plan.calories,
@@ -231,8 +241,6 @@ class MacrosRepository:
             }
         except MealPlan.DoesNotExist:
             return None
-
-
 
     @staticmethod
     def get_mealplans_by_category(diet_type):
@@ -255,7 +263,6 @@ class MacrosRepository:
             }
             for meal_plan in meal_plans
         ]
-
 
 
 class DietCategoryRepository:

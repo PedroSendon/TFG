@@ -262,6 +262,7 @@ const Users: React.FC = () => {
 
 
         {/* Botón flotante para añadir un nuevo usuario */}
+        {userRole === 'administrador' && (
         <Fab
           onClick={handleAddUser}
           sx={{
@@ -285,6 +286,7 @@ const Users: React.FC = () => {
         >
           <Add sx={{ fontSize: 24 }} />
         </Fab>
+         )}
       </Container>
 
       {/* Diálogo de confirmación de eliminación */}

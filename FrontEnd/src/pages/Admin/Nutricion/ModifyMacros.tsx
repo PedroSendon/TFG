@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {
     Box, Button, Container, Grid, MenuItem, TextField,
+    Typography,
 } from '@mui/material'; // Importación de componentes de Material UI.
 import { useHistory, useLocation } from 'react-router-dom'; // Hook para redirección y obtener datos.
 import Header from '../../Header/Header'; // Componente de header reutilizable
@@ -20,6 +21,9 @@ const ModifyMacros: React.FC = () => {
             description: string;
         };
     }
+
+    const [mealCount, setMealCount] = useState<number>(); // Número de comidas (inicialmente 2)
+    const [mealDistribution, setMealDistribution] = useState<number[]>([25, 25, 25, 25]); // Distribución inicial para 4 comidas
 
     const location = useLocation<LocationState>(); // Hook para obtener el estado pasado (datos de la recomendación).
     const recommendationData = location.state?.recommendation; // Suponiendo que los datos vienen de la navegación.
@@ -96,11 +100,16 @@ const ModifyMacros: React.FC = () => {
         newErrors.proteins = validateField('proteins', formData.proteins);
         newErrors.carbs = validateField('carbs', formData.carbs);
         newErrors.fats = validateField('fats', formData.fats);
+
         if (!formData.dietType) {
             newErrors.dietType = t('validation_select_diet_type');
         }
+
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+
+        // Filtrar solo los errores que tengan mensajes no vacíos y verificar si hay alguno.
+        const hasErrors = Object.values(newErrors).some((error) => error !== '');
+        return !hasErrors;
     };
 
     // Manejar los cambios en el formulario.
@@ -109,13 +118,12 @@ const ModifyMacros: React.FC = () => {
         setFormData({ ...formData, [name]: value });
     };
 
-    // Manejar el envío del formulario.
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (validateForm()) {
             try {
                 const accessToken = localStorage.getItem('access_token');
-
+    
                 if (!accessToken) {
                     console.error(t('no_token'));
                     return;
@@ -124,6 +132,7 @@ const ModifyMacros: React.FC = () => {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,
                     },
                     body: JSON.stringify({
                         kcal: formData.kcal,
@@ -131,15 +140,15 @@ const ModifyMacros: React.FC = () => {
                         carbs: formData.carbs,
                         fats: formData.fats,
                         description: formData.description,
+                        mealDistribution: mealDistribution,
                     }),
                 });
-
+    
                 if (response.ok) {
-                    console.log('Recomendación modificada:', formData);
-                    history.push('/admin/macros'); // Redirigir después de la modificación.
+                    history.push('/admin/nutrition');
                 } else {
-                    const errorData = await response.json();
-                    console.error('Error modificando la recomendación:', errorData);
+                    const errorText = await response.text(); // Captura la respuesta completa
+                    console.error('Error modificando la recomendación:', errorText);
                 }
             } catch (error) {
                 console.error('Error al modificar la recomendación:', error);
@@ -147,6 +156,18 @@ const ModifyMacros: React.FC = () => {
         } else {
             console.log(t('form_errors'));
         }
+    };
+
+    const handleMealCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const count = parseInt(e.target.value);
+        setMealCount(count);
+        setMealDistribution(Array(count).fill(Math.floor(100 / count))); // Inicializa la distribución al porcentaje más cercano
+    };
+    
+    const handleMealDistributionChange = (index: number, value: string) => {
+        const newDistribution = [...mealDistribution];
+        newDistribution[index] = Number(value);
+        setMealDistribution(newDistribution);
     };
 
     const handleCancel = () => {
@@ -315,6 +336,68 @@ const ModifyMacros: React.FC = () => {
                                 }}
                             />
                         </Grid>
+
+                         {/* Selección del número de comidas */}
+                         <Grid item xs={12}>
+                            <TextField
+                                variant="outlined"
+                                select
+                                fullWidth
+                                label={t('meal_count')}
+                                value={mealCount || ''}
+                                onChange={handleMealCountChange}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                }}
+                            >
+                                {[2, 3, 4, 5, 6].map((count) => (
+                                    <MenuItem key={count} value={count}>
+                                        {count} {t('meals_per_day')}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+
+                        {/* Distribución de comidas */}
+                        {mealCount && (
+                            <Grid item xs={12}>
+                                <Typography sx={{ mb: 1, color:'gray' }}>
+                                    {t('meal_distribution')}
+                                </Typography>
+                                <Grid container spacing={1}>
+                                    {mealDistribution.map((percentage, index) => (
+                                        <Grid item xs={6} key={index}>
+                                            <TextField
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                                label={`${t('meal')} ${index + 1} (%)`}
+                                                value={percentage}
+                                                onChange={(e) => handleMealDistributionChange(index, e.target.value)}
+                                                error={!!errors.mealDistribution}
+                                                helperText={index === mealDistribution.length - 1 && errors.mealDistribution}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '8px',
+                                                        '& fieldset': { borderColor: '#CCCCCC' },
+                                                        '&:hover fieldset': { borderColor: '#AAAAAA' },
+                                                        '&.Mui-focused fieldset': { borderColor: '#555555' },
+                                                    },
+                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
+                                                }}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Grid>
+                        )}
+
                     </Grid>
                 </form>
                 <Grid container spacing={2} sx={{ mt: 1 }}>
