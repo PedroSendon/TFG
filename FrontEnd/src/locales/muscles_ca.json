@@ -1,3 +1,25 @@
 {
-    "muscleGroups": ["Pectorales", "Bíceps", "Tríceps", "Dorsales", "Cuádriceps"]
+    "muscleGroups": [
+        "Pectorals",
+        "Dorsals",
+        "Bíceps",
+        "Tríceps",
+        "Deltoides",
+        "Abdominals",
+        "Oblics",
+        "Quadríceps",
+        "Isquiotibials",
+        "Glutis",
+        "Pantorrilles",
+        "Adductors",
+        "Lumbars",
+        "Trapeci",
+        "Rombes",
+        "Bíceps femoral",
+        "Serrat anterior",
+        "Subescapular",
+        "Infraespinós",
+        "Esternoclidomastoïdal",
+        "Escalens"
+    ]
 }

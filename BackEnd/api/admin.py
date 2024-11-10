@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models.user import User, UserDetails, DietPreferences, WeightRecord  # Asegúrate de importar WeightRecord
-from .models.macros import DietCategory, MealPlan, UserNutritionPlan
+from .models.macros import MealPlan, UserNutritionPlan
 from .models.exercise import Exercise
 from .models.process import ProgressTracking, ExerciseLog
 from .models.workout import WeeklyWorkout, Workout, WorkoutExercise, UserWorkout, Imagen
@@ -46,12 +46,6 @@ class MealPlanAdmin(admin.ModelAdmin):
     search_fields = ['name', 'diet_type']
     list_filter = ['diet_type']
     fields = ['name', 'diet_type', 'calories', 'proteins', 'carbs', 'fats', 'meal_distribution', 'description']  # Añadido 'description' en 'fields'
-
-@admin.register(DietCategory)
-class DietCategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description']
-    search_fields = ['name']
-    list_filter = ['name']
 
 @admin.register(UserNutritionPlan)
 class UserNutritionPlanAdmin(admin.ModelAdmin):

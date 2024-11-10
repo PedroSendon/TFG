@@ -2,13 +2,6 @@ from django.db import models
 from .user import User  # Asegúrate de que 'User' esté definido en otro archivo de modelos
 from django.contrib.postgres.fields import JSONField  # Importa JSONField si estás usando PostgreSQL
 
-class DietCategory(models.Model):
-    name = models.CharField(max_length=50, unique=True)  # Nombre de la categoría (p.ej., 'weightLoss', 'muscleGain', 'maintenance')
-    description = models.TextField(blank=True, null=True)  # Descripción opcional de la categoría
-
-    def __str__(self):
-        return self.name
-
 class MealPlan(models.Model):
     name = models.CharField(max_length=100, default="Default Plan Name")  # Valor predeterminado
     diet_type = models.CharField(max_length=20, choices=[('weightLoss', 'Pérdida de Peso'), ('muscleGain', 'Ganancia Muscular'), ('maintenance', 'Mantenimiento')])

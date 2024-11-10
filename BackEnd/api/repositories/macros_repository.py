@@ -1,18 +1,10 @@
 from api.repositories.user_repository import UserRepository
 from api.models.user import User
-from api.models.macros import MealPlan, DietCategory, UserNutritionPlan
+from api.models.macros import MealPlan, UserNutritionPlan
 from rest_framework import status
 
 
 class MacrosRepository:
-
-    @staticmethod
-    def get_all_diet_categories():
-        """
-        Obtener todas las categorías de dieta desde la base de datos.
-        :return: Una lista de nombres de categorías.
-        """
-        return list(DietCategory.objects.values_list('name', flat=True))
 
     @staticmethod
     def get_all_mealplans():
@@ -281,23 +273,3 @@ class MacrosRepository:
             }
             for meal_plan in meal_plans
         ]
-
-
-class DietCategoryRepository:
-    @staticmethod
-    def list_all_categories():
-        """
-        Obtener todas las categorías de dietas.
-        :return: Lista de categorías de dietas con sus detalles.
-        """
-        return DietCategory.objects.all().values('id', 'name', 'description')
-
-    @staticmethod
-    def create_category(name, description):
-        """
-        Crear una nueva categoría de dieta.
-        :param name: Nombre de la categoría.
-        :param description: Descripción de la categoría.
-        :return: La categoría creada.
-        """
-        return DietCategory.objects.create(name=name, description=description)
