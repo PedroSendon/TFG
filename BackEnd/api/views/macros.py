@@ -60,8 +60,6 @@ def get_macronutrient_by_id(request):
 '''
 @api_view(['POST'])
 def add_mealplan(request):
-    Añadir un nuevo plan de comidas (MealPlan).
-    print("HOLA")
     # Llamar al repositorio para crear el MealPlan
     result = MacrosRepository.add_mealplan2(request.user, request.data)
 
