@@ -1,4 +1,7 @@
 from datetime import datetime
+
+from pydantic import ValidationError
+from api.schemas.user import UserAdminCreate
 from api.models.macros import MealPlan, UserNutritionPlan
 from api.models.workout import UserWorkout, Imagen, WeeklyWorkout
 from api.models.trainingplan import TrainingPlan
@@ -135,7 +138,10 @@ class UserRepository:
         # Asegurarse de que user es una instancia de User
         if not isinstance(user, User):
             try:
-                user = User.objects.get(id=user.id)
+                if isinstance(user, int):
+                    user = User.objects.get(id=user)
+                else:
+                    user = User.objects.get(id=user.id)
             except User.DoesNotExist:
                 return {"error": "Usuario no encontrado.", "status": status.HTTP_404_NOT_FOUND}
         
@@ -146,26 +152,49 @@ class UserRepository:
         return {"user": user}
 
     @staticmethod
-    def create_user_admin(user_data):
+    def create_user_as_admin(admin_user, user_data):
         """
-        Crear un nuevo usuario en la base de datos.
-        :param user_data: Diccionario con los datos del usuario.
-        :return: El objeto usuario creado.
+        Crear un nuevo usuario en la base de datos desde el modo administrador.
+        :param admin_user: Usuario que realiza la solicitud (debe ser administrador).
+        :param user_data: Diccionario con los datos del nuevo usuario.
+        :return: Un diccionario con el mensaje de éxito o error y el código de estado.
         """
         try:
+            # Verificar permisos de administrador
+            if admin_user.role != 'administrador':
+                return {"error": "No tienes permisos para crear usuarios", "status": status.HTTP_403_FORBIDDEN}
+
+            # Validar los datos recibidos
+            try:
+                user_data_validated = UserAdminCreate(**user_data)
+            except ValidationError as e:
+                return {"error": f"Error de validación: {e.errors()}", "status": status.HTTP_400_BAD_REQUEST}
+
+            # Verificar si el usuario ya existe por email
+            if UserRepository.user_exists_by_email(user_data_validated.email):
+                return {"error": "El usuario con este correo electrónico ya existe.", "status": status.HTTP_400_BAD_REQUEST}
+
+            # Hash de la contraseña
+            user_data_validated.password = make_password(user_data_validated.password)
+
+            # Asignar el rol (cliente por defecto si no se proporciona)
+            role = user_data.get('role', 'cliente')
+
+            # Crear el usuario en la base de datos
             user = User.objects.create(
-                first_name=user_data['first_name'],
-                last_name=user_data['last_name'],
-                email=user_data['email'],
-                # Asegúrate de que la contraseña esté hasheada
-                password=user_data['password'],
-                birth_date=user_data['birth_date'],
-                gender=user_data['gender'],
-                role=user_data['role']
+                first_name=user_data_validated.first_name,
+                last_name=user_data_validated.last_name,
+                email=user_data_validated.email,
+                password=user_data_validated.password,
+                birth_date=user_data_validated.birth_date,
+                gender=user_data_validated.gender,
+                role=role
             )
-            return user
+
+            return {"data": user, "status": status.HTTP_201_CREATED}
+        
         except Exception as e:
-            raise ValueError(f"Error creando usuario: {e}")
+            return {"error": f"Error creando usuario: {str(e)}", "status": status.HTTP_400_BAD_REQUEST}
 
     @staticmethod
     def get_user_by_id(user_id):
@@ -261,13 +290,23 @@ class UserRepository:
             return None
 
     @staticmethod
-    def assign_concret_training_plan_to_user(user_id, training_plan_id):
+    def assign_concret_training_plan_to_user(request_user, training_plan_id):
         """
         Asigna un plan de entrenamiento a un usuario, eliminando el plan anterior si existe.
+        :param request_user: Usuario que realiza la solicitud.
+        :param user_id: ID del usuario al que se le asignará el plan.
+        :param training_plan_id: ID del plan de entrenamiento a asignar.
+        :return: Tupla con el éxito de la operación y un mensaje.
         """
+        # Validar permisos
+        check_result = UserRepository.check_user_role(request_user, ['administrador', 'entrenador', 'nutricionista'])
+        if "error" in check_result:
+            return False, "No tienes permisos para asignar planes de entrenamiento."
+        else:
+            request_user = check_result["user"]
+            
         try:
-            print(f"Intentando asignar el plan de entrenamiento {training_plan_id} al usuario {user_id}")
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(id=request_user.id)
             training_plan = TrainingPlan.objects.get(id=training_plan_id)
 
             # Eliminar cualquier plan de entrenamiento existente
@@ -298,14 +337,21 @@ class UserRepository:
         except Exception as e:
             return False, str(e)
 
+
     @staticmethod
-    def assign_concret_nutrition_plan_to_user(user_id, plan_id):
+    def assign_concret_nutrition_plan_to_user(user, plan_id):
         """
         Asigna un plan nutricional a un usuario, eliminando el plan anterior si existe.
         """
+        # Validar permisos
+        check_result = UserRepository.check_user_role(user, ['administrador', 'entrenador', 'nutricionista'])
+        if "error" in check_result:
+            return False, "No tienes permisos para asignar planes de entrenamiento."
+        else:
+            user = check_result["user"]
+
         try:
-            print(f"Intentando asignar el plan nutricional {plan_id} al usuario {user_id}")
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(id=user.id)
             nutrition_plan = MealPlan.objects.get(id=plan_id)
 
             # Eliminar cualquier plan nutricional existente

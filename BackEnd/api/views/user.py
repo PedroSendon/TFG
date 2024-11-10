@@ -1,9 +1,9 @@
-from rest_framework.response import Response  # type: ignore
-from rest_framework.decorators import api_view, parser_classes, permission_classes, authentication_classes  # type: ignore
-from rest_framework import status  # type: ignore
+from rest_framework.response import Response 
+from rest_framework.decorators import api_view, permission_classes  
+from rest_framework import status 
 from api.repositories.user_repository import UserRepository, ImagenRepository, WeightRecordRepository
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from api.schemas.user import UserCreate, UserDetailsSchema, LoginSchema, UserAdminCreate
+from rest_framework.permissions import IsAuthenticated
+from api.schemas.user import UserCreate, UserDetailsSchema, LoginSchema
 from django.contrib.auth.hashers import make_password
 from api.repositories.user_repository import UserDetailsRepository
 from django.contrib.auth.decorators import login_required
@@ -11,6 +11,22 @@ from pydantic import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 from api.schemas.user import ImagenSchema
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated]) 
+def create_user_as_admin(request):
+    """
+    Crear un nuevo usuario desde el modo administrador.
+    """
+    # Llamar al repositorio para crear el usuario
+    result = UserRepository.create_user_as_admin(request.user, request.data)
+
+    # Comprobar si hubo un error
+    if 'error' in result:
+        return Response({"error": result['error']}, status=result.get('status', status.HTTP_400_BAD_REQUEST))
+
+    return Response({"message": "Usuario creado exitosamente"}, status=status.HTTP_201_CREATED)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Permitir a cualquier usuario registrar
@@ -55,41 +71,6 @@ def register(request):
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated]) 
-def create_user_as_admin(request):
-    """
-    Crear un nuevo usuario desde el modo administrador.
-    """
-    try:
-        # Verificar si el usuario tiene permisos de administrador
-        # user = request.user
-        # if user.role != 'administrador':
-        #    return Response({"error": "No tienes permisos para crear usuarios"}, status=status.HTTP_403_FORBIDDEN)
-
-        # Validar los datos recibidos
-        user_data = UserAdminCreate(**request.data)
-
-        # Verificar si el usuario ya existe por email
-        if UserRepository.user_exists_by_email(user_data.email):
-            return Response({"error": "El usuario con este correo electrónico ya existe."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Hash de la contraseña
-        user_data.password = make_password(user_data.password)
-
-        # Asignar el rol (cliente por defecto si no se proporciona)
-        role = request.data.get('role', 'cliente')
-
-        # Crear el usuario en la base de datos
-        user = UserRepository.create_user_admin(
-            {**user_data.dict(), "role": role})
-
-        return Response({"message": "Usuario creado exitosamente"}, status=status.HTTP_201_CREATED)
-
-    except ValidationError as e:
-        return Response({"error": f"Error de validación: {e.errors()}"}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -330,7 +311,7 @@ def update_user_as_admin(request, user_id):
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def assign_role(request, user_id):
     """
     Asignar un rol específico a un usuario.

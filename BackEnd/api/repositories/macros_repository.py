@@ -114,49 +114,67 @@ class MacrosRepository:
         except MealPlan.DoesNotExist:
             return None
 
+
     @staticmethod
-    def add_mealplan(user, kcal, proteins, carbs, fats, diet_type, meal_distribution, name, description):
+    def add_mealplan2(user, data):
         """
         Añadir un nuevo plan de comidas (MealPlan).
-        :param user: El usuario asociado al plan de comida.
-        :param kcal: Calorías de la comida.
-        :param proteins: Gramos de proteínas.
-        :param carbs: Gramos de carbohidratos.
-        :param fats: Gramos de grasas.
-        :param diet_type: Tipo de dieta (weightLoss, muscleGain, maintenance).
-        :return: Un diccionario con los detalles del plan de comida o None si ocurrió un error.
+        :param user: El usuario que realiza la solicitud.
+        :param data: Los datos de la solicitud.
+        :return: Un diccionario con los detalles del plan de comida o un mensaje de error.
         """
-        try:
-            # Validación de meal_distribution
-            if meal_distribution and (not isinstance(meal_distribution, list) or sum(meal_distribution) != 100):
-                raise ValueError(
-                    "meal_distribution debe ser una lista de porcentajes que sumen 100.")
+        # Verificar permisos
+        check_result = UserRepository.check_user_role(user, ['nutricionista', 'administrador'])
+        if "error" in check_result:
+            return check_result
+        else:
+            user = check_result['user']
 
+        # Validar datos requeridos
+        required_fields = ['kcal', 'proteins', 'carbs', 'fats', 'dietType']
+        missing_fields = [field for field in required_fields if field not in data or data[field] is None]
+        if missing_fields:
+            return {"error": f"Faltan los campos obligatorios: {', '.join(missing_fields)}", "status": status.HTTP_400_BAD_REQUEST}
+
+        # Validar que el diet_type es válido
+        valid_categories = ['weightLoss', 'muscleGain', 'maintenance']
+        diet_type = data['dietType']
+        if diet_type not in valid_categories:
+            return {"error": "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance.", "status": status.HTTP_400_BAD_REQUEST}
+
+        # Validación de meal_distribution
+        meal_distribution = data.get('mealDistribution')
+        if meal_distribution and (not isinstance(meal_distribution, list) or sum(meal_distribution) != 100):
+            return {"error": "meal_distribution debe ser una lista de porcentajes que sumen 100.", "status": status.HTTP_400_BAD_REQUEST}
+
+        # Crear el plan de comidas
+        try:
             meal_plan = MealPlan.objects.create(
-                user=user,  # Relación con el usuario
-                name=name,
-                calories=kcal,
-                proteins=proteins,
-                carbs=carbs,
-                fats=fats,
-                description=description,
-                # Asegúrate de que diet_type sea uno de los valores permitidos en MealPlan
+                name=data.get('name', "Default Plan Name"),
+                calories=data['kcal'],
+                proteins=data['proteins'],
+                carbs=data['carbs'],
+                fats=data['fats'],
                 diet_type=diet_type,
-                meal_distribution=meal_distribution  # Distribución de comidas
+                meal_distribution=meal_distribution,
+                description=data.get('description')
             )
+            
             return {
-                "id": meal_plan.id,
-                "kcal": meal_plan.calories,
-                "proteins": float(meal_plan.proteins),
-                "carbs": float(meal_plan.carbs),
-                "fats": float(meal_plan.fats),
-                "dietType": meal_plan.diet_type,
-                "meal_distribution": meal_plan.meal_distribution
+                "data": {
+                    "id": meal_plan.id,
+                    "kcal": meal_plan.calories,
+                    "proteins": float(meal_plan.proteins),
+                    "carbs": float(meal_plan.carbs),
+                    "fats": float(meal_plan.fats),
+                    "dietType": meal_plan.diet_type,
+                    "meal_distribution": meal_plan.meal_distribution
+                }
             }
         except Exception as e:
             # Manejo de errores
-            print(f"Error al agregar el plan de comidas: {e}")
-            return None
+            return {"error": f"Error al agregar el plan de comidas: {str(e)}", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
 
     @staticmethod
     def update_mealplan(user, mealplan_id, category, data):

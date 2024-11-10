@@ -90,7 +90,7 @@ urlpatterns = [
     path('mealplans/<str:category>/<int:id>/delete/', macros.delete_mealplan, name='delete-mealplan'),
     path('mealplans/', macros.get_user_mealplan, name='get-mealplans'),
     path('mealplans/<str:category>/', macros.get_mealplans_by_category, name='get-mealplans-by-category'),
-    path('mealplans/create/', macros.add_mealplan, name='add-mealplan'),
+    #path('mealplans/create/', macros.create_meal_plan_view, name='create_meal_plan'),
     path('diet-categories/', macros.list_diet_categories, name='get-diet-categories'),
 
     # Estadísticas

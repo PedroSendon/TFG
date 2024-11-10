@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from api.repositories.macros_repository import MacrosRepository, DietCategoryRepository
+from api.repositories.macros_repository import MacrosRepository
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
@@ -57,59 +57,25 @@ def get_macronutrient_by_id(request):
     else:
         return Response({"error": "Recomendación no encontrada"}, status=status.HTTP_404_NOT_FOUND)
 
-
+'''
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def add_mealplan(request):
-    """
     Añadir un nuevo plan de comidas (MealPlan).
-    """
-    user = request.user
-    if user.role != 'nutricionista' and user.role != 'administrador':
-        return Response({"error": "No tienes permisos para crear planes de nutrición"}, status=status.HTTP_403_FORBIDDEN)
+    print("HOLA")
+    # Llamar al repositorio para crear el MealPlan
+    result = MacrosRepository.add_mealplan2(request.user, request.data)
 
-    # Obtener los datos del cuerpo de la solicitud
-    kcal = request.data.get('kcal')
-    proteins = request.data.get('proteins')
-    carbs = request.data.get('carbs')
-    fats = request.data.get('fats')
-    diet_type = request.data.get('dietType')
-    name = request.data.get('name')
-    meal_distribution = request.data.get('mealDistribution')
-    description = request.data.get('description')
-
-    # Validar que todos los campos requeridos están presentes
-    if not all([ kcal, proteins, carbs, fats, diet_type]):
-        return Response({"error": "Todos los campos ( kcal, proteins, carbs, fats, dietType) son obligatorios."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    # Validar que el diet_type es válido
-    valid_categories = ['weightLoss', 'muscleGain', 'maintenance']
-    if diet_type not in valid_categories:
-        return Response({"error": "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    # Añadir el plan de comidas
-    meal_plan_data = MacrosRepository.add_mealplan(
-        user=user,
-        kcal=kcal,
-        proteins=proteins,
-        carbs=carbs,
-        fats=fats,
-        diet_type=diet_type,
-        name=name,
-        meal_distribution=meal_distribution,
-        description=description
-    )
-
-    if meal_plan_data is None:
-        return Response({"error": "Error al agregar el plan de comidas."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # Comprobar si hubo un error
+    if 'error' in result:
+        return Response({"error": result['error']}, status=result.get('status', status.HTTP_400_BAD_REQUEST))
 
     return Response({
         "message": "Plan de comidas añadido exitosamente",
-        "data": meal_plan_data
+        "data": result['data']
     }, status=status.HTTP_201_CREATED)
-
+    '''
+    
+    
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

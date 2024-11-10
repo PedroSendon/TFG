@@ -73,7 +73,9 @@ const AddMacros: React.FC = () => {
             newErrors.mealDistribution = t('distribution_error');
         }
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        // Filtrar solo los errores que tengan mensajes no vacíos y verificar si hay alguno.
+        const hasErrors = Object.values(newErrors).some((error) => error !== '');
+        return !hasErrors;
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,18 +87,27 @@ const AddMacros: React.FC = () => {
         e.preventDefault();
         if (validateForm()) {
             try {
+                
                 const accessToken = localStorage.getItem('access_token');
                 if (!accessToken) {
                     console.error(t('no_token'));
                     return;
                 }
-                const response = await fetch('http://127.0.0.1:8000/api/mealplans/create/', {
+                const response = await fetch(`http://127.0.0.1:8000/api/mealplans/create/`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`,
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${accessToken}`,
                     },
-                    body: JSON.stringify({ ...formData, meal_distribution: mealDistribution }),
+                    body: JSON.stringify({
+                        kcal: formData.kcal,
+                        proteins: formData.proteins,
+                        carbs: formData.carbs,
+                        fats: formData.fats,
+                        dietType: formData.dietType,
+                        description: formData.description,
+                        meal_distribution: mealDistribution, 
+                    }),
                 });
                 if (response.ok) {
                     history.push({
@@ -112,6 +123,8 @@ const AddMacros: React.FC = () => {
             }
         }
     };
+    
+    
     const handleMealCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const count = parseInt(e.target.value);
         setMealCount(count);
@@ -370,7 +383,7 @@ const AddMacros: React.FC = () => {
                 </form>
 
                 {/* Botones de Cancelar y Guardar */}
-                <Box sx={{ mt: 3, pb: 2, textAlign: 'center', width: '100%' }}>
+                <Box sx={{ mb:'15%' ,mt: 3, pb: 2, textAlign: 'center', width: '100%' }}>
                     <Grid container spacing={2} justifyContent="center">
                         <Grid item xs={6}>
                             <Button
