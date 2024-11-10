@@ -155,3 +155,5 @@ def update_exercise(request):
         "message": "Ejercicio modificado con éxito.",
         "data": result['data']
     }, status=status.HTTP_200_OK)
+
+
