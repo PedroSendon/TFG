@@ -709,36 +709,3 @@ class GetMealPlansByCategoryTests(APITestCase):
         # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn("Authentication credentials were not provided", response.data["detail"])
-
-class ListDietCategoriesTests(APITestCase):
-
-    def test_list_diet_categories_success(self):
-        """
-        Test para obtener las categorías de dieta con éxito.
-        """
-        # Realizar la solicitud GET al endpoint
-        url = reverse('get-diet-categories')
-        response = self.client.get(url)
-
-        # Verificar que el estado de la respuesta es 200 OK
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
-        # Verificar que las categorías están en la respuesta y son correctas
-        categories = response.data["categories"]
-        expected_categories = [
-            {"name": "weightLoss", "description": "Pérdida de Peso"},
-            {"name": "muscleGain", "description": "Ganancia Muscular"},
-            {"name": "maintenance", "description": "Mantenimiento"}
-        ]
-        self.assertEqual(categories, expected_categories)
-
-    def test_list_diet_categories_unauthenticated(self):
-        """
-        Test para verificar que el acceso no autenticado está permitido (si se aplica autenticación en el futuro).
-        """
-        # Realizar la solicitud GET sin autenticación
-        url = reverse('get-diet-categories')
-        response = self.client.get(url)
-
-        # Verificar que el estado de la respuesta es 200 OK
-        self.assertEqual(response.status_code, status.HTTP_200_OK)

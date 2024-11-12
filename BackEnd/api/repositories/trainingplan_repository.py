@@ -160,27 +160,22 @@ class TrainingPlanRepository:
         """
         Actualiza un plan de entrenamiento específico con los datos proporcionados.
         """
-        # Verificar si el objeto `user` es una instancia de `User`
         if not isinstance(user, User):
             user = User.objects.get(id=user.id)
             
         if user.role not in ['entrenador', 'administrador']:
-            return {"error": "No tienes permisos para modificar ejercicios", "status": status.HTTP_403_FORBIDDEN}
+            return None, "No tienes permisos para modificar ejercicios"
         
         try:
             training_plan = TrainingPlan.objects.get(id=training_plan_id)
 
             # Actualizamos los campos básicos
             training_plan.name = data.get("name", training_plan.name)
-            training_plan.description = data.get(
-                "description", training_plan.description)
+            training_plan.description = data.get("description", training_plan.description)
             training_plan.media = data.get("media", training_plan.media)
-            training_plan.difficulty = data.get(
-                "difficulty", training_plan.difficulty)
-            training_plan.equipment = data.get(
-                "equipment", training_plan.equipment)
-            training_plan.duration = data.get(
-                "duration", training_plan.duration)
+            training_plan.difficulty = data.get("difficulty", training_plan.difficulty)
+            training_plan.equipment = data.get("equipment", training_plan.equipment)
+            training_plan.duration = data.get("duration", training_plan.duration)
             training_plan.save()
 
             # Actualizamos los entrenamientos asociados si se proporcionan

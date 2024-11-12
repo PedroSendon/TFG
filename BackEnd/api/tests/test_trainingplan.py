@@ -1,565 +1,890 @@
-# from django.urls import reverse
-# from rest_framework import status
-# from rest_framework.test import APITestCase
-# from django.contrib.auth import get_user_model
-# from api.models.workout import Workout, WeeklyWorkout, UserWorkout
-# from api.models.trainingplan import TrainingPlan
-# from datetime import date
+from rest_framework import status
+from rest_framework.test import APITestCase
+from django.urls import reverse
+from api.models.trainingplan import TrainingPlan
+from api.models.workout import UserWorkout, WeeklyWorkout, Workout
+from api.models.user import User
 
-# User = get_user_model()
+class CreateTrainingPlanTests(APITestCase):
 
-# class GetTrainingPlanTests(APITestCase):
+    def setUp(self):
+        # Crear un usuario autenticado con permisos necesarios
+        self.user = User.objects.create(
+            email='trainer@example.com',
+            password='password123',
+            role='entrenador',
+            birth_date='1990-01-01'
+        )
 
-#     def setUp(self):
-#         # Crear un usuario y autenticarlo
-#         self.user = User.objects.create_user(email='testuser@example.com', password='testpass123')
-#         self.client.force_authenticate(user=self.user)
+        # Crear entrenamientos en la base de datos para asociarlos al plan
+        self.workout1 = Workout.objects.create(name="Cardio Workout", description="High-intensity cardio session")
+        self.workout2 = Workout.objects.create(name="Strength Workout", description="Strength and conditioning")
 
-#         # Crear un Workout y un TrainingPlan para los tests
-#         self.workout = Workout.objects.create(name="Workout 1", description="Description for Workout 1")
-#         self.training_plan = TrainingPlan.objects.create(
-#             name="Training Plan 1",
-#             description="Description for Training Plan 1",
-#             media="http://example.com/media.jpg",
-#             difficulty="moderado",
-#             equipment="Dumbbells",
-#             duration=30
-#         )
-#         self.training_plan.workouts.add(self.workout)
+    def test_create_training_plan_success(self):
+        """
+        Test para crear un plan de entrenamiento con éxito.
+        """
+        # Autenticar como usuario
+        self.client.force_authenticate(user=self.user)
 
-#     def test_get_training_plan(self):
-#         """
-#         Test para obtener los detalles de un plan de entrenamiento específico.
-#         """
-#         url = reverse('get_training_plan', args=[self.training_plan.id])
-#         response = self.client.get(url)
+        # Datos para crear un plan de entrenamiento
+        data = {
+            "name": "Plan Avanzado",
+            "description": "Este es un plan avanzado de entrenamiento",
+            "selectedTraining": [self.workout1.id, self.workout2.id],
+            "media": "http://example.com/media/training.jpg",
+            "difficulty": "avanzado",
+            "equipment": "Dumbbells, Kettlebells",
+            "duration": 30
+        }
 
-#         # Verificar que la respuesta sea 200 OK
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Realizar la solicitud POST al endpoint
+        url = reverse('create-training-plan')
+        response = self.client.post(url, data, format='json')
 
-#         # Verificar que los datos devueltos son correctos
-#         self.assertEqual(response.data["id"], self.training_plan.id)
-#         self.assertEqual(response.data["name"], "Training Plan 1")
-#         self.assertEqual(response.data["description"], "Description for Training Plan 1")
-#         self.assertEqual(response.data["media"], "http://example.com/media.jpg")
-#         self.assertEqual(response.data["difficulty"], "moderado")
-#         self.assertEqual(response.data["equipment"], "Dumbbells")
-#         self.assertEqual(response.data["duration"], 30)
-#         self.assertEqual(len(response.data["workouts"]), 1)
-#         self.assertEqual(response.data["workouts"][0]["id"], self.workout.id)
-#         self.assertEqual(response.data["workouts"][0]["name"], "Workout 1")
-
-#     def test_get_training_plan_not_found(self):
-#         """
-#         Test para obtener un plan de entrenamiento inexistente.
-#         """
-#         url = reverse('get_training_plan', args=[999])  # ID que no existe
-#         response = self.client.get(url)
-
-#         # Verificar que la respuesta sea 404 Not Found
-#         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-#         self.assertEqual(response.data["error"], "Training Plan not found.")
-
-# class UpdateTrainingPlanTests(APITestCase):
-
-#     def setUp(self):
-#         # Crear un usuario con rol 'entrenador' y autenticarlo
-#         self.user = User.objects.create_user(email='trainer@example.com', password='testpass123', role='entrenador')
-#         self.client.force_authenticate(user=self.user)
-
-#         # Crear un Workout y un TrainingPlan para los tests
-#         self.workout1 = Workout.objects.create(name="Workout 1", description="Description for Workout 1")
-#         self.workout2 = Workout.objects.create(name="Workout 2", description="Description for Workout 2")
-#         self.training_plan = TrainingPlan.objects.create(
-#             name="Original Training Plan",
-#             description="Original description",
-#             media="http://example.com/original.jpg",
-#             difficulty="moderado",
-#             equipment="Dumbbells",
-#             duration=30
-#         )
-#         self.training_plan.workouts.add(self.workout1)
-
-#     def test_update_training_plan(self):
-#         """
-#         Test para actualizar un plan de entrenamiento específico.
-#         """
-#         url = reverse('update_training_plan')
-#         data = {
-#             "training_plan_id": self.training_plan.id,
-#             "name": "Updated Training Plan",
-#             "description": "Updated description",
-#             "media": "http://example.com/updated.jpg",
-#             "difficulty": "avanzado",
-#             "equipment": "Kettlebells",
-#             "duration": 45,
-#             "workouts": [self.workout1.id, self.workout2.id]
-#         }
-#         response = self.client.put(url, data, format='json')
-
-#         # Verificar que la respuesta sea 200 OK
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-#         # Verificar que los datos fueron actualizados correctamente
-#         self.assertEqual(response.data["name"], "Updated Training Plan")
-#         self.assertEqual(response.data["description"], "Updated description")
-#         self.assertEqual(response.data["media"], "http://example.com/updated.jpg")
-#         self.assertEqual(response.data["difficulty"], "avanzado")
-#         self.assertEqual(response.data["equipment"], "Kettlebells")
-#         self.assertEqual(response.data["duration"], 45)
-#         self.assertEqual(len(response.data["workouts"]), 2)
-#         self.assertEqual(response.data["workouts"][0]["id"], self.workout1.id)
-#         self.assertEqual(response.data["workouts"][1]["id"], self.workout2.id)
-
-#     def test_update_training_plan_not_found(self):
-#         """
-#         Test para intentar actualizar un plan de entrenamiento inexistente.
-#         """
-#         url = reverse('update_training_plan')
-#         data = {
-#             "training_plan_id": 999,  # ID inexistente
-#             "name": "Updated Training Plan"
-#         }
-#         response = self.client.put(url, data, format='json')
-
-#         # Verificar que la respuesta sea 404 Not Found
-#         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-#         self.assertEqual(response.data["error"], "Training Plan not found.")
-
-#     def test_update_training_plan_without_permission(self):
-#         """
-#         Test para intentar actualizar un plan de entrenamiento sin permisos adecuados.
-#         """
-#         # Cambiar el rol del usuario a 'cliente' que no tiene permisos
-#         self.user.role = 'cliente'
-#         self.user.save()
-
-#         url = reverse('update_training_plan')
-#         data = {
-#             "training_plan_id": self.training_plan.id,
-#             "name": "Updated Training Plan"
-#         }
-#         response = self.client.put(url, data, format='json')
-
-#         # Verificar que la respuesta sea 403 Forbidden
-#         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-#         self.assertEqual(response.data["error"], "No tienes permisos para modificar ejercicios")
-
-# class DeleteTrainingPlanTests(APITestCase):
-
-#     def setUp(self):
-#         # Crear un usuario con rol 'entrenador' y autenticarlo
-#         self.user = User.objects.create_user(email='trainer@example.com', password='testpass123', role='entrenador')
-#         self.client.force_authenticate(user=self.user)
-
-#         # Crear un TrainingPlan para los tests
-#         self.training_plan = TrainingPlan.objects.create(
-#             name="Sample Training Plan",
-#             description="Sample description",
-#             difficulty="moderado",
-#             equipment="Dumbbells",
-#             duration=30
-#         )
-
-#     def test_delete_training_plan_success(self):
-#         """
-#         Test para eliminar un plan de entrenamiento existente.
-#         """
-#         url = reverse('delete_training_plan', args=[self.training_plan.id])
-#         response = self.client.delete(url)
-
-#         # Verificar que la respuesta sea 200 OK
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertEqual(response.data["message"], "Training plan deleted successfully.")
-
-#         # Verificar que el plan ya no exista en la base de datos
-#         self.assertFalse(TrainingPlan.objects.filter(id=self.training_plan.id).exists())
-
-#     def test_delete_training_plan_not_found(self):
-#         """
-#         Test para intentar eliminar un plan de entrenamiento inexistente.
-#         """
-#         url = reverse('delete_training_plan', args=[9999])  # ID inexistente
-#         response = self.client.delete(url)
-
-#         # Verificar que la respuesta sea 404 Not Found
-#         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-#         self.assertEqual(response.data["error"], "Training plan not found.")
-
-#     def test_delete_training_plan_without_permission(self):
-#         """
-#         Test para intentar eliminar un plan de entrenamiento sin permisos adecuados.
-#         """
-#         # Cambiar el rol del usuario a 'cliente' que no tiene permisos
-#         self.user.role = 'cliente'
-#         self.user.save()
-
-#         url = reverse('delete_training_plan', args=[self.training_plan.id])
-#         response = self.client.delete(url)
-
-#         # Verificar que la respuesta sea 403 Forbidden
-#         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-#         self.assertEqual(response.data["error"], "No tienes permisos para eliminar planes de entrenamiento")
-
-
-# class GetAssignedTrainingPlanTests(APITestCase):
-
-#     def setUp(self):
-#         # Crear un usuario con rol 'cliente' y autenticarlo
-#         self.user = User.objects.create_user(email='client@example.com', password='testpass123', role='cliente')
-#         self.client.force_authenticate(user=self.user)
-
-#         # Crear un TrainingPlan y un UserWorkout para el usuario
-#         self.training_plan = TrainingPlan.objects.create(
-#             name="Sample Training Plan",
-#             description="Sample description",
-#             difficulty="moderado",
-#             equipment="Dumbbells",
-#             duration=30
-#         )
-#         self.user_workout = UserWorkout.objects.create(
-#             user=self.user,
-#             training_plan=self.training_plan,
-#             date_started=date.today(),
-#             progress=50  # Ejemplo de progreso en el plan
-#         )
-
-#         # Crear un Workout y WeeklyWorkout asociados
-#         self.workout = Workout.objects.create(
-#             name="Sample Workout",
-#             description="Workout description",
-#             duration=60
-#         )
-#         self.weekly_workout = WeeklyWorkout.objects.create(
-#             user_workout=self.user_workout,
-#             workout=self.workout,
-#             completed=False,
-#             progress=20  # Ejemplo de progreso en el entrenamiento
-#         )
-
-#     def test_get_assigned_training_plan_success(self):
-#         """
-#         Test para obtener el plan de entrenamiento asignado al usuario autenticado.
-#         """
-#         url = reverse('get_assigned_training_plan')
-#         response = self.client.get(url)
-
-#         # Verificar que la respuesta sea 200 OK y que el contenido sea correcto
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertEqual(response.data["id"], self.training_plan.id)
-#         self.assertEqual(response.data["name"], self.training_plan.name)
-#         self.assertEqual(response.data["progress"], self.user_workout.progress)
-#         self.assertEqual(len(response.data["workouts"]), 1)
-#         self.assertEqual(response.data["workouts"][0]["id"], self.workout.id)
-
-#     def test_get_assigned_training_plan_not_found(self):
-#         """
-#         Test para verificar el caso en que el usuario no tiene un plan de entrenamiento asignado.
-#         """
-#         # Eliminar el UserWorkout para simular que el usuario no tiene plan asignado
-#         self.user_workout.delete()
-
-#         url = reverse('get_assigned_training_plan')
-#         response = self.client.get(url)
-
-#         # Verificar que la respuesta sea 404 Not Found
-#         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-#         self.assertEqual(response.data["error"], "Training plan not found for the user.")
-
-
-# class CreateTrainingPlanTests(APITestCase):
-
-#     def setUp(self):
-#         # Crear un usuario con rol 'entrenador' y autenticarlo
-#         self.user = User.objects.create_user(email='trainer@example.com', password='testpass123', role='entrenador')
-#         self.client.force_authenticate(user=self.user)
-
-#         # Crear un Workout para asociarlo al plan
-#         self.workout1 = Workout.objects.create(
-#             name="Sample Workout 1",
-#             description="Description for workout 1",
-#             duration=60
-#         )
-#         self.workout2 = Workout.objects.create(
-#             name="Sample Workout 2",
-#             description="Description for workout 2",
-#             duration=45
-#         )
-
-#     def test_create_training_plan_success(self):
-#         """
-#         Test para crear un nuevo plan de entrenamiento exitosamente.
-#         """
-#         url = reverse('create_training_plan')
-#         data = {
-#             "name": "New Training Plan",
-#             "description": "This is a test training plan",
-#             "selectedTraining": [self.workout1.id, self.workout2.id],
-#             "media": "http://example.com/media.png",
-#             "difficulty": "moderado",
-#             "equipment": "Dumbbells",
-#             "duration": 30
-#         }
-#         response = self.client.post(url, data, format='json')
-
-#         # Verificar que la respuesta sea 201 Created y el contenido sea correcto
-#         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-#         self.assertEqual(response.data["data"]["name"], data["name"])
-#         self.assertEqual(len(response.data["data"]["workouts"]), 2)
-
-#     def test_create_training_plan_missing_fields(self):
-#         """
-#         Test para verificar la respuesta cuando faltan campos obligatorios.
-#         """
-#         url = reverse('create_training_plan')
-#         data = {
-#             "name": "Incomplete Training Plan",
-#             # Falta 'description', 'selectedTraining', 'difficulty', 'equipment', y 'duration'
-#         }
-#         response = self.client.post(url, data, format='json')
-
-#         # Verificar que la respuesta sea 400 Bad Request
-#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-#     def test_create_training_plan_invalid_workouts(self):
-#         """
-#         Test para verificar el manejo de errores cuando los IDs de entrenamientos no existen.
-#         """
-#         url = reverse('create_training_plan')
-#         data = {
-#             "name": "Invalid Training Plan",
-#             "description": "This is a test training plan with invalid workouts",
-#             "selectedTraining": [9999, 8888],  # IDs inexistentes
-#             "media": "http://example.com/media.png",
-#             "difficulty": "moderado",
-#             "equipment": "Kettlebells",
-#             "duration": 30
-#         }
-#         response = self.client.post(url, data, format='json')
-
-#         # Verificar que la respuesta sea 400 Bad Request con mensaje de error adecuado
-#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-#         self.assertIn("Los entrenamientos asociados no existen.", response.data["error"])
-
-
-# class GetTrainingPlansTests(APITestCase):
-
-#     def setUp(self):
-#         # Crear un usuario con rol 'entrenador' y autenticarlo
-#         self.user = User.objects.create_user(email='trainer@example.com', password='testpass123', role='entrenador')
-#         self.client.force_authenticate(user=self.user)
-
-#         # Crear algunos planes de entrenamiento y entrenamientos asociados
-#         self.workout1 = Workout.objects.create(name="Workout 1", description="Desc 1", duration=45)
-#         self.workout2 = Workout.objects.create(name="Workout 2", description="Desc 2", duration=60)
-
-#         self.training_plan1 = TrainingPlan.objects.create(
-#             name="Training Plan 1",
-#             description="Desc Plan 1",
-#             difficulty="ligero",
-#             equipment="Equipment 1",
-#             media="http://example.com/media1.png",
-#             duration=30
-#         )
-#         self.training_plan1.workouts.add(self.workout1, self.workout2)
-
-#         self.training_plan2 = TrainingPlan.objects.create(
-#             name="Training Plan 2",
-#             description="Desc Plan 2",
-#             difficulty="moderado",
-#             equipment="Equipment 2",
-#             media="http://example.com/media2.png",
-#             duration=45
-#         )
-#         self.training_plan2.workouts.add(self.workout1)
-
-#     def test_get_all_training_plans_success(self):
-#         """
-#         Test para obtener todos los planes de entrenamiento exitosamente.
-#         """
-#         url = reverse('get_training_plans')  # Ajusta el nombre del endpoint según tu configuración
-#         response = self.client.get(url)
-
-#         # Verificar que la respuesta sea 200 OK
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Verificar que el estado de la respuesta es 201 CREATED
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
-#         # Verificar que se devuelvan los datos correctos
-#         self.assertIn("data", response.data)
-#         self.assertEqual(len(response.data["data"]), 2)
-#         self.assertEqual(response.data["data"][0]["name"], "Training Plan 1")
-#         self.assertEqual(response.data["data"][1]["name"], "Training Plan 2")
+        # Verificar que el plan de entrenamiento fue creado correctamente
+        training_plan = response.data["data"]
+        self.assertEqual(training_plan["name"], "Plan Avanzado")
+        self.assertEqual(training_plan["description"], "Este es un plan avanzado de entrenamiento")
+        self.assertEqual(training_plan["media"], "http://example.com/media/training.jpg")
+        self.assertEqual(training_plan["difficulty"], "avanzado")
+        self.assertEqual(training_plan["equipment"], "Dumbbells, Kettlebells")
+        self.assertEqual(training_plan["duration"], 30)
+        self.assertEqual(training_plan["workouts"], [self.workout1.id, self.workout2.id])
 
-#     def test_get_all_training_plans_empty(self):
-#         """
-#         Test para verificar el caso en el que no hay planes de entrenamiento.
-#         """
-#         # Primero eliminar los planes creados en setUp
-#         TrainingPlan.objects.all().delete()
+    def test_create_training_plan_workouts_not_found(self):
+        """
+        Test para verificar el error cuando los entrenamientos no existen.
+        """
+        # Autenticar como usuario
+        self.client.force_authenticate(user=self.user)
 
-#         url = reverse('get_training_plans')
-#         response = self.client.get(url)
+        # Datos para crear un plan de entrenamiento con IDs de entrenamientos inexistentes
+        data = {
+            "name": "Plan Intermedio",
+            "description": "Entrenamiento de nivel intermedio",
+            "selectedTraining": [999, 1000],  # IDs inexistentes
+            "media": "http://example.com/media/training.jpg",
+            "difficulty": "intermedio",
+            "equipment": "Barbells",
+            "duration": 30
+        }
 
-#         # Verificar que la respuesta sea 404 Not Found con mensaje adecuado
-#         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-#         self.assertEqual(response.data["message"], "No training plans found.")
+        # Realizar la solicitud POST al endpoint
+        url = reverse('create-training-plan')
+        response = self.client.post(url, data, format='json')
 
-# class GetNextPendingWorkoutTests(APITestCase):
+        # Verificar que el estado de la respuesta es 400 BAD REQUEST
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Los entrenamientos asociados no existen.", response.data["error"])
 
-#     def setUp(self):
-#         # Crear un usuario y autenticarlo
-#         self.user = User.objects.create_user(email='user@example.com', password='testpass123', role='cliente')
-#         self.client.force_authenticate(user=self.user)
+    def test_create_training_plan_invalid_duration(self):
+        """
+        Test para verificar el error cuando se proporciona una duración inválida.
+        """
+        # Autenticar como usuario
+        self.client.force_authenticate(user=self.user)
 
-#         # Crear un plan de entrenamiento, entrenamientos y asociarlos con el usuario
-#         self.workout1 = Workout.objects.create(name="Workout 1", description="Description for Workout 1")
-#         self.workout2 = Workout.objects.create(name="Workout 2", description="Description for Workout 2")
+        # Datos para crear un plan de entrenamiento con duración inválida
+        data = {
+            "name": "Plan Moderado",
+            "description": "Entrenamiento moderado",
+            "selectedTraining": [self.workout1.id, self.workout2.id],
+            "media": "http://example.com/media/training.jpg",
+            "difficulty": "moderado",
+            "equipment": "None",
+            "duration": "invalid_duration"  # Duración no válida
+        }
 
-#         self.training_plan = TrainingPlan.objects.create(
-#             name="Training Plan 1",
-#             description="Description for Training Plan 1",
-#             difficulty="ligero",
-#             equipment="Basic Equipment",
-#             duration=30
-#         )
-#         self.training_plan.workouts.add(self.workout1, self.workout2)
+        # Realizar la solicitud POST al endpoint
+        url = reverse('create-training-plan')
+        response = self.client.post(url, data, format='json')
 
-#         self.user_workout = UserWorkout.objects.create(user=self.user, training_plan=self.training_plan)
+        # Verificar que el estado de la respuesta es 400 BAD REQUEST
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("La duración debe ser un número entero válido.", response.data["error"])
 
-#         # Crear WeeklyWorkouts asociados con el UserWorkout, donde el primer workout está sin completar
-#         self.weekly_workout1 = WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout1, completed=False)
-#         self.weekly_workout2 = WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout2, completed=True)
 
-#     def test_get_next_pending_workout_success(self):
-#         """
-#         Test para obtener el próximo entrenamiento pendiente exitosamente.
-#         """
-#         url = reverse('get_next_pending_workout')  # Ajusta el nombre del endpoint si es necesario
-#         response = self.client.get(url)
+    def test_create_training_plan_unauthenticated(self):
+        """
+        Test para verificar que el acceso sin autenticación está prohibido.
+        """
+        # Datos para crear un plan de entrenamiento
+        data = {
+            "name": "Plan Básico",
+            "description": "Entrenamiento básico",
+            "selectedTraining": [self.workout1.id, self.workout2.id],
+            "media": "http://example.com/media/training.jpg",
+            "difficulty": "ligero",
+            "equipment": "None",
+            "duration": 15
+        }
 
-#         # Verifica que la respuesta sea 200 OK
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Realizar la solicitud POST sin autenticación
+        url = reverse('create-training-plan')
+        response = self.client.post(url, data, format='json')
+
+        # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("Authentication credentials were not provided", response.data["detail"])
+class GetTrainingPlansTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario autenticado con permisos
+        self.user = User.objects.create(
+            email='user@example.com',
+            password='password123',
+            role='entrenador',
+            birth_date='1990-01-01'
+        )
         
-#         # Verifica que el workout devuelto es el primero sin completar
-#         self.assertEqual(response.data["id"], self.weekly_workout1.workout.id)
-#         self.assertEqual(response.data["name"], self.weekly_workout1.workout.name)
-#         self.assertEqual(response.data["description"], self.weekly_workout1.workout.description)
+        # Crear entrenamientos para asociar con los planes
+        self.workout1 = Workout.objects.create(name="Cardio Session", description="Cardio intenso")
+        self.workout2 = Workout.objects.create(name="Strength Session", description="Entrenamiento de fuerza")
 
-#     def test_get_next_pending_workout_no_pending_workouts(self):
-#         """
-#         Test para el caso en el que no hay entrenamientos pendientes.
-#         """
-#         # Marcar todos los entrenamientos como completados
-#         self.weekly_workout1.completed = True
-#         self.weekly_workout1.save()
+        # Crear planes de entrenamiento
+        self.training_plan1 = TrainingPlan.objects.create(
+            name="Plan Básico",
+            description="Entrenamiento básico para principiantes",
+            difficulty="ligero",
+            equipment="Ninguno",
+            duration=30,
+            media="http://example.com/media/basic-plan.jpg"
+        )
+        self.training_plan1.workouts.set([self.workout1, self.workout2])
 
-#         url = reverse('get_next_pending_workout')
-#         response = self.client.get(url)
+        self.training_plan2 = TrainingPlan.objects.create(
+            name="Plan Avanzado",
+            description="Entrenamiento avanzado para atletas",
+            difficulty="avanzado",
+            equipment="Barra, Mancuernas",
+            duration=60,
+            media="http://example.com/media/advanced-plan.jpg"
+        )
+        self.training_plan2.workouts.set([self.workout1])
 
-#         # Verifica que la respuesta sea 404 Not Found y el mensaje sea adecuado
-#         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-#         self.assertEqual(response.data["error"], "No pending workouts found.")
+    def test_get_training_plans_success(self):
+        """
+        Test para obtener todos los planes de entrenamiento con éxito.
+        """
+        # Autenticar como usuario
+        self.client.force_authenticate(user=self.user)
 
-#     def test_get_next_pending_workout_no_user_workout(self):
-#         """
-#         Test para el caso en el que el usuario no tiene un plan de entrenamiento asignado.
-#         """
-#         # Elimina el UserWorkout
-#         self.user_workout.delete()
+        # Realizar la solicitud GET al endpoint
+        url = reverse('training-plans')
+        response = self.client.get(url)
 
-#         url = reverse('get_next_pending_workout')
-#         response = self.client.get(url)
+        # Verificar que el estado de la respuesta es 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-#         # Verifica que la respuesta sea 404 Not Found y el mensaje sea adecuado
-#         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-#         self.assertEqual(response.data["error"], "User workout not found.")
-
-# class MarkWorkoutCompleteTests(APITestCase):
-
-#     def setUp(self):
-#         # Crear un usuario y autenticarlo
-#         self.user = User.objects.create_user(email='user@example.com', password='testpass123', role='cliente')
-#         self.client.force_authenticate(user=self.user)
-
-#         # Crear un plan de entrenamiento, entrenamientos y asociarlos con el usuario
-#         self.workout1 = Workout.objects.create(name="Workout 1", description="Description for Workout 1")
-#         self.workout2 = Workout.objects.create(name="Workout 2", description="Description for Workout 2")
-
-#         self.training_plan = TrainingPlan.objects.create(
-#             name="Training Plan 1",
-#             description="Description for Training Plan 1",
-#             difficulty="ligero",
-#             equipment="Basic Equipment",
-#             duration=30
-#         )
-#         self.training_plan.workouts.add(self.workout1, self.workout2)
-
-#         self.user_workout = UserWorkout.objects.create(user=self.user, training_plan=self.training_plan)
-
-#         # Crear WeeklyWorkouts asociados con el UserWorkout, donde el primer workout está sin completar
-#         self.weekly_workout1 = WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout1, completed=False)
-#         self.weekly_workout2 = WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout2, completed=False)
-
-#     def test_mark_workout_complete_success(self):
-#         """
-#         Test para marcar un entrenamiento como completado exitosamente.
-#         """
-#         url = reverse('mark_workout_complete', args=[self.weekly_workout1.workout.id])
-#         response = self.client.post(url, {"progress": 50})
-
-#         # Verifica que la respuesta sea 200 OK y que el mensaje sea adecuado
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertEqual(response.data["message"], "Workout marked as complete.")
+        # Verificar que los datos de los planes de entrenamiento están presentes en la respuesta
+        training_plans = response.data["data"]
+        self.assertEqual(len(training_plans), 2)
         
-#         # Verifica que el entrenamiento esté marcado como completado
-#         self.weekly_workout1.refresh_from_db()
-#         self.assertTrue(self.weekly_workout1.completed)
-#         self.assertEqual(self.weekly_workout1.progress, 50)
+        # Verificar los datos de cada plan de entrenamiento
+        self.assertEqual(training_plans[0]["name"], "Plan Básico")
+        self.assertEqual(training_plans[0]["duration"], 30)
+        self.assertEqual(training_plans[0]["workouts"], [self.workout1.id, self.workout2.id])
 
-#     def test_mark_workout_already_completed(self):
-#         """
-#         Test para intentar marcar un entrenamiento que ya está completado.
-#         """
-#         self.weekly_workout1.completed = True
-#         self.weekly_workout1.save()
+        self.assertEqual(training_plans[1]["name"], "Plan Avanzado")
+        self.assertEqual(training_plans[1]["duration"], 60)
+        self.assertEqual(training_plans[1]["workouts"], [self.workout1.id])
 
-#         url = reverse('mark_workout_complete', args=[self.weekly_workout1.workout.id])
-#         response = self.client.post(url, {"progress": 100})
+    def test_get_training_plans_no_plans_found(self):
+        """
+        Test para verificar el mensaje cuando no hay planes de entrenamiento disponibles.
+        """
+        # Eliminar todos los planes de entrenamiento
+        TrainingPlan.objects.all().delete()
 
-#         # Verifica que la respuesta sea 400 Bad Request y que el mensaje indique que ya está completado
-#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-#         self.assertEqual(response.data["error"], "Workout not found or already completed.")
+        # Autenticar como usuario
+        self.client.force_authenticate(user=self.user)
 
-#     def test_mark_nonexistent_workout(self):
-#         """
-#         Test para intentar marcar un entrenamiento inexistente.
-#         """
-#         url = reverse('mark_workout_complete', args=[9999])  # ID inexistente
-#         response = self.client.post(url, {"progress": 100})
+        # Realizar la solicitud GET al endpoint
+        url = reverse('training-plans')
+        response = self.client.get(url)
 
-#         # Verifica que la respuesta sea 400 Bad Request y que el mensaje indique que no se encontró el entrenamiento
-#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-#         self.assertEqual(response.data["error"], "Workout not found or already completed.")
+        # Verificar que el estado de la respuesta es 404 NOT FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["message"], "No training plans found.")
 
-#     def test_mark_all_workouts_complete_and_reset(self):
-#         """
-#         Test para completar todos los entrenamientos y verificar que el plan se restablece.
-#         """
-#         # Completa el primer entrenamiento
-#         url1 = reverse('mark_workout_complete', args=[self.weekly_workout1.workout.id])
-#         self.client.post(url1, {"progress": 50})
+    def test_get_training_plans_unauthenticated(self):
+        """
+        Test para verificar que el acceso sin autenticación está prohibido.
+        """
+        # Realizar la solicitud GET sin autenticación
+        url = reverse('training-plans')
+        response = self.client.get(url)
 
-#         # Completa el segundo entrenamiento
-#         url2 = reverse('mark_workout_complete', args=[self.weekly_workout2.workout.id])
-#         response = self.client.post(url2, {"progress": 100})
+        # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("Authentication credentials were not provided", response.data["detail"])
 
-#         # Verifica que la respuesta sea 200 OK y que el mensaje indique el restablecimiento
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertEqual(response.data["message"], "All workouts completed. Resetting to incomplete.")
+class DeleteTrainingPlanTests(APITestCase):
 
-#         # Verifica que ambos entrenamientos estén marcados como incompletos después del restablecimiento
-#         self.weekly_workout1.refresh_from_db()
-#         self.weekly_workout2.refresh_from_db()
-#         self.assertFalse(self.weekly_workout1.completed)
-#         self.assertFalse(self.weekly_workout2.completed)
-#         self.user_workout.refresh_from_db()
-#         self.assertEqual(self.user_workout.progress, 0)  # Verifica que el progreso se restablece también
+    def setUp(self):
+        # Crear un usuario autenticado con permisos
+        self.user = User.objects.create(
+            email='trainer@example.com',
+            password='password123',
+            role='entrenador',
+            birth_date='1990-01-01'
+        )
+
+        # Crear un plan de entrenamiento en la base de datos para eliminarlo en las pruebas
+        self.training_plan = TrainingPlan.objects.create(
+            name="Plan de prueba",
+            description="Entrenamiento de prueba",
+            difficulty="moderado",
+            equipment="Dumbbells",
+            duration=45,
+            media="http://example.com/media/test-plan.jpg"
+        )
+
+    def test_delete_training_plan_success(self):
+        """
+        Test para eliminar un plan de entrenamiento con éxito.
+        """
+        # Autenticar como usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud DELETE al endpoint
+        url = reverse('delete-training-plan', args=[self.training_plan.id])
+        response = self.client.delete(url)
+
+        # Verificar que el estado de la respuesta es 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["message"], "Training plan deleted successfully.")
+
+        # Confirmar que el plan de entrenamiento fue eliminado
+        self.assertFalse(TrainingPlan.objects.filter(id=self.training_plan.id).exists())
+
+    def test_delete_training_plan_not_found(self):
+        """
+        Test para verificar el error cuando el plan de entrenamiento no existe.
+        """
+        # Autenticar como usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud DELETE con un ID inexistente
+        url = reverse('delete-training-plan', args=[999])  # ID inexistente
+        response = self.client.delete(url)
+
+        # Verificar que el estado de la respuesta es 404 NOT FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Training plan not found.")
+
+    def test_delete_training_plan_unauthenticated(self):
+        """
+        Test para verificar que el acceso sin autenticación está prohibido.
+        """
+        # Realizar la solicitud DELETE sin autenticación
+        url = reverse('delete-training-plan', args=[self.training_plan.id])
+        response = self.client.delete(url)
+
+        # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("Authentication credentials were not provided", response.data["detail"])
+
+class GetTrainingPlanTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario autenticado con permisos
+        self.user = User.objects.create(
+            email='user@example.com',
+            password='password123',
+            role='entrenador',
+            birth_date='1990-01-01'
+        )
+
+        # Crear entrenamientos para asociar con el plan
+        self.workout1 = Workout.objects.create(name="Cardio Session", description="Intensive cardio session")
+        self.workout2 = Workout.objects.create(name="Strength Session", description="Strength and conditioning")
+
+        # Crear un plan de entrenamiento en la base de datos
+        self.training_plan = TrainingPlan.objects.create(
+            name="Plan de Prueba",
+            description="Este es un plan de prueba",
+            difficulty="intermedio",
+            equipment="Pesas",
+            duration=30,
+            media="http://example.com/media/test-plan.jpg"
+        )
+        self.training_plan.workouts.set([self.workout1, self.workout2])
+
+    def test_get_training_plan_success(self):
+        """
+        Test para obtener los detalles de un plan de entrenamiento con éxito.
+        """
+        # Autenticar como usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud GET al endpoint
+        url = reverse('get-training-plan', args=[self.training_plan.id])
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verificar los datos del plan de entrenamiento en la respuesta
+        training_plan = response.data
+        self.assertEqual(training_plan["name"], "Plan de Prueba")
+        self.assertEqual(training_plan["description"], "Este es un plan de prueba")
+        self.assertEqual(training_plan["difficulty"], "intermedio")
+        self.assertEqual(training_plan["equipment"], "Pesas")
+        self.assertEqual(training_plan["duration"], 30)
+        self.assertEqual(len(training_plan["workouts"]), 2)
+
+    def test_get_training_plan_not_found(self):
+        """
+        Test para verificar el error cuando el plan de entrenamiento no existe.
+        """
+        # Autenticar como usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud GET con un ID inexistente
+        url = reverse('get-training-plan', args=[999])  # ID inexistente
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 404 NOT FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Training Plan not found.")
+
+    def test_get_training_plan_unauthenticated(self):
+        """
+        Test para verificar que el acceso sin autenticación está prohibido.
+        """
+        # Realizar la solicitud GET sin autenticación
+        url = reverse('get-training-plan', args=[self.training_plan.id])
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("Authentication credentials were not provided", response.data["detail"])
+
+class UpdateTrainingPlanTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario con permisos y otro sin permisos
+        self.admin_user = User.objects.create(
+            email='admin@example.com',
+            password='password123',
+            role='administrador',
+            birth_date='1990-01-01'
+        )
+        self.client_user = User.objects.create(
+            email='client@example.com',
+            password='password123',
+            role='cliente',
+            birth_date='1990-01-01'
+        )
+
+        # Crear entrenamientos para asociar con el plan
+        self.workout1 = Workout.objects.create(name="Cardio Session", description="Intensive cardio session")
+        self.workout2 = Workout.objects.create(name="Strength Session", description="Strength and conditioning")
+
+        # Crear un plan de entrenamiento en la base de datos
+        self.training_plan = TrainingPlan.objects.create(
+            name="Plan de Prueba",
+            description="Este es un plan de prueba",
+            difficulty="intermedio",
+            equipment="Pesas",
+            duration=30,
+            media="http://example.com/media/test-plan.jpg"
+        )
+        self.training_plan.workouts.set([self.workout1, self.workout2])
+
+    def test_update_training_plan_success(self):
+        """
+        Test para modificar un plan de entrenamiento con éxito.
+        """
+        # Autenticar como administrador
+        self.client.force_authenticate(user=self.admin_user)
+
+        # Datos para actualizar el plan de entrenamiento
+        data = {
+            "training_plan_id": self.training_plan.id,
+            "name": "Plan Actualizado",
+            "description": "Descripción actualizada",
+            "difficulty": "avanzado",
+            "equipment": "Ninguno",
+            "duration": 45,
+            "workouts": [self.workout1.id]
+        }
+
+        # Realizar la solicitud PUT al endpoint
+        url = reverse('update-training-plan')
+        response = self.client.put(url, data, format='json')
+
+        # Verificar que el estado de la respuesta es 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verificar los datos actualizados del plan de entrenamiento
+        training_plan = response.data
+        self.assertEqual(training_plan["name"], "Plan Actualizado")
+        self.assertEqual(training_plan["description"], "Descripción actualizada")
+        self.assertEqual(training_plan["difficulty"], "avanzado")
+        self.assertEqual(training_plan["equipment"], "Ninguno")
+        self.assertEqual(training_plan["duration"], 45)
+        self.assertEqual(len(training_plan["workouts"]), 1)
+        self.assertEqual(training_plan["workouts"][0]["id"], self.workout1.id)
+
+    def test_update_training_plan_not_found(self):
+        """
+        Test para verificar el error cuando el plan de entrenamiento no existe.
+        """
+        # Autenticar como administrador
+        self.client.force_authenticate(user=self.admin_user)
+
+        # Datos para actualizar el plan con un ID inexistente
+        data = {
+            "training_plan_id": 999,  # ID inexistente
+            "name": "Plan Actualizado"
+        }
+
+        # Realizar la solicitud PUT al endpoint
+        url = reverse('update-training-plan')
+        response = self.client.put(url, data, format='json')
+
+        # Verificar que el estado de la respuesta es 404 NOT FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Training Plan not found.")
+
+    def test_update_training_plan_permission_denied(self):
+        """
+        Test para verificar el error cuando un usuario sin permisos intenta modificar un plan.
+        """
+        # Autenticar como usuario sin permisos
+        self.client.force_authenticate(user=self.client_user)
+
+        # Datos para actualizar el plan de entrenamiento
+        data = {
+            "training_plan_id": self.training_plan.id,
+            "name": "Intento de actualización sin permisos"
+        }
+
+        # Realizar la solicitud PUT al endpoint
+        url = reverse('update-training-plan')
+        response = self.client.put(url, data, format='json')
+
+        # Verificar que el estado de la respuesta es 403 FORBIDDEN
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data["error"], "No tienes permisos para modificar ejercicios")
+
+    def test_update_training_plan_unauthenticated(self):
+        """
+        Test para verificar que el acceso sin autenticación está prohibido.
+        """
+        # Datos para actualizar el plan de entrenamiento
+        data = {
+            "training_plan_id": self.training_plan.id,
+            "name": "Nuevo nombre"
+        }
+
+        # Realizar la solicitud PUT sin autenticación
+        url = reverse('update-training-plan')
+        response = self.client.put(url, data, format='json')
+
+        # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("Authentication credentials were not provided", response.data["detail"])
+
+    def test_update_training_plan_missing_id(self):
+        """
+        Test para verificar el error cuando falta el `training_plan_id`.
+        """
+        # Autenticar como administrador
+        self.client.force_authenticate(user=self.admin_user)
+
+        # Datos sin `training_plan_id`
+        data = {
+            "name": "Nuevo nombre"
+        }
+
+        # Realizar la solicitud PUT al endpoint
+        url = reverse('update-training-plan')
+        response = self.client.put(url, data, format='json')
+
+        # Verificar que el estado de la respuesta es 400 BAD REQUEST
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "El ID del plan de entrenamiento es obligatorio.")
+
+class DeleteTrainingPlanTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario autenticado con permisos
+        self.admin_user = User.objects.create(
+            email='admin@example.com',
+            password='password123',
+            role='administrador',
+            birth_date='1990-01-01'
+        )
+
+        # Crear un plan de entrenamiento en la base de datos
+        self.training_plan = TrainingPlan.objects.create(
+            name="Plan de prueba",
+            description="Entrenamiento de prueba",
+            difficulty="moderado",
+            equipment="Dumbbells",
+            duration=45,
+            media="http://example.com/media/test-plan.jpg"
+        )
+
+    def test_delete_training_plan_success(self):
+        """
+        Test para eliminar un plan de entrenamiento con éxito.
+        """
+        # Autenticar como administrador
+        self.client.force_authenticate(user=self.admin_user)
+
+        # Realizar la solicitud DELETE al endpoint
+        url = reverse('delete-training-plan', args=[self.training_plan.id])
+        response = self.client.delete(url)
+
+        # Verificar que el estado de la respuesta es 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["message"], "Training plan deleted successfully.")
+
+        # Confirmar que el plan de entrenamiento fue eliminado
+        self.assertFalse(TrainingPlan.objects.filter(id=self.training_plan.id).exists())
+
+    def test_delete_training_plan_not_found(self):
+        """
+        Test para verificar el error cuando el plan de entrenamiento no existe.
+        """
+        # Autenticar como administrador
+        self.client.force_authenticate(user=self.admin_user)
+
+        # Realizar la solicitud DELETE con un ID inexistente
+        url = reverse('delete-training-plan', args=[999])  # ID inexistente
+        response = self.client.delete(url)
+
+        # Verificar que el estado de la respuesta es 404 NOT FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Training plan not found.")
+
+    def test_delete_training_plan_unauthenticated(self):
+        """
+        Test para verificar que el acceso sin autenticación está prohibido.
+        """
+        # Realizar la solicitud DELETE sin autenticación
+        url = reverse('delete-training-plan', args=[self.training_plan.id])
+        response = self.client.delete(url)
+
+        # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("Authentication credentials were not provided", response.data["detail"])
+
+class GetAssignedTrainingPlanTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario autenticado
+        self.user = User.objects.create(
+            email='user@example.com',
+            password='password123',
+            role='cliente',
+            birth_date='1990-01-01'
+        )
+
+        # Crear un plan de entrenamiento y asignarlo al usuario
+        self.training_plan = TrainingPlan.objects.create(
+            name="Plan Asignado",
+            description="Este es un plan asignado al usuario.",
+            difficulty="intermedio",
+            equipment="Pesas",
+            duration=30,
+            media="http://example.com/media/test-plan.jpg"
+        )
+
+        # Crear una relación de UserWorkout para asociar el usuario con el plan de entrenamiento
+        self.user_workout = UserWorkout.objects.create(
+            user=self.user,
+            training_plan=self.training_plan,
+            progress=50,
+            date_started="2023-01-01",
+            date_completed=None
+        )
+
+        # Crear entrenamientos semanales y asignarlos con estado completado o progreso
+        self.workout1 = Workout.objects.create(name="Cardio Session", description="Intensive cardio session")
+        self.workout2 = Workout.objects.create(name="Strength Session", description="Strength and conditioning")
+
+        # Agregar estos entrenamientos a WeeklyWorkout
+        WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout1, completed=True, progress=100)
+        WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout2, completed=False, progress=60)
+
+    def test_get_assigned_training_plan_success(self):
+        """
+        Test para obtener el plan de entrenamiento asignado al usuario con éxito.
+        """
+        # Autenticar como el usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud GET al endpoint
+        url = reverse('get-assigned-training-plan')
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verificar los datos del plan de entrenamiento en la respuesta
+        training_plan = response.data
+        self.assertEqual(training_plan["name"], "Plan Asignado")
+        self.assertEqual(training_plan["description"], "Este es un plan asignado al usuario.")
+        self.assertEqual(training_plan["difficulty"], "intermedio")
+        self.assertEqual(training_plan["equipment"], "Pesas")
+        self.assertEqual(training_plan["duration"], 30)
+        self.assertEqual(training_plan["progress"], 50)
+        self.assertEqual(len(training_plan["workouts"]), 2)
+
+    def test_get_assigned_training_plan_not_found(self):
+        """
+        Test para verificar el error cuando el usuario no tiene un plan de entrenamiento asignado.
+        """
+        # Crear un nuevo usuario sin plan asignado
+        new_user = User.objects.create(
+            email='newuser@example.com',
+            password='password123',
+            role='cliente',
+            birth_date='1990-01-01'
+        )
+
+        # Autenticar como el nuevo usuario
+        self.client.force_authenticate(user=new_user)
+
+        # Realizar la solicitud GET al endpoint
+        url = reverse('get-assigned-training-plan')
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 404 NOT FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Training plan not found for the user.")
+
+    def test_get_assigned_training_plan_unauthenticated(self):
+        """
+        Test para verificar que el acceso sin autenticación está prohibido.
+        """
+        # Realizar la solicitud GET sin autenticación
+        url = reverse('get-assigned-training-plan')
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("Authentication credentials were not provided", response.data["detail"])
+
+class GetNextPendingWorkoutTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario autenticado
+        self.user = User.objects.create(
+            email='user@example.com',
+            password='password123',
+            role='cliente',
+            birth_date='1990-01-01'
+        )
+
+        # Crear un plan de entrenamiento y asignarlo al usuario
+        self.training_plan = TrainingPlan.objects.create(
+            name="Plan Asignado",
+            description="Plan de entrenamiento para el usuario.",
+            difficulty="intermedio",
+            equipment="Pesas",
+            duration=30,
+            media="http://example.com/media/test-plan.jpg"
+        )
+
+        # Crear la relación de UserWorkout para el plan del usuario
+        self.user_workout = UserWorkout.objects.create(
+            user=self.user,
+            training_plan=self.training_plan,
+            progress=50,
+            date_started="2023-01-01"
+        )
+
+        # Crear entrenamientos y asignarlos como WeeklyWorkout al UserWorkout
+        self.workout1 = Workout.objects.create(name="Cardio Session", description="Intensive cardio session")
+        self.workout2 = Workout.objects.create(name="Strength Session", description="Strength and conditioning")
+
+        # Asignar entrenamientos semanales, marcando uno como completado y otro como pendiente
+        WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout1, completed=True, progress=100)
+        WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout2, completed=False, progress=50)
+
+    def test_get_next_pending_workout_success(self):
+        """
+        Test para obtener el próximo entrenamiento pendiente con éxito.
+        """
+        # Autenticar como el usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud GET al endpoint
+        url = reverse('get-next-pending-workout')
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verificar los detalles del próximo entrenamiento pendiente
+        next_workout = response.data
+        self.assertEqual(next_workout["name"], "Strength Session")
+        self.assertEqual(next_workout["progress"], 50)
+
+    def test_get_next_pending_workout_no_pending_found(self):
+        """
+        Test para verificar el error cuando no hay entrenamientos pendientes.
+        """
+        # Marcar todos los entrenamientos como completados
+        WeeklyWorkout.objects.filter(user_workout=self.user_workout).update(completed=True)
+
+        # Autenticar como el usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud GET al endpoint
+        url = reverse('get-next-pending-workout')
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 404 NOT FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "No pending workouts found.")
+
+    def test_get_next_pending_workout_no_user_workout(self):
+        """
+        Test para verificar el error cuando el usuario no tiene un plan de entrenamiento asignado.
+        """
+        # Crear un nuevo usuario sin plan de entrenamiento asignado
+        new_user = User.objects.create(
+            email='newuser@example.com',
+            password='password123',
+            role='cliente',
+            birth_date='1990-01-01'
+        )
+
+        # Autenticar como el nuevo usuario
+        self.client.force_authenticate(user=new_user)
+
+        # Realizar la solicitud GET al endpoint
+        url = reverse('get-next-pending-workout')
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 404 NOT FOUND
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "User workout not found.")
+
+    def test_get_next_pending_workout_unauthenticated(self):
+        """
+        Test para verificar que el acceso sin autenticación está prohibido.
+        """
+        # Realizar la solicitud GET sin autenticación
+        url = reverse('get-next-pending-workout')
+        response = self.client.get(url)
+
+        # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("Authentication credentials were not provided", response.data["detail"])
+
+class MarkWorkoutCompleteTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario autenticado
+        self.user = User.objects.create(
+            email='user@example.com',
+            password='password123',
+            role='cliente',
+            birth_date='1990-01-01'
+        )
+
+        # Crear un plan de entrenamiento y asignarlo al usuario
+        self.training_plan = TrainingPlan.objects.create(
+            name="Plan Asignado",
+            description="Plan de entrenamiento para el usuario.",
+            difficulty="intermedio",
+            equipment="Pesas",
+            duration=30,
+            media="http://example.com/media/test-plan.jpg"
+        )
+
+        # Crear la relación de UserWorkout para el plan del usuario
+        self.user_workout = UserWorkout.objects.create(
+            user=self.user,
+            training_plan=self.training_plan,
+            progress=0,
+            date_started="2023-01-01"
+        )
+
+        # Crear entrenamientos y asignarlos como WeeklyWorkout al UserWorkout
+        self.workout1 = Workout.objects.create(name="Cardio Session", description="Intensive cardio session")
+        self.workout2 = Workout.objects.create(name="Strength Session", description="Strength and conditioning")
+
+        # Asignar entrenamientos semanales
+        self.weekly_workout1 = WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout1, completed=False, progress=0)
+        self.weekly_workout2 = WeeklyWorkout.objects.create(user_workout=self.user_workout, workout=self.workout2, completed=False, progress=0)
+
+    def test_mark_workout_complete_success(self):
+        """
+        Test para marcar un entrenamiento como completado con éxito.
+        """
+        # Autenticar como el usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud POST al endpoint
+        url = reverse('mark-workout-complete', args=[self.workout1.id])
+        response = self.client.post(url, {"progress": 100}, format='json')
+
+        # Verificar que el estado de la respuesta es 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["message"], "Workout marked as complete.")
+
+        # Confirmar que el entrenamiento ha sido marcado como completado
+        self.weekly_workout1.refresh_from_db()
+        self.assertTrue(self.weekly_workout1.completed)
+        self.assertEqual(self.weekly_workout1.progress, 100)
+
+    def test_mark_workout_complete_already_completed(self):
+        """
+        Test para verificar el error cuando el entrenamiento ya está completado.
+        """
+        # Marcar el entrenamiento como completado
+        self.weekly_workout1.completed = True
+        self.weekly_workout1.progress = 100
+        self.weekly_workout1.save()
+
+        # Autenticar como el usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud POST al endpoint
+        url = reverse('mark-workout-complete', args=[self.workout1.id])
+        response = self.client.post(url, {"progress": 100}, format='json')
+
+        # Verificar que el estado de la respuesta es 400 BAD REQUEST
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "Workout not found or already completed.")
+
+    def test_mark_workout_complete_not_found(self):
+        """
+        Test para verificar el error cuando el entrenamiento no existe para el usuario.
+        """
+        # Autenticar como el usuario
+        self.client.force_authenticate(user=self.user)
+
+        # Realizar la solicitud POST al endpoint con un ID de entrenamiento inexistente
+        url = reverse('mark-workout-complete', args=[999])  # ID inexistente
+        response = self.client.post(url, {"progress": 100}, format='json')
+
+        # Verificar que el estado de la respuesta es 400 BAD REQUEST
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "Workout not found or already completed.")
+
+    def test_mark_workout_complete_unauthenticated(self):
+        """
+        Test para verificar que el acceso sin autenticación está prohibido.
+        """
+        # Realizar la solicitud POST sin autenticación
+        url = reverse('mark-workout-complete', args=[self.workout1.id])
+        response = self.client.post(url, {"progress": 100}, format='json')
+
+        # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn("Authentication credentials were not provided", response.data["detail"])
+

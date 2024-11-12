@@ -34,9 +34,16 @@ def update_training_plan(request):
     updated_plan, error = TrainingPlanRepository.update_training_plan(request.user, training_plan_id, request.data)
 
     if error:
-        return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+        # Asigna el código de estado adecuado en función del mensaje de error
+        if error == "Training Plan not found.":
+            return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
+        elif error == "No tienes permisos para modificar ejercicios":
+            return Response({"error": error}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(updated_plan, status=status.HTTP_200_OK)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -70,7 +77,6 @@ def get_assigned_training_plan(request):
 
     return Response(training_plan, status=status.HTTP_200_OK)
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_training_plan(request):
@@ -78,11 +84,11 @@ def create_training_plan(request):
     Endpoint para crear un nuevo plan de entrenamiento.
     """
     try:
-        print("Request data:")
-        print(request.data)  # Esto mostrará la estructura de request.data
-
-        # Convertir duration a entero si es posible
-        duration = int(request.data['duration'])
+        # Convertir duration a entero
+        try:
+            duration = int(request.data['duration'])
+        except ValueError:
+            return Response({"error": "La duración debe ser un número entero válido."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Crear el plan de entrenamiento usando el repositorio
         plan = TrainingPlanRepository.create_training_plan(
@@ -101,13 +107,12 @@ def create_training_plan(request):
         }, status=status.HTTP_201_CREATED)
 
     except ValueError as e:
+        # Manejo específico para errores de valor (entrenamientos no encontrados)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         import traceback
-        # Mostrar detalles del error en la consola
         print("Error:", traceback.format_exc())
         return Response({"error": "Ocurrió un error inesperado."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -175,3 +180,4 @@ def mark_workout_complete(request, day_id):
 def get_training_plan_images(request):
     images = TrainingPlanRepository.get_training_plan_images()
     return Response(images)
+

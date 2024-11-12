@@ -40,6 +40,11 @@ urlpatterns = [
     path('users/all-details/<int:user_id>/', user.get_user_all_details, name='get-all-details'),
     path('assign-single-plan/<int:user_id>/', user.assign_single_plan, name='assign-single-plan'),
 
+    # Endpoints para WeightRecord
+    path('weight-records/', user.obtener_registros_peso_usuario, name='obtener_registros_peso_usuario'),
+    path('weight-records/create/', user.crear_registro_peso, name='crear_registro_peso'),
+    path('latest-weight-record/', user.get_latest_weight_record, name='latest-weight-record'),
+
     # Perfil de usuario
     path('profile/', user.get_user_profile, name='get-user-profile'),
     path('profile/update/', user.update_user_profile, name='update-user-profile'),
@@ -90,13 +95,6 @@ urlpatterns = [
     path('mealplans/<str:category>/', macros.get_mealplans_by_category, name='get-mealplans-by-category'),
     #path('mealplans/create/', macros.create_meal_plan_view, name='create_meal_plan'),
     path('diet-categories/', macros.list_diet_categories, name='get-diet-categories'),
-
-
-    # Endpoints para WeightRecord
-    path('weight-records/', user.obtener_registros_peso_usuario, name='obtener_registros_peso_usuario'),
-    path('weight-records/create/', user.crear_registro_peso, name='crear_registro_peso'),
-    path('latest-weight-record/', user.get_latest_weight_record, name='latest-weight-record'),
-
 
     # Endpoints para ExerciseLog
     path('exercise-log/', statistics.create_exercise_log, name='create-exercise-log'),

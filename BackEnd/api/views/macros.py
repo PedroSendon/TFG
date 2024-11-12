@@ -167,6 +167,7 @@ def get_mealplans_by_category(request, category):
     else:
         return Response({"error": "No se encontraron planes de comidas"}, status=status.HTTP_404_NOT_FOUND)
 
+# Vista sin requerir autenticación
 @api_view(['GET'])
 def list_diet_categories(request):
     """
@@ -178,4 +179,5 @@ def list_diet_categories(request):
         {"name": "maintenance", "description": "Mantenimiento"}
     ]
     return Response({"categories": categories}, status=status.HTTP_200_OK)
+
 
