@@ -232,7 +232,7 @@ const WorkoutsExercises: React.FC = () => {
     return (
         <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <Header title={t(selectedSection === 'workouts' ? 'workouts' : 'exercises')} />
-            <Container maxWidth="sm" sx={{ mt: 8, pb: 10, flexGrow: 1 }}>
+            <Container maxWidth="sm" sx={{ mt: 8, pb: 16, flexGrow: 1 }}>
                 <Box
                     sx={{
                         position: 'fixed',

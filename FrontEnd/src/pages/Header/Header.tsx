@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Box, Tooltip } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Box, Tooltip, CircularProgress } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
@@ -12,6 +12,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ title, onBack = () => {}, showBackButton = false }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isAdminView, setIsAdminView] = useState<boolean>(localStorage.getItem('isAdminView') === 'true');
+  const [loading, setLoading] = useState<boolean>(true);
 
   const fetchUserRole = async () => {
     const accessToken = localStorage.getItem('access_token');
@@ -29,6 +30,8 @@ const Header: React.FC<HeaderProps> = ({ title, onBack = () => {}, showBackButto
       setUserRole(role);
     } catch (error) {
       console.error('Error fetching user role:', error);
+    } finally {
+      setLoading(false); // Indicar que la carga ha terminado
     }
   };
 
@@ -42,6 +45,17 @@ const Header: React.FC<HeaderProps> = ({ title, onBack = () => {}, showBackButto
   useEffect(() => {
     fetchUserRole();
   }, []);
+
+  // Mostrar un indicador de carga mientras se obtiene el rol del usuario
+  if (loading) {
+    return (
+      <AppBar position="fixed" sx={{ backgroundColor: '#c1c1c1', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', height: '64px' }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <CircularProgress color="inherit" size={24} />
+        </Toolbar>
+      </AppBar>
+    );
+  }
 
   return (
     <AppBar position="fixed" sx={{ backgroundColor: '#c1c1c1', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', height: '64px' }}>

@@ -33,9 +33,9 @@ const MealPlanDetails: React.FC = () => {
     if (loading) return <p>{t('loading_meal_plan')}</p>;
 
     return (
-        <Box sx={{ marginTop: '16%', paddingBottom: '15%' }}>
+        <Box sx={{ marginTop: '16%', paddingBottom: '15%', height:'80vh', backgroundColor: '#f5f5f5' }}>
             <Header title={t('meal_plan_details')} />
-            <Box sx={{ padding: '20px', backgroundColor: '#f5f5f5' }}>
+            <Box sx={{ padding: '20px' }}>
 
                 {/* General Information */}
                 <Card sx={{

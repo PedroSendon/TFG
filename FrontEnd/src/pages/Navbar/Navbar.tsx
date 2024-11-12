@@ -1,50 +1,121 @@
-// Navbar.js
-import React, { useEffect, useState } from 'react';
-import NavbarAdmin from './NavbarAdmin';
-import NavbarCliente from './NavbarCliente';
-import NavbarTrainerNutritionist from './NavbarTrainerNutritionist';
-import { useHistory } from 'react-router-dom';
+import React, { useEffect, useState, useContext } from 'react';
+import { AppBar, BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
+import { useHistory, useLocation } from 'react-router-dom';
+import { navItems, NavItem } from './navConfig'; // Importa NavItem aquí
+import { LanguageContext } from '../../context/LanguageContext';
+import { usePlansContext } from '../../context/PlansContext';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import FoodBankIcon from '@mui/icons-material/FoodBank';
+import PeopleIcon from '@mui/icons-material/People';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import GroupIcon from '@mui/icons-material/Group';
+
+
+const iconMap = {
+  AssignmentIcon,
+  MenuBookIcon,
+  GroupIcon,
+  FitnessCenterIcon,
+  FoodBankIcon,
+  TrendingUpIcon,
+  AccountCircleIcon,
+  HourglassEmptyIcon,
+  PeopleIcon,
+  GroupAddIcon,
+};
+
+
 
 const Navbar = () => {
-  const [userRole, setUserRole] = useState(null);
+  const { t } = useContext(LanguageContext);
+  const { plansAssigned } = usePlansContext();
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isAdminView, setIsAdminView] = useState<boolean>(localStorage.getItem('isAdminView') === 'true');
   const history = useHistory();
-
-  const fetchUserDetails = async () => {
-    const accessToken = localStorage.getItem('access_token');
-    if (!accessToken) {
-      history.push('/login');
-      return;
-    }
-    try {
-      // Obtener el rol del usuario
-      const roleResponse = await fetch('http://127.0.0.1:8000/api/user/role/', {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${accessToken}` },
-      });
-      const roleData = await roleResponse.json();
-      const role = roleData.role;
-      localStorage.setItem('role', role);
-      setUserRole(role);
-
-    } catch (error) {
-      console.error('Error fetching user role or status:', error);
-    }
-  };
+  const location = useLocation();
 
   useEffect(() => {
-    fetchUserDetails();
-  }, []);
+    const fetchUserRoleAndStatus = async () => {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        history.push('/login');
+        return;
+      }
+      try {
+        const roleResponse = await fetch('http://127.0.0.1:8000/api/user/role/', {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+        });
+        const roleData = await roleResponse.json();
+        const role = roleData.role;
+        setUserRole(role);
+        localStorage.setItem('role', role);
+      } catch (error) {
+        console.error('Error fetching user role or status:', error);
+      }
+    };
 
-  // Renderizar la navbar en función del rol del usuario
-  if (userRole === 'administrador') {
-    return <NavbarAdmin />;
-  } else if (userRole === 'cliente') {
-    return <NavbarCliente />;
-  } else if (userRole === 'nutricionista' || userRole === 'entrenador') {
-    return <NavbarTrainerNutritionist />;
-  } else {
+    const handleStorageChange = () => {
+      setIsAdminView(localStorage.getItem('isAdminView') === 'true');
+    };
+
+    fetchUserRoleAndStatus();
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [history]);
+
+  const handleNavigation = (path: string) => {
+    history.push(path);
+  };
+
+  if (!userRole) {
     return null;
   }
+
+  const currentRole = isAdminView ? userRole : 'cliente';
+  const filteredNavItems = navItems[currentRole as keyof typeof navItems].filter((item: NavItem) => {
+    if (item.condition === 'plansAssigned') return plansAssigned;
+    if (item.condition === '!plansAssigned') return !plansAssigned;
+    return true;
+  });
+
+  return (
+    <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, backgroundColor: '#c1c1c1', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' }}>
+      <Paper elevation={3}>
+        <BottomNavigation
+          value={location.pathname}
+          onChange={(event, newValue) => handleNavigation(newValue)}
+          sx={{ backgroundColor: 'transparent' }}
+          showLabels
+        >
+          {filteredNavItems.map((item, index) => {
+            const IconComponent = iconMap[item.icon as keyof typeof iconMap];
+            return (
+              <BottomNavigationAction
+                key={index}
+                label={t(item.label)}
+                icon={<IconComponent sx={{ fontSize: 24 }} />}
+                sx={{
+                  color: location.pathname === item.path ? '#FFFFFF' : '#6b6b6b',
+                  backgroundColor: location.pathname === item.path ? '#c1c1c1' : 'transparent',
+                  '&.Mui-selected': { color: '#FFFFFF', backgroundColor: '#c1c1c1' },
+                }}
+                onClick={() => handleNavigation(item.path)}
+              />
+            );
+          })}
+        </BottomNavigation>
+      </Paper>
+    </AppBar>
+  );
 };
 
 export default Navbar;
