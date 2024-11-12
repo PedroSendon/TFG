@@ -12,7 +12,9 @@ class Exercise(models.Model):
         return self.name
 
     def get_muscle_groups(self):
-        return self.muscleGroups.split(',') if self.muscleGroups else []
+        # Remueve espacios en blanco alrededor de cada elemento de la lista
+        return [muscle.strip() for muscle in self.muscleGroups.split(',')] if self.muscleGroups else []
+
 
     def set_muscle_groups(self, muscle_groups):
         self.muscleGroups = ','.join(muscle_groups)

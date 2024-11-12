@@ -40,7 +40,6 @@ urlpatterns = [
     path('users/all-details/<int:user_id>/', user.get_user_all_details, name='get-all-details'),
     path('assign-single-plan/<int:user_id>/', user.assign_single_plan, name='assign-single-plan'),
 
-
     # Perfil de usuario
     path('profile/', user.get_user_profile, name='get-user-profile'),
     path('profile/update/', user.update_user_profile, name='update-user-profile'),
@@ -72,14 +71,13 @@ urlpatterns = [
     path('workout/complete/<int:day_id>/', trainingplan.mark_workout_complete, name='mark-workout-complete'),
     path('images/', trainingplan.get_training_plan_images, name='get_training_plan_images'),
 
-
     # Exercises
     path('exercises/create/', exercise.create_exercise, name='create-exercise'),
     path('exercises/details/', exercise.get_exercise_details, name='get-exercise-details'),
+    path('exercises/by_training/', exercise.get_exercises_by_training, name='get_exercises_by_training'),
     path('exercises/<int:exercise_id>/', exercise.get_exercise_by_id, name='get-exercise-by-id'),
     path('exercises/all/', exercise.list_all_exercises, name='list-all-exercises'),
-    path('exercises/by-train/', exercise.get_exercises_by_training, name='get-exercises-by-training'),
-    path('exercises/update/', exercise.update_exercise, name='update-exercise'),
+    path('exercises/update/', exercise.update_exercise, name='update_exercise'),
     path('exercises/<int:exercise_id>/delete/', exercise.delete_exercise, name='delete-exercise'),
 
     # Macros
@@ -93,13 +91,6 @@ urlpatterns = [
     #path('mealplans/create/', macros.create_meal_plan_view, name='create_meal_plan'),
     path('diet-categories/', macros.list_diet_categories, name='get-diet-categories'),
 
-    # Estadísticas
-    path('statistics/exercises/', statistics.get_exercise_popularity, name='get-exercise-popularity'),
-    path('statistics/growth/', statistics.get_platform_growth, name='get-platform-growth'),
-    path('progress/', statistics.create_progress, name='create-progress'),
-    path('progress/user/<int:user_id>/', statistics.get_progress_by_user, name='get-progress-by-user'),
-    path('progress/<int:progress_id>/', statistics.update_progress, name='update-progress'),
-    path('progress/<int:progress_id>/delete/', statistics.delete_progress, name='delete-progress'),
 
     # Endpoints para WeightRecord
     path('weight-records/', user.obtener_registros_peso_usuario, name='obtener_registros_peso_usuario'),

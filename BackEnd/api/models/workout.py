@@ -19,9 +19,9 @@ class Workout(models.Model):
 class WorkoutExercise(models.Model):
     workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
-    sets = models.PositiveIntegerField()
-    reps = models.PositiveIntegerField()
-    rest = models.PositiveIntegerField()  # Descanso en segundos entre series
+    sets = models.IntegerField(null=True, blank=True)  # Permite valores nulos
+    reps = models.IntegerField(null=True, blank=True)  # Permite valores nulos
+    rest = models.IntegerField(null=True, blank=True)  # Permite valores nulos
 
     def __str__(self):
         return f'{self.workout.name} - {self.exercise.name}'

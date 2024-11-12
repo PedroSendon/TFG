@@ -211,18 +211,23 @@ class MacrosRepository:
     def delete_mealplan(user, mealplan_id, diet_type):
         """
         Eliminar un plan de comidas de la categoría seleccionada.
-        :param user: El usuario que posee el plan de comidas.
+        :param user: El usuario que realiza la solicitud.
         :param mealplan_id: El ID del plan de comidas a eliminar.
         :param diet_type: La categoría de la dieta (weightLoss, muscleGain, maintenance).
         :return: True si se eliminó correctamente, False si no se encontró el plan de comidas.
         """
         try:
-            # Buscar el MealPlan por ID, usuario y tipo de dieta
-            meal_plan = MealPlan.objects.get(
-                id=mealplan_id, user=user, diet_type=diet_type)
-            meal_plan.delete()
+            # Buscar el UserNutritionPlan que enlaza al usuario con el MealPlan correspondiente
+            user_nutrition_plan = UserNutritionPlan.objects.select_related('plan').get(
+                user=user, plan__id=mealplan_id, plan__diet_type=diet_type
+            )
+            
+            # Eliminar el plan de comidas
+            user_nutrition_plan.plan.delete()
             return True
-        except MealPlan.DoesNotExist:
+
+        except UserNutritionPlan.DoesNotExist:
+            # Si no existe el UserNutritionPlan que relacione al usuario con el MealPlan, devuelve False
             return False
 
     @staticmethod
@@ -235,9 +240,13 @@ class MacrosRepository:
         :return: Un diccionario con los detalles del plan de comidas o None si no se encontró.
         """
         try:
-            # Buscar el MealPlan por ID, usuario y tipo de dieta
-            meal_plan = MealPlan.objects.get(
-                id=mealplan_id, user=user, diet_type=diet_type)
+            # Buscar el UserNutritionPlan que enlace al usuario con el MealPlan correspondiente
+            user_nutrition_plan = UserNutritionPlan.objects.select_related('plan').get(
+                user=user, plan__id=mealplan_id, plan__diet_type=diet_type
+            )
+            meal_plan = user_nutrition_plan.plan
+
+            # Retornar los detalles del plan de comidas
             return {
                 "id": meal_plan.id,
                 "kcal": meal_plan.calories,
@@ -249,7 +258,7 @@ class MacrosRepository:
                 "name": meal_plan.name,
                 "description": meal_plan.description
             }
-        except MealPlan.DoesNotExist:
+        except UserNutritionPlan.DoesNotExist:
             return None
 
     @staticmethod

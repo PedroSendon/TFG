@@ -18,7 +18,10 @@ const ExerciseDetails: React.FC = () => {
     const fetchExerciseDetails = async () => {
         try {
             const accessToken = localStorage.getItem('access_token');
-            if (!accessToken || !exerciseId) return;
+            if (!accessToken) {
+                console.error('Access token missing');
+                return;
+            }
 
             const response = await fetch(`http://127.0.0.1:8000/api/exercises/${exerciseId}/`, {
                 method: 'GET',
@@ -32,7 +35,7 @@ const ExerciseDetails: React.FC = () => {
                 const data = await response.json();
                 setExerciseData(data);
             } else {
-                console.error("Failed to fetch exercise details");
+                console.error("Failed to fetch exercise details:", response.status, response.statusText);
             }
         } catch (error) {
             console.error('Error fetching exercise data', error);

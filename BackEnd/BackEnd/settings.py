@@ -9,17 +9,43 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import sys
 from datetime import timedelta
 import os
 from pathlib import Path
 from google.oauth2 import service_account
 from decouple import config
 
+# Detectar si estamos en modo de pruebas
+IS_TESTING = 'test' in sys.argv
 
 # Base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Configuración de la base de datos
+if IS_TESTING:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'smartgym_test',  # Base de datos de pruebas
+            'USER': 'postgres',
+            'PASSWORD': 'Admin',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'smartgym',  # Nombre de la base de datos que creaste en pgAdmin
+            # Usuario de PostgreSQL (por defecto suele ser 'postgres')
+            'USER': 'postgres',
+            'PASSWORD': 'Admin',  # Contraseña de PostgreSQL
+            'HOST': 'localhost',  # Dirección del servidor de base de datos
+            'PORT': '5432',  # Puerto de PostgreSQL (por defecto 5432)
+        }
+    }
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -47,7 +73,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
-    'drf_yasg', 
+    'drf_yasg',
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -109,20 +135,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'BackEnd.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'smartgym',  # Nombre de la base de datos que creaste en pgAdmin
-        'USER': 'postgres',  # Usuario de PostgreSQL (por defecto suele ser 'postgres')
-        'PASSWORD': 'Admin',  # Contraseña de PostgreSQL
-        'HOST': 'localhost',  # Dirección del servidor de base de datos
-        'PORT': '5432',  # Puerto de PostgreSQL (por defecto 5432)
-    }
-}
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8100",  # URL donde corre tu frontend de Ionic

@@ -65,7 +65,8 @@ class ExerciseRepository:
         # Crear el nuevo ejercicio
         try:
             # Verificar si el objeto `user` es una instancia de `User`
-            check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
+            check_result = UserRepository.check_user_role(
+                user, ['entrenador', 'administrador'])
             if "error" in check_result:
                 return check_result
 
@@ -93,6 +94,13 @@ class ExerciseRepository:
                     "media": exercise.media
                 }
             }
+        except ValidationError as e:
+            # Capturar y personalizar el mensaje de error
+            error_messages = e.errors()
+            error_details = {
+                "error": " ".join([f"{err['loc'][0]}: {err['msg']}" for err in error_messages]).replace(" ", "\n")
+            }
+            return {"error": error_details, "status": status.HTTP_400_BAD_REQUEST}
         except Exception as e:
             return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
 
@@ -100,37 +108,29 @@ class ExerciseRepository:
     def update_exercise(exercise_id: int, user, data: dict):
         """
         Modificar un ejercicio existente.
-        :param exercise_id: ID del ejercicio a modificar.
-        :param user: Usuario que realiza la petición.
-        :param data: Datos actualizados del ejercicio.
-        :return: Un diccionario con los datos del ejercicio actualizado o un mensaje de error.
         """
-
-        # Verificar si el objeto `user` es una instancia de `User`
-        if not isinstance(user, User):
-            user = User.objects.get(id=user.id)
-
+        # Verificar permisos
         if user.role not in ['entrenador', 'administrador']:
             return {"error": "No tienes permisos para modificar ejercicios", "status": status.HTTP_403_FORBIDDEN}
 
-        # Validar los datos con el schema
+        # Validar datos con ExerciseUpdateSchema
         try:
             schema = ExerciseUpdateSchema(**data)
             validated_data = schema.dict(exclude_unset=True)
         except ValidationError as e:
-            return {"error": "Datos no válidos", "status": status.HTTP_400_BAD_REQUEST}
+            return {"error": "Datos no válidos", "details": e.errors(), "status": status.HTTP_400_BAD_REQUEST}
 
-        # En la función update_exercise del repositorio
+        # Intentar obtener y actualizar el ejercicio
         try:
             exercise = Exercise.objects.get(id=exercise_id)
 
+            # Actualizar los campos con los datos validados
             if 'name' in validated_data:
                 exercise.name = validated_data['name']
             if 'description' in validated_data:
                 exercise.description = validated_data['description']
-            if 'muscleGroups' in validated_data:  # Cambia aquí el nombre del campo si es necesario
-                exercise.muscleGroups = ','.join(
-                    validated_data['muscleGroups'])
+            if 'muscleGroups' in validated_data:
+                exercise.muscleGroups = ','.join(validated_data['muscleGroups'])
             if 'instructions' in validated_data:
                 exercise.instructions = validated_data['instructions']
             if 'media' in validated_data:
@@ -138,20 +138,23 @@ class ExerciseRepository:
 
             exercise.save()
 
+            # Retornar datos del ejercicio actualizado con el estado 200
             return {
                 "data": {
                     "id": exercise.id,
                     "name": exercise.name,
                     "description": exercise.description,
-                    # Cambia aquí si el nombre es correcto
-                    "muscleGroups": exercise.muscleGroups.split(","),
+                    "muscleGroups": exercise.get_muscle_groups(),
                     "instructions": exercise.instructions,
                     "media": exercise.media
-                }
+                },
+                "status": status.HTTP_200_OK
             }
         except Exercise.DoesNotExist:
+            # Si no se encuentra el ejercicio, devolver 404
             return {"error": "Ejercicio no encontrado", "status": status.HTTP_404_NOT_FOUND}
-
+        
+        
     @staticmethod
     def delete_exercise_by_id(exercise_id: int) -> bool:
         """

@@ -147,8 +147,6 @@ def get_mealplan(request, category, id):
         return Response(mealplan, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Plan de comidas no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-
-
     
 
 @api_view(['GET'])

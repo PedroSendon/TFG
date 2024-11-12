@@ -93,20 +93,24 @@ def get_exercise_details(request):
     """
     day_id = request.data.get('day_id')
     exercise_id = request.data.get('exerciseId')
-    print(day_id, exercise_id)
 
-    if not day_id or not exercise_id:
-        return Response({"error": "day_id y exercise_id son requeridos."}, status=status.HTTP_400_BAD_REQUEST)
+    # Verificar si los parámetros están presentes
+    if day_id is None or exercise_id is None:
+        return Response({"error": "day_id y exercise_id son requeridos"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validar si los parámetros son numéricos
+    if not str(day_id).isdigit() or not str(exercise_id).isdigit():
+        return Response({"error": "Los parámetros 'day_id' y 'exercise_id' deben ser números"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         user = request.user  # Obtener el usuario autenticado
-        exercise = ExerciseRepository.get_exercise_by_user_workout_and_id(user, day_id, exercise_id)
+        exercise = ExerciseRepository.get_exercise_by_user_workout_and_id(user, int(day_id), int(exercise_id))
         if exercise:
             return Response(exercise, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Ejercicio no encontrado en el workout especificado."}, status=status.HTTP_404_NOT_FOUND)
     except ValueError:
-        return Response({"error": "Los parámetros 'day_id' y 'exercise_id' deben ser números."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Error en el procesamiento de los datos"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -133,27 +137,25 @@ def get_exercises_by_training(request):
     else:
         return Response({"error": "No se encontraron ejercicios para el entrenamiento especificado."}, status=status.HTTP_404_NOT_FOUND)
 
+
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_exercise(request):
     """
     Modificar un ejercicio existente.
     """
-    # Obtener el ID del ejercicio desde el cuerpo de la solicitud
     exercise_id = request.data.get('id')
 
     if not exercise_id:
         return Response({"error": "El parámetro 'id' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Llamar al repositorio para actualizar el ejercicio
     result = ExerciseRepository.update_exercise(exercise_id, request.user, request.data)
     
     if 'error' in result:
-        return Response({"error": result['error']}, status=result.get('status', status.HTTP_400_BAD_REQUEST))
+        # Devuelve el código de estado proporcionado en el resultado
+        return Response({"error": result['error'], "details": result.get("details")}, status=result.get('status', status.HTTP_400_BAD_REQUEST))
 
     return Response({
         "message": "Ejercicio modificado con éxito.",
         "data": result['data']
-    }, status=status.HTTP_200_OK)
-
-
+    }, status=result['status'])
