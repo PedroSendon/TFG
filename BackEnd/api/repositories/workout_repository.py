@@ -16,20 +16,25 @@ class WorkoutRepository:
         :return: Lista de diccionarios con los datos de cada entrenamiento.
         """
         if user_id:
-            # Si hay lógica para entrenamientos personalizados, implementarla aquí.
-            workouts = Workout.objects.filter(user__id=user_id)
+            # Obtener el entrenamiento asociado al usuario a través de UserWorkout
+            user_workout = UserWorkout.objects.filter(user_id=user_id).first()
+            if user_workout and user_workout.training_plan:
+                workouts = user_workout.training_plan.workouts.all()
+            else:
+                workouts = Workout.objects.none()  # Retorna una lista vacía si no hay `training_plan`
         else:
             # Obtener todos los entrenamientos disponibles
             workouts = Workout.objects.all()
 
-        # Serializamos los datos de los entrenamientos de la misma manera que list_all_exercises
+        # Serializar los datos de los entrenamientos
         return [{
             "id": workout.id,
             "name": workout.name,
             "description": workout.description,
             "media": workout.media,
-            # Puedes incluir más campos según tu modelo de Workout si es necesario
+            "duration": workout.duration,
         } for workout in workouts]
+
 
     @staticmethod
     def get_training_plans_by_user(user_id):
@@ -236,6 +241,8 @@ class WorkoutRepository:
 
         # Añadir los ejercicios al entrenamiento
         exercises_data = []
+        missing_exercises = []  # Lista para almacenar los nombres de ejercicios no encontrados
+
         for exercise in exercises:
             try:
                 existing_exercise = Exercise.objects.get(name=exercise['name'])
@@ -253,49 +260,51 @@ class WorkoutRepository:
                     "rest": exercise['rest']
                 })
             except Exercise.DoesNotExist:
-                continue  # Si no existe el ejercicio, se ignora
+                missing_exercises.append(exercise['name'])  # Agregar nombre del ejercicio a la lista de faltantes
 
-        return {
+        response_data = {
             "data": {
                 "id": workout.id,
                 "name": workout.name,
                 "description": workout.description,
                 "exercises": exercises_data,
                 "media": workout.media,
-                "duration": workout.duration
+                "duration": workout.duration,
             }
         }
+
+        # Si hay ejercicios no encontrados, incluir mensaje adicional en la respuesta
+        if missing_exercises:
+            response_data["data"]["missing_exercises"] = missing_exercises
+
+        return response_data
+
 
     @staticmethod
     def update_workout(user, workout_id, name, description, exercises, media=None):
         """
         Actualizar un entrenamiento existente en el sistema.
-        :param user: El usuario que realiza la solicitud.
-        :param workout_id: ID del entrenamiento a actualizar.
-        :param name: Nuevo nombre del entrenamiento.
-        :param description: Nueva descripción del entrenamiento.
-        :param exercises: Lista de ejercicios asociados al entrenamiento.
-        :param media: Nueva URL o base64 de la imagen o video asociado al entrenamiento (opcional).
-        :return: Un diccionario con los datos del entrenamiento actualizado o un mensaje de error.
         """
         try:
             check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
             if "error" in check_result:
-                return check_result
-            
-            # Obtener el entrenamiento
-            workout = Workout.objects.get(id=workout_id)
-            
-            # Actualizar los detalles del entrenamiento
+                # Cambiar el código de estado a 403 si el usuario no tiene permisos
+                return {"error": "No tienes permisos para realizar esta acción", "status": status.HTTP_403_FORBIDDEN}
+
+            # Intentar obtener el entrenamiento; si no existe, devolver error 404
+            try:
+                workout = Workout.objects.get(id=workout_id)
+            except Workout.DoesNotExist:
+                return {"error": "Entrenamiento no encontrado", "status": status.HTTP_404_NOT_FOUND}
+
+            # Actualizar detalles del entrenamiento
             workout.name = name
             workout.description = description
             workout.media = media
             workout.save()
 
-            # Eliminar los ejercicios anteriores asociados con el entrenamiento
+            # Eliminar ejercicios anteriores y añadir los nuevos
             WorkoutExercise.objects.filter(workout=workout).delete()
-
-            # Añadir los nuevos ejercicios al entrenamiento
             exercises_data = []
             for exercise in exercises:
                 try:
@@ -314,9 +323,8 @@ class WorkoutRepository:
                         "rest": exercise['rest']
                     })
                 except Exercise.DoesNotExist:
-                    continue  # Ignorar el ejercicio si no existe
+                    continue  # Ignorar si no existe el ejercicio
 
-            # Devolver los datos del entrenamiento actualizado
             return {
                 "id": workout.id,
                 "name": workout.name,
@@ -326,8 +334,8 @@ class WorkoutRepository:
             }
 
         except Workout.DoesNotExist:
-            return {"error": "Entrenamiento no encontrado"}
-        
+            return {"error": "Entrenamiento no encontrado", "status": status.HTTP_404_NOT_FOUND}
+            
     @staticmethod
     def delete_workout(user, workout_id):
         """

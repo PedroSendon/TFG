@@ -837,12 +837,9 @@ class ImagenRepository:
         return Imagen.objects.first()
 
 class UserWorkoutRepository:
+
     @staticmethod
     def mark_workout_as_completed(user_id, workout_id):
-        """
-        Marca un entrenamiento como completo para un usuario. Si todos los entrenamientos están completos,
-        reinicia todos los entrenamientos a incompleto.
-        """
         try:
             user_workout = UserWorkout.objects.get(user_id=user_id)
             workout = WeeklyWorkout.objects.get(user_workout=user_workout, workout_id=workout_id)
@@ -854,7 +851,9 @@ class UserWorkoutRepository:
 
             return {"message": "Workout marked as completed"}
         except WeeklyWorkout.DoesNotExist:
-            return {"error": "Workout not found for the user"}, 404
+            # Devolver un mensaje con el error y el código 404
+            return {"error": "Workout not found for the user"}, status.HTTP_404_NOT_FOUND
+
 
     @staticmethod
     def check_and_reset_all_workouts(user_workout):

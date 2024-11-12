@@ -71,8 +71,11 @@ def get_workout_exercises_by_day(request, day_id):
 def complete_workout(request, workout_id):
     user_id = request.user.id
     result = UserWorkoutRepository.mark_workout_as_completed(user_id, workout_id)
-    if "error" in result:
-        return Response(result, status=result[1])
+
+    if isinstance(result, tuple) and "error" in result[0]:
+        # Devolver el código de estado que viene en `result[1]` si hay un error
+        return Response(result[0], status=result[1])
+    
     return Response(result, status=status.HTTP_200_OK)
 
 
@@ -185,14 +188,16 @@ def update_workout(request, workout_id):
         media=request.data.get('media', None)
     )
 
-    # Si hay un error, devolvemos una respuesta con el mensaje de error
+    # Comprobar si el resultado contiene un error y devolver el código de estado adecuado
     if 'error' in result:
-        return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        status_code = result.get('status', status.HTTP_400_BAD_REQUEST)  # Usar el estado especificado en `result`, si existe
+        return Response({"error": result["error"]}, status=status_code)
     
     return Response({
         "message": "Entrenamiento actualizado con éxito.",
         "data": result
     }, status=status.HTTP_200_OK)
+
 
     
 @api_view(['DELETE'])
