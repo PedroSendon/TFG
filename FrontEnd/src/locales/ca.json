@@ -386,5 +386,6 @@
   "select_difficulty_placeholder": "Selecciona la Dificultat",
   "meal_count": "Selecciona el nombre de menjars",
   "select_equipment_placeholder": "Selecciona l'Equipament",
-  "select_training_plan": "Seleccionar pla d'entrenament"
+  "select_training_plan": "Seleccionar pla d'entrenament",
+  "weight_record_history": "Històric de Pes"
 }

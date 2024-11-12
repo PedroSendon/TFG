@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Button, Card, CardContent, Divider, Typography, Box, List, ListItem, ListItemText, Avatar, Select, MenuItem } from '@mui/material';
-import { useParams, useHistory, useLocation } from 'react-router-dom';
+import { Button, Card, CardContent, Divider, Typography, Box, List, ListItem, ListItemText, Avatar, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext';
-import { h } from 'vue';
+import { Line } from 'react-chartjs-2';
 
 const UserInformation: React.FC = () => {
     const location = useLocation<{ userId: number; showPlanSection: boolean }>();
@@ -12,17 +12,28 @@ const UserInformation: React.FC = () => {
     const history = useHistory();
     const { t } = useContext(LanguageContext);
     const [userData, setUserData] = useState<any>(null);
-    const [plans, setPlans] = useState<any[]>([]); // Cambiado de trainingPlans a plans para ser más genérico
+    const [plans, setPlans] = useState<any[]>([]);
     const [selectedPlan, setSelectedPlan] = useState<number | "new" | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [isNutritionPlan, setIsNutritionPlan] = useState<boolean>(false); // Nuevo estado para el tipo de plan
+    const [isNutritionPlan, setIsNutritionPlan] = useState<boolean>(false);
 
     useEffect(() => {
-        fetchUserDetails();
-        
-        // Si se debe mostrar la sección de planes, obtener el rol y los planes
+        const storedUserData = localStorage.getItem(`user_data_${userId}`);
+        const storedPlans = localStorage.getItem(`plans_${userId}`);
+
+        if (storedUserData) {
+            setUserData(JSON.parse(storedUserData));
+            setLoading(false);
+        } else {
+            fetchUserDetails();
+        }
+
         if (showPlanSection) {
-            fetchUserRole();
+            if (storedPlans) {
+                setPlans(JSON.parse(storedPlans));
+            } else {
+                fetchUserRole();
+            }
         }
     }, []);
 
@@ -35,11 +46,9 @@ const UserInformation: React.FC = () => {
             });
             if (response.ok) {
                 const data = await response.json();
-                // Si el rol es 'nutricionista', configuramos `isNutritionPlan` a `true`, de lo contrario a `false`
                 const isNutriRole = data.role === 'nutricionista';
                 setIsNutritionPlan(isNutriRole);
 
-                // Llamamos a `fetchPlans` después de saber el rol del usuario
                 fetchPlans(isNutriRole);
             } else {
                 console.error("Error fetching user role");
@@ -56,7 +65,11 @@ const UserInformation: React.FC = () => {
             const response = await fetch(`http://127.0.0.1:8000/api/users/all-details/${userId}/`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` },
             });
-            if (response.ok) setUserData(await response.json());
+            if (response.ok) {
+                const data = await response.json();
+                setUserData(data);
+                localStorage.setItem(`user_data_${userId}`, JSON.stringify(data)); // Guardar en localStorage
+            }
         } catch (error) {
             console.error('Error fetching user details', error);
         } finally {
@@ -69,7 +82,6 @@ const UserInformation: React.FC = () => {
             const accessToken = localStorage.getItem('access_token');
             if (!accessToken) return;
 
-            // Seleccionar el endpoint correcto según el tipo de plan
             const endpoint = isNutritionPlan
                 ? `http://127.0.0.1:8000/api/nutritionplans/`
                 : `http://127.0.0.1:8000/api/trainingplans/`;
@@ -81,6 +93,7 @@ const UserInformation: React.FC = () => {
             if (response.ok) {
                 const data = await response.json();
                 setPlans(data.data);
+                localStorage.setItem(`plans_${userId}`, JSON.stringify(data.data)); // Guardar en localStorage
             }
         } catch (error) {
             console.error('Error fetching plans', error);
@@ -106,7 +119,6 @@ const UserInformation: React.FC = () => {
                 });
 
                 if (response.ok) {
-                    const result = await response.json();
                     history.push('/admin/pending-users');
                 } else {
                     console.error("Failed to assign the plan");
@@ -117,19 +129,45 @@ const UserInformation: React.FC = () => {
         }
     };
 
-    const handleSelectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleSelectChange = (event: SelectChangeEvent<number | "new">) => {
         const value = event.target.value as number | "new";
         setSelectedPlan(value);
 
         if (value === "new") {
-            // Redirigir a la página de agregar plan en función de `isNutritionPlan`
             const path = isNutritionPlan ? '/admin/nutrition/add' : '/admin/trainingplans/add';
             history.push(path);
         }
     };
 
+    const chartData = userData && userData.weight_records ? {
+        labels: userData.weight_records.map((record: { date: string }) =>
+            new Date(record.date).toLocaleDateString(undefined, { day: '2-digit', month: 'short' })
+        ),
+        datasets: [
+            {
+                label: t('Weight Evolution'),
+                data: userData.weight_records.map((record: { weight: number }) => record.weight),
+                borderColor: 'rgba(70, 130, 180, 1)',
+                backgroundColor: 'rgba(70, 130, 180, 0.2)',
+                fill: true,
+            },
+        ],
+    } : {
+        labels: [],
+        datasets: [
+            {
+                label: t('Weight Evolution'),
+                data: [],
+                borderColor: 'rgba(70, 130, 180, 1)',
+                backgroundColor: 'rgba(70, 130, 180, 0.2)',
+                fill: true,
+            },
+        ],
+    };
+
 
     if (loading) return <Typography>{t("loading_admin")}</Typography>;
+
 
     return (
         <Box sx={{ marginTop: '16%' }}>
@@ -222,6 +260,28 @@ const UserInformation: React.FC = () => {
                                 <ListItemText primary={t('meals_per_day_admin')} secondary={`${userData?.diet_preferences?.meals_per_day} ${t('meals_admin')}`} />
                             </ListItem>
                         </List>
+                    </CardContent>
+                </Card>
+
+                {/* Section for Weight Evolution Chart */}
+                <Card variant="outlined" sx={{ marginTop: '15px', mb: '10%', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
+                    <CardContent>
+                        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+                            {t('weight_record_history')}
+                        </Typography>
+                        <Line
+                            data={chartData}
+                            options={{
+                                responsive: true,
+                                plugins: {
+                                    legend: { display: false },
+                                },
+                                scales: {
+                                    x: { title: { display: true, text: t('Date') } },
+                                    y: { title: { display: true, text: t('Weight (kg)') } },
+                                },
+                            }}
+                        />
                     </CardContent>
                 </Card>
 

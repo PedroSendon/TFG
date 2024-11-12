@@ -489,15 +489,19 @@ class UserRepository:
             user = UserRepository.get_user_by_id(user_id)
             if not isinstance(user, User):
                 user = User.objects.get(id=user.id)
-            # Fetch user details with related fields
+
+            # Obtener detalles del usuario y preferencias de dieta
             user_data = User.objects.select_related('details', 'diet_preferences').filter(id=user.id).first()
             if not user_data:
                 return None
-            
-            # Calculate age using the birth date
+
+            # Calcular la edad usando la fecha de nacimiento
             age = UserDetailsRepository.calculate_age(user_data.birth_date)
 
-            # Structure the essential data in a dictionary, handling missing related data gracefully
+            # Obtener registros de peso del usuario
+            weight_records = user_data.weight_records.all().values('weight', 'date')
+
+            # Estructurar los datos esenciales en un diccionario
             user_details = {
                 'id': user_data.id,
                 'first_name': user_data.first_name,
@@ -510,7 +514,7 @@ class UserRepository:
                 'status': user_data.status,
                 'role': user_data.role,
 
-                # User Details (providing default values if missing)
+                # User Details
                 'details': {
                     'height': user_data.details.height if user_data.details else None,
                     'weight': user_data.details.weight if user_data.details else None,
@@ -529,7 +533,7 @@ class UserRepository:
                     'available_equipment': None,
                 },
 
-                # Diet Preferences (providing default values if missing)
+                # Diet Preferences
                 'diet_preferences': {
                     'diet_type': user_data.diet_preferences.diet_type if user_data.diet_preferences else None,
                     'meals_per_day': user_data.diet_preferences.meals_per_day if user_data.diet_preferences else None,
@@ -537,6 +541,9 @@ class UserRepository:
                     'diet_type': None,
                     'meals_per_day': None,
                 },
+
+                # Weight Records
+                'weight_records': list(weight_records)  # Convertir los registros de peso a una lista de diccionarios
             }
 
             return user_details
@@ -544,6 +551,7 @@ class UserRepository:
         except Exception as e:
             print(f"Error fetching user details: {e}")
             return None
+
 
 
 

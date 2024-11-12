@@ -387,5 +387,6 @@
   "select_difficulty_placeholder": "Selecciona Dificultad",
   "meal_count": "Selecciona el número de comidas",
   "select_equipment_placeholder": "Selecciona Equipamiento",
-  "select_training_plan": "Seleccionar plan de entrenamiento"
+  "select_training_plan": "Seleccionar plan de entrenamiento",
+  "weight_record_history": "Historial de Registros de Peso"
 }
