@@ -455,7 +455,7 @@ def obtener_registros_peso_usuario(request):
     return Response([registro.dict() for registro in registros_peso_data], status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated]) 
 def crear_registro_peso(request):
     """
     Endpoint para crear un nuevo registro de peso para un usuario.

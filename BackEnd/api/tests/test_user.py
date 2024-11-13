@@ -1428,3 +1428,114 @@ class GetWeightRecordsTests(APITestCase):
         """
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class CreateWeightRecordTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario de prueba
+        self.user = User.objects.create(
+            first_name="John",
+            last_name="Doe",
+            email="johndoe@example.com",
+            password=make_password("password123"),
+            birth_date="1990-01-01",
+            gender="M",
+            role="cliente"
+        )
+        self.url = reverse('crear_registro_peso')
+
+    def authenticate_user(self):
+        # Forzar autenticación para las solicitudes de prueba
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_weight_record_success(self):
+        """
+        Prueba para verificar que un usuario autenticado puede crear un nuevo registro de peso.
+        """
+        self.authenticate_user()
+        data = {'weight': 75.5}  # Peso a registrar
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn("Registro de peso creado", response.data["message"])
+        self.assertIn("id", response.data)
+
+        # Verificar que el registro de peso fue realmente creado
+        self.assertEqual(WeightRecord.objects.count(), 1)
+        self.assertEqual(WeightRecord.objects.first().weight, 75.5)
+
+    def test_create_weight_record_no_weight(self):
+        """
+        Prueba para verificar que si no se proporciona peso, se retorna un error.
+        """
+        self.authenticate_user()
+        data = {}  # No se proporciona peso
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "El peso es requerido.")
+
+    def test_create_weight_record_unauthenticated(self):
+        """
+        Prueba para verificar que un usuario no autenticado no puede crear un registro de peso.
+        """
+        data = {'weight': 75.5}
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)  # Esperamos 401 si está autenticado
+
+class GetLatestWeightRecordTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario de prueba
+        self.user = User.objects.create(
+            first_name="John",
+            last_name="Doe",
+            email="johndoe@example.com",
+            password=make_password("password123"),
+            birth_date="1990-01-01",
+            gender="M",
+            role="cliente"
+        )
+        # Crear varios registros de peso para el usuario
+        self.weight_record_1 = WeightRecord.objects.create(
+            user=self.user,
+            weight=70.0,
+            date="2024-01-01"
+        )
+        self.weight_record_2 = WeightRecord.objects.create(
+            user=self.user,
+            weight=75.5,
+            date="2024-11-13"
+        )
+        self.url = reverse('latest-weight-record')
+
+    def authenticate_user(self):
+        # Forzar autenticación para las solicitudes de prueba
+        self.client.force_authenticate(user=self.user)
+
+    def test_get_latest_weight_record_success(self):
+        """
+        Prueba para verificar que un usuario autenticado pueda obtener su último registro de peso.
+        """
+        self.authenticate_user()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Verificar que la respuesta contenga los datos del último registro de peso
+        self.assertEqual(float(response.data['weight']), float(self.weight_record_2.weight))
+        self.assertEqual(str(response.data['date']), str(self.weight_record_2.date))  # Fecha debe ser la misma
+
+    def test_get_latest_weight_record_no_data(self):
+        """
+        Prueba para verificar el comportamiento cuando el usuario no tiene registros de peso.
+        """
+        # Eliminar todos los registros de peso del usuario
+        self.user.weight_records.all().delete()
+        self.authenticate_user()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["message"], "No weight record found.")
+
+    def test_get_latest_weight_record_unauthenticated(self):
+        """
+        Prueba para verificar que un usuario no autenticado no puede obtener el último registro de peso.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
