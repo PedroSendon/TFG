@@ -14,7 +14,7 @@ class TrainingPlan(models.Model):
     media = models.URLField(blank=True, null=True)
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_LEVELS)  # Restricción a las opciones definidas
     equipment = models.CharField(max_length=100)  # Equipamiento requerido para el plan
-    duration = models.PositiveIntegerField()  # Duración del plan completo en días o semanas
+    duration = models.PositiveIntegerField(null=True, blank=True, default=30)  # Duración del plan completo en días o semanas
 
     def __str__(self):
         return self.name

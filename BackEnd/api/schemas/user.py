@@ -1,5 +1,5 @@
 from datetime import date
-from pydantic import BaseModel, EmailStr, Field, constr, PositiveInt, conint
+from pydantic import BaseModel, EmailStr, Field, condecimal, constr, PositiveInt, conint
 from typing import Literal, Optional, List
 
 from api.models.user import WeightRecord
@@ -19,12 +19,12 @@ class UserSchema(BaseModel):
 
 
 class UserCreate(BaseModel):
-    first_name: str = Field(..., min_length=1)  # type: ignore
-    last_name: str = Field(..., min_length=1)  # type: ignore
+    first_name: str = Field(..., min_length=1)
+    last_name: str = Field(..., min_length=1)
     email: EmailStr
-    password: str = Field(..., min_length=8)  # type: ignore
+    password: str = Field(..., min_length=8)
     birth_date: date
-    gender: str = Field(..., pattern=r'^(M|F|Otro)$')
+    gender: str = Field(..., pattern=r'^(M|F|Otro)$')  # Cambiado a 'Otro'
     terms_accepted: bool
 
     class Config:
@@ -56,7 +56,6 @@ class UserProfileUpdateSchema(BaseModel):
 class LoginSchema(BaseModel):
     email: EmailStr
     password: constr(min_length=8)# type: ignore
-    remember_me: bool
 
     class Config:
         from_attributes = True
@@ -64,7 +63,7 @@ class LoginSchema(BaseModel):
 
 class UserDetailsSchema(BaseModel):
     height: PositiveInt
-    weight: PositiveInt
+    weight: condecimal(gt=0, max_digits=5, decimal_places=2)  # Permite decimales
     weight_goal: Literal["Ganar masa muscular", "Perder peso", "Mantenimiento"]  # Opciones específicas para la meta de peso
     weekly_training_days: conint(ge=1, le=7)
     daily_training_time: str
@@ -96,7 +95,7 @@ class ImagenSchema(BaseModel):
     descripcion: str
 
 class WeightRecordSchema(BaseModel):
-    weight: PositiveInt
+    weight: condecimal(gt=0, max_digits=5, decimal_places=2)  # Permite decimales
     date: date
 
     class Config:

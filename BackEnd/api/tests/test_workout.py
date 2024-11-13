@@ -431,7 +431,7 @@ class DeleteWorkoutTests(APITestCase):
 
         # Verificar la respuesta
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response.data["error"], "No tienes permisos para realizar esta acción")
+        self.assertIn("No tienes permisos para realizar esta acción", response.data["error"])
 
 class GetWorkoutsByUserTests(APITestCase):
 

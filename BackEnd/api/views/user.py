@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status 
 from api.repositories.user_repository import UserRepository, ImagenRepository, WeightRecordRepository
 from rest_framework.permissions import IsAuthenticated
-from api.schemas.user import UserCreate, UserDetailsSchema, LoginSchema
+from api.schemas.user import UserCreate, UserDetailsSchema, LoginSchema, WeightRecordSchema
 from django.contrib.auth.hashers import make_password
 from api.repositories.user_repository import UserDetailsRepository
 from django.contrib.auth.decorators import login_required
@@ -113,6 +113,9 @@ def login(request):
             "access": str(refresh.access_token)
         }, status=status.HTTP_200_OK)
 
+    except ValidationError as e:
+        # Si hay un error de validación, devolver un 400 con el detalle del error
+        return Response({"error": "Datos de entrada inválidos: " + str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -207,30 +210,19 @@ def assign_plans(request, user_id):
     workout_id = request.data.get('workout_id')
     nutrition_plan_id = request.data.get('nutrition_plan_id')
 
-    # Verificamos si workout_id y/o nutrition_plan_id están presentes y válidos
     if workout_id:
-        print("Asignando workout_id:", workout_id)
-        # Llamar al repositorio para asignar el entrenamiento
-        success_workout, message_workout = UserRepository.assign_concret_training_plan_to_user(user_id, workout_id)
-
+        success_workout, message_workout, status_code = UserRepository.assign_concret_training_plan_to_user(user_id, workout_id, request.user)
         if not success_workout:
-            return Response({"error": message_workout}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": message_workout}, status=status_code)
 
     if nutrition_plan_id:
-        print("Asignando nutrition_plan_id:", nutrition_plan_id)
-        # Llamar al repositorio para asignar el plan nutricional
-        success_plan, message_plan = UserRepository.assign_concret_nutrition_plan_to_user(user_id, nutrition_plan_id)
-
+        success_plan, message_plan, status_code = UserRepository.assign_concret_nutrition_plan_to_user(user_id, nutrition_plan_id, request.user)
         if not success_plan:
-            return Response({"error": message_plan}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": message_plan}, status=status_code)
 
-    # Si al menos uno de los planes fue asignado con éxito
     if workout_id or nutrition_plan_id:
-        return Response({
-            "message": "Planes asignados exitosamente."
-        }, status=status.HTTP_200_OK)
+        return Response({"message": "Planes asignados exitosamente."}, status=status.HTTP_200_OK)
     else:
-        # Si ninguno de los planes fue proporcionado
         return Response({"error": "No se proporcionó ningún ID de plan para asignar."}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -248,19 +240,20 @@ def assign_single_plan(request, user_id):
         return Response({"error": "ID del plan o tipo de plan (is_nutrition_plan) no proporcionado."}, status=status.HTTP_400_BAD_REQUEST)
 
     if is_nutrition_plan:
-        # Asignar el plan nutricional
-        success, message = UserRepository.assign_concret_nutrition_plan_to_user(user_id, plan_id)
+        # Asignar el plan nutricional, pasando `request.user` como `request_user`
+        success, message, status_code = UserRepository.assign_concret_nutrition_plan_to_user(user_id, plan_id, request.user)
     else:
-        # Asignar el plan de entrenamiento
-        success, message = UserRepository.assign_concret_training_plan_to_user(user_id, plan_id)
+        # Asignar el plan de entrenamiento, pasando `request.user` como `request_user`
+        success, message, status_code = UserRepository.assign_concret_training_plan_to_user(user_id, plan_id, request.user)
 
     if not success:
-        return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": message}, status=status_code)
 
     plan_type = "nutricional" if is_nutrition_plan else "de entrenamiento"
     return Response({
         "message": f"Plan {plan_type} asignado exitosamente al usuario."
-    }, status=status.HTTP_200_OK)
+    }, status=status_code)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -269,8 +262,13 @@ def get_user_role(request):
     Devuelve el rol del usuario autenticado.
     """
     user = request.user
-    role_data = UserRepository.ger_user_role(user.id)
+    role_data = UserRepository.get_user_role(user.id)
+    
+    if role_data is None:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    
     return Response(role_data, status=status.HTTP_200_OK)
+
 
 
 @api_view(['GET'])
@@ -279,12 +277,16 @@ def get_user_details(request, user_id):
     """
     Endpoint para obtener los detalles de un usuario por su ID, delegando la lógica al repositorio.
     """
-    user_data = UserRepository.get_user_by_id2(user_id)
+    user_data = UserRepository.get_user_by_id2(user_id, request.user)
     
     if user_data is None:
         return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+    if "error" in user_data:
+        return Response({"error": user_data["error"]}, status=user_data["status"])
     
     return Response(user_data, status=status.HTTP_200_OK)
+
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -293,38 +295,23 @@ def update_user_as_admin(request, user_id):
     Modificar los datos de un usuario existente desde el modo administrador.
     """
     try:
-        # Verificar el rol del usuario que hace la solicitud
-        user= UserRepository.get_user_by_id(user_id)
-        if user.role != 'administrador' and user.role != 'entrenador' and user.role != 'nutricionista':
-            return Response({"error": "No tienes permisos para modificar usuarios"}, status=status.HTTP_403_FORBIDDEN)
-
         # Llamar a la función del repositorio para actualizar el usuario
-        success, message = UserRepository.update_user_details(user_id, request.data)
+        success, message = UserRepository.update_user_details(user_id, request.data, request.user)
 
         if success:
             return Response({"message": message}, status=status.HTTP_200_OK)
-        else:
+        elif message == "No tienes permisos para modificar usuarios":
+            return Response({"error": message}, status=status.HTTP_403_FORBIDDEN)
+        elif message == "Usuario no encontrado":
             return Response({"error": message}, status=status.HTTP_404_NOT_FOUND)
-        
+        else:
+            return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
+
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def assign_role(request, user_id):
-    """
-    Asignar un rol específico a un usuario.
-    """
-    role = request.data.get('role')  # Obtener el rol enviado desde el frontend
-    if role not in ['cliente', 'administrador', 'entrenador', 'nutricionista']:
-        return Response({"error": "Rol no válido."}, status=status.HTTP_400_BAD_REQUEST)
 
-    success = UserRepository.assign_role_to_user(user_id, role)
-    if success:
-        return Response({"message": "Rol asignado correctamente."}, status=status.HTTP_200_OK)
-    else:
-        return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['PUT'])
@@ -381,7 +368,11 @@ def get_all_users(request):
     """
     Obtener la lista de usuarios con su información básica.
     """
-    user_data = UserDetailsRepository.get_all_users()
+    user_data = UserDetailsRepository.get_all_users(request.user)
+
+    # Verificar si el usuario tiene permisos
+    if "error" in user_data:
+        return Response(user_data, status=status.HTTP_403_FORBIDDEN)
 
     return Response(user_data, status=status.HTTP_200_OK)
 
@@ -392,19 +383,15 @@ def delete_user(request, user_id):
     """
     Eliminar un usuario por su ID.
     """
-    # Obtener el usuario autenticado desde el repositorio
-    authenticated_user = UserRepository.get_user_by_id(
-        request.user.id)  # Asegúrate de que tienes un método para esto
+    success, message = UserDetailsRepository.delete_user_by_id(user_id, request.user)
 
-    if authenticated_user and authenticated_user.role == 'administrador':
-        success = UserDetailsRepository.delete_user_by_id(user_id)
-
-        if success:
-            return Response({"message": "Usuario eliminado exitosamente"}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    if success:
+        return Response({"message": message}, status=status.HTTP_200_OK)
+    elif message == "No tienes permisos para eliminar usuarios.":
+        return Response({"error": message}, status=status.HTTP_403_FORBIDDEN)
     else:
-        return Response({"error": "No tienes permisos para eliminar usuarios"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"error": message}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 @api_view(['POST'])
@@ -451,25 +438,21 @@ def obtener_logo(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def obtener_registros_peso_usuario(request):
-    """
-    Endpoint para obtener todos los registros de peso de un usuario.
-    """
-    user = request.user  # Obtener el usuario autenticado
-    registros_peso, error = WeightRecordRepository.obtener_registros_peso_usuario(user)
-    
+
+    # Llama al repositorio para obtener los registros
+    registros_peso, error = WeightRecordRepository.obtener_registros_peso_usuario(request.user)
+
     if error:
         return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
 
-    # Serialización de los datos de los registros de peso
-    registros_peso_data = [
-        {"weight": registro.weight, "date": registro.date}
-        for registro in registros_peso
-    ]
-    return Response(registros_peso_data, status=status.HTTP_200_OK)
+    if not registros_peso:
+        return Response({"error": "No se encontraron registros de peso para este usuario."}, status=status.HTTP_404_NOT_FOUND)
+
+    registros_peso_data = [WeightRecordSchema.from_orm(registro) for registro in registros_peso]
+    return Response([registro.dict() for registro in registros_peso_data], status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -515,9 +498,12 @@ def get_latest_weight_record(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_unassigned_users_for_nutrition(request):
-
     # Llama al repositorio para obtener los usuarios no asignados para nutrición
-    unassigned_users = UserRepository.get_unassigned_users_for_nutrition(request.user)
+    result = UserRepository.get_unassigned_users_for_nutrition(request.user)
+    
+    if isinstance(result, dict) and "error" in result:
+        return Response({"error": result["error"]}, status=result["status"])
+    
     unassigned_users_data = [
         {
             'id': user.id,
@@ -526,18 +512,20 @@ def get_unassigned_users_for_nutrition(request):
             'status': user.status,
             'profile_photo': user.profile_photo if user.profile_photo else None
         }
-        for user in unassigned_users
+        for user in result
     ]
 
     return Response(unassigned_users_data, status=status.HTTP_200_OK)
 
-# Endpoint para obtener usuarios no asignados para entrenamiento
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_unassigned_users_for_training(request):
-
-    # Llama al repositorio para obtener los usuarios no asignados para entrenamiento
-    unassigned_users = UserRepository.get_unassigned_users_for_training(request.user)
+    result = UserRepository.get_unassigned_users_for_training(request.user)
+    
+    if isinstance(result, dict) and "error" in result:
+        return Response({"error": result["error"]}, status=result["status"])
+    
     unassigned_users_data = [
         {
             'id': user.id,
@@ -546,10 +534,11 @@ def get_unassigned_users_for_training(request):
             'status': user.status,
             'profile_photo': user.profile_photo if user.profile_photo else None
         }
-        for user in unassigned_users
+        for user in result
     ]
 
     return Response(unassigned_users_data, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

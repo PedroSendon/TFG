@@ -29,7 +29,6 @@ urlpatterns = [
     path('users/', user.get_all_users, name='get-all-users'),
     path('users/update/<int:user_id>/', user.update_user_as_admin, name='update-user'),
     path('users/delete/<int:user_id>/', user.delete_user, name='delete-user'),
-    path('users/assign-role/<int:user_id>/', user.assign_role, name='assign-role'),
     path('users/create/', user.create_user_as_admin, name='create-user-as-admin'),
     path('users/<int:user_id>/assign-plans/', user.assign_plans, name='assign-plans'),
     path('users/details/<int:user_id>/', user.get_user_details, name='get-user-details'),
@@ -41,7 +40,7 @@ urlpatterns = [
     path('assign-single-plan/<int:user_id>/', user.assign_single_plan, name='assign-single-plan'),
 
     # Endpoints para WeightRecord
-    path('weight-records/', user.obtener_registros_peso_usuario, name='obtener_registros_peso_usuario'),
+    path('weight-records/', user.obtener_registros_peso_usuario, name='weight-records'),
     path('weight-records/create/', user.crear_registro_peso, name='crear_registro_peso'),
     path('latest-weight-record/', user.get_latest_weight_record, name='latest-weight-record'),
 

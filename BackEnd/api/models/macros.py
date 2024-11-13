@@ -5,10 +5,10 @@ from django.contrib.postgres.fields import JSONField  # Importa JSONField si est
 class MealPlan(models.Model):
     name = models.CharField(max_length=100, default="Default Plan Name")  # Valor predeterminado
     diet_type = models.CharField(max_length=20, choices=[('weightLoss', 'Pérdida de Peso'), ('muscleGain', 'Ganancia Muscular'), ('maintenance', 'Mantenimiento')])
-    calories = models.PositiveIntegerField()  # Calorías de la comida
-    proteins = models.DecimalField(max_digits=5, decimal_places=2)  # Proteínas en gramos
-    carbs = models.DecimalField(max_digits=5, decimal_places=2)  # Carbohidratos en gramos
-    fats = models.DecimalField(max_digits=5, decimal_places=2)  # Grasas en gramos
+    calories = models.PositiveIntegerField(null=True, blank=True)  # Calorías de la comida
+    proteins = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2)  # Proteínas en gramos
+    carbs = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2)  # Carbohidratos en gramos
+    fats = models.DecimalField(blank=True, null=True, max_digits=5, decimal_places=2)  # Grasas en gramos
     meal_distribution = models.JSONField(default=dict, blank=True, null=True, help_text="Distribución de comidas en porcentajes. Ejemplo: {'desayuno': 20, 'almuerzo': 40, 'cena': 25, 'merienda': 15}")
     description = models.TextField(blank=True, null=True)  # Descripción opcional de la categoría
 

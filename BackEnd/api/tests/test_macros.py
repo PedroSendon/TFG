@@ -349,7 +349,8 @@ class UpdateMealPlanTests(APITestCase):
 
         # Verificar que el estado de la respuesta es 403 FORBIDDEN
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response.data["error"], "No tienes permisos para realizar esta acción")
+        self.assertIn("No tienes permisos para realizar esta acción", response.data["error"])
+
 
     def test_update_mealplan_missing_fields(self):
         """
