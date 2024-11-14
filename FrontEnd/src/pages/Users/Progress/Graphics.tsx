@@ -39,7 +39,7 @@ const Graphics: React.FC = () => {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json', 
         },
       });
       if (!response.ok) throw new Error('Failed to fetch weight records');

@@ -387,5 +387,7 @@
   "select_equipment_placeholder": "Select Equipment",
   "meal_count": "Select number of meals",
   "select_training_plan": "Select training plan",
-  "weight_record_history": "Weight Record History"
+  "weight_record_history": "Weight Record History",
+  "see_more": "See More",
+  "assign_nutrition_plan_admin": "Assign Nutrition Plan"
 }

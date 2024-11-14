@@ -24,6 +24,7 @@ const PendingUsers: React.FC = () => {
     email: string;
     status: string;
     profile_photo: string;
+    plans_needed: string[];
   }
 
   const [users, setUsers] = useState<User[]>([]);
@@ -74,10 +75,20 @@ const PendingUsers: React.FC = () => {
         return;
       }
 
+      // Selección de endpoint en función del rol del usuario
       const endpoint =
         userRole === 'nutricionista'
           ? 'http://127.0.0.1:8000/api/user/unassigned/nutrition/'
-          : 'http://127.0.0.1:8000/api/user/unassigned/training/';
+          : userRole === 'entrenador'
+          ? 'http://127.0.0.1:8000/api/user/unassigned/training/'
+          : userRole === 'administrador'
+          ? 'http://127.0.0.1:8000/api/user/unassigned/all/'  // Endpoint específico para administrador
+          : null;
+
+      if (!endpoint) {
+        console.error(t('role_error'));
+        return;
+      }
 
       const response = await fetch(endpoint, {
         method: 'GET',
@@ -98,12 +109,14 @@ const PendingUsers: React.FC = () => {
     }
   };
 
-  const handleUserInformation = (userId: number) => {
+
+  const handleUserInformation = (userId: number, plans_needed: string[]) => {
     history.push({
       pathname: `/admin/users/details`,
-      state: { userId, showPlanSection: true },
+      state: { userId, showPlanSection: true, plans_needed },
     });
   };
+  
 
   return (
     <Box sx={{ backgroundColor: '#f5f5f5', height: '95vh', marginTop: '16%' }}>
@@ -128,7 +141,7 @@ const PendingUsers: React.FC = () => {
                   },
                   cursor: 'pointer',
                 }}
-                onClick={() => handleUserInformation(user.id)}
+                onClick={() => handleUserInformation(user.id, user.plans_needed)}
               >
                 <Avatar
                   src={user.profile_photo || "/path/to/default-avatar.png"}
@@ -197,7 +210,7 @@ const PendingUsers: React.FC = () => {
                       marginRight: 1,
                     }}
                   >
-                    Ver más
+                    {t('see_more')}
                   </Typography>
                   <ArrowForwardIos fontSize="small" sx={{ color: '#888888' }} />
                 </Box>

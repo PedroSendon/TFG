@@ -387,5 +387,7 @@
   "meal_count": "Selecciona el nombre de menjars",
   "select_equipment_placeholder": "Selecciona l'Equipament",
   "select_training_plan": "Seleccionar pla d'entrenament",
-  "weight_record_history": "Històric de Pes"
+  "weight_record_history": "Històric de Pes",
+  "see_more": "Veure més",
+  "assign_nutrition_plan_admin": "Assignar pla de nutrició"
 }

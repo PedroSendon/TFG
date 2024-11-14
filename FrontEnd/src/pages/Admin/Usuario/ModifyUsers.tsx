@@ -46,9 +46,7 @@ const ModifyUserPage: React.FC = () => {
                 console.error(t('no_token'));
                 return;
             }
-
-            console.log("Starting fetch for user details...");
-
+    
             const response = await fetch(`http://127.0.0.1:8000/api/users/details/${userId}/`, {
                 method: 'GET',
                 headers: {
@@ -56,20 +54,34 @@ const ModifyUserPage: React.FC = () => {
                     'Authorization': `Bearer ${accessToken}`,
                 },
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
-                console.log("Fetched user data:", data);
-
+    
+                // Mapeo de valores recibidos a los valores esperados por los Select
+                const weightGoalMapping: { [key: string]: string } = {
+                    'lose_weight': 'Perder peso',
+                    'gain_muscle': 'Ganar masa muscular',
+                    'maintain_weight': 'Mantener peso'
+                };
+    
+                const activityLevelMapping: { [key: string]: string } = {
+                    'Sedentary': 'Sedentaria',
+                    'Light': 'Ligera',
+                    'Moderate': 'Moderada',
+                    'Intense': 'Intensa'
+                };
+    
                 setProfileData({
                     firstName: data.first_name,
                     lastName: data.last_name,
                     currentWeight: data.current_weight,
-                    weightGoal: data.weight_goal,
-                    activityLevel: data.activity_level,
+                    weightGoal: weightGoalMapping[data.weight_goal as keyof typeof weightGoalMapping] || '',
+                    activityLevel: activityLevelMapping[data.activity_level as keyof typeof activityLevelMapping] || '',
                     trainingFrequency: data.training_frequency,
                     role: data.role,
                 });
+                setProfilePicture(data.profile_picture || 'https://via.placeholder.com/150'); // Establecer la imagen de perfil
             } else {
                 console.error("Fetch error: ", await response.text());
             }
@@ -77,11 +89,12 @@ const ModifyUserPage: React.FC = () => {
             console.error(t('request_error'), error);
         }
     };
+    
+    
 
 
     useEffect(() => {
         if (userId) {
-            console.log("Fetching user details for userId:", userId);
             fetchUserDetails();
         } else {
             console.warn("No userId provided in location.state");
@@ -96,15 +109,7 @@ const ModifyUserPage: React.FC = () => {
                 console.error(t('no_token'));
                 return;
             }
-            console.log("Datos enviados para la actualización:", {
-                first_name: profileData.firstName,
-                last_name: profileData.lastName,
-                currentWeight: profileData.currentWeight,
-                weightGoal: profileData.weightGoal,
-                activityLevel: profileData.activityLevel,
-                trainingFrequency: profileData.trainingFrequency,
-                role: profileData.role,
-            });
+
             const response = await fetch(`http://127.0.0.1:8000/api/users/update/${userId}/`, {
                 method: 'PUT',
                 headers: {
@@ -124,7 +129,6 @@ const ModifyUserPage: React.FC = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log(t('user_updated'), data);
                 history.push('/admin/users'); // Redirigir a la página de administración después de guardar
             } else {
                 console.error(t('update_error'));
@@ -151,8 +155,6 @@ const ModifyUserPage: React.FC = () => {
     const handlePhotoOption = (option: string) => {
         if (option === 'upload') {
             fileInputRef.current?.click();
-        } else if (option === 'take') {
-            console.log(t('take_photo'));
         } else if (option === 'delete') {
             setProfilePicture('https://via.placeholder.com/150');
         }

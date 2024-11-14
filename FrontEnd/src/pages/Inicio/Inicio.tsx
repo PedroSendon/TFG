@@ -32,76 +32,109 @@ const MainScreen: React.FC = () => {
         position: 'relative',
       }}
     >
-<Select
-  value={language}
-  onChange={(e) => changeLanguage(e.target.value as 'en' | 'es' | 'ca')}
-  IconComponent={() => null} // Elimina el icono de flecha
-  input={<OutlinedInput notched={false} />}
-  sx={{
-    position: 'absolute',
-    top: '16px',
-    right: '16px',
-    width: '50px', // Tamaño ajustado
-    height: '50px',
-    padding: 0,
-    border: '1px solid #d0d0d0',
-    borderRadius: '8px',
-    backgroundColor: '#ffffff',
-    '& .MuiSelect-select': {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 0,
-    },
-  }}
-  renderValue={() => (
-    <Box
-      component="img"
-      src={
-        language === 'en'
-          ? 'https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg'
-          : language === 'es'
-          ? 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg'
-          : 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Catalonia.svg'
-      }
-      alt={language}
-      sx={{
-        width: '32px', // Ocupa todo el ancho disponible
-        height: '100%', // Ocupa toda la altura disponible
-        objectFit: 'cover', // Ajusta la imagen
-        marginLeft: '30px', // Espacio entre la imagen y el texto
-      }}
-    />
-  )}
->
-  <MenuItem value="en">
-    <Box
-      component="img"
-      src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg"
-      alt="English"
-      sx={{ width: '30px', height: '20px', marginRight: '10px' }}
-    />
-    English
-  </MenuItem>
-  <MenuItem value="es">
-    <Box
-      component="img"
-      src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg"
-      alt="Español"
-      sx={{ width: '30px', height: '20px', marginRight: '10px' }}
-    />
-    Español
-  </MenuItem>
-  <MenuItem value="ca">
-    <Box
-      component="img"
-      src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Catalonia.svg"
-      alt="Català"
-      sx={{ width: '30px', height: '20px', marginRight: '10px' }}
-    />
-    Català
-  </MenuItem>
-</Select>
+      <Select
+        value={language}
+        onChange={(e) => changeLanguage(e.target.value as 'en' | 'es' | 'ca')}
+        IconComponent={() => null} // Elimina el icono de flecha
+        input={<OutlinedInput notched={false} />}
+        sx={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px',
+          width: '50px', // Tamaño ajustado
+          height: '50px',
+          padding: 0,
+          border: '1px solid #d0d0d0',
+          borderRadius: '8px',
+          backgroundColor: 'transparent', // Fondo transparente cuando está cerrado
+          '&.Mui-focused': {
+            backgroundColor: '#f5f5f5', // Fondo cuando está abierto
+          },
+          '& .MuiSelect-select': {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+          },
+        }}
+        renderValue={() => (
+          <Box
+            component="img"
+            src={
+              language === 'en'
+                ? 'https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg'
+                : language === 'es'
+                  ? 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg'
+                  : 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Catalonia.svg'
+            }
+            alt={language}
+            sx={{
+              width: '32px', // Ocupa todo el ancho disponible
+              height: '100%', // Ocupa toda la altura disponible
+              objectFit: 'cover', // Ajusta la imagen
+              marginLeft: '30px', // Espacio entre la imagen y el texto
+            }}
+          />
+        )}
+      >
+        <MenuItem
+          value="en"
+          sx={{
+            '&.Mui-selected': {
+              backgroundColor: '#e0e0e0', // Fondo gris cuando está seleccionado
+            },
+            '&.Mui-selected:hover': {
+              backgroundColor: '#d3d3d3', // Fondo gris más oscuro al pasar el ratón
+            },
+          }}
+        >
+          <Box
+            component="img"
+            src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg"
+            alt="English"
+            sx={{ width: '30px', height: '20px', marginRight: '10px' }}
+          />
+          English
+        </MenuItem>
+        <MenuItem
+          value="es"
+          sx={{
+            '&.Mui-selected': {
+              backgroundColor: '#e0e0e0',
+            },
+            '&.Mui-selected:hover': {
+              backgroundColor: '#d3d3d3',
+            },
+          }}
+        >
+          <Box
+            component="img"
+            src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg"
+            alt="Español"
+            sx={{ width: '30px', height: '20px', marginRight: '10px' }}
+          />
+          Español
+        </MenuItem>
+        <MenuItem
+          value="ca"
+          sx={{
+            '&.Mui-selected': {
+              backgroundColor: '#e0e0e0',
+            },
+            '&.Mui-selected:hover': {
+              backgroundColor: '#d3d3d3',
+            },
+          }}
+        >
+          <Box
+            component="img"
+            src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Catalonia.svg"
+            alt="Català"
+            sx={{ width: '30px', height: '20px', marginRight: '10px' }}
+          />
+          Català
+        </MenuItem>
+      </Select>
 
 
 

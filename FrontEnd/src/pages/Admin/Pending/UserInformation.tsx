@@ -4,59 +4,31 @@ import { useHistory, useLocation } from 'react-router-dom';
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext';
 import { Line } from 'react-chartjs-2';
+import { Chart, Filler } from 'chart.js'; // Importa Filler
+Chart.register(Filler); // Registra el plugin Filler
+
 
 const UserInformation: React.FC = () => {
-    const location = useLocation<{ userId: number; showPlanSection: boolean }>();
-    const { userId } = location.state;
-    const { showPlanSection } = location.state;
+    const location = useLocation<{ userId: number; showPlanSection: boolean; plans_needed: string[] }>();
+    const { userId, showPlanSection, plans_needed = [] } = location.state || {};
     const history = useHistory();
     const { t } = useContext(LanguageContext);
     const [userData, setUserData] = useState<any>(null);
-    const [plans, setPlans] = useState<any[]>([]);
-    const [selectedPlan, setSelectedPlan] = useState<number | "new" | null>(null);
+    const [plans, setPlans] = useState<{ nutrition: any[]; training: any[] }>({ nutrition: [], training: [] });
+    const [selectedPlan, setSelectedPlan] = useState<{ nutrition: number | "new" | null; training: number | "new" | null }>({
+        nutrition: null,
+        training: null,
+    });
     const [loading, setLoading] = useState<boolean>(true);
-    const [isNutritionPlan, setIsNutritionPlan] = useState<boolean>(false);
 
     useEffect(() => {
-        const storedUserData = localStorage.getItem(`user_data_${userId}`);
-        const storedPlans = localStorage.getItem(`plans_${userId}`);
-
-        if (storedUserData) {
-            setUserData(JSON.parse(storedUserData));
-            setLoading(false);
-        } else {
-            fetchUserDetails();
-        }
-
+        fetchUserDetails();
         if (showPlanSection) {
-            if (storedPlans) {
-                setPlans(JSON.parse(storedPlans));
-            } else {
-                fetchUserRole();
-            }
+            fetchPlans('nutrition');
+            fetchPlans('training');
         }
     }, []);
 
-    const fetchUserRole = async () => {
-        try {
-            const accessToken = localStorage.getItem('access_token');
-            if (!accessToken) return;
-            const response = await fetch(`http://127.0.0.1:8000/api/user/role/`, {
-                headers: { 'Authorization': `Bearer ${accessToken}` },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                const isNutriRole = data.role === 'nutricionista';
-                setIsNutritionPlan(isNutriRole);
-
-                fetchPlans(isNutriRole);
-            } else {
-                console.error("Error fetching user role");
-            }
-        } catch (error) {
-            console.error("Error fetching user role:", error);
-        }
-    };
 
     const fetchUserDetails = async () => {
         try {
@@ -77,14 +49,14 @@ const UserInformation: React.FC = () => {
         }
     };
 
-    const fetchPlans = async (isNutritionPlan: boolean) => {
+    const fetchPlans = async (planType: 'nutrition' | 'training') => {
         try {
             const accessToken = localStorage.getItem('access_token');
             if (!accessToken) return;
 
-            const endpoint = isNutritionPlan
-                ? `http://127.0.0.1:8000/api/nutritionplans/`
-                : `http://127.0.0.1:8000/api/trainingplans/`;
+            const endpoint = planType === 'nutrition'
+                ? 'http://127.0.0.1:8000/api/mealplans/all/'
+                : 'http://127.0.0.1:8000/api/trainingplans/';
 
             const response = await fetch(endpoint, {
                 headers: { 'Authorization': `Bearer ${accessToken}` },
@@ -92,16 +64,16 @@ const UserInformation: React.FC = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                setPlans(data.data);
-                localStorage.setItem(`plans_${userId}`, JSON.stringify(data.data)); // Guardar en localStorage
+                setPlans((prevPlans) => ({ ...prevPlans, [planType]: data.data }));
             }
         } catch (error) {
-            console.error('Error fetching plans', error);
+            console.error(`Error fetching ${planType} plans`, error);
         }
     };
-
-    const handlePlanAssign = async () => {
-        if (selectedPlan && selectedPlan !== "new") {
+    
+    const handlePlanAssign = async (planType: 'nutrition' | 'training') => {
+        const planId = selectedPlan[planType];
+        if (planId && planId !== "new") {
             const accessToken = localStorage.getItem('access_token');
             if (!accessToken) return;
 
@@ -113,28 +85,29 @@ const UserInformation: React.FC = () => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        id_plan: selectedPlan,
-                        is_nutrition_plan: isNutritionPlan,
+                        id_plan: planId,
+                        is_nutrition_plan: planType === 'nutrition',
                     }),
                 });
 
                 if (response.ok) {
                     history.push('/admin/pending-users');
                 } else {
-                    console.error("Failed to assign the plan");
+                    console.error(`Failed to assign the ${planType} plan`);
                 }
             } catch (error) {
-                console.error('Error assigning plan:', error);
+                console.error(`Error assigning ${planType} plan:`, error);
             }
         }
     };
 
-    const handleSelectChange = (event: SelectChangeEvent<number | "new">) => {
+
+    const handleSelectChange = (event: SelectChangeEvent<number | "new">, planType: 'nutrition' | 'training') => {
         const value = event.target.value as number | "new";
-        setSelectedPlan(value);
+        setSelectedPlan((prevSelected) => ({ ...prevSelected, [planType]: value }));
 
         if (value === "new") {
-            const path = isNutritionPlan ? '/admin/nutrition/add' : '/admin/trainingplans/add';
+            const path = planType === 'nutrition' ? '/admin/nutrition/add' : '/admin/trainingplans/add';
             history.push(path);
         }
     };
@@ -285,49 +258,71 @@ const UserInformation: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                {/* Sección de asignación de planes, solo si `showPlanSection` es true */}
+                {/* Sección de asignación de planes */}
                 {showPlanSection && (
-                    <Card variant="outlined" sx={{ marginTop: '15px', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
-                        <CardContent>
-                            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
-                                {t('assign_training_plan_admin')}
-                            </Typography>
-                            <Select
-                                fullWidth
-                                value={selectedPlan || ""}
-                                onChange={handleSelectChange}
-                            >
-                                {plans.map((plan) => (
-                                    <MenuItem key={plan.id} value={plan.id}>
-                                        {plan.name}
-                                    </MenuItem>
-                                ))}
-                                <MenuItem value="new">{t("create_new_plan_admin")}</MenuItem>
-                            </Select>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                fullWidth
-                                sx={{
-                                    backgroundColor: '#primary',
-                                    color: '#ffffff',
-                                    padding: '12px 24px',
-                                    borderRadius: '8px',
-                                    fontSize: '1rem',
-                                    fontWeight: 'bold',
-                                    mt: 2,
-                                    width: '100%',
-                                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                                    '&:hover': {
-                                        backgroundColor: '#333333',
-                                    },
-                                }}
-                                onClick={handlePlanAssign}
-                            >
-                                {t("assign_plan_admin")}
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <>
+                        {plans_needed && plans_needed.includes('nutrition') && (
+                            <Card variant="outlined" sx={{ marginTop: '15px', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
+                                <CardContent>
+                                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+                                        {t('assign_nutrition_plan_admin')}
+                                    </Typography>
+                                    <Select
+                                        fullWidth
+                                        value={selectedPlan.nutrition || ""}
+                                        onChange={(event) => handleSelectChange(event as SelectChangeEvent<number | "new">, 'nutrition')}
+                                    >
+                                        {plans.nutrition.map((plan) => (
+                                            <MenuItem key={plan.id} value={plan.id}>
+                                                {plan.name}
+                                            </MenuItem>
+                                        ))}
+                                        <MenuItem value="new">{t("create_new_plan_admin")}</MenuItem>
+                                    </Select>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        fullWidth
+                                        sx={{ mt: 2 }}
+                                        onClick={() => handlePlanAssign('nutrition')}
+                                    >
+                                        {t("assign_plan_admin")}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {plans_needed && plans_needed.includes('training') && (
+                            <Card variant="outlined" sx={{ marginTop: '15px', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
+                                <CardContent>
+                                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
+                                        {t('assign_training_plan_admin')}
+                                    </Typography>
+                                    <Select
+                                        fullWidth
+                                        value={selectedPlan.training || ""}
+                                        onChange={(event) => handleSelectChange(event as SelectChangeEvent<number | "new">, 'training')}
+                                    >
+                                        {plans.training.map((plan) => (
+                                            <MenuItem key={plan.id} value={plan.id}>
+                                                {plan.name}
+                                            </MenuItem>
+                                        ))}
+                                        <MenuItem value="new">{t("create_new_plan_admin")}</MenuItem>
+                                    </Select>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        fullWidth
+                                        sx={{ mt: 2 }}
+                                        onClick={() => handlePlanAssign('training')}
+                                    >
+                                        {t("assign_plan_admin")}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </>
                 )}
             </Box>
         </Box>

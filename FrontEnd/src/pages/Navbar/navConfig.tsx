@@ -7,10 +7,11 @@ export type NavItem = {
 
 export const navItems: Record<string, NavItem[]> = {
   administrador: [
-      { label: 'workout_label', icon: 'AssignmentIcon', path: '/admin/workout' },
-      { label: 'nutrition_label', icon: 'MenuBookIcon', path: '/admin/nutrition' },
-      { label: 'all_users_label', icon: 'GroupIcon', path: '/admin/users' },
-    ],
+    { label: 'workout_label', icon: 'AssignmentIcon', path: '/admin/workout' },
+    { label: 'nutrition_label', icon: 'MenuBookIcon', path: '/admin/nutrition' },
+    { label: 'all_users_label', icon: 'GroupIcon', path: '/admin/users' },
+    { label: 'unassigned_users_label', icon: 'GroupAddIcon', path: '/admin/pending-users' }, // Nuevo ítem agregado
+  ],
     cliente: [
       { label: 'workout_label', icon: 'FitnessCenterIcon', path: '/workout', condition: 'plansAssigned' },
       { label: 'macronutrients_label', icon: 'FoodBankIcon', path: '/macronutrients', condition: 'plansAssigned' },

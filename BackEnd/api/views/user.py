@@ -425,8 +425,7 @@ def obtener_logo(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def obtener_registros_peso_usuario(request):
-
-    # Llama al repositorio para obtener los registros
+        
     registros_peso, error = WeightRecordRepository.obtener_registros_peso_usuario(request.user)
 
     if error:
@@ -435,8 +434,11 @@ def obtener_registros_peso_usuario(request):
     if not registros_peso:
         return Response({"error": "No se encontraron registros de peso para este usuario."}, status=status.HTTP_404_NOT_FOUND)
 
-    registros_peso_data = [WeightRecordSchema.from_orm(registro) for registro in registros_peso]
-    return Response([registro.dict() for registro in registros_peso_data], status=status.HTTP_200_OK)
+    registros_peso_data = [
+        {"weight": registro.weight, "date": registro.date} for registro in registros_peso
+    ]
+    return Response(registros_peso_data, status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated]) 
@@ -501,6 +503,16 @@ def get_unassigned_users_for_nutrition(request):
 
     return Response(unassigned_users_data, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_unassigned_users_for_admin(request):
+    # Llama al repositorio para obtener los usuarios no asignados para el administrador
+    result = UserRepository.get_unassigned_users_for_admin(request.user)
+    
+    if isinstance(result, dict) and "error" in result:
+        return Response({"error": result["error"]}, status=result["status"])
+    
+    return Response(result, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

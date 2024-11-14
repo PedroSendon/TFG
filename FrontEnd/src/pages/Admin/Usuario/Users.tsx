@@ -54,7 +54,7 @@ const Users: React.FC = () => {
         console.error(t('no_token'));
         return;
       }
-
+ 
       const response = await fetch('http://127.0.0.1:8000/api/users/', {
         method: 'GET',
         headers: {

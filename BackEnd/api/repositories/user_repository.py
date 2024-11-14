@@ -17,6 +17,42 @@ from rest_framework.response import Response
 class UserRepository:
 
     @staticmethod
+    def get_unassigned_users_for_admin(user):
+        """
+        Devuelve usuarios con los estados 'awaiting_assignment', 'training_only', o 'nutrition_only'
+        y especifica qué tipo de plan necesitan.
+        """
+        if not isinstance(user, User):
+            user = User.objects.get(id=user.id)
+        
+        # Verificar que el rol del usuario sea 'administrador'
+        if user.role == 'administrador':
+            users = User.objects.filter(status__in=['awaiting_assignment', 'training_only', 'nutrition_only'])
+            unassigned_users_data = []
+
+            for user in users:
+                plan_type_needed = []
+                if user.status == 'awaiting_assignment':
+                    plan_type_needed = ['nutrition', 'training']
+                elif user.status == 'training_only':
+                    plan_type_needed = ['nutrition']
+                elif user.status == 'nutrition_only':
+                    plan_type_needed = ['training']
+                
+                unassigned_users_data.append({
+                    'id': user.id,
+                    'name': f"{user.first_name} {user.last_name}",
+                    'email': user.email,
+                    'status': user.status,
+                    'profile_photo': user.profile_photo if user.profile_photo else None,
+                    'plans_needed': plan_type_needed
+                })
+            
+            return unassigned_users_data
+        else:
+            return {"error": "No tienes permiso para ver esta información.", "status": status.HTTP_403_FORBIDDEN}
+
+    @staticmethod
     def get_unassigned_users_for_nutrition(user):
         """
         Devuelve usuarios con los estados 'awaiting_assignment' o 'training_only'
@@ -385,6 +421,9 @@ class UserRepository:
                 "activity_level": details.physical_activity_level if details else None,
                 "training_frequency": details.weekly_training_days if details else None,
                 "role": user.role,
+                "status": user.status,
+                "email": user.email,
+                "profile_photo": user.profile_photo.url if user.profile_photo else None,
             }
         except User.DoesNotExist:
             return None
@@ -757,6 +796,8 @@ class UserDetailsRepository:
         Obtener la lista de usuarios con información básica.
         :return: Lista de usuarios con id, nombre y correo o un mensaje de error si el usuario no tiene permisos.
         """
+        if not isinstance(request_user, User):
+            request_user = User.objects.get(id=request_user.id)
         # Verificar si el usuario tiene el rol adecuado para ver esta información
         if request_user.role not in ['administrador', 'entrenador', 'nutricionista']:
             return {"error": "No tienes permisos para ver esta información."}
@@ -873,17 +914,14 @@ class WeightRecordRepository:
         try:
             # Verificar que `user` es una instancia del modelo User
             if not isinstance(user, User):
-                User.objects.get(id=user.id)
-
+                user = User.objects.get(id=user.id)
             # Obtener los registros de peso del usuario
             registros_peso = user.weight_records.all()
-            if registros_peso.exists():
-                return registros_peso, None
-            return None, "No se encontraron registros de peso para este usuario."
-
-        except User.DoesNotExist:
-            return None, "Usuario no encontrado."
-
+            if not registros_peso:
+                return None, "No se encontraron registros de peso para este usuario."
+            return registros_peso, None
+        except Exception as e:
+            return None, f"Error al obtener registros de peso: {str(e)}"
 
     @staticmethod
     def crear_registro_peso(user, peso):
