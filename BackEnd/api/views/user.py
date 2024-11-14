@@ -160,26 +160,10 @@ def get_user_profile(request):
     return Response(profile_data, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
-def get_weight_history(request):
-    """
-    Obtener el historial de peso del usuario a lo largo del tiempo.
-    """
-    user_id = request.query_params.get(
-        'userId') or request.user.id  # Si no se pasa `userId`, tomamos el usuario autenticado
-
-    # Llamar a `UserDetailsRepository` en lugar de `UserRepository`
-    weight_history = UserDetailsRepository.get_weight_history(user_id)
-
-    if weight_history is None:
-        return Response({"error": "No se encontró el historial de peso para el usuario."}, status=status.HTTP_404_NOT_FOUND)
-
-    return Response(weight_history, status=status.HTTP_200_OK)
 
 
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated]) 
+@permission_classes([IsAuthenticated])
 def update_user_profile(request):
     """
     Actualizar la información del perfil del usuario.
@@ -192,13 +176,13 @@ def update_user_profile(request):
         return Response({"error": "No se proporcionaron datos para actualizar."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Actualizar el perfil del usuario
-    updated_profile = UserDetailsRepository.update_user_profile(
-        user_id, profile_data)
+    updated_profile = UserDetailsRepository.update_user_profile(user_id, profile_data)
 
     if updated_profile is None:
         return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
     return Response(updated_profile, status=status.HTTP_200_OK)
+
 
 
 @api_view(['POST'])
@@ -330,7 +314,7 @@ def change_password(request):
         return Response({"error": "Todos los campos son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Cambiar la contraseña
-    result = UserRepository.change_user_password(
+    result = UserDetailsRepository.change_user_password(
         user_id, current_password, new_password, confirm_password)
 
     if 'error' in result:

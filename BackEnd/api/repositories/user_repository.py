@@ -639,29 +639,7 @@ class UserDetailsRepository:
         today = date.today()
         return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
 
-    @staticmethod
-    def get_weight_history(user_id):
-        """
-        Obtener el historial de peso del usuario.
-        :param user_id: ID del usuario.
-        :return: Lista de registros de peso con fecha.
-        """
-        try:
-            # Filtrar por el usuario y ordenar por fecha ascendente para mostrar el historial cronológicamente
-            weight_history = ProgressTracking.objects.filter(
-                user_id=user_id).order_by('date')
 
-            # Convertir el historial a un formato adecuado
-            history_data = [
-                {
-                    "day": record.date.strftime("%d/%m"),
-                    "weight": record.weight
-                } for record in weight_history if record.weight is not None
-            ]
-
-            return history_data
-        except ProgressTracking.DoesNotExist:
-            return None
 
     @staticmethod
     def update_user_profile(user_id, profile_data):

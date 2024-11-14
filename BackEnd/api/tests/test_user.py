@@ -3,11 +3,12 @@ from decimal import Decimal
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.urls import reverse
+from api.repositories.user_repository import UserDetailsRepository
 from api.models.macros import MealPlan, UserNutritionPlan
 from api.models.trainingplan import TrainingPlan
 from api.models.workout import UserWorkout
 from api.models.user import DietPreferences, User, UserDetails, WeightRecord
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class RegisterTests(APITestCase):
@@ -1539,3 +1540,270 @@ class GetLatestWeightRecordTests(APITestCase):
         """
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class GetUserProfileTests(APITestCase):
+
+    def setUp(self):
+        # Crear un usuario de prueba
+
+        self.user = User.objects.create(
+            first_name="John",
+            last_name="Doe",
+            email="johndoe@example.com",
+            password=make_password("password123"),
+            birth_date=date(1990, 1, 1),  # Usar un objeto de tipo date
+            gender="M",
+            role="cliente"
+        )
+
+        # Crear detalles de usuario
+        self.user_details = UserDetails.objects.create(
+            user=self.user,
+            height=180,
+            weight=75.5,
+            weight_goal='gain_muscle',
+            weekly_training_days=3,
+            daily_training_time='1-2 horas',
+            physical_activity_level='moderate',
+            available_equipment='gimnasio_completo'
+        )
+        self.url = reverse('get-user-profile')
+
+    def authenticate_user(self):
+        # Forzar autenticación para las solicitudes de prueba
+        self.client.force_authenticate(user=self.user)
+        
+    def test_get_user_profile_success(self):
+        """
+        Prueba para verificar que un usuario autenticado puede obtener su perfil correctamente.
+        """
+        self.authenticate_user()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["username"], f"{self.user.first_name} {self.user.last_name}")
+        self.assertEqual(response.data["email"], self.user.email)
+        self.assertEqual(response.data["age"], UserDetailsRepository.calculate_age(self.user.birth_date))
+        self.assertEqual(response.data["height"], self.user_details.height)
+        self.assertEqual(response.data["initialWeight"], self.user_details.weight)
+        self.assertEqual(response.data["currentWeight"], self.user_details.weight)
+        self.assertEqual(response.data["weightGoal"], self.user_details.weight_goal)
+        self.assertEqual(response.data["activityLevel"], self.user_details.physical_activity_level)
+        self.assertEqual(response.data["trainingFrequency"], self.user_details.weekly_training_days)
+
+    def test_get_user_profile_no_details(self):
+        """
+        Prueba para verificar el comportamiento cuando el usuario no tiene detalles de perfil.
+        """
+        # Crear un usuario sin detalles de perfil
+        user_without_details = User.objects.create(
+            first_name="Jane",
+            last_name="Doe",
+            email="janedoe@example.com",
+            password=make_password("password123"),
+            birth_date="1995-05-05",
+            gender="F",
+            role="cliente"
+        )
+        self.authenticate_user()
+        response = self.client.get(self.url, {'userId': user_without_details.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["weightGoal"], "No goal set")
+        self.assertEqual(response.data["activityLevel"], "No info")
+        self.assertEqual(response.data["trainingFrequency"], 0)
+
+    def test_get_user_profile_user_not_found(self):
+        """
+        Prueba para verificar el comportamiento cuando el usuario no existe.
+        """
+        self.authenticate_user()
+        response = self.client.get(self.url, {'userId': 999999})  # Un ID de usuario que no existe
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Usuario no encontrado")
+
+    def test_get_user_profile_unauthenticated(self):
+        """
+        Prueba para verificar que un usuario no autenticado no puede obtener el perfil.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class UpdateUserProfileTests(APITestCase):
+    def setUp(self):
+        # Crear un usuario regular y sus detalles
+        self.user = User.objects.create(
+            first_name="Regular",
+            last_name="User",
+            email="regular@example.com",
+            password=make_password("password123"),
+            birth_date="1995-01-01",
+            gender="M",
+            role="cliente",
+            status="assigned"
+        )
+        self.user_details = UserDetails.objects.create(
+            user=self.user,
+            height=180,
+            weight=75.0,
+            weight_goal="maintain",
+            weekly_training_days=3,
+            physical_activity_level="moderate"
+        )
+        self.url = reverse('update-user-profile')
+
+    def test_update_profile_success(self):
+        """
+        Prueba para verificar la actualización exitosa del perfil del usuario.
+        """
+        self.client.force_authenticate(user=self.user)
+        data = {
+            "firstName": "Updated",
+            "lastName": "User",
+            "currentWeight": 70.5,
+            "weightGoal": "gain_muscle",
+            "activityLevel": "intense",
+            "trainingFrequency": 5
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["username"], "Updated User")
+        self.assertEqual(response.data["currentWeight"], 70.5)
+        self.assertEqual(response.data["weightGoal"], "gain_muscle")
+        self.assertEqual(response.data["activityLevel"], "intense")
+        self.assertEqual(response.data["trainingFrequency"], 5)
+
+    def test_update_profile_no_data_provided(self):
+        """
+        Prueba para verificar el manejo de la falta de datos.
+        """
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(self.url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "No se proporcionaron datos para actualizar.")
+
+    def test_update_profile_user_not_found(self):
+        """
+        Prueba para verificar el comportamiento cuando el usuario no existe.
+        """
+        # Invalidamos al usuario para simular que no existe
+        self.client.force_authenticate(user=self.user)
+        User.objects.filter(id=self.user.id).delete()
+        data = {
+            "firstName": "Nonexistent",
+            "lastName": "User"
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Usuario no encontrado.")
+
+    def test_update_profile_requires_authentication(self):
+        """
+        Prueba para verificar que solo usuarios autenticados pueden actualizar su perfil.
+        """
+        data = {
+            "firstName": "Unauthorized",
+            "lastName": "User"
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class ChangePasswordTests(APITestCase):
+    def setUp(self):
+        # Crear un usuario regular
+        self.user = User.objects.create(
+            first_name="Regular",
+            last_name="User",
+            email="regular@example.com",
+            password=make_password("old_password123"),
+            birth_date="1995-01-01",
+            gender="M",
+            role="cliente"
+        )
+        self.url = reverse('change-password')
+
+    def test_change_password_success(self):
+        """
+        Prueba para verificar el cambio de contraseña exitoso.
+        """
+        self.client.force_authenticate(user=self.user)
+        data = {
+            "currentPassword": "old_password123",
+            "newPassword": "new_password123",
+            "confirmPassword": "new_password123"
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["message"], "La contraseña ha sido cambiada exitosamente.")
+
+        # Verificar que la nueva contraseña funciona
+        self.user.refresh_from_db()
+        self.assertTrue(check_password("new_password123", self.user.password))
+
+    def test_change_password_incorrect_current_password(self):
+        """
+        Prueba para verificar que el cambio de contraseña falla si la contraseña actual es incorrecta.
+        """
+        self.client.force_authenticate(user=self.user)
+        data = {
+            "currentPassword": "wrong_password",
+            "newPassword": "new_password123",
+            "confirmPassword": "new_password123"
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "La contraseña actual es incorrecta.")
+
+    def test_change_password_mismatch_new_passwords(self):
+        """
+        Prueba para verificar que el cambio de contraseña falla si las nuevas contraseñas no coinciden.
+        """
+        self.client.force_authenticate(user=self.user)
+        data = {
+            "currentPassword": "old_password123",
+            "newPassword": "new_password123",
+            "confirmPassword": "different_password123"
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "Las nuevas contraseñas no coinciden.")
+
+    def test_change_password_same_as_current(self):
+        """
+        Prueba para verificar que el cambio de contraseña falla si la nueva contraseña es igual a la actual.
+        """
+        self.client.force_authenticate(user=self.user)
+        data = {
+            "currentPassword": "old_password123",
+            "newPassword": "old_password123",
+            "confirmPassword": "old_password123"
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "La nueva contraseña no puede ser igual a la actual.")
+
+    def test_change_password_missing_fields(self):
+        """
+        Prueba para verificar que el cambio de contraseña falla si faltan campos obligatorios.
+        """
+        self.client.force_authenticate(user=self.user)
+        data = {
+            "currentPassword": "old_password123",
+            "newPassword": "new_password123"
+            # Falta el confirmPassword
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["error"], "Todos los campos son obligatorios.")
+
+    def test_change_password_requires_authentication(self):
+        """
+        Prueba para verificar que el cambio de contraseña requiere autenticación.
+        """
+        data = {
+            "currentPassword": "old_password123",
+            "newPassword": "new_password123",
+            "confirmPassword": "new_password123"
+        }
+        response = self.client.put(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+

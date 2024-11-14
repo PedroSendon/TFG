@@ -49,7 +49,7 @@ urlpatterns = [
     path('profile/update/', user.update_user_profile, name='update-user-profile'),
     path('profile/password/', user.change_password, name='change-password'),
     path('profile/photo/', user.upload_profile_photo, name='upload-profile-photo'),
-    path('profile/weight-history/', user.get_weight_history, name='get-weight-history'),
+    
 
     # Workouts
     path('workouts/', workout.get_workouts, name='get-workouts'),
