@@ -706,8 +706,9 @@ class AssignPlansTests(APITestCase):
         data = {"workout_id": self.training_plan.id}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["message"], "Planes asignados exitosamente.")
+        self.assertEqual(response.data["message"], "Planes asignados o eliminados exitosamente.")
         self.assertTrue(UserWorkout.objects.filter(user=self.regular_user, training_plan=self.training_plan).exists())
+
 
     def test_assign_nutrition_plan_as_admin(self):
         """
@@ -717,7 +718,7 @@ class AssignPlansTests(APITestCase):
         data = {"nutrition_plan_id": self.nutrition_plan.id}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["message"], "Planes asignados exitosamente.")
+        self.assertEqual(response.data["message"], "Planes asignados o eliminados exitosamente.")
         self.assertTrue(UserNutritionPlan.objects.filter(user=self.regular_user, plan=self.nutrition_plan).exists())
 
     def test_assign_both_plans_as_admin(self):
@@ -731,7 +732,7 @@ class AssignPlansTests(APITestCase):
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["message"], "Planes asignados exitosamente.")
+        self.assertEqual(response.data["message"], "Planes asignados o eliminados exitosamente.")
         self.assertTrue(UserWorkout.objects.filter(user=self.regular_user, training_plan=self.training_plan).exists())
         self.assertTrue(UserNutritionPlan.objects.filter(user=self.regular_user, plan=self.nutrition_plan).exists())
 
@@ -773,7 +774,8 @@ class AssignPlansTests(APITestCase):
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.post(self.url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["error"], "No se proporcionó ningún ID de plan para asignar.")
+        self.assertEqual(response.data["error"], "No se proporcionó ningún ID de plan para asignar o eliminar.")
+
 
 class GetUserDetailsTests(APITestCase):
 

@@ -189,25 +189,44 @@ def update_user_profile(request):
 @permission_classes([IsAuthenticated])
 def assign_plans(request, user_id):
     """
-    Asignar un plan de entrenamiento y/o un plan nutricional a un usuario.
+    Asignar o eliminar un plan de entrenamiento y/o un plan nutricional a un usuario.
     """
     workout_id = request.data.get('workout_id')
     nutrition_plan_id = request.data.get('nutrition_plan_id')
 
-    if workout_id:
-        success_workout, message_workout, status_code = UserRepository.assign_concret_training_plan_to_user(user_id, workout_id, request.user)
-        if not success_workout:
-            return Response({"error": message_workout}, status=status_code)
+    # Variable de control para verificar si alguna operación fue realizada
+    any_change_made = False
 
-    if nutrition_plan_id:
-        success_plan, message_plan, status_code = UserRepository.assign_concret_nutrition_plan_to_user(user_id, nutrition_plan_id, request.user)
-        if not success_plan:
-            return Response({"error": message_plan}, status=status_code)
+    # Manejo del plan de entrenamiento
+    if workout_id is not None:  # Asignar o eliminar plan de entrenamiento
+        if workout_id == -1:  # Eliminar el plan de entrenamiento actual
+            success_workout, message_workout, status_code = UserRepository.remove_training_plan_from_user(user_id, request.user)
+            if not success_workout:
+                return Response({"error": message_workout}, status=status_code)
+            any_change_made = True
+        elif workout_id:  # Asignar un nuevo plan
+            success_workout, message_workout, status_code = UserRepository.assign_concret_training_plan_to_user(user_id, workout_id, request.user)
+            if not success_workout:
+                return Response({"error": message_workout}, status=status_code)
+            any_change_made = True
 
-    if workout_id or nutrition_plan_id:
-        return Response({"message": "Planes asignados exitosamente."}, status=status.HTTP_200_OK)
+    # Manejo del plan nutricional
+    if nutrition_plan_id is not None:  # Asignar o eliminar plan de nutrición
+        if nutrition_plan_id == -1:  # Eliminar el plan de nutrición actual
+            success_plan, message_plan, status_code = UserRepository.remove_nutrition_plan_from_user(user_id, request.user)
+            if not success_plan:
+                return Response({"error": message_plan}, status=status_code)
+            any_change_made = True
+        elif nutrition_plan_id:  # Asignar un nuevo plan
+            success_plan, message_plan, status_code = UserRepository.assign_concret_nutrition_plan_to_user(user_id, nutrition_plan_id, request.user)
+            if not success_plan:
+                return Response({"error": message_plan}, status=status_code)
+            any_change_made = True
+
+    if any_change_made:
+        return Response({"message": "Planes asignados o eliminados exitosamente."}, status=status.HTTP_200_OK)
     else:
-        return Response({"error": "No se proporcionó ningún ID de plan para asignar."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "No se proporcionó ningún ID de plan para asignar o eliminar."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -253,7 +272,18 @@ def get_user_role(request):
     
     return Response(role_data, status=status.HTTP_200_OK)
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_plans(request, user_id):
+    """
+    Devuelve el MealPlan y el TrainingPlan asignados al usuario autenticado.
+    """
+    plans_data = UserRepository.get_user_plans(user_id)
+    
+    if plans_data is None:
+        return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    
+    return Response(plans_data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

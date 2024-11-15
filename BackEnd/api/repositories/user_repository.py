@@ -95,6 +95,79 @@ class UserRepository:
             return {"role": user.role}
         except User.DoesNotExist:
             return None
+        
+    @staticmethod
+    def get_user_plans(user_id):
+        """
+        Obtener el MealPlan y el TrainingPlan asignados a un usuario.
+        """
+        try:
+            
+            user = User.objects.get(id=user_id)
+            # Obtener el plan de comidas (MealPlan)
+            meal_plan = user.user_nutrition_plans.plan if hasattr(user, 'user_nutrition_plans') else None
+
+            # Obtener el último plan de entrenamiento (TrainingPlan)
+            user_workout = user.user_workouts.last()  # Obtener el último UserWorkout si hay varios
+            training_plan = user_workout.training_plan if user_workout else None
+
+            return {
+                "meal_plan": {
+                    "id": meal_plan.id,
+                    "name": meal_plan.name,
+                    "diet_type": meal_plan.diet_type,
+                    "calories": meal_plan.calories,
+                    "proteins": meal_plan.proteins,
+                    "carbs": meal_plan.carbs,
+                    "fats": meal_plan.fats,
+                    "description": meal_plan.description,
+                    "meal_distribution": meal_plan.meal_distribution,
+                } if meal_plan else None,
+                "training_plan": {
+                    "id": training_plan.id,
+                    "name": training_plan.name,
+                    "description": training_plan.description,
+                    "difficulty": training_plan.difficulty,
+                    "equipment": training_plan.equipment,
+                    "duration": training_plan.duration,
+                } if training_plan else None
+            }
+        except User.DoesNotExist:
+            return None
+
+    @staticmethod
+    def remove_training_plan_from_user(user_id, current_user):
+        try:
+            user = User.objects.get(id=user_id)
+            if not user.user_workouts.exists():  # Verificar si el usuario tiene un plan asignado
+                return False, "El usuario no tiene un plan de entrenamiento asignado.", status.HTTP_404_NOT_FOUND
+            user.user_workouts.all().delete()  # Eliminar todas las instancias de UserWorkout asociadas al usuario
+            if user.status == 'training_only':
+                user.status = 'awaiting_assignment'
+                user.save()
+            if user.status == 'assigned':
+                user.status = 'nutrition_only'
+                user.save()
+            return True, "Plan de entrenamiento eliminado exitosamente.", status.HTTP_200_OK
+        except User.DoesNotExist:
+            return False, "Usuario no encontrado.", status.HTTP_404_NOT_FOUND
+
+    @staticmethod
+    def remove_nutrition_plan_from_user(user_id, current_user):
+        try:
+            user = User.objects.get(id=user_id)
+            if not hasattr(user, 'user_nutrition_plans'):  # Verificar si el usuario tiene un plan de nutrición
+                return False, "El usuario no tiene un plan nutricional asignado.", status.HTTP_404_NOT_FOUND
+            user.user_nutrition_plans.delete()  # Eliminar la relación con el plan de nutrición
+            if user.status == 'nutrition_only':
+                user.status = 'awaiting_assignment'
+                user.save()
+            if user.status == 'assigned':
+                user.status = 'training_only'
+                user.save() 
+            return True, "Plan nutricional eliminado exitosamente.", status.HTTP_200_OK
+        except User.DoesNotExist:
+            return False, "Usuario no encontrado.", status.HTTP_404_NOT_FOUND
 
     @staticmethod
     def get_user_status(user_id):
@@ -197,6 +270,8 @@ class UserRepository:
         :return: Un diccionario con el mensaje de éxito o error y el código de estado.
         """
         try:
+            if not isinstance(admin_user, User):
+                admin_user = User.objects.get(id=admin_user.id)
             # Verificar permisos de administrador
             if admin_user.role != 'administrador':
                 return {"error": "No tienes permisos para crear usuarios", "status": status.HTTP_403_FORBIDDEN}

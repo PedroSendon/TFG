@@ -1,19 +1,9 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from .choices import ROLE_CHOICES, STATUS_CHOICES, WEIGHT_GOAL_CHOICES, ACTIVITY_LEVEL_CHOICES, EQUIPMENT_CHOICES, DIET_TYPE_CHOICES
 
 class User(models.Model):
-    ROLE_CHOICES = [
-        ('cliente', 'Cliente'),
-        ('administrador', 'Administrador'),
-        ('entrenador', 'Entrenador'),
-        ('nutricionista', 'Nutricionista'),
-    ]
-    STATUS_CHOICES = [
-    ('awaiting_assignment', 'Awaiting Assignment'),
-    ('assigned', 'Assigned'),
-    ('training_only', 'Training Plan Assigned Only'),
-    ('nutrition_only', 'Nutrition Plan Assigned Only'),
-]
+
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -36,23 +26,7 @@ class User(models.Model):
 
 
 class UserDetails(models.Model):
-    WEIGHT_GOAL_CHOICES = [
-        ('gain_muscle', 'Ganar masa muscular'),
-        ('lose_weight', 'Perder peso'),
-        ('maintain', 'Mantenimiento'),
-    ]
-    ACTIVITY_LEVEL_CHOICES = [
-        ('sedentary', 'Sedentaria'),
-        ('light', 'Ligera'),
-        ('moderate', 'Moderada'),
-        ('intense', 'Intensa'),
-    ]
-    EQUIPMENT_CHOICES = [
-        ('gimnasio_completo', 'Gimnasio Completo'),
-        ('pesas_libres', 'Pesas Libres'),
-        ('sin_equipamiento', 'Sin Equipamiento'),
-    ]
-    
+        
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='details')
     height = models.PositiveIntegerField()  # En cm
     weight = models.DecimalField(max_digits=5, decimal_places=2)  # En kg
@@ -68,12 +42,7 @@ class UserDetails(models.Model):
 
 
 class DietPreferences(models.Model):
-    DIET_TYPE_CHOICES = [
-        ('low_protein', 'Bajo en proteínas'),
-        ('low_carbs', 'Bajo en carbohidratos'),
-        ('low_fats', 'Bajo en grasas'),
-        ('balanced', 'Balanceado'),
-    ]
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='diet_preferences')
     diet_type = models.CharField(max_length=20, choices=DIET_TYPE_CHOICES, default='balanced')  # Tipo de dieta limitado a opciones
     meals_per_day = models.PositiveIntegerField()

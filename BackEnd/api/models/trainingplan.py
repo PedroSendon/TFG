@@ -1,13 +1,9 @@
 from django.db import models
 from .workout import Workout  # Asegúrate de que 'Workout' esté definido en otro archivo de modelos
+from .choices import DIFFICULTY_LEVELS  # Importa las opciones de dificultad definidas en choices.py
 
 class TrainingPlan(models.Model):
-    DIFFICULTY_LEVELS = [
-        ('ligero', 'Ligero'),
-        ('moderado', 'Moderado'),
-        ('intermedio', 'Intermedio'),
-        ('avanzado', 'Avanzado'),
-    ]
+
     name = models.CharField(max_length=100)
     description = models.TextField()
     workouts = models.ManyToManyField(Workout, related_name='training_plans')  # Relacionamos los entrenamientos incluidos en el plan
