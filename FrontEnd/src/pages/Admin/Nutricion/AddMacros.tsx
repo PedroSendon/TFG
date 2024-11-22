@@ -26,6 +26,9 @@ const AddMacros: React.FC = () => {
     const [dietTypes, setDietTypes] = useState<{ value: string; label: string }[]>([]);
 
     useEffect(() => {
+
+       
+
         const fetchDietTypes = async () => {
             try {
                 const accessToken = localStorage.getItem('access_token');
@@ -111,7 +114,7 @@ const AddMacros: React.FC = () => {
                 });
                 if (response.ok) {
                     history.push({
-                        pathname: '/admin/macros',
+                        pathname: '/admin/nutrition',
                         state: { reload: true },
                     });
                 } else {

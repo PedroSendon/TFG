@@ -9,6 +9,7 @@ from .views import workout
 from .views import statistics
 from .views import exercise
 from .views import trainingplan
+from django.urls import re_path
 
 
 urlpatterns = [
@@ -93,9 +94,11 @@ urlpatterns = [
     path('mealplans/<str:category>/<int:id>/update/', macros.update_mealplan, name='update-mealplan'),
     path('mealplans/<str:category>/<int:id>/delete/', macros.delete_mealplan, name='delete-mealplan'),
     path('mealplans/', macros.get_user_mealplan, name='get-mealplans'),
-    path('mealplans/<str:category>/', macros.get_mealplans_by_category, name='get-mealplans-by-category'),
-    #path('mealplans/create/', macros.create_meal_plan_view, name='create_meal_plan'),
+    re_path(r'^mealplans/(?P<category>(weightLoss|muscleGain|maintenance))/$', macros.get_mealplans_by_category, name='get-mealplans-by-category'),
+
+    path('mealplans/create/', macros.add_mealplan, name='create_meal_plan'),
     path('diet-categories/', macros.list_diet_categories, name='get-diet-categories'),
+    path('mealplans/prueba/', macros.prueba, name='preuba'),
 
     # Endpoints para ExerciseLog
     path('exercise-log/', statistics.create_exercise_log, name='create-exercise-log'),

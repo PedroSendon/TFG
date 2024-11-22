@@ -57,7 +57,14 @@ def get_macronutrient_by_id(request):
     else:
         return Response({"error": "Recomendación no encontrada"}, status=status.HTTP_404_NOT_FOUND)
 
-'''
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def prueba(request):
+    return Response({"message": "Hola mundo"}, status=status.HTTP_200_OK)
+
+
+
 @api_view(['POST'])
 def add_mealplan(request):
     # Llamar al repositorio para crear el MealPlan
@@ -71,7 +78,6 @@ def add_mealplan(request):
         "message": "Plan de comidas añadido exitosamente",
         "data": result['data']
     }, status=status.HTTP_201_CREATED)
-    '''
     
     
 
@@ -109,9 +115,6 @@ def delete_mealplan(request, category, id):
     """
     Eliminar un plan de comidas de la categoría seleccionada.
     """
-    user = request.user
-    if user.role != 'nutricionista' and user.role != 'administrador':
-        return Response({"error": "No tienes permisos para eliminar planes de nutrición"}, status=status.HTTP_403_FORBIDDEN)
 
     # Validar que la categoría es válida
     valid_categories = ['weightLoss', 'muscleGain', 'maintenance']
@@ -120,7 +123,7 @@ def delete_mealplan(request, category, id):
                         status=status.HTTP_400_BAD_REQUEST)
 
     # Eliminar el plan de comidas
-    success = MacrosRepository.delete_mealplan(user, id, category)
+    success = MacrosRepository.delete_mealplan(request.user, id, category)
 
     if success:
         return Response({"message": "Plan de comidas eliminado correctamente"}, status=status.HTTP_200_OK)

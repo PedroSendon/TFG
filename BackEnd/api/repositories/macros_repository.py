@@ -209,26 +209,32 @@ class MacrosRepository:
 
     @staticmethod
     def delete_mealplan(user, mealplan_id, diet_type):
-        """
-        Eliminar un plan de comidas de la categoría seleccionada.
-        :param user: El usuario que realiza la solicitud.
-        :param mealplan_id: El ID del plan de comidas a eliminar.
-        :param diet_type: La categoría de la dieta (weightLoss, muscleGain, maintenance).
-        :return: True si se eliminó correctamente, False si no se encontró el plan de comidas.
-        """
         try:
-            # Buscar el UserNutritionPlan que enlaza al usuario con el MealPlan correspondiente
-            user_nutrition_plan = UserNutritionPlan.objects.select_related('plan').get(
-                user=user, plan__id=mealplan_id, plan__diet_type=diet_type
-            )
-            
-            # Eliminar el plan de comidas
-            user_nutrition_plan.plan.delete()
-            return True
+            # Verificar si el usuario tiene permisos
+            if not isinstance(user, User):
+                user = User.objects.get(id=user.id)
+            if user.role not in ['nutricionista', 'administrador']:
+                return {"error": "No tienes permisos para realizar esta acción.", "status": status.HTTP_403_FORBIDDEN}
 
-        except UserNutritionPlan.DoesNotExist:
-            # Si no existe el UserNutritionPlan que relacione al usuario con el MealPlan, devuelve False
-            return False
+            # Buscar el MealPlan con el ID y tipo de dieta proporcionados
+            meal_plan = MealPlan.objects.filter(id=mealplan_id, diet_type=diet_type).first()
+            if not meal_plan:
+                return {"error": "El plan de comidas no existe.", "status": status.HTTP_404_NOT_FOUND}
+
+            # Verificar si el MealPlan está asignado a algún usuario
+            user_nutrition_plans = UserNutritionPlan.objects.filter(plan=meal_plan)
+            if user_nutrition_plans.exists():
+                # Desasignar el plan de los usuarios asociados
+                user_nutrition_plans.delete()
+
+            # Eliminar el MealPlan de la base de datos
+            meal_plan.delete()
+            return {"message": "Plan de comidas eliminado correctamente.", "status": status.HTTP_200_OK}
+
+        except Exception as e:
+            print(f"Error deleting MealPlan: {str(e)}")
+            return {"error": "Ocurrió un error inesperado al intentar eliminar el plan de comidas.", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
 
     @staticmethod
     def get_mealplan(user, mealplan_id, diet_type):

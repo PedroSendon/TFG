@@ -147,12 +147,13 @@ const MacrosAdmin: React.FC = () => {
     return (
         <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '3rem 0' }}>
             <Header title={t('nutrition_management_title')} />
-            <Container sx={{ paddingTop: '8%' }}>
+            <Container sx={{ paddingTop: '8%' , pb: 4,}}>
                 <Box
                     sx={{
                         position: 'fixed',
                         top: 0,
                         left: 0,
+                        
                         width: '100vw',
                         backgroundColor: '#f5f5f5',
                         paddingTop: '16%',
@@ -225,7 +226,7 @@ const MacrosAdmin: React.FC = () => {
                                             <IconButton
                                                 onClick={(event) => {
                                                     event.stopPropagation();
-                                                    handleEditMacros(macro.id);
+                                                    openDeleteDialog(macro.id);
                                                 }}
                                                 sx={{
                                                     border: '1px solid #FF0000',
