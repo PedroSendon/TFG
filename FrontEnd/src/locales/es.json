@@ -390,5 +390,7 @@
   "select_training_plan": "Seleccionar plan de entrenamiento",
   "weight_record_history": "Historial de Registros de Peso",
   "see_more": "Ver más",
-  "assign_nutrition_plan_admin": "Asignar plan de nutrición"
+  "assign_nutrition_plan_admin": "Asignar plan de nutrición",
+  "training_plans": "Planes"
+
 }
