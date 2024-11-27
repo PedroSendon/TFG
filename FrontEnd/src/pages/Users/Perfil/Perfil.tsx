@@ -114,7 +114,10 @@ const ProfilePage: React.FC = () => {
                             </ListItem>
                             <Divider component="li" />
                             <ListItem>
-                                <ListItemText primary={t('activity_level')} secondary={userData?.activityLevel} />
+                                <ListItemText
+                                    primary={t('activity_level')}
+                                    secondary={t(userData?.activityLevel || 'No info')}
+                                />                         
                             </ListItem>
                             <Divider component="li" />
                             <ListItem>

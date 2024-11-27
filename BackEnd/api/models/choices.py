@@ -34,10 +34,10 @@ WEIGHT_GOAL_CHOICES = [
 ]
 
 ACTIVITY_LEVEL_CHOICES = [
-    ('sedentary', 'Sedentaria'),
-    ('light', 'Ligera'),
-    ('moderate', 'Moderada'),
-    ('intense', 'Intensa'),
+    ('sedentary', 'Sedentary'),
+    ('light', 'Light'),
+    ('moderate', 'Moderate'),
+    ('intense', 'Intense'),
 ]
 
 EQUIPMENT_CHOICES = [

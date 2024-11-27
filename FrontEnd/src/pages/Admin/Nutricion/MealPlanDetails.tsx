@@ -24,7 +24,7 @@ const MealPlanDetails: React.FC = () => {
             });
             if (response.ok) setMealPlanData(await response.json());
         } catch (error) {
-            console.error('Error fetching meal plan data', error);
+            console.error('Error fetching meal plan data', error); 
         } finally {
             setLoading(false);
         }
@@ -72,7 +72,7 @@ const MealPlanDetails: React.FC = () => {
                         </Typography>
                         <List dense>
                             <ListItem>
-                                <ListItemText primary={t('calories')} secondary={`${mealPlanData?.calories} kcal`} />
+                                <ListItemText primary={t('calories')} secondary={`${mealPlanData?.kcal} kcal`} />
                             </ListItem>
                             <Divider component="li" />
                             <ListItem>
