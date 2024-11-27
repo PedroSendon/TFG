@@ -211,15 +211,13 @@ class MacrosRepository:
     def delete_mealplan(user, mealplan_id, diet_type):
         try:
             # Verificar si el usuario tiene permisos
-            if not isinstance(user, User):
-                user = User.objects.get(id=user.id)
             if user.role not in ['nutricionista', 'administrador']:
-                return {"error": "No tienes permisos para realizar esta acción.", "status": status.HTTP_403_FORBIDDEN}
+                return False, {"error": "No tienes permisos para eliminar planes de nutrición.", "status": status.HTTP_403_FORBIDDEN}
 
             # Buscar el MealPlan con el ID y tipo de dieta proporcionados
             meal_plan = MealPlan.objects.filter(id=mealplan_id, diet_type=diet_type).first()
             if not meal_plan:
-                return {"error": "El plan de comidas no existe.", "status": status.HTTP_404_NOT_FOUND}
+                return False, {"error": "El plan de comidas no existe.", "status": status.HTTP_404_NOT_FOUND}
 
             # Verificar si el MealPlan está asignado a algún usuario
             user_nutrition_plans = UserNutritionPlan.objects.filter(plan=meal_plan)
@@ -229,12 +227,11 @@ class MacrosRepository:
 
             # Eliminar el MealPlan de la base de datos
             meal_plan.delete()
-            return {"message": "Plan de comidas eliminado correctamente.", "status": status.HTTP_200_OK}
+            return True, {"message": "Plan de comidas eliminado correctamente", "status": status.HTTP_200_OK}
 
         except Exception as e:
             print(f"Error deleting MealPlan: {str(e)}")
-            return {"error": "Ocurrió un error inesperado al intentar eliminar el plan de comidas.", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
-
+            return False, {"error": "Ocurrió un error inesperado al intentar eliminar el plan de comidas.", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
 
     @staticmethod
     def get_mealplan(user, mealplan_id, diet_type):

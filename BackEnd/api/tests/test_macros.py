@@ -485,7 +485,7 @@ class DeleteMealPlanTests(APITestCase):
 
         # Verificar que el estado de la respuesta es 403 FORBIDDEN
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response.data["error"], "No tienes permisos para eliminar planes de nutrición")
+        self.assertEqual(response.data["error"], "No tienes permisos para eliminar planes de nutrición.")
 
     def test_delete_mealplan_invalid_category(self):
         """
@@ -509,13 +509,14 @@ class DeleteMealPlanTests(APITestCase):
         # Autenticar como nutricionista
         self.client.force_authenticate(user=self.nutritionist_user)
 
-        # Realizar la solicitud DELETE para un ID de plan inexistente
-        url = reverse('delete-mealplan', args=['maintenance', 999])
+        # Realizar la solicitud DELETE al endpoint con un ID inexistente
+        url = reverse('delete-mealplan', args=['maintenance', 999])  # ID inexistente
         response = self.client.delete(url)
 
         # Verificar que el estado de la respuesta es 404 NOT FOUND
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.data["error"], "Plan de comidas no encontrado")
+        self.assertEqual(response.data["error"], "El plan de comidas no existe.")
+
 
     def test_delete_mealplan_unauthenticated(self):
         """
@@ -671,18 +672,22 @@ class GetMealPlansByCategoryTests(APITestCase):
 
     def test_get_mealplans_by_category_invalid_category(self):
         """
-        Test para verificar el error cuando se proporciona una categoría inválida.
+        Test para verificar el error cuando se proporciona una categoría que no está contemplada.
         """
         # Autenticar como usuario
         self.client.force_authenticate(user=self.user)
 
-        # Realizar la solicitud GET con una categoría inválida
-        url = reverse('get-mealplans-by-category', args=['invalidCategory'])
+        # Construir la URL manualmente con una categoría inválida
+        url = '/api/mealplans/invalidCategory/'
         response = self.client.get(url)
 
         # Verificar que el estado de la respuesta es 400 BAD REQUEST
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance.")
+
+
+
+
 
     def test_get_mealplans_by_category_not_found(self):
         """

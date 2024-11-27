@@ -123,12 +123,13 @@ def delete_mealplan(request, category, id):
                         status=status.HTTP_400_BAD_REQUEST)
 
     # Eliminar el plan de comidas
-    success = MacrosRepository.delete_mealplan(request.user, id, category)
+    success, result = MacrosRepository.delete_mealplan(request.user, id, category)
 
-    if success:
-        return Response({"message": "Plan de comidas eliminado correctamente"}, status=status.HTTP_200_OK)
-    else:
-        return Response({"error": "Plan de comidas no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    if not success:
+        return Response(result, status=result.get("status", status.HTTP_400_BAD_REQUEST))
+
+    return Response(result, status=result.get("status", status.HTTP_200_OK))
+
 
     
 @api_view(['GET'])
@@ -169,6 +170,7 @@ def get_mealplans_by_category(request, category):
         return Response(meal_plans, status=status.HTTP_200_OK)
     else:
         return Response({"error": "No se encontraron planes de comidas"}, status=status.HTTP_404_NOT_FOUND)
+
 
 # Vista sin requerir autenticación
 @api_view(['GET'])

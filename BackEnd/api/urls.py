@@ -94,7 +94,7 @@ urlpatterns = [
     path('mealplans/<str:category>/<int:id>/update/', macros.update_mealplan, name='update-mealplan'),
     path('mealplans/<str:category>/<int:id>/delete/', macros.delete_mealplan, name='delete-mealplan'),
     path('mealplans/', macros.get_user_mealplan, name='get-mealplans'),
-    re_path(r'^mealplans/(?P<category>(weightLoss|muscleGain|maintenance))/$', macros.get_mealplans_by_category, name='get-mealplans-by-category'),
+    re_path(r'^mealplans/(?P<category>.+)/$', macros.get_mealplans_by_category, name='get-mealplans-by-category'),
 
     path('mealplans/create/', macros.add_mealplan, name='create_meal_plan'),
     path('diet-categories/', macros.list_diet_categories, name='get-diet-categories'),
