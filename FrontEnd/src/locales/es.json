@@ -391,6 +391,10 @@
   "weight_record_history": "Historial de Registros de Peso",
   "see_more": "Ver más",
   "assign_nutrition_plan_admin": "Asignar plan de nutrición",
-  "training_plans": "Planes"
+  "training_plans": "Planes",
+  "weightLoss": "Pérdida",
+  "muscleGain": "Músculo",
+  "awaiting_assignment": "Falta por asignar plan",
+  "assigned_plan": "Plan asignado"
 
 }

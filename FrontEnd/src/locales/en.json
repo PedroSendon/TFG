@@ -390,5 +390,9 @@
   "weight_record_history": "Weight Record History",
   "see_more": "See More",
   "assign_nutrition_plan_admin": "Assign Nutrition Plan",
-  "training_plans": "Plans"
+  "training_plans": "Plans",
+  "weightLoss": "Loss",
+  "muscleGain": "Muscle",
+  "awaiting_assignment": "Plan not assigned",
+  "assigned_plan": "Plan assigned"
 }

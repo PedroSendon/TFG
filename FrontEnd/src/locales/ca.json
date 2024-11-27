@@ -390,6 +390,9 @@
   "weight_record_history": "Històric de Pes",
   "see_more": "Veure més",
   "assign_nutrition_plan_admin": "Assignar pla de nutrició",
-  "training_plans": "Plans"
-
+  "training_plans": "Plans",
+  "weightLoss": "Perdua",
+  "muscleGain": "Múscul",
+  "awaiting_assignment": "Falta assignar pla",
+  "assigned_plan": "Pla assignat"
 }

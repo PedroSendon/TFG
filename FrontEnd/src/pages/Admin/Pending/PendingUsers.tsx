@@ -80,10 +80,10 @@ const PendingUsers: React.FC = () => {
         userRole === 'nutricionista'
           ? 'http://127.0.0.1:8000/api/user/unassigned/nutrition/'
           : userRole === 'entrenador'
-          ? 'http://127.0.0.1:8000/api/user/unassigned/training/'
-          : userRole === 'administrador'
-          ? 'http://127.0.0.1:8000/api/user/unassigned/all/'  // Endpoint específico para administrador
-          : null;
+            ? 'http://127.0.0.1:8000/api/user/unassigned/training/'
+            : userRole === 'administrador'
+              ? 'http://127.0.0.1:8000/api/user/unassigned/all/'  // Endpoint específico para administrador
+              : null;
 
       if (!endpoint) {
         console.error(t('role_error'));
@@ -116,7 +116,7 @@ const PendingUsers: React.FC = () => {
       state: { userId, showPlanSection: true, plans_needed },
     });
   };
-  
+
 
   return (
     <Box sx={{ backgroundColor: '#f5f5f5', height: '95vh', marginTop: '16%' }}>
@@ -189,7 +189,11 @@ const PendingUsers: React.FC = () => {
                       marginTop: '8px',
                     }}
                   >
-                    {user.status === 'awaiting_assignment' ? 'Falta por asignar plan' : 'Plan asignado'}
+                    {
+                      user.status === 'awaiting_assignment'
+                        ? (t('awaiting_assignment') || 'Falta por asignar plan')
+                        : (t('assigned_plan') || 'Plan asignado')
+                    }
                   </Typography>
                 </CardContent>
                 <Box
