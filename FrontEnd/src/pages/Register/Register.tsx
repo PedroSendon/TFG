@@ -152,7 +152,7 @@ const Register: React.FC = () => {
 
         // Redirigir al usuario a otra página, por ejemplo el formulario o dashboard
         history.push('/form');
-      } else { 
+      } else {
         const errorData = await response.json();
         console.log('Error:', errorData);
         setErrors({ apiError: errorData.error });
@@ -165,7 +165,7 @@ const Register: React.FC = () => {
 
 
   return (
-    <Container component="main" maxWidth="xs" sx={{backgroundColor:'#f5f5f5', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Container component="main" maxWidth="xs" sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Box sx={{
         width: '100%',
         backgroundColor: '#ffffff',
@@ -309,25 +309,28 @@ const Register: React.FC = () => {
                   label={t('birthdate')}
                   value={formData.birthDate}
                   onChange={handleDateChange}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      error={!!errors.birthDate}
-                      helperText={errors.birthDate}
-                      sx={{
-                        '& label.Mui-focused': { color: '#555555' },
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: '#CCCCCC' },
-                          '&:hover fieldset': { borderColor: '#AAAAAA' },
-                          '&.Mui-focused fieldset': { borderColor: '#555555 !important' },
-                        },
-                      }}
-                    />
-                  )}
+                  slots={{
+                    textField: (props) => (
+                      <TextField
+                        {...props}
+                        fullWidth
+                        error={!!errors.birthDate}
+                        helperText={errors.birthDate}
+                        sx={{
+                          '& label.Mui-focused': { color: '#555555' },
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: '#CCCCCC' },
+                            '&:hover fieldset': { borderColor: '#AAAAAA' },
+                            '&.Mui-focused fieldset': { borderColor: '#555555 !important' },
+                          },
+                        }}
+                      />
+                    ),
+                  }}
                 />
               </LocalizationProvider>
             </Grid>
+
 
             <Grid item xs={12}>
               <FormControlLabel

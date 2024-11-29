@@ -41,6 +41,7 @@ urlpatterns = [
     path('user/unassigned/training/', user.get_unassigned_users_for_training, name='get_unassigned_users_for_training'),
     path('users/all-details/<int:user_id>/', user.get_user_all_details, name='get-all-details'),
     path('assign-single-plan/<int:user_id>/', user.assign_single_plan, name='assign-single-plan'),
+    path('user/status/<int:user_id>/', user.get_user_status_by_id, name='get_user_status_id'),
 
     # Endpoints para WeightRecord
     path('weight-records/', user.obtener_registros_peso_usuario, name='weight-records'),

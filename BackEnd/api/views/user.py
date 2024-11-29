@@ -1,9 +1,10 @@
+import re
 from rest_framework.response import Response 
 from rest_framework.decorators import api_view, permission_classes  
 from rest_framework import status 
 from api.repositories.user_repository import UserRepository, ImagenRepository, WeightRecordRepository
 from rest_framework.permissions import IsAuthenticated
-from api.schemas.user import UserCreate, UserDetailsSchema, LoginSchema, WeightRecordSchema
+from api.schemas.user import UserCreate, UserDetailsSchema, LoginSchema, UserSchema, WeightRecordSchema
 from django.contrib.auth.hashers import make_password
 from api.repositories.user_repository import UserDetailsRepository
 from django.contrib.auth.decorators import login_required
@@ -12,6 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.permissions import AllowAny
 from api.schemas.user import ImagenSchema
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.exceptions import APIException
 
 
 @api_view(['POST'])
@@ -30,6 +32,9 @@ def create_user_as_admin(request):
     return Response({"message": "Usuario creado exitosamente"}, status=status.HTTP_201_CREATED)
 
 
+
+from pydantic import ValidationError
+
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Permitir a cualquier usuario registrar
 def register(request):
@@ -39,16 +44,28 @@ def register(request):
     try:
         user_data = request.data
 
+        # Validar los datos usando Pydantic
+        try:
+            validated_data = UserCreate(**user_data)
+        except ValidationError as e:
+            # Personalizar el mensaje de error de validación
+            for error in e.errors():
+                if error['loc'][0] == 'email':
+                    return Response({"error": "El correo electrónico no es válido."}, status=status.HTTP_400_BAD_REQUEST)
+                if error['loc'][0] == 'password':
+                    return Response({"error": "String should have at least 8 characters"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Error de validación en los datos proporcionados."}, status=status.HTTP_400_BAD_REQUEST)
+
         # Verificar si el usuario ya existe por su email
-        if UserRepository.user_exists_by_email(user_data['email']):
+        if UserRepository.user_exists_by_email(validated_data.email):
             return Response({"error": "El usuario con este correo electrónico ya existe."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Asegurarse de que los términos fueron aceptados
-        if not user_data.get('terms_accepted', False):
+        if not validated_data.terms_accepted:
             return Response({"error": "Debes aceptar los términos y condiciones."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Crear usuario usando el repositorio
-        user = UserRepository.create_user({**user_data, "role": "cliente"})
+        user = UserRepository.create_user({**validated_data.dict(), "role": "cliente"})
 
         # Generar tokens JWT para el usuario
         refresh = RefreshToken.for_user(user)
@@ -62,21 +79,27 @@ def register(request):
         }, status=status.HTTP_201_CREATED)
 
     except Exception as e:
-        return Response({"error": f"Error en el registro: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Ocurrió un error inesperado. Por favor, inténtalo nuevamente."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
+@permission_classes([IsAuthenticated])
 def get_user_by_email(request, email):
     """
     Obtener un usuario por su correo electrónico.
     """
-    user_data = UserRepository.get_user_by_email(email)
+    user = UserRepository.get_user_by_email(email)
 
-    if user_data:
+    if user:
+        # Convertimos el modelo a un esquema Pydantic serializable
+        user_data = UserSchema.from_orm(user).dict()
         return Response(user_data, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 @api_view(['POST'])
@@ -97,7 +120,7 @@ def login(request):
         # Autenticar al usuario
         user = UserRepository.authenticate_user(email, password)
         if not user:
-            return Response({"error": "Credenciales inválidas. Verifica tu email y contraseña."}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Generar tokens JWT
         refresh = RefreshToken.for_user(user)
@@ -572,6 +595,14 @@ def get_unassigned_users_for_training(request):
 @permission_classes([IsAuthenticated])
 def get_user_status(request):
     user_status = UserRepository.get_user_status(request.user.id)
+    if user_status is None:
+        return Response({"error": "User not found."}, status=404)
+    return Response({"status": user_status}, status=200)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_status_by_id(request, user_id):
+    user_status = UserRepository.get_user_status(user_id)
     if user_status is None:
         return Response({"error": "User not found."}, status=404)
     return Response({"status": user_status}, status=200)

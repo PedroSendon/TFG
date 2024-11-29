@@ -89,13 +89,7 @@ class RegisterTests(APITestCase):
         }
         response = self.client.post(self.register_url, data=invalid_email_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.data["error"],
-            "Error de validación en los datos proporcionados: 1 validation error for UserCreate\n"
-            "email\n"
-            "  value is not a valid email address: The email address is not valid. It must have exactly one @-sign. "
-            "[type=value_error, input_value='invalid_email', input_type=str]"
-        )
+        self.assertEqual(response.data["error"], "El correo electrónico no es válido.")
 
     def test_register_weak_password(self):
         weak_password_data = {
@@ -321,6 +315,7 @@ class GetUserByEmailTests(APITestCase):
         self.assertEqual(response.data['email'], self.user.email)
         self.assertEqual(response.data['first_name'], self.user.first_name)
         self.assertEqual(response.data['last_name'], self.user.last_name)
+
 
     def test_get_user_by_email_not_found(self):
         """

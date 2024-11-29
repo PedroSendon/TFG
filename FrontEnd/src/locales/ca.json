@@ -394,5 +394,9 @@
   "weightLoss": "Perdua",
   "muscleGain": "Múscul",
   "awaiting_assignment": "Falta assignar pla",
-  "assigned_plan": "Pla assignat"
+  "assigned_plan": "Pla assignat",
+  "role_error": "El rol d'usuari no és reconegut.",
+  "all_assigned_message": "Tots els usuaris estan assignats!",
+  "no_pending_users_message": "Bon treball! Tots els usuaris tenen plans assignats. Ara mateix no hi ha usuaris pendents.",
+  "no_pending_users_icon_alt": "Tots els plans assignats"
 }

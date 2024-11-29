@@ -11,11 +11,12 @@ class UserSchema(BaseModel):
     last_name: str
     email: EmailStr
     password: str
-    birth_date: str
+    birth_date: date  # Cambiado de str a date
     gender: str
 
     class Config:
         from_attributes = True
+
 
 
 class UserCreate(BaseModel):

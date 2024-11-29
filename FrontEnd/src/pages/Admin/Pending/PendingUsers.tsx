@@ -9,7 +9,7 @@ import {
   Grid,
   Typography,
 } from '@mui/material';
-import { ArrowForwardIos } from '@mui/icons-material';
+import { ArrowForwardIos, CheckCircleOutline } from '@mui/icons-material'; // Agrega el icono
 import Header from '../../Header/Header';
 import { LanguageContext } from '../../../context/LanguageContext';
 
@@ -109,7 +109,6 @@ const PendingUsers: React.FC = () => {
     }
   };
 
-
   const handleUserInformation = (userId: number, plans_needed: string[]) => {
     history.push({
       pathname: `/admin/users/details`,
@@ -117,111 +116,139 @@ const PendingUsers: React.FC = () => {
     });
   };
 
-
   return (
-    <Box sx={{ backgroundColor: '#f5f5f5', height: '95vh', marginTop: '16%' }}>
+    <Box sx={{ backgroundColor: '#f5f5f5', height: '95vh'}}>
       <Header title={t('users')} />
       <Container sx={{ mt: 10, paddingBottom: '18%' }}>
-        <Grid container spacing={2}>
-          {users.map((user) => (
-            <Grid item xs={12} key={user.id}>
-              <Card
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '12px',
-                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                  border: '1px solid #e0e0e0',
-                  padding: '16px',
-                  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)',
-                  },
-                  cursor: 'pointer',
-                }}
-                onClick={() => handleUserInformation(user.id, user.plans_needed)}
-              >
-                <Avatar
-                  src={user.profile_photo || "/path/to/default-avatar.png"}
-                  alt={`${user.name}'s profile photo`}
+        {users.length === 0 ? ( // Si no hay usuarios, muestra el mensaje
+          <Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            height="70vh"
+            textAlign="center"
+          >
+            <CheckCircleOutline
+              sx={{ fontSize: '80px', color: '#4caf50', marginBottom: '16px' }}
+            />
+            <Typography
+              sx={{
+                color: '#555555',
+                fontSize: '1.2em',
+                fontWeight: 'bold',
+                lineHeight: 1.5,
+              }}
+            >
+              {t('all_assigned_message')}
+            </Typography>
+          </Box>
+        ) : (
+          <Grid container spacing={2}>
+            {users.map((user) => (
+              <Grid item xs={12} key={user.id}>
+                <Card
                   sx={{
-                    width: 50,
-                    height: 50,
-                    marginRight: 2,
-                    backgroundColor: '#f0f0f0',
-                  }}
-                />
-                <CardContent
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    padding: 0,
-                    width: '100%',
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      color: '#000000',
-                      fontWeight: 'bold',
-                      fontSize: '1em',
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {user.name}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: '#555555',
-                      fontSize: '0.875em',
-                      marginTop: '4px',
-                    }}
-                  >
-                    {user.email}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: '#FF5733',
-                      fontSize: '0.875em',
-                      fontWeight: '500',
-                      marginTop: '8px',
-                    }}
-                  >
-                    {
-                      user.status === 'awaiting_assignment'
-                        ? (t('awaiting_assignment') || 'Falta por asignar plan')
-                        : (t('assigned_plan') || 'Plan asignado')
-                    }
-                  </Typography>
-                </CardContent>
-                <Box
-                  sx={{
-                    marginLeft: 'auto',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '100%',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '12px',
+                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #e0e0e0',
+                    padding: '16px',
+                    transition:
+                      'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                    '&:hover': {
+                      transform: 'scale(1.02)',
+                      boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)',
+                    },
+                    cursor: 'pointer',
                   }}
+                  onClick={() =>
+                    handleUserInformation(user.id, user.plans_needed)
+                  }
                 >
-                  <Typography
+                  <Avatar
+                    src={user.profile_photo || '/path/to/default-avatar.png'}
+                    alt={`${user.name}'s profile photo`}
                     sx={{
-                      fontSize: '0.75em',
-                      color: '#888888',
-                      fontWeight: '500',
-                      textAlign: 'center',
-                      marginRight: 1,
+                      width: 50,
+                      height: 50,
+                      marginRight: 2,
+                      backgroundColor: '#f0f0f0',
+                    }}
+                  />
+                  <CardContent
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      padding: 0,
+                      width: '100%',
                     }}
                   >
-                    {t('see_more')}
-                  </Typography>
-                  <ArrowForwardIos fontSize="small" sx={{ color: '#888888' }} />
-                </Box>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                    <Typography
+                      sx={{
+                        color: '#000000',
+                        fontWeight: 'bold',
+                        fontSize: '1em',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {user.name}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: '#555555',
+                        fontSize: '0.875em',
+                        marginTop: '4px',
+                      }}
+                    >
+                      {user.email}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: '#FF5733',
+                        fontSize: '0.875em',
+                        fontWeight: '500',
+                        marginTop: '8px',
+                      }}
+                    >
+                      {user.status === 'awaiting_assignment'
+                        ? t('awaiting_assignment') || 'Falta por asignar plan'
+                        : t('assigned_plan') || 'Plan asignado'}
+                    </Typography>
+                  </CardContent>
+                  <Box
+                    sx={{
+                      marginLeft: 'auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: '0.75em',
+                        color: '#888888',
+                        fontWeight: '500',
+                        textAlign: 'center',
+                        marginRight: 1,
+                      }}
+                    >
+                      {t('see_more')}
+                    </Typography>
+                    <ArrowForwardIos
+                      fontSize="small"
+                      sx={{ color: '#888888' }}
+                    />
+                  </Box>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Container>
     </Box>
   );

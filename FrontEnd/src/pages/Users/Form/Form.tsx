@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import { TextField, Box, Button, Grid, Typography, MenuItem } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
@@ -19,14 +19,21 @@ const UserDetailsForm: React.FC = () => {
         physicalActivityLevel: '',
         currentTrainingDays: '',
         mealsPerDay: '',
-        diet_type: '',
+        diet_type: '', 
         availableEquipment: '',
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+    const handleChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            const { name, value } = e.target;
+            setFormData((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
+        },
+        []
+    );
+    
 
     const handleNext = () => {
         setCurrentStep(currentStep + 1);
@@ -43,28 +50,29 @@ const UserDetailsForm: React.FC = () => {
                 console.error(t('no_token'));
                 return;
             }
-            console.log('Authorization header:', `Bearer ${localStorage.getItem('access_token')}`);
-
+    
+            // Convertir los datos al formato necesario (por ejemplo, números)
+            const processedData = {
+                height: parseInt(formData.height, 10),
+                weight: parseFloat(formData.weight),
+                weight_goal: formData.weightGoal,
+                weekly_training_days: parseInt(formData.weeklyTrainingDays, 10),
+                daily_training_time: formData.dailyTrainingTime,
+                physical_activity_level: formData.physicalActivityLevel,
+                meals_per_day: parseInt(formData.mealsPerDay, 10),
+                diet_type: formData.diet_type,
+                available_equipment: formData.availableEquipment,
+            };
+    
             const response = await fetch('http://127.0.0.1:8000/api/form/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,
                 },
-                body: JSON.stringify({
-                    height: parseInt(formData.height, 10),
-                    weight: parseFloat(formData.weight),
-                    weight_goal: formData.weightGoal,
-                    weekly_training_days: parseInt(formData.weeklyTrainingDays, 10),
-                    daily_training_time: formData.dailyTrainingTime,
-                    physical_activity_level: formData.physicalActivityLevel,
-                    meals_per_day: parseInt(formData.mealsPerDay, 10),
-                    diet_type: formData.diet_type,
-                    available_equipment: formData.availableEquipment,
-                }),
+                body: JSON.stringify(processedData),
             });
-            console.log(formData)
-
+    
             if (response.ok) {
                 const data = await response.json();
                 history.push('/profile');
@@ -75,7 +83,7 @@ const UserDetailsForm: React.FC = () => {
             console.error("Error saving user details:", error);
         }
     };
-
+    
     const Introduction = () => (
         <Box
             display="flex"
@@ -211,13 +219,15 @@ const UserDetailsForm: React.FC = () => {
             <Grid container spacing={3} sx={{ width: '100%', maxWidth: '400px' }}>
                 <Grid item xs={12}>
                     <TextField
+                        type="number" // Asegura que solo se permitan números
                         variant="outlined"
                         label={t('height')}
                         name="height"
                         value={formData.height}
                         onChange={handleChange}
                         fullWidth
-                        InputLabelProps={{ style: { color: '#555' } }}
+                        
+                        InputLabelProps={{ style: { color: '#555' }, shrink: true }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': { borderColor: '#CCCCCC' },
@@ -232,13 +242,14 @@ const UserDetailsForm: React.FC = () => {
                 </Grid>
                 <Grid item xs={12}>
                     <TextField
+                        type="number" // Asegura que solo se permitan números
                         variant="outlined"
                         label={t('weight')}
                         name="weight"
                         value={formData.weight}
                         onChange={handleChange}
                         fullWidth
-                        InputLabelProps={{ style: { color: '#555' } }}
+                        InputLabelProps={{ style: { color: '#555' },shrink: true }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': { borderColor: '#CCCCCC' },

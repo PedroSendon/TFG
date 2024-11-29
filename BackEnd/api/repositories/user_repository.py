@@ -325,14 +325,14 @@ class UserRepository:
         """
         Busca un usuario por email.
         :param email: Correo electrónico del usuario.
-        :return: El objeto User si existe, None en caso contrario.
+        :return: Datos serializados del usuario si existe, None en caso contrario.
         """
         try:
             user = User.objects.get(email=email)
             return user
         except User.DoesNotExist:
             return None
-
+        
     @staticmethod
     def get_user_profile(user_id):
         """
@@ -715,19 +715,32 @@ class UserDetailsRepository:
         user = User.objects.get(id=user_id)
 
         # Verificar si ya existen detalles del usuario
-        user_details, created = UserDetails.objects.get_or_create(user=user)
+        user_details, created = UserDetails.objects.update_or_create(
+                user=user,
+                defaults={
+                    'height': data['height'],
+                    'weight': data['weight'],
+                    'weight_goal': data['weight_goal'],
+                    'weekly_training_days': data['weekly_training_days'],
+                    'daily_training_time': data['daily_training_time'],
+                    'physical_activity_level': data['physical_activity_level'],
+                    'available_equipment': data['available_equipment'],
+                }
+            )
+        # Guardar preferencias de dieta
+        diet_preferences, created = DietPreferences.objects.update_or_create(
+            user=user,
+            defaults={
+                'diet_type': data['diet_type'],
+                'meals_per_day': data['meals_per_day']
+            }
+        )
 
-        # Actualizar los detalles con los datos recibidos
-        user_details.height = data.get('height', user_details.height)
-        user_details.weight = data.get('weight', user_details.weight)
-        user_details.weight_goal = data.get('weight_goal', user_details.weight_goal)
-        user_details.weekly_training_days = data.get('weekly_training_days', user_details.weekly_training_days)
-        user_details.daily_training_time = data.get('daily_training_time', user_details.daily_training_time)
-        user_details.physical_activity_level = data.get('physical_activity_level', user_details.physical_activity_level)
-        user_details.available_equipment = data.get('available_equipment', user_details.available_equipment)
-        user_details.save()
+        # Crear registro de peso inicial
+        WeightRecordRepository.crear_registro_peso(user, data['weight'])
 
-        return user_details
+        return user_details, diet_preferences
+
 
 
     @staticmethod

@@ -7,10 +7,9 @@ import { Line } from 'react-chartjs-2';
 import { Chart, Filler } from 'chart.js'; // Importa Filler
 Chart.register(Filler); // Registra el plugin Filler
 
-
 const UserInformation: React.FC = () => {
-    const location = useLocation<{ userId: number; showPlanSection: boolean; plans_needed: string[] }>();
-    const { userId, showPlanSection, plans_needed = [] } = location.state || {};
+    const location = useLocation<{ userId: number; showPlanSection: boolean }>();
+    const { userId, showPlanSection } = location.state || {};
     const history = useHistory();
     const { t } = useContext(LanguageContext);
     const [userData, setUserData] = useState<any>(null);
@@ -20,15 +19,17 @@ const UserInformation: React.FC = () => {
         training: null,
     });
     const [loading, setLoading] = useState<boolean>(true);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [plansAssigned, setPlansAssigned] = useState<string>(''); // Usa cadena vacía como valor predeterminado.
 
     useEffect(() => {
+        const role = localStorage.getItem('role'); // Obtener el rol del localStorage
+        setUserRole(role);
         fetchUserDetails();
-        if (showPlanSection) {
-            fetchPlans('nutrition');
-            fetchPlans('training');
-        }
+        fetchPlans('nutrition');
+        fetchPlans('training');
+        console.log(role);
     }, []);
-
 
     const fetchUserDetails = async () => {
         try {
@@ -62,15 +63,28 @@ const UserInformation: React.FC = () => {
                 headers: { 'Authorization': `Bearer ${accessToken}` },
             });
 
+    
             if (response.ok) {
                 const data = await response.json();
                 setPlans((prevPlans) => ({ ...prevPlans, [planType]: data.data }));
+
+            }
+
+            const response2 = await fetch(`http://127.0.0.1:8000/api/user/status/${userId}/`, {
+                method: 'GET',
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+
+            if (response2.ok) {
+                const data = await response2.json();
+                setPlansAssigned(data.status); // Asegúrate de que `data.status` es una cadena
+
             }
         } catch (error) {
             console.error(`Error fetching ${planType} plans`, error);
         }
     };
-    
+
     const handlePlanAssign = async (planType: 'nutrition' | 'training') => {
         const planId = selectedPlan[planType];
         if (planId && planId !== "new") {
@@ -100,7 +114,6 @@ const UserInformation: React.FC = () => {
             }
         }
     };
-
 
     const handleSelectChange = (event: SelectChangeEvent<number | "new">, planType: 'nutrition' | 'training') => {
         const value = event.target.value as number | "new";
@@ -137,7 +150,6 @@ const UserInformation: React.FC = () => {
             },
         ],
     };
-
 
     if (loading) return <Typography>{t("loading_admin")}</Typography>;
 
@@ -261,7 +273,7 @@ const UserInformation: React.FC = () => {
                 {/* Sección de asignación de planes */}
                 {showPlanSection && (
                     <>
-                        {plans_needed && plans_needed.includes('nutrition') && (
+                        {userRole === 'nutricionista' && plansAssigned && ['training_only', 'awaiting_assignment'].includes(plansAssigned) && (
                             <Card variant="outlined" sx={{ marginTop: '15px', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
                                 <CardContent>
                                     <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>
@@ -292,7 +304,7 @@ const UserInformation: React.FC = () => {
                             </Card>
                         )}
 
-                        {plans_needed && plans_needed.includes('training') && (
+                        {userRole === 'entrenador' && plansAssigned && ['awaiting_assignment', 'nutrition_only'].includes(plansAssigned) && (
                             <Card variant="outlined" sx={{ marginTop: '15px', borderRadius: '8px', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}>
                                 <CardContent>
                                     <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '10px', color: '#333' }}>

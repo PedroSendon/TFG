@@ -395,5 +395,9 @@
   "weightLoss": "Pérdida",
   "muscleGain": "Músculo",
   "awaiting_assignment": "Falta por asignar plan",
-  "assigned_plan": "Plan asignado"
+  "assigned_plan": "Plan asignado",
+  "role_error": "El rol de usuario no es reconocido.",
+  "all_assigned_message": "¡Todos los usuarios están asignados!",
+  "no_pending_users_message": "¡Buen trabajo! Todos los usuarios tienen planes asignados. No hay usuarios pendientes en este momento.",
+  "no_pending_users_icon_alt": "Todos los planes asignados"
 }

@@ -31,7 +31,7 @@ export const PlansProvider: React.FC<PlansProviderProps> = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setPlansAssigned(data.all_plans_assigned); // Actualiza el estado según la respuesta
+        setPlansAssigned(data.status); // Actualiza el estado según la respuesta
       } else {
         console.error('Failed to fetch plans status:', response.statusText);
       }

@@ -61,14 +61,12 @@ const Login: React.FC = () => {
                     password: formData.password,
                 }),
             });
-            console.log("data", formData)
     
             if (response.ok) {
                 const data = await response.json();
     
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('refresh_token', data.refresh);
-                console.log(data.access);                  
 
                 // Obtener los detalles del usuario después del login
                 const userResponse = await fetch('http://127.0.0.1:8000/api/user/role/', {

@@ -14,11 +14,14 @@ class UserManager(BaseUserManager):
             raise ValueError('El usuario debe tener un nombre')
         if not extra_fields.get('last_name'):
             raise ValueError('El usuario debe tener un apellido')
-        if not extra_fields.get('birth_date'):
+
+        # Solo validar birth_date para usuarios normales, no para superusuarios
+        if not extra_fields.get('birth_date') and not extra_fields.get('is_superuser'):
             raise ValueError('El usuario debe tener una fecha de nacimiento')
-        if not extra_fields.get('gender'):
+
+        if not extra_fields.get('gender') and not extra_fields.get('is_superuser'):
             raise ValueError('El usuario debe especificar un género')
-        if not extra_fields.get('role'):
+        if not extra_fields.get('role') and not extra_fields.get('is_superuser'):
             raise ValueError('El usuario debe tener un rol asignado')
 
         # Normaliza el email y establece valores predeterminados
@@ -30,16 +33,17 @@ class UserManager(BaseUserManager):
             email=email,
             first_name=extra_fields.pop('first_name'),
             last_name=extra_fields.pop('last_name'),
-            birth_date=extra_fields.pop('birth_date'),
-            gender=extra_fields.pop('gender'),
-            profile_photo=extra_fields.pop('profile_photo', None),  # Campo opcional
-            status=extra_fields.pop('status', 'awaiting_assignment'),  # Valor predeterminado
-            role=extra_fields.pop('role', 'cliente'),  # Valor predeterminado
+            birth_date=extra_fields.pop('birth_date', None),  # Opcional
+            gender=extra_fields.pop('gender', None),  # Opcional
+            profile_photo=extra_fields.pop('profile_photo', None),  # Opcional
+            status=extra_fields.pop('status', 'awaiting_assignment'),  # Predeterminado
+            role=extra_fields.pop('role', 'cliente'),  # Predeterminado
             **extra_fields
         )
         user.set_password(password)
         user.save(using=self._db)
         return user
+
 
     def create_superuser(self, email, password=None, **extra_fields):
         """
@@ -47,6 +51,11 @@ class UserManager(BaseUserManager):
         """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('first_name', 'Admin')  # Valor predeterminado
+        extra_fields.setdefault('last_name', 'User')  # Valor predeterminado
+        extra_fields.setdefault('birth_date', None)  # No obligatorio para superusuario
+        extra_fields.setdefault('gender', 'M')  # Valor predeterminado
+        extra_fields.setdefault('role', 'administrador')  # Valor predeterminado para superusuarios
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('El superusuario debe tener is_staff=True.')
@@ -54,6 +63,7 @@ class UserManager(BaseUserManager):
             raise ValueError('El superusuario debe tener is_superuser=True.')
 
         return self.create_user(email, password, **extra_fields)
+
 
 
 
@@ -77,7 +87,7 @@ class User(AbstractUser):
 
 class UserDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='details')
-    height = models.PositiveIntegerField()  # En cm
+    height = models.PositiveIntegerField(null=True, blank=True)  # Cambiado para permitir valores nulos
     weight = models.DecimalField(max_digits=5, decimal_places=2)  # En kg
     weight_goal = models.CharField(max_length=20, choices=WEIGHT_GOAL_CHOICES)  # Cambiado a opciones de texto
     weekly_training_days = models.PositiveIntegerField()

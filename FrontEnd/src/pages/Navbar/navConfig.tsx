@@ -21,12 +21,12 @@ export const navItems: Record<string, NavItem[]> = {
     ],
     entrenador: [
       { label: 'workouts_label', icon: 'FitnessCenterIcon', path: '/admin/workout' },
-      { label: 'unassigned_users_label', icon: 'GroupAddIcon', path: '/admin/pending-users' },
       { label: 'all_users_label', icon: 'PeopleIcon', path: '/admin/users' },
+      { label: 'unassigned_users_label', icon: 'GroupAddIcon', path: '/admin/pending-users' },
     ],
     nutricionista: [
       { label: 'nutrition_label', icon: 'FoodBankIcon', path: '/admin/nutrition' },
-      { label: 'unassigned_users_label', icon: 'GroupAddIcon', path: '/admin/pending-users' },
       { label: 'all_users_label', icon: 'PeopleIcon', path: '/admin/users' },
+      { label: 'unassigned_users_label', icon: 'GroupAddIcon', path: '/admin/pending-users' },
     ],
   };
