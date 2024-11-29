@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { TextField, Box, Button, Grid, Typography, MenuItem } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { LanguageContext } from '../../../context/LanguageContext'; // Importar el contexto de idioma
+import { formatDate } from 'react-calendar/dist/cjs/shared/dateFormatter';
 
 const UserDetailsForm: React.FC = () => {
     const history = useHistory();
@@ -18,7 +19,7 @@ const UserDetailsForm: React.FC = () => {
         physicalActivityLevel: '',
         currentTrainingDays: '',
         mealsPerDay: '',
-        macronutrientIntake: '',
+        diet_type: '',
         availableEquipment: '',
     });
 
@@ -38,38 +39,40 @@ const UserDetailsForm: React.FC = () => {
     const handleFinish = async () => {
         try {
             const accessToken = localStorage.getItem('access_token');
-
             if (!accessToken) {
                 console.error(t('no_token'));
                 return;
             }
+            console.log('Authorization header:', `Bearer ${localStorage.getItem('access_token')}`);
+
             const response = await fetch('http://127.0.0.1:8000/api/form/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                    'Authorization': `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify({
-                    height: parseInt(formData.height),
+                    height: parseInt(formData.height, 10),
                     weight: parseFloat(formData.weight),
                     weight_goal: formData.weightGoal,
-                    weekly_training_days: parseInt(formData.weeklyTrainingDays),
+                    weekly_training_days: parseInt(formData.weeklyTrainingDays, 10),
                     daily_training_time: formData.dailyTrainingTime,
                     physical_activity_level: formData.physicalActivityLevel,
-                    meals_per_day: parseInt(formData.mealsPerDay),
-                    macronutrient_intake: formData.macronutrientIntake,
+                    meals_per_day: parseInt(formData.mealsPerDay, 10),
+                    diet_type: formData.diet_type,
                     available_equipment: formData.availableEquipment,
                 }),
             });
+            console.log(formData)
 
             if (response.ok) {
                 const data = await response.json();
-                console.log(t('user_details_saved'), data);
+                history.push('/profile');
             } else {
-                console.error(t('error_saving_user_details'), response.statusText);
+                console.error("Error saving user details:", response.statusText);
             }
         } catch (error) {
-            console.error(t('error_saving_user_details'), error);
+            console.error("Error saving user details:", error);
         }
     };
 
@@ -80,7 +83,7 @@ const UserDetailsForm: React.FC = () => {
             justifyContent="center"
             alignItems="center"
             sx={{
-                height: '95vh',
+                height: '100vh',
                 backgroundColor: '#f5f5f5',
                 px: 3,  // Añade un poco de margen horizontal
             }}
@@ -556,10 +559,11 @@ const UserDetailsForm: React.FC = () => {
                                 },
                             }}
                         >
-                            <MenuItem value="Sedentaria">{t('sedentary')}</MenuItem>
+                            <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
                             <MenuItem value="Ligera">{t('light')}</MenuItem>
                             <MenuItem value="Moderada">{t('moderate')}</MenuItem>
                             <MenuItem value="Intensa">{t('intense')}</MenuItem>
+
                         </TextField>
                     </Grid>
 
@@ -585,9 +589,10 @@ const UserDetailsForm: React.FC = () => {
                                 },
                             }}
                         >
-                            <MenuItem value="Gimnasio">{t('full_gym')}</MenuItem>
-                            <MenuItem value="Pesas libres">{t('free_weights')}</MenuItem>
-                            <MenuItem value="Nada">{t('no_equipment')}</MenuItem>
+                            <MenuItem value="Gimnasio Completo">{t('full_gym')}</MenuItem>
+                            <MenuItem value="Pesas Libres">{t('free_weights')}</MenuItem>
+                            <MenuItem value="Sin Equipamiento">{t('no_equipment')}</MenuItem>
+
                         </TextField>
                     </Grid>
                 </Grid>
@@ -642,6 +647,14 @@ const UserDetailsForm: React.FC = () => {
 
     const DietAndNutrition = () => {
 
+        const handleDietTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const { value } = e.target;
+            setFormData({
+                ...formData,
+                diet_type: value, // Asegurarse de que se actualiza la clave correcta
+            });
+        };
+
         return (
             <Box
                 display="flex"
@@ -673,7 +686,7 @@ const UserDetailsForm: React.FC = () => {
                 {/* Título principal con estilo */}
                 <Typography
                     variant="h4"
-                    sx={{ 
+                    sx={{
                         mb: 3,
                         fontWeight: 'bold',
                         color: '#333',
@@ -721,8 +734,8 @@ const UserDetailsForm: React.FC = () => {
                             label={t('macronutrient_intake')}
                             name="macronutrientIntake"
                             select
-                            value={formData.macronutrientIntake}
-                            onChange={handleChange}
+                            value={formData.diet_type}
+                            onChange={handleDietTypeChange}
                             fullWidth
                             sx={{
                                 '& .MuiOutlinedInput-root': {
@@ -736,11 +749,10 @@ const UserDetailsForm: React.FC = () => {
                                 },
                             }}
                         >
-                            <MenuItem value="Bajo en proteínas">{t('low_protein')}</MenuItem>
-                            <MenuItem value="Bajo en carbohidratos">{t('low_carb')}</MenuItem>
-                            <MenuItem value="Bajo en grasas">{t('low_fat')}</MenuItem>
-                            <MenuItem value="Balanceado">{t('balanced')}</MenuItem>
-                            <MenuItem value="No lo sé">{t('dont_know')}</MenuItem>
+                            <MenuItem value="balanced">{t('balanced')}</MenuItem>
+                            <MenuItem value="low_protein">{t('low_protein')}</MenuItem>
+                            <MenuItem value="low_carb">{t('low_carb')}</MenuItem>
+                            <MenuItem value="low_fat">{t('low_fat')}</MenuItem>
                         </TextField>
                     </Grid>
                 </Grid>

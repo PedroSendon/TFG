@@ -8,9 +8,11 @@ from django.contrib.auth.hashers import make_password
 from api.repositories.user_repository import UserDetailsRepository
 from django.contrib.auth.decorators import login_required
 from pydantic import ValidationError
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.permissions import AllowAny
 from api.schemas.user import ImagenSchema
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated]) 
@@ -32,45 +34,35 @@ def create_user_as_admin(request):
 @permission_classes([AllowAny])  # Permitir a cualquier usuario registrar
 def register(request):
     """
-    Registrar un nuevo usuario y devolver tokens JWT.
+    Registrar un nuevo usuario y devolver tokens JWT automáticamente.
     """
     try:
-        user_data = UserCreate(**request.data)
+        user_data = request.data
 
         # Verificar si el usuario ya existe por su email
-        if UserRepository.user_exists_by_email(user_data.email):
+        if UserRepository.user_exists_by_email(user_data['email']):
             return Response({"error": "El usuario con este correo electrónico ya existe."}, status=status.HTTP_400_BAD_REQUEST)
 
         # Asegurarse de que los términos fueron aceptados
-        if not user_data.terms_accepted:
+        if not user_data.get('terms_accepted', False):
             return Response({"error": "Debes aceptar los términos y condiciones."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Hash de la contraseña
-        user_data.password = make_password(user_data.password)
-
-        # Crear usuario usando el repositorio, asignando rol "cliente"
-        user = UserRepository.create_user({**user_data.dict(), "role": "cliente"})
+        # Crear usuario usando el repositorio
+        user = UserRepository.create_user({**user_data, "role": "cliente"})
 
         # Generar tokens JWT para el usuario
         refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
 
-        # Devolver tokens y mensaje de éxito
+        # Responder con los tokens
         return Response({
             "message": "Usuario registrado exitosamente",
             "refresh": str(refresh),
-            "access": str(refresh.access_token)
+            "access": access_token
         }, status=status.HTTP_201_CREATED)
 
-    except ValidationError as e:
-        # Esto imprimirá el error exacto en la consola
-        print(f"Error de validación: {e}")
-        return Response({"error": f"Error de validación en los datos proporcionados: {e}"}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        # Agrega esto para más detalles en la consola
-        print(f"Error inesperado: {e}")
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
+        return Response({"error": f"Error en el registro: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -94,30 +86,32 @@ def login(request):
     Autenticar un usuario.
     """
     try:
-        # Validar los datos de la solicitud
-        login_data = LoginSchema(**request.data)
-        
+        # Obtener datos de la solicitud
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Validar datos requeridos
+        if not email or not password:
+            return Response({"error": "Email y contraseña son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+
         # Autenticar al usuario
-        user = UserRepository.authenticate_user(
-            login_data.email, login_data.password)
+        user = UserRepository.authenticate_user(email, password)
         if not user:
-            return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": "Credenciales inválidas. Verifica tu email y contraseña."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Generar tokens JWT para el usuario
+        # Generar tokens JWT
         refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
 
-        # Generar token
+        # Responder con los tokens
         return Response({
             "message": "Inicio de sesión exitoso",
             "refresh": str(refresh),
-            "access": str(refresh.access_token)
+            "access": access_token
         }, status=status.HTTP_200_OK)
 
-    except ValidationError as e:
-        # Si hay un error de validación, devolver un 400 con el detalle del error
-        return Response({"error": "Datos de entrada inválidos: " + str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": f"Error inesperado: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -257,20 +251,22 @@ def assign_single_plan(request, user_id):
         "message": f"Plan {plan_type} asignado exitosamente al usuario."
     }, status=status_code)
 
+from rest_framework.decorators import authentication_classes
+from api.models.user import User
+from django.conf import settings
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_role(request):
-    """
-    Devuelve el rol del usuario autenticado.
-    """
-    user = request.user
-    role_data = UserRepository.get_user_role(user.id)
-    
-    if role_data is None:
+    user_id = request.query_params.get(
+        'userId') or request.user.id 
+    role_data = UserRepository.get_user_role(user_id)
+    if not role_data:
         return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
     
     return Response(role_data, status=status.HTTP_200_OK)
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -407,28 +403,34 @@ def delete_user(request, user_id):
         return Response({"error": message}, status=status.HTTP_404_NOT_FOUND)
 
 
-
 @api_view(['POST'])
-@permission_classes([IsAuthenticated]) 
+@permission_classes([IsAuthenticated])
 def create_user_details(request):
+    user_id = request.user.id
+    data = request.data
+
     try:
-        print(f"Datos recibidos: {request.data}")
-        user_details_data = UserDetailsSchema(**request.data)
-        
-        # Crear o actualizar los detalles del usuario autenticado
-        UserDetailsRepository.create_user_details(
-            request.user, user_details_data.dict())
-        #UserRepository.assign_workout_to_user(request.user.id)
-        #UserRepository.assign_nutrition_plan_to_user(request.user.id)
+        # Llama al repositorio para crear los detalles
+        UserDetailsRepository.create_user_details(user_id, data)
 
-        return Response({"message": "Detalles del usuario guardados correctamente."}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "User details created successfully"},
+            status=status.HTTP_201_CREATED,
+        )
 
+    except User.DoesNotExist:
+        return Response(
+            {"error": "User not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
     except ValidationError as e:
         print(f"Error de validación: {e}")
         return Response({"error": e.errors()}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         print(f"Error inesperado: {str(e)}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny]) 

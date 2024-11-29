@@ -62,20 +62,23 @@ class LoginSchema(BaseModel):
 
 
 class UserDetailsSchema(BaseModel):
-    height: PositiveInt
-    weight: condecimal(gt=0, max_digits=5, decimal_places=2)  # Permite decimales
-    weight_goal: Literal["Ganar masa muscular", "Perder peso", "Mantenimiento"]  # Opciones específicas para la meta de peso
-    weekly_training_days: conint(ge=1, le=7)
-    daily_training_time: str
-    physical_activity_level: Literal["Sedentario", "Ligera", "Moderada", "Intensa"]  # Opciones específicas para nivel de actividad
-    available_equipment: Literal["Gimnasio Completo", "Pesas Libres", "Sin Equipamiento"]  # Opciones limitadas para el equipamiento
+    height: conint(gt=0)  # Altura en cm
+    weight: condecimal(gt=0, max_digits=5, decimal_places=2)  # Peso en kg
+    weight_goal: Literal["gain_muscle", "lose_weight", "maintain"]  # Claves internas
+    weekly_training_days: conint(ge=1, le=7)  # Días de entrenamiento
+    daily_training_time: str  # Tiempo de entrenamiento diario
+    physical_activity_level: Literal["sedentary", "light", "moderate", "intense"]  # Claves internas
+    meals_per_day: conint(gt=0)  # Número de comidas al día
+    available_equipment: Literal["gimnasio_completo", "pesas_libres", "sin_equipamiento"]  # Claves internas
 
     class Config:
         from_attributes = True
 
 
+
+
 class DietPreferencesSchema(BaseModel):
-    diet_type: str  # Tipo de dieta
+    diet_type: Literal["balanced", "low_protein", "low_carb", "low_fat"] = "balanced"  # Valor predeterminado
     meals_per_day: conint(gt=0)  # Comidas al día, mayor a 0
 
     class Config:

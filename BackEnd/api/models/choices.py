@@ -45,3 +45,9 @@ EQUIPMENT_CHOICES = [
     ('pesas_libres', 'Pesas Libres'),
     ('sin_equipamiento', 'Sin Equipamiento'),
 ]
+
+DAILY_TRAINING_TIME_CHOICES = [
+    ('Menos de 1 hora', 'Menos de 1 hora'),
+    ('1-2 horas', '1-2 horas'),
+    ('Más de 2 horas', 'Más de 2 horas'),
+]

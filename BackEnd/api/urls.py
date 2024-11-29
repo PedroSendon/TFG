@@ -13,14 +13,13 @@ from django.urls import re_path
 
 
 urlpatterns = [
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # Usuarios
     path('register/', user.register, name='register'),
     path('login/', user.login, name='login'),
     path('form/', user.create_user_details, name='create_user_details'), 
-    
     #Imagenes
     path('logo/', user.obtener_logo, name='obtener_logo'),
 
@@ -34,6 +33,7 @@ urlpatterns = [
     path('users/<int:user_id>/assign-plans/', user.assign_plans, name='assign-plans'),
     path('users/details/<int:user_id>/', user.get_user_details, name='get-user-details'),
     path('user/role/', user.get_user_role, name='get_user_role'),
+
     path('user/status/', user.get_user_status, name='get_user_status'),
     path('user/unassigned/all/', user.get_unassigned_users_for_admin, name='unassigned-users-admin'),
     path('users/<int:user_id>/plans/', user.get_user_plans, name='user-plans'),

@@ -76,7 +76,7 @@ class TrainingPlanRepository:
         try:
             # Busca el UserWorkout relacionado con el usuario
             if not isinstance(user, User):
-                user = User.objects.get(id=user.id)
+                user = User.objects.get(id=user)
 
             user_workout = UserWorkout.objects.get(user_id=user.id)
             training_plan = user_workout.training_plan

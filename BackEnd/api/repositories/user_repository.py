@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Dict
 
 from pydantic import ValidationError
 from api.schemas.user import UserAdminCreate
@@ -189,12 +190,11 @@ class UserRepository:
                 first_name=user_data['first_name'],
                 last_name=user_data['last_name'],
                 email=user_data['email'],
-                # Asegúrate de que la contraseña esté hasheada
-                password=user_data['password'],
+                password=make_password(user_data['password']),  # Hash de la contraseña
                 birth_date=user_data['birth_date'],
                 gender=user_data['gender'],
-                # Asignar el rol, por defecto "cliente"
-                role=user_data.get('role', 'cliente')
+                role=user_data.get('role', 'cliente'),  # Rol por defecto "cliente"
+                is_active=True,  # El usuario está activo por defecto
             )
             return user
         except Exception as e:
@@ -325,19 +325,11 @@ class UserRepository:
         """
         Busca un usuario por email.
         :param email: Correo electrónico del usuario.
-        :return: El objeto usuario completo si existe, None en caso contrario.
+        :return: El objeto User si existe, None en caso contrario.
         """
         try:
             user = User.objects.get(email=email)
-            return {
-                "id": user.id,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "email": user.email,
-                "birth_date": user.birth_date,
-                "gender": user.gender,
-                "profile_photo": user.profile_photo.url if user.profile_photo else None
-            }
+            return user
         except User.DoesNotExist:
             return None
 
@@ -394,10 +386,9 @@ class UserRepository:
         """
         try:
             user = User.objects.get(email=email)
-            if check_password(password, user.password):
+            if check_password(password, user.password):  # Validación de contraseña
                 return user
-            else:
-                return None
+            return None
         except User.DoesNotExist:
             return None
 
@@ -668,51 +659,76 @@ class UserDetailsRepository:
         }
         return translations.get(diet_type, diet_type)
 
+    @staticmethod
+    def translate_fields(details_data, reverse=False):
+        translations = {
+            'weight_goal': {
+                'Ganar masa muscular': 'gain_muscle',
+                'Perder peso': 'lose_weight',
+                'Mantenimiento': 'maintain'
+            },
+            'physical_activity_level': {
+                'Sedentario': 'sedentary',
+                'Ligera': 'light',
+                'Moderada': 'moderate',
+                'Intensa': 'intense'
+            },
+            'available_equipment': {
+                'Gimnasio Completo': 'gimnasio_completo',
+                'Pesas Libres': 'pesas_libres',
+                'Sin Equipamiento': 'sin_equipamiento'
+            },
+            'diet_type': {  # Añadimos diet_type
+                'Balanceado': 'balanced',
+                'Bajo en proteínas': 'low_protein',
+                'Bajo en carbohidratos': 'low_carb',
+                'Bajo en grasas': 'low_fat'
+            }
+        }
+
+        # Iterar por cada campo definido en translations
+        for field, mapping in translations.items():
+            if field in details_data:
+                if reverse:
+                    # Traducción inversa (backend -> frontend)
+                    reverse_mapping = {v: k for k, v in mapping.items()}
+                    details_data[field] = reverse_mapping.get(details_data[field], details_data[field])
+                else:
+                    # Traducción normal (frontend -> backend)
+                    if details_data[field] in mapping:
+                        details_data[field] = mapping[details_data[field]]
+                    elif not details_data[field]:
+                        # Si el campo está vacío o no se envió, asignar un valor predeterminado
+                        if field == 'diet_type':
+                            details_data[field] = 'balanced'  # Valor predeterminado
+        return details_data
+
 
     @staticmethod
-    def create_user_details(user, details_data):
-        try:
-            # Traducción del tipo de dieta a inglés si es necesario
-            details_data["diet_type"] = UserDetailsRepository.translate_diet_type(details_data.get("diet_type", ""))
+    def create_user_details(user_id: int, data: Dict):
+        """
+        Crea o actualiza los detalles del usuario asociados a un usuario existente.
+        :param user_id: ID del usuario
+        :param data: Diccionario con los datos necesarios para UserDetails
+        :return: Instancia de UserDetails creada o actualizada
+        """
+        user = User.objects.get(id=user_id)
 
-            # Validación de `weight_goal`, `physical_activity_level` y `available_equipment`
-            if details_data.get('weight_goal') not in ["Ganar masa muscular", "Perder peso", "Mantenimiento"]:
-                raise ValueError("El campo 'weight_goal' debe ser uno de los valores permitidos.")
-            if details_data.get('physical_activity_level') not in ["Sedentario", "Ligera", "Moderada", "Intensa"]:
-                raise ValueError("El campo 'physical_activity_level' debe ser uno de los valores permitidos.")
-            if details_data.get('available_equipment') not in ["Gimnasio Completo", "Pesas Libres", "Sin Equipamiento"]:
-                raise ValueError("El campo 'available_equipment' debe ser uno de los valores permitidos.")
+        # Verificar si ya existen detalles del usuario
+        user_details, created = UserDetails.objects.get_or_create(user=user)
 
-            # Guardar los detalles generales
-            user_details, created = UserDetails.objects.update_or_create(
-                user=user,
-                defaults={
-                    'height': details_data['height'],
-                    'weight': details_data['weight'],
-                    'weight_goal': details_data['weight_goal'],
-                    'weekly_training_days': details_data['weekly_training_days'],
-                    'daily_training_time': details_data['daily_training_time'],
-                    'physical_activity_level': details_data['physical_activity_level'],
-                    'available_equipment': details_data['available_equipment'],
-                }
-            )
+        # Actualizar los detalles con los datos recibidos
+        user_details.height = data.get('height', user_details.height)
+        user_details.weight = data.get('weight', user_details.weight)
+        user_details.weight_goal = data.get('weight_goal', user_details.weight_goal)
+        user_details.weekly_training_days = data.get('weekly_training_days', user_details.weekly_training_days)
+        user_details.daily_training_time = data.get('daily_training_time', user_details.daily_training_time)
+        user_details.physical_activity_level = data.get('physical_activity_level', user_details.physical_activity_level)
+        user_details.available_equipment = data.get('available_equipment', user_details.available_equipment)
+        user_details.save()
 
-            # Guardar preferencias de dieta
-            diet_preferences, created = DietPreferences.objects.update_or_create(
-                user=user,
-                defaults={
-                    'diet_type': details_data['diet_type'],
-                    'meals_per_day': details_data['meals_per_day']
-                }
-            )
+        return user_details
 
-            # Crear registro de peso inicial
-            WeightRecordRepository.crear_registro_peso(user.id, details_data['weight'])
-
-            return user_details, diet_preferences
-
-        except Exception as e:
-            raise ValueError(f"Error al crear o actualizar los detalles del usuario: {e}")
 
     @staticmethod
     def get_user_profile(user_id):

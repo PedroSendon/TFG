@@ -153,8 +153,9 @@ def get_next_pending_workout(request):
     """
     Obtener el primer entrenamiento no completado del plan de entrenamiento del usuario autenticado.
     """
-    user = request.user
-    next_workout, error = TrainingPlanRepository.get_next_pending_workout(user)
+    user_id = request.query_params.get(
+        'userId') or request.user.id 
+    next_workout, error = TrainingPlanRepository.get_next_pending_workout(user_id)
 
     if error:
         return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)

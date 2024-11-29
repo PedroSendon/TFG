@@ -5,15 +5,37 @@ from .models.exercise import Exercise
 from .models.process import ProgressTracking, ExerciseLog
 from .models.workout import WeeklyWorkout, Workout, WorkoutExercise, UserWorkout, Imagen
 from .models.trainingplan import TrainingPlan
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth import get_user_model
 
 # Registro de todos los modelos en el panel de administración de Django
 
+User = get_user_model()
+
+# Verifica si el modelo está registrado antes de anularlo
+if admin.site.is_registered(User):
+    admin.site.unregister(User)
+
+# Registra el modelo con tu clase personalizada
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'email', 'role', 'status']
-    search_fields = ['first_name', 'last_name', 'email']
-    list_filter = ['role', 'status']
-    list_editable = ['status']
+class CustomUserAdmin(UserAdmin):
+    model = User
+    list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_active', 'role')
+    list_filter = ('is_staff', 'is_active', 'role')
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Información personal', {'fields': ('first_name', 'last_name', 'birth_date', 'gender', 'profile_photo')}),
+        ('Permisos', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Estado', {'fields': ('status', 'role')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2', 'is_staff', 'is_active')}
+        ),
+    )
+    search_fields = ('email',)
+    ordering = ('email',)
 
 @admin.register(UserDetails)
 class UserDetailsAdmin(admin.ModelAdmin):

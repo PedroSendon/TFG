@@ -88,12 +88,19 @@ const Navbar = () => {
   });
 
   return (
-    <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, backgroundColor: '#c1c1c1', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' }}>
+    <AppBar
+      position="fixed"
+      sx={{ top: 'auto', bottom: 0, backgroundColor: '#c1c1c1', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' }}
+    >
       <Paper elevation={3}>
         <BottomNavigation
           value={location.pathname}
           onChange={(event, newValue) => handleNavigation(newValue)}
-          sx={{ backgroundColor: 'transparent' }}
+          sx={{
+            backgroundColor: 'transparent',
+            justifyContent: filteredNavItems.length <= 3 ? 'space-around' : 'flex-start', // Centrar si hay pocos ítems
+            width: filteredNavItems.length <= 3 ? '100%' : 'auto', // Usar todo el ancho si pocos ítems
+          }}
           showLabels
         >
           {filteredNavItems.map((item, index) => {

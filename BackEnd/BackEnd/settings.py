@@ -14,6 +14,7 @@ from datetime import timedelta
 import os
 from pathlib import Path
 from google.oauth2 import service_account
+from corsheaders.defaults import default_headers
 from decouple import config
 
 # Detectar si estamos en modo de pruebas
@@ -83,14 +84,15 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Debe estar antes del middleware común
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -100,9 +102,16 @@ REST_FRAMEWORK = {
     ),
 }
 
+AUTH_USER_MODEL = 'api.User'
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ALGORITHM': 'HS256',  # Debe coincidir con el `alg` en el HEADER
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),  # Define el tipo de cabecera permitido
+    'USER_ID_FIELD': 'id',  # Cambia este valor si usas otro campo como identificador
+    'USER_ID_CLAIM': 'user_id',
 }
 
 ROOT_URLCONF = 'BackEnd.urls'
@@ -139,6 +148,11 @@ WSGI_APPLICATION = 'BackEnd.wsgi.application'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8100",  # URL donde corre tu frontend de Ionic
 ]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'Authorization',
+]
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

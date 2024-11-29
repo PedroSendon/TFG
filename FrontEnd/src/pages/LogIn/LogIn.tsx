@@ -13,7 +13,6 @@ const Login: React.FC = () => {
         email: '',
         password: '',
         showPassword: false,
-        rememberMe: false,
     });
 
     const [errors, setErrors] = useState<any>({});
@@ -60,16 +59,17 @@ const Login: React.FC = () => {
                 body: JSON.stringify({
                     email: formData.email,
                     password: formData.password,
-                    remember_me: formData.rememberMe,
                 }),
             });
+            console.log("data", formData)
     
             if (response.ok) {
                 const data = await response.json();
     
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('refresh_token', data.refresh);
-    
+                console.log(data.access);                  
+
                 // Obtener los detalles del usuario después del login
                 const userResponse = await fetch('http://127.0.0.1:8000/api/user/role/', {
                     method: 'GET',
@@ -184,17 +184,6 @@ const Login: React.FC = () => {
                                 }}
                             />
                         </Grid>
-                        {/*
-                        <Grid item xs={12}>
-                            <FormControlLabel
-                                control={<Checkbox checked={formData.rememberMe} onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })} />}
-                                label={t('remember_me')}
-                                sx={{ color: '#555555' }}
-                            />
-                            <Link href="#" variant="body2" sx={{ color: '#777777' }}>
-                                {t('forgot_password')}
-                            </Link>
-                        </Grid>*/}
                     </Grid>
 
                     <Button
