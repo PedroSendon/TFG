@@ -118,7 +118,6 @@ const EditProfilePage: React.FC = () => {
             setProfilePicture('https://via.placeholder.com/150');
         }
     };
-    console.log(userData)
     const handleChangePassword = async () => {
         if (passwords.newPassword !== passwords.confirmPassword) {
             console.error(t('password_mismatch'));

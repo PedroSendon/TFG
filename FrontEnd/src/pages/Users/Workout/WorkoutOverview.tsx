@@ -6,6 +6,7 @@ import { authenticatedFetch } from '../../../utils/authFetch';
 import { Typography, IconButton, Box, Card, CardContent, Divider, Modal, List, ListItem, ListItemText } from '@mui/material';
 import { Close as CloseIcon, Info as InfoIcon, PlayCircleOutline, CheckCircleOutline, Lock } from '@mui/icons-material';
 import useImage from '../../Image/useImage';
+import { STATIC_FILES } from '../../../context/config';
 
 interface Workout {
   id: number;
@@ -34,7 +35,7 @@ const WorkoutOverview: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false); // Controla el estado del modal
 
   // Obtén las imágenes utilizando useImage
-  const imageNames = ["Fondo 1.jpg", "Fondo 3.jpg", "Fondo 4.jpg"];
+  const imageNames = STATIC_FILES.IMAGES;
 
   const [sliderImages, setSliderImages] = useState<string[]>([]);
   const [currentSlide, setCurrentSlide] = useState<number>(0);

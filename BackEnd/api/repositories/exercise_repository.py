@@ -10,7 +10,7 @@ from datetime import datetime
 from rest_framework import status
 from google.cloud import storage
 from datetime import timedelta
-from api.utils.googleCloud import upload_to_gcs
+from api.utils.googleCloud import upload_to_gcs, delete_file_from_gcs
 
 class ExerciseRepository:
 
@@ -127,6 +127,7 @@ class ExerciseRepository:
         # Intentar obtener y actualizar el ejercicio
         try:
             exercise = Exercise.objects.get(id=exercise_id)
+            old_media_url = exercise.media  # Guardar la URL anterior de la imagen
 
             # Actualizar los campos con los datos validados
             if 'name' in validated_data:
@@ -137,8 +138,17 @@ class ExerciseRepository:
                 exercise.muscleGroups = ','.join(validated_data['muscleGroups'])
             if 'instructions' in validated_data:
                 exercise.instructions = validated_data['instructions']
-            if 'media' in validated_data:
-                exercise.media = validated_data['media']
+            # Gestionar la actualización de la imagen
+            media_file = data.get('media')  # Obtener la nueva imagen si está en los datos
+            if media_file:
+                try:
+                    # Subir la nueva imagen
+                    new_media_url = upload_to_gcs(media_file, f"exercises/{data['name']}_media.jpg")
+                    exercise.media = new_media_url
+                    delete_file_from_gcs(old_media_url)
+                except Exception as e:
+                    return {"error": f"Error al subir la nueva imagen: {str(e)}", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
 
             exercise.save()
 
@@ -160,19 +170,42 @@ class ExerciseRepository:
         
         
     @staticmethod
-    def delete_exercise_by_id(exercise_id: int) -> bool:
+    def delete_workout(user, workout_id):
         """
-        Elimina un ejercicio por su ID.
+        Eliminar un entrenamiento existente en el sistema, incluyendo su imagen asociada en Google Cloud Storage.
 
-        :param exercise_id: ID del ejercicio a eliminar.
-        :return: True si el ejercicio fue eliminado, False si no se encontró.
+        :param user: Usuario que realiza la solicitud.
+        :param workout_id: ID del entrenamiento a eliminar.
+        :return: True si el entrenamiento fue eliminado, False si no se encontró, o un mensaje de error.
         """
+        # Verificar el rol del usuario
+        check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
+        if "error" in check_result:
+            return {"error": check_result["error"], "status": check_result["status"]}
+
         try:
-            exercise = Exercise.objects.get(id=exercise_id)
-            exercise.delete()
+            # Obtener el entrenamiento
+            workout = Workout.objects.get(id=workout_id)
+
+            # Si tiene una imagen asociada, eliminarla usando el método `delete_file_from_gcs`
+            if workout.media:  # Si el modelo tiene un campo `media` asociado
+                delete_success = delete_file_from_gcs(workout.media)
+                if not delete_success:
+                    print(f"Advertencia: No se pudo eliminar la imagen asociada del entrenamiento {workout_id}.")
+
+            # Eliminar las relaciones ManyToMany (si existen)
+            workout.exercises.clear()  # Limpiar relaciones con ejercicios
+
+            # Eliminar el registro del entrenamiento en la base de datos
+            workout.delete()
             return True
-        except Exercise.DoesNotExist:
+        except Workout.DoesNotExist:
             return False
+        except Exception as e:
+             # Agregar un log o manejar el error adecuadamente
+            print(f"Error al eliminar el entrenamiento o la imagen: {e}")
+            return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
 
     @staticmethod
     def list_all_exercises():

@@ -37,8 +37,6 @@ def list_bucket_files():
         print(f"Error al listar archivos: {e}")
 
 
-
-
 def upload_to_gcs(file, filename):
     """
     Subir un archivo a Google Cloud Storage y devolver una URL pública.
@@ -60,8 +58,6 @@ def upload_to_gcs(file, filename):
     return signed_url
 
 
-
-
 def generate_signed_url(bucket_name, blob_name, expiration=3600):
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
@@ -72,3 +68,31 @@ def generate_signed_url(bucket_name, blob_name, expiration=3600):
         method="GET",
     )
     return signed_url
+
+def delete_file_from_gcs(file_url: str) -> bool:
+    """
+    Eliminar un archivo de Google Cloud Storage dado su URL.
+
+    :param file_url: URL completa del archivo en Google Cloud Storage.
+    :return: True si el archivo se eliminó correctamente, False en caso contrario.
+    """
+    try:
+        bucket_name = "fitprox"  # Cambiar al nombre de tu bucket
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+
+        # Extraer el nombre del archivo desde la URL
+        blob_name = file_url.split('/')[-1]
+        blob = bucket.blob(blob_name)
+
+        # Verificar si el archivo existe antes de intentar eliminarlo
+        if blob.exists():
+            blob.delete()
+            print(f"Archivo {blob_name} eliminado correctamente de Google Cloud Storage.")
+            return True
+        else:
+            print(f"El archivo {blob_name} no existe en el bucket {bucket_name}.")
+            return False
+    except Exception as e:
+        print(f"Error al intentar eliminar el archivo de Google Cloud Storage: {e}")
+        return False

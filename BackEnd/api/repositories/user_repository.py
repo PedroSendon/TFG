@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Dict
+from google.cloud import storage
 
 from pydantic import ValidationError
-from api.utils.googleCloud import upload_to_gcs, generate_signed_url
+from api.utils.googleCloud import upload_to_gcs, generate_signed_url, delete_file_from_gcs
 from api.schemas.user import UserAdminCreate
 from api.models.macros import MealPlan, UserNutritionPlan
 from api.models.workout import UserWorkout, Imagen, WeeklyWorkout
@@ -947,7 +948,7 @@ class UserDetailsRepository:
     @staticmethod
     def delete_user_by_id(user_id, request_user):
         """
-        Eliminar un usuario y sus relaciones.
+        Eliminar un usuario, su imagen de perfil y sus relaciones.
         """
         try:
             # Verificar si `request_user` tiene permisos de administrador
@@ -957,13 +958,24 @@ class UserDetailsRepository:
             if request_user.role != 'administrador':
                 return False, "No tienes permisos para eliminar usuarios."
             
-            # Intentar eliminar el usuario
+            # Intentar obtener el usuario
             user = User.objects.get(id=user_id)
-            user.delete()  # Eliminar el usuario y sus relaciones
+            
+            # Eliminar la imagen de perfil en Google Cloud Storage, si existe
+            if user.profile_image:  # Suponiendo que el campo de la imagen de perfil se llama `profile_image`
+                delete_success = delete_file_from_gcs(user.profile_image)
+                if not delete_success:
+                    print(f"Advertencia: No se pudo eliminar la imagen de perfil del usuario {user_id}.")
+
+            # Eliminar el usuario y sus relaciones
+            user.delete()
             return True, "Usuario eliminado exitosamente."
             
         except User.DoesNotExist:
             return False, "Usuario no encontrado."
+        except Exception as e:
+            return False, f"Error al eliminar el usuario: {str(e)}"
+
 
 
     @staticmethod

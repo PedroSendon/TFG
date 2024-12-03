@@ -1,10 +1,11 @@
-from api.utils.googleCloud import upload_to_gcs
+from api.utils.googleCloud import upload_to_gcs, delete_file_from_gcs
 from api.repositories.user_repository import UserRepository
 from api.models.user import User
 from api.models.workout import Workout, WorkoutExercise, Exercise, UserWorkout
 from api.models.exercise import Exercise
 from api.models.process import ProgressTracking, ExerciseLog
 from django.utils import timezone
+from google.cloud import storage
 from rest_framework import status
 
 class WorkoutRepository:
@@ -306,10 +307,25 @@ class WorkoutRepository:
             except Workout.DoesNotExist:
                 return {"error": "Entrenamiento no encontrado", "status": status.HTTP_404_NOT_FOUND}
 
+            # Si se proporciona un nuevo archivo de media
+            if media:
+                # Eliminar la imagen anterior de Google Cloud Storage si existe
+                if workout.media:
+                    delete_success = delete_file_from_gcs(workout.media)
+                    if not delete_success:
+                        print(f"Advertencia: No se pudo eliminar la imagen anterior del workout {workout_id}.")
+
+                # Subir la nueva imagen a Google Cloud Storage
+                try:
+                    new_media_url = upload_to_gcs(media, f"workouts/{name}_media.jpg")
+                    workout.media = new_media_url
+                except Exception as e:
+                    return {"error": f"Error al subir la nueva imagen: {str(e)}", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
+
             # Actualizar detalles del entrenamiento
             workout.name = name
             workout.description = description
-            workout.media = media
             workout.save()
 
             # Eliminar ejercicios anteriores y añadir los nuevos
@@ -348,7 +364,8 @@ class WorkoutRepository:
     @staticmethod
     def delete_workout(user, workout_id):
         """
-        Eliminar un entrenamiento existente en el sistema.
+        Eliminar un entrenamiento existente en el sistema, incluyendo su multimedia en Google Cloud Storage.
+        
         :param user: Usuario que realiza la solicitud.
         :param workout_id: ID del entrenamiento a eliminar.
         :return: True si el entrenamiento fue eliminado, False si no se encontró, o un mensaje de error.
@@ -359,13 +376,22 @@ class WorkoutRepository:
             return {"error": check_result["error"], "status": check_result["status"]}
 
         try:
+            # Obtener el workout
             workout = Workout.objects.get(id=workout_id)
             
-            # Si el modelo tiene relaciones a través de WorkoutExercise, asegúrate de eliminar esas relaciones.
+            # Si tiene una imagen o multimedia asociada, usar `delete_file_from_gcs` para eliminarla
+            if workout.media:
+                delete_success = delete_file_from_gcs(workout.media)
+                if not delete_success:
+                    print(f"Advertencia: No se pudo eliminar el archivo multimedia asociado al entrenamiento {workout_id}.")
+
+            # Si el modelo tiene relaciones a través de WorkoutExercise, eliminarlas
             workout.exercises.clear()  # Elimina la relación ManyToMany antes de eliminar el workout
 
+            # Eliminar el entrenamiento
             workout.delete()
             return True
+
         except Workout.DoesNotExist:
             return False
         except Exception as e:
