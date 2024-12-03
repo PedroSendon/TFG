@@ -215,7 +215,7 @@ const AssignPlans: React.FC = () => {
               variant="outlined"
               sx={{
                 color: '#777', borderColor: '#777', fontWeight: 'bold', py: 1, borderRadius: '8px',
-              }}
+            }}
               onClick={handleCancel}
             >
               {t('cancel')}
@@ -227,7 +227,7 @@ const AssignPlans: React.FC = () => {
               variant="contained"
               sx={{
                 backgroundColor: '#555', color: '#FFF', fontWeight: 'bold', py: 1, borderRadius: '8px', '&:hover': { backgroundColor: '#333' },
-              }}
+            }}
               onClick={handleSave}
             >
               {t('save')}

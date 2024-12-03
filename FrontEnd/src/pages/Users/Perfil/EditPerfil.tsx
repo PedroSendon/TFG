@@ -118,7 +118,7 @@ const EditProfilePage: React.FC = () => {
             setProfilePicture('https://via.placeholder.com/150');
         }
     };
-
+    console.log(userData)
     const handleChangePassword = async () => {
         if (passwords.newPassword !== passwords.confirmPassword) {
             console.error(t('password_mismatch'));
@@ -158,7 +158,7 @@ const EditProfilePage: React.FC = () => {
 
             <Box textAlign="center" mb={3}>
                 <Avatar
-                    src={profileData.profilePicture}
+                    src={userData?.profilePhoto} 
                     alt="Preview"
                     sx={{
                         width: 150, height: 150, mx: 'auto', borderRadius: '8px', border: '2px solid #000', mt: '18%'
@@ -266,9 +266,9 @@ const EditProfilePage: React.FC = () => {
                             '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
                         }}
                     >
-                        <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
-                        <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
-                        <MenuItem value="Mantener el peso actual">{t('maintain_weight')}</MenuItem>
+                            <MenuItem value="Ganar masa muscular">{t('gain_muscle')}</MenuItem>
+                            <MenuItem value="Perder peso">{t('lose_weight')}</MenuItem>
+                            <MenuItem value="Mantenimiento">{t('maintenance')}</MenuItem>
                     </TextField>
                 </Grid>
 
@@ -291,10 +291,10 @@ const EditProfilePage: React.FC = () => {
                             '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
                         }}
                     >
-                        <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
-                        <MenuItem value="Ligera">{t('light')}</MenuItem>
-                        <MenuItem value="Moderada">{t('moderate')}</MenuItem>
-                        <MenuItem value="Intensa">{t('intense')}</MenuItem>
+                            <MenuItem value="Sedentario">{t('sedentary')}</MenuItem>
+                            <MenuItem value="Ligera">{t('light')}</MenuItem>
+                            <MenuItem value="Moderada">{t('moderate')}</MenuItem>
+                            <MenuItem value="Intensa">{t('intense')}</MenuItem>
                     </TextField>
                 </Grid>
 

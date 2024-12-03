@@ -119,7 +119,7 @@ const PendingUsers: React.FC = () => {
   return (
     <Box sx={{ backgroundColor: '#f5f5f5', height: '95vh'}}>
       <Header title={t('users')} />
-      <Container sx={{ mt: 10, paddingBottom: '18%' }}>
+      <Container sx={{paddingBottom: '18%' }}>
         {users.length === 0 ? ( // Si no hay usuarios, muestra el mensaje
           <Box
             display="flex"

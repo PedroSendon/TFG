@@ -363,10 +363,7 @@ const AddUsers: React.FC = () => {
                             fullWidth
                             variant="outlined"
                             sx={{
-                                borderColor: '#AAAAAA',
-                                color: '#777777',
-                                fontWeight: 'bold',
-                                py: 1,
+                                color: '#777', borderColor: '#777', fontWeight: 'bold', py: 1, borderRadius: '8px',
                             }}
                             onClick={handleCancel}
                         >
@@ -378,13 +375,7 @@ const AddUsers: React.FC = () => {
                             fullWidth
                             variant="contained"
                             sx={{
-                                backgroundColor: '#555555',
-                                color: '#FFFFFF',
-                                fontWeight: 'bold',
-                                py: 1,
-                                '&:hover': {
-                                    backgroundColor: '#333333',
-                                },
+                                backgroundColor: '#555', color: '#FFF', fontWeight: 'bold', py: 1, borderRadius: '8px', '&:hover': { backgroundColor: '#333' },
                             }}
                             onClick={handleSubmit}
                         >

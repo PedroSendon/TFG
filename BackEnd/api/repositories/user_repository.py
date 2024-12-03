@@ -343,7 +343,6 @@ class UserRepository:
         """
         try:
             user = User.objects.get(id=user_id)
-            print(f"Usuario encontrado: {user}")  # Depuración
             # Intentar obtener los detalles del usuario
             try:
                 user_details = user.details
@@ -372,7 +371,6 @@ class UserRepository:
                 "trainingFrequency": user_details.weekly_training_days if user_details else 0,
                 "profilePhoto": profile_photo_signed_url,
             }
-            print(user.profile_photo)
 
             return profile_data
         except User.DoesNotExist:

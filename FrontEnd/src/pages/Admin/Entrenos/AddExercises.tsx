@@ -154,7 +154,7 @@ const AddExercises: React.FC = () => {
 
 
     return (
-        <Box sx={{ pb: 10, pt: 5, backgroundColor: '#f5f5f5' }}>
+        <Box sx={{ pb: 10, pt: 5, backgroundColor: '#f5f5f5', height:'85vh' }}>
             <Header title={t('add_exercise_title')} />
 
             <Box sx={{ p: 3, mt: 2, backgroundColor: '#f5f5f5' }}>

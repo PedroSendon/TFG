@@ -202,7 +202,7 @@ const AddWorkouts: React.FC = () => {
     
 
     return (
-        <Container sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', marginTop: '20%' }}>
+        <Container sx={{ backgroundColor: '#f5f5f5', minHeight: '89vh', marginTop: '20%' }}>
             <Header title={t('add_workout_title')} />
             <Box mt={4}>
                 <form>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AssignmentOutlined, FitnessCenter, Edit as EditIcon, Delete as DeleteIcon, Close } from '@mui/icons-material';
+import { AssignmentOutlined, FitnessCenter, Edit as EditIcon, Delete as DeleteIcon, Close, Add } from '@mui/icons-material';
 import Header from '../../Header/Header';
 import Navbar from '../../Navbar/Navbar';
 import { useHistory } from 'react-router';
@@ -357,11 +357,7 @@ const WorkoutsExercises: React.FC = () => {
                         },
                     }}
                 >
-                    {selectedSection === 'trainingPlans' ? (
-                        <AssignmentOutlined sx={{ fontSize: 28, color: '#000' }} />
-                    ) : (
-                        <FitnessCenter sx={{ fontSize: 28, color: '#000' }} />
-                    )}
+                   <Add sx={{ fontSize: 24 }} />
                 </Fab>
             </Container>
             {/* Diálogo de confirmación de eliminación */}
