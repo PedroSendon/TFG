@@ -4,10 +4,13 @@ import { useHistory } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { LanguageContext } from '../../context/LanguageContext'; // Importamos el contexto de idioma
+import useImage from '../Image/useImage';
+import { STATIC_FILES } from "../../context/config";
 
 const Login: React.FC = () => {
     const history = useHistory();
     const { t } = useContext(LanguageContext);
+    const { imageUrl} = useImage(STATIC_FILES.LOGO);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -121,8 +124,8 @@ const Login: React.FC = () => {
                 p: 4
             }}>
                 <Box textAlign="center" sx={{ mb: 4 }}>
-                    <img src="/src/components/logo.png" alt="logo" style={{ marginBottom: '1.5rem', width: '100px', borderRadius: '50%' }} />
-                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333333', mb: 2 }}>
+                    <img src={imageUrl || ''} alt="logo" style={{ width: '130px', borderRadius: '50%' }} />
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333333'}}>
                         {t('welcome_back')}
                     </Typography>
                 </Box>

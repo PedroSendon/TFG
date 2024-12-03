@@ -29,8 +29,6 @@ const iconMap = {
   GroupAddIcon,
 };
 
-
-
 const Navbar = () => {
   const { t } = useContext(LanguageContext);
   const { plansAssigned } = usePlansContext();

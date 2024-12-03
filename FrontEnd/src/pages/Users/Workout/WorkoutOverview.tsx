@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { LanguageContext } from '../../../context/LanguageContext';
 import Header from '../../Header/Header';
 import { authenticatedFetch } from '../../../utils/authFetch';
 import { Typography, IconButton, Box, Card, CardContent, Divider, Modal, List, ListItem, ListItemText } from '@mui/material';
 import { Close as CloseIcon, Info as InfoIcon, PlayCircleOutline, CheckCircleOutline, Lock } from '@mui/icons-material';
+import useImage from '../../Image/useImage';
 
 interface Workout {
   id: number;
@@ -32,18 +33,46 @@ const WorkoutOverview: React.FC = () => {
 
   const [modalOpen, setModalOpen] = useState(false); // Controla el estado del modal
 
-  const hardcodedImages = [
-    '/src/components/pexels-anush-1229356.jpg',
-    '/src/components/pexels-scottwebb-136404.jpg',
-    '/src/components/pexels-victorfreitas-791763.jpg',
-  ];
+  // Obtén las imágenes utilizando useImage
+  const imageNames = ["Fondo 1.jpg", "Fondo 3.jpg", "Fondo 4.jpg"];
 
-  const [sliderImages, setSliderImages] = useState<string[]>(hardcodedImages);
+  const [sliderImages, setSliderImages] = useState<string[]>([]);
   const [currentSlide, setCurrentSlide] = useState<number>(0);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [nextWorkout, setNextWorkout] = useState<number | null>(null);
+
+  const [loadingImages, setLoadingImages] = useState<boolean>(true);
+  const [errorImages, setErrorImages] = useState<string | null>(null);
+
+
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const imageUrls = await Promise.all(
+          imageNames.map(async (imageName) => {
+            const response = await fetch(`http://127.0.0.1:8000/api/get-image/${imageName}`);
+            if (!response.ok) throw new Error(`Error loading image: ${imageName}`);
+            const data = await response.json();
+            return data.image_url;
+          })
+        );
+
+        setSliderImages(imageUrls);
+        setLoadingImages(false);
+      } catch (error) {
+        console.error(error);
+        setErrorImages(t('error_loading_images'));
+        setLoadingImages(false);
+      }
+    };
+
+    fetchImages();
+  }, [t]);
+
+
 
   const fetchWorkouts = async () => {
     try {
@@ -157,64 +186,73 @@ const WorkoutOverview: React.FC = () => {
 
         )}
 
-        <List sx={{ padding: '0 20px', pb: '14%' }}>
-          {trainingPlan && trainingPlan.workouts.map((workout) => (
-            <ListItem
-              key={workout.id}
-              component="button"
-              onClick={() => {
-                // Verifica si el entrenamiento está bloqueado antes de ejecutar el onClick
-                if (!workout.completed && workout.id !== nextWorkout) return;
-                handleDayClick(workout.id);
-              }}
-              sx={{
-                backgroundColor: '#ffffff',
-                borderRadius: '12px', // Bordes redondeados más suaves
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', // Sombra suave para darle profundidad
-                border: '1px solid #e0e0e0', // Borde claro para una apariencia limpia
-                marginBottom: '15px',
-                padding: '16px', // Espaciado interno
-                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                '&:hover': {
-                  transform: 'scale(1.02)', // Leve efecto de agrandamiento al pasar el cursor
-                  boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)', // Aumenta la sombra al hacer hover
-                },
-              }}
-            >
-              <ListItemText
-                primary={
-                  <Typography sx={{ fontWeight: 'bold', fontSize: '1.1em', color: '#333' }}>
-                    {workout.name}
-                  </Typography>
-                }
-                secondary={
-                  <Typography
-                    sx={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      fontSize: '1em',
-                      WebkitBoxOrient: 'vertical',
-                      color: '#666', // Color de texto más suave
-                    }}
-                  >
-                    {workout.description}
-                  </Typography>
-                }
-              />
-              <div style={{ marginLeft: '3%', display: 'flex', alignItems: 'center' }}>
-                {workout.completed ? (
-                  <CheckCircleOutline sx={{ color: 'green', fontSize: '1.5em' }} />
-                ) : workout.id === nextWorkout ? (
-                  <PlayCircleOutline sx={{ color: 'blue', fontSize: '1.5em' }} />
-                ) : (
-                  <Lock sx={{ color: 'gray', fontSize: '1.5em' }} />
-                )}
-              </div>
-            </ListItem>
-          ))}
-        </List>
+<List sx={{ padding: '0 20px', pb: '14%' }}>
+  {trainingPlan &&
+    trainingPlan.workouts
+      .sort((a, b) => {
+        if (a.id === nextWorkout) return -1; // El pendiente primero
+        if (b.id === nextWorkout) return 1;
+        if (a.completed && !b.completed) return 1; // Los completados después de los bloqueados
+        if (!a.completed && b.completed) return -1;
+        return 0; // Mantén el orden para los que tienen el mismo estado
+      })
+      .map((workout) => (
+        <ListItem
+          key={workout.id}
+          component="button"
+          onClick={() => {
+            if (!workout.completed && workout.id !== nextWorkout) return; // No permitir interacción con bloqueados
+            handleDayClick(workout.id);
+          }}
+          sx={{
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #e0e0e0',
+            marginBottom: '15px',
+            padding: '16px',
+            transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+            '&:hover': {
+              transform: 'scale(1.02)',
+              boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)',
+            },
+          }}
+        >
+          <ListItemText
+            primary={
+              <Typography sx={{ fontWeight: 'bold', fontSize: '1.1em', color: '#333' }}>
+                {workout.name}
+              </Typography>
+            }
+            secondary={
+              <Typography
+                sx={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  fontSize: '1em',
+                  WebkitBoxOrient: 'vertical',
+                  color: '#666',
+                }}
+              >
+                {workout.description}
+              </Typography>
+            }
+          />
+          <div style={{ marginLeft: '3%', display: 'flex', alignItems: 'center' }}>
+            {workout.completed ? (
+              <CheckCircleOutline sx={{ color: 'green', fontSize: '1.5em' }} />
+            ) : workout.id === nextWorkout ? (
+              <PlayCircleOutline sx={{ color: 'blue', fontSize: '1.5em' }} />
+            ) : (
+              <Lock sx={{ color: 'gray', fontSize: '1.5em' }} />
+            )}
+          </div>
+        </ListItem>
+      ))}
+</List>
+
 
         {/* Botón de información */}
         <IconButton

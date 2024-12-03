@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, IconButton, Box, Tooltip, CircularProgress } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import useImage from '../Image/useImage';
+import { STATIC_FILES } from '../../context/config';
 
 interface HeaderProps {
   title: string;
@@ -13,6 +15,7 @@ const Header: React.FC<HeaderProps> = ({ title, onBack = () => {}, showBackButto
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isAdminView, setIsAdminView] = useState<boolean>(localStorage.getItem('isAdminView') === 'true');
   const [loading, setLoading] = useState<boolean>(true);
+  const { imageUrl} = useImage(STATIC_FILES.LOGO);
 
   const fetchUserRole = async () => {
     const accessToken = localStorage.getItem('access_token');
@@ -99,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({ title, onBack = () => {}, showBackButto
           </Tooltip>
         ) : (
           <Box>
-            <img src="/src/components/FitProX.png" alt="Logo" style={{ width: '80px', height: '80px' }} />
+            <img src={imageUrl || ''} alt="Logo" style={{ width: '80px', height: '80px' }} />
           </Box>
         )}
       </Toolbar>

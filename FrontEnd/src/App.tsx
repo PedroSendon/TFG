@@ -3,7 +3,6 @@ import { Redirect, Route, BrowserRouter as Router, Switch, useLocation } from 'r
 import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
 import { LanguageContext, LanguageProvider } from './context/LanguageContext';
 import { PlansProvider } from './context/PlansContext';
-
 import Register from './pages/Register/Register';
 import Login from './pages/LogIn/LogIn';
 import Form from './pages/Users/Form/Form';

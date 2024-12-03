@@ -16,6 +16,7 @@ from pathlib import Path
 from google.oauth2 import service_account
 from corsheaders.defaults import default_headers
 from decouple import config
+from google.cloud import storage
 
 # Detectar si estamos en modo de pruebas
 IS_TESTING = 'test' in sys.argv
@@ -47,6 +48,21 @@ else:
             'PORT': '5432',  # Puerto de PostgreSQL (por defecto 5432)
         }
     }
+
+
+GCS_CREDENTIALS_FILE = os.path.join(BASE_DIR, 'BackEnd', 'credentials.json')
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GCS_CREDENTIALS_FILE
+
+# Inicializa el cliente de Google Cloud Storage
+STORAGE_CLIENT = storage.Client()
+
+# Nombre del bucket
+GCS_BUCKET_NAME = 'fitprox'
+
+bucket = STORAGE_CLIENT.bucket('fitprox')
+
+# Verifica si puedes acceder al bucket
+print(f"Bucket name: {bucket.name}")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/

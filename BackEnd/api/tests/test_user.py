@@ -10,6 +10,9 @@ from api.models.workout import UserWorkout
 from api.models.user import DietPreferences, User, UserDetails, WeightRecord
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.http import JsonResponse
+from django.conf import settings
+from api.utils.googleCloud import get_signed_url
 
 class RegisterTests(APITestCase):
 

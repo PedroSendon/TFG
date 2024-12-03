@@ -19,7 +19,6 @@ export const PlansProvider: React.FC<PlansProviderProps> = ({ children }) => {
   const fetchPlansStatus = async () => {
     const accessToken = localStorage.getItem('access_token');
     if (!accessToken) {
-      console.error('No access token found.');
       return;
     }
 
@@ -28,7 +27,6 @@ export const PlansProvider: React.FC<PlansProviderProps> = ({ children }) => {
         method: 'GET',
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-
       if (response.ok) {
         const data = await response.json();
         setPlansAssigned(data.status); // Actualiza el estado según la respuesta
@@ -43,8 +41,6 @@ export const PlansProvider: React.FC<PlansProviderProps> = ({ children }) => {
   // Llamar a `fetchPlansStatus` cuando el componente se monte
   useEffect(() => {
     fetchPlansStatus();
-    console.log('Fetching user plans status...');
-
   }, []);
 
   return (

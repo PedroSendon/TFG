@@ -1,11 +1,15 @@
 import React, { useContext } from 'react';
-import { Select, MenuItem, Container, Button, Box, OutlinedInput } from '@mui/material';
+import { Select, MenuItem, Container, Button, Box, OutlinedInput, Typography } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { LanguageContext } from '../../context/LanguageContext';
+import useImage from '../Image/useImage';
+import { STATIC_FILES } from "../../context/config";
 
 const MainScreen: React.FC = () => {
+  const { imageUrl } = useImage(STATIC_FILES.LOGO);
   const history = useHistory();
   const { language, changeLanguage } = useContext(LanguageContext);
+  const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
 
   const handleRegister = () => {
     history.push('/register');
@@ -140,7 +144,8 @@ const MainScreen: React.FC = () => {
 
       {/* Logo */}
       <Box sx={{ width: '80%', marginBottom: '1.5rem' }}>
-        <img src={'/src/components/FitProX.png'} alt="Logo de la App" style={{ width: '100%' }} />
+
+        <img src={imageUrl || ''} alt="Logo de la App" style={{ width: '100%' }} />
       </Box>
 
       {/* Bienvenida 

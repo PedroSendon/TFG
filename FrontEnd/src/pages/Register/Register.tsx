@@ -10,10 +10,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { LanguageContext } from '../../context/LanguageContext'; // Importamos el contexto de idioma
+import useImage from '../Image/useImage'; // Importamos el hook useImage
+import { STATIC_FILES } from "../../context/config";
 
 const Register: React.FC = () => {
   const history = useHistory();
   const { t } = useContext(LanguageContext); // Usamos el contexto de idioma
+  const { imageUrl} = useImage(STATIC_FILES.LOGO);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -174,8 +177,8 @@ const Register: React.FC = () => {
         p: 4
       }}>
         <Box textAlign="center" sx={{ mb: 4 }}>
-          <img src="/src/components/logo.png" alt="logo" style={{ width: '60px', borderRadius: '50%' }} />
-          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333333', mt: 2 }}>
+          <img src={imageUrl || '' } alt="logo" style={{ width: '130px'}} />
+          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333333' }}>
             {t('welcome')}
           </Typography>
         </Box>

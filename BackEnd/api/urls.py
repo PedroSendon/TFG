@@ -10,6 +10,7 @@ from .views import statistics
 from .views import exercise
 from .views import trainingplan
 from django.urls import re_path
+from .views import image
 
 
 urlpatterns = [
@@ -20,8 +21,9 @@ urlpatterns = [
     path('register/', user.register, name='register'),
     path('login/', user.login, name='login'),
     path('form/', user.create_user_details, name='create_user_details'), 
-    #Imagenes
-    path('logo/', user.obtener_logo, name='obtener_logo'),
+
+    # Endpoints para images
+    path('get-image/<str:image_name>/', image.get_image, name='get_image'),
 
     # Admin users
     path('user/details/', user.save_user_details, name='user-details'),
@@ -106,5 +108,8 @@ urlpatterns = [
     path('exercise-log/user/<int:user_id>/', statistics.get_exercise_logs_by_user, name='get-exercise-logs-by-user'),
     path('exercise-log/<int:log_id>/', statistics.update_exercise_log, name='update-exercise-log'),
     path('exercise-log/<int:log_id>/delete/', statistics.delete_exercise_log, name='delete-exercise-log'),
+
+    
+
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
