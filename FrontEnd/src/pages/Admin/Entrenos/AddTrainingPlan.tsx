@@ -16,7 +16,6 @@ interface Workout {
     id: number;
     name: string;
     description: string;
-    media?: string | null; // Si media es opcional
 }
 
 const CreateTrainingPlan: React.FC = () => {
@@ -26,14 +25,10 @@ const CreateTrainingPlan: React.FC = () => {
         name: '',
         selectedTraining: [],
         description: '',
-        media: '',
         equipment: '',
         difficulty: '',
         duration: 0,
     });
-    const [media, setMedia] = useState<string | null>(null);
-    const [showActionSheet, setShowActionSheet] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [availableWorkouts, setAvailableWorkouts] = useState<Workout[]>([]);
 
 
@@ -82,7 +77,6 @@ const CreateTrainingPlan: React.FC = () => {
                     name: planData.name,
                     selectedTraining: planData.selectedTraining,
                     description: planData.description,
-                    media: planData.media,
                     equipment: planData.equipment,
                     difficulty: planData.difficulty,
                     duration: planData.duration,
@@ -128,29 +122,6 @@ const CreateTrainingPlan: React.FC = () => {
             ...planData,
             selectedTraining: event.target.value, // Maneja múltiples selecciones como array
         });
-    };
-
-    const handleMediaUpload = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setMedia(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handlePhotoOption = (option: string) => {
-        if (option === 'upload') {
-            handleMediaUpload();
-        } else if (option === 'delete') {
-            setMedia(null);
-        }
     };
 
     const equipmentOptions = [
@@ -319,35 +290,7 @@ const CreateTrainingPlan: React.FC = () => {
                             />
                         </Grid>
 
-                        <Grid item xs={12} textAlign="center">
-                            <Button
-                                variant="outlined"
-                                onClick={() => fileInputRef.current?.click()}
-                                fullWidth
-                                sx={{
-                                    color: '#777',
-                                    borderColor: '#777',
-                                    fontWeight: 'bold',
-                                    py: 1.5,
-                                    borderRadius: '8px',
-                                    '&:hover': { backgroundColor: '#f5f5f5' },
-                                }}
-                            >
-                                <CameraAlt sx={{ mr: 1 }} /> {t('upload_image')}
-                            </Button>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                ref={fileInputRef}
-                                style={{ display: 'none' }}
-                                onChange={handleFileChange}
-                            />
-                            {media && (
-                                <Box mt={2} textAlign="center">
-                                    <Avatar src={media} alt="Preview" sx={{ width: 100, height: 100, margin: 'auto' }} />
-                                </Box>
-                            )}
-                        </Grid>
+
 
                         {/* Botones de Cancelar y Guardar */}
                         <Grid item xs={12}>

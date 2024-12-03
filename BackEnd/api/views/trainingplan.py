@@ -95,7 +95,6 @@ def create_training_plan(request):
             name=request.data['name'],
             description=request.data['description'],
             workout_ids=request.data['selectedTraining'],
-            media=request.data.get('media', None),
             difficulty=request.data['difficulty'],
             equipment=request.data['equipment'],
             duration=duration
@@ -134,7 +133,6 @@ def get_training_plans(request):
                 "description": plan.description,
                 "difficulty": plan.difficulty,
                 "equipment": plan.equipment,
-                "media": plan.media,
                 "duration": plan.duration,
                 "workouts": [workout.id for workout in plan.workouts.all()]
             })

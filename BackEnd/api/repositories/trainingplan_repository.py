@@ -26,13 +26,12 @@ class TrainingPlanRepository:
         return images
 
     @staticmethod
-    def create_training_plan(name: str, description: str, workout_ids: List[int], media: str, difficulty: str, equipment: str, duration: int):
+    def create_training_plan(name: str, description: str, workout_ids: List[int], difficulty: str, equipment: str, duration: int):
         """
         Crear un nuevo plan de entrenamiento.
         :param name: Nombre del plan.
         :param description: Descripción del plan.
         :param workout_ids: Lista de IDs de entrenamientos asociados.
-        :param media: URL del media (imagen/video).
         :param difficulty: Dificultad del plan.
         :param equipment: Equipamiento necesario.
         :param duration: Duración del plan.
@@ -48,7 +47,6 @@ class TrainingPlanRepository:
         training_plan = TrainingPlan.objects.create(
             name=name,
             description=description,
-            media=media,
             difficulty=difficulty,
             equipment=equipment,
             duration=duration
@@ -61,7 +59,6 @@ class TrainingPlanRepository:
             "id": training_plan.id,
             "name": training_plan.name,
             "description": training_plan.description,
-            "media": training_plan.media,
             "difficulty": training_plan.difficulty,
             "equipment": training_plan.equipment,
             "duration": training_plan.duration,
@@ -139,7 +136,6 @@ class TrainingPlanRepository:
                 "id": training_plan.id,
                 "name": training_plan.name,
                 "description": training_plan.description,
-                "media": training_plan.media,
                 "difficulty": training_plan.difficulty,
                 "equipment": training_plan.equipment,
                 "duration": training_plan.duration,
@@ -172,7 +168,6 @@ class TrainingPlanRepository:
             # Actualizamos los campos básicos
             training_plan.name = data.get("name", training_plan.name)
             training_plan.description = data.get("description", training_plan.description)
-            training_plan.media = data.get("media", training_plan.media)
             training_plan.difficulty = data.get("difficulty", training_plan.difficulty)
             training_plan.equipment = data.get("equipment", training_plan.equipment)
             training_plan.duration = data.get("duration", training_plan.duration)
@@ -188,7 +183,6 @@ class TrainingPlanRepository:
                 "id": training_plan.id,
                 "name": training_plan.name,
                 "description": training_plan.description,
-                "media": training_plan.media,
                 "difficulty": training_plan.difficulty,
                 "equipment": training_plan.equipment,
                 "duration": training_plan.duration,
@@ -243,7 +237,6 @@ class TrainingPlanRepository:
                 "id": training_plan.id,
                 "name": training_plan.name,
                 "description": training_plan.description,
-                "media": training_plan.media,
                 "difficulty": training_plan.difficulty,
                 "equipment": training_plan.equipment,
                 "duration": training_plan.duration,

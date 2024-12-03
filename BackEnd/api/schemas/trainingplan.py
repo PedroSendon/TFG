@@ -7,7 +7,6 @@ class TrainingPlanSchema(BaseModel):
     description: Optional[str] = None
     difficulty: constr(min_length=1, max_length=100)  # Cadena con una longitud mínima y máxima
     equipment: Optional[str] = None  # Equipamiento opcional
-    media: Optional[str] = None  # URL opcional para imágenes o videos
     duration: conint(gt=0)  # Duración en días, debe ser mayor a 0
     workouts: List[PositiveInt]  # IDs de entrenamientos relacionados
 
@@ -20,7 +19,6 @@ class TrainingPlanCreate(BaseModel):
     description: Optional[str] = None
     difficulty: constr(min_length=1, max_length=100)
     equipment: Optional[str] = None
-    media: Optional[str] = None
     duration: conint(gt=0)  # Duración en días, mayor a 0
     workout_ids: List[PositiveInt]  # Lista de IDs de entrenamientos relacionados
 

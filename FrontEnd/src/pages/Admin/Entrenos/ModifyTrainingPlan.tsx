@@ -14,7 +14,6 @@ interface LocationState {
         difficulty: string;
         equipment: string;
         duration: number;
-        media: string | null;
         workouts: any[];
     };
 }
@@ -22,7 +21,6 @@ interface Workout {
     id: number;
     name: string;
     description: string;
-    media?: string | null; // Si media es opcional
 }
 const ModifyTrainingPlans: React.FC = () => {
     const history = useHistory();
@@ -40,7 +38,6 @@ const ModifyTrainingPlans: React.FC = () => {
         equipment: '',
         duration: 0,
     });
-    const [media, setMedia] = useState<string | null>(null);
     const [workouts, setWorkouts] = useState<Workout[]>([]);
     const [showToast, setShowToast] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -88,7 +85,6 @@ const ModifyTrainingPlans: React.FC = () => {
                         equipment: data.equipment,
                         duration: data.duration
                     });
-                    setMedia(data.media);
                     setWorkouts(data.workouts);
                 } else {
                     console.error(t('error_loading_training_plan'));
@@ -147,7 +143,6 @@ const ModifyTrainingPlans: React.FC = () => {
         const updatedTrainingPlan = {
             training_plan_id: trainingPlanId,  // Agregar el ID aquí
             ...planDetails,
-            media,
             workouts: workoutIds,  // Solo enviar los IDs
         };
 
@@ -187,20 +182,6 @@ const ModifyTrainingPlans: React.FC = () => {
         history.push('/admin/workout');
     };
 
-    const handleMediaUpload = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setMedia(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
         const { name, value } = e.target;
@@ -407,28 +388,6 @@ const ModifyTrainingPlans: React.FC = () => {
                             </Card>
                         </Grid>
                     ))}
-
-
-                    <Grid item xs={12}>
-                        <Button
-                            variant="outlined"
-                            onClick={handleMediaUpload}
-                            fullWidth
-                            sx={{
-                                color: '#777',
-                                borderColor: '#777',
-                                fontWeight: 'bold',
-                                py: 1.5,
-                                borderRadius: '8px',
-                                '&:hover': { backgroundColor: '#f5f5f5' },
-                            }}
-                        >
-                            <CameraAlt style={{ color: '#777', marginRight: '10px' }} />
-                            {t('change_image_video')}
-                        </Button>
-                        <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-                        {media && <Box mt={2}><Avatar src={media} alt="Preview" variant="rounded" sx={{ width: '100%', height: 150 }} /></Box>}
-                    </Grid>
 
                     {/* Botones de Cancelar y Guardar */}
                     <Grid item xs={12}>
