@@ -5,7 +5,7 @@ class Exercise(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     muscleGroups = models.TextField(blank=True, default="")  # Almacena los grupos musculares como una cadena
-    media = models.URLField(blank=True, null=True)
+    media = models.URLField(max_length=2000, blank=True, null=True)
     instructions = models.TextField(default="No instructions available")
 
     def __str__(self):

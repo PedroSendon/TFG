@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Dict
 
 from pydantic import ValidationError
+from api.utils.googleCloud import upload_to_gcs, generate_signed_url
 from api.schemas.user import UserAdminCreate
 from api.models.macros import MealPlan, UserNutritionPlan
 from api.models.workout import UserWorkout, Imagen, WeeklyWorkout
@@ -342,13 +343,21 @@ class UserRepository:
         """
         try:
             user = User.objects.get(id=user_id)
-
+            print(f"Usuario encontrado: {user}")  # Depuración
             # Intentar obtener los detalles del usuario
             try:
                 user_details = user.details
             except UserDetails.DoesNotExist:
                 # Si no existen detalles, devolver valores predeterminados o manejar la ausencia
                 user_details = None
+
+            # Generar URL firmada para la foto de perfil, si existe
+            profile_photo_signed_url = None
+            if user.profile_photo:
+                profile_photo_signed_url = generate_signed_url(
+                    'fitprox', f"profile_photos/user_{user.id}_profile.jpg"
+                )
+
 
             profile_data = {
                 "username": f"{user.first_name} {user.last_name}",
@@ -360,8 +369,10 @@ class UserRepository:
                 # Cambiado para usar el valor de la opción
                 "weightGoal": user_details.weight_goal if user_details else "No goal set",
                 "activityLevel": user_details.physical_activity_level if user_details else "No info",
-                "trainingFrequency": user_details.weekly_training_days if user_details else 0
+                "trainingFrequency": user_details.weekly_training_days if user_details else 0,
+                "profilePhoto": profile_photo_signed_url,
             }
+            print(user.profile_photo)
 
             return profile_data
         except User.DoesNotExist:
@@ -804,6 +815,14 @@ class UserDetailsRepository:
             # Actualizar los campos básicos
             user.first_name = profile_data.get('firstName', user.first_name)
             user.last_name = profile_data.get('lastName', user.last_name)
+            profile_photo = profile_data.get('profilePhoto')
+            
+            if profile_photo:
+                # Subir manualmente la imagen a GCS
+                uploaded_url = upload_to_gcs(profile_photo, f"user_{user.id}_profile.jpg")
+                user.profile_photo = uploaded_url  # Guardar solo la URL
+
+
             user.save()
 
             # Actualizar los detalles del usuario
@@ -883,16 +902,23 @@ class UserDetailsRepository:
             user = User.objects.get(id=user_id)
 
             # Actualizar la foto de perfil
-            user.profile_photo = photo
-            user.save()
+            if photo:
+                # Subir la imagen a GCS y obtener la URL pública o firmada
+                file_name = f"profile_photos/user_{user.id}_profile.jpg"
+                uploaded_url = upload_to_gcs(photo, file_name)
+                signed_url = generate_signed_url('fitprox', f"profile_photos/{file_name}")
+
+                user.profile_photo = uploaded_url  # Guarda la URL pública
+                user.save()
 
             return {
                 "username": f"{user.first_name} {user.last_name}",
-                "profilePhotoUrl": user.profile_photo.url if user.profile_photo else None
+                "profilePhotoUrl": signed_url,  # Envía la URL firmada para el cliente
             }
 
-        except user.DoesNotExist:
+        except User.DoesNotExist:
             return None
+
 
     @staticmethod
     def get_all_users(request_user):

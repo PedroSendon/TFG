@@ -46,6 +46,7 @@ def create_exercise(request):
     }, status=status.HTTP_201_CREATED)
 
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_exercise_by_id(request, exercise_id):

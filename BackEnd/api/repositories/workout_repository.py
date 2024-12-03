@@ -1,3 +1,4 @@
+from api.utils.googleCloud import upload_to_gcs
 from api.repositories.user_repository import UserRepository
 from api.models.user import User
 from api.models.workout import Workout, WorkoutExercise, Exercise, UserWorkout
@@ -206,7 +207,28 @@ class WorkoutRepository:
         except Workout.DoesNotExist:
             return None
 
-        
+    @staticmethod
+    def parse_exercises(data):
+        """
+        Extraer y formatear los ejercicios desde los datos de la solicitud.
+        :param data: Datos del request (dict-like).
+        :return: Lista de ejercicios formateados.
+        """
+        exercises = []
+        index = 0
+        while True:
+            exercise_name = data.get(f'exercises[{index}][name]')
+            if not exercise_name:
+                break  # Sal del bucle si no hay más ejercicios
+            exercises.append({
+                'name': exercise_name,
+                'sets': int(data.get(f'exercises[{index}][sets]', 0)),
+                'reps': int(data.get(f'exercises[{index}][reps]', 0)),
+                'rest': int(data.get(f'exercises[{index}][rest]', 0)),
+            })
+            index += 1
+        return exercises
+            
     @staticmethod
     def create_workout(user, data):
         """
@@ -215,33 +237,34 @@ class WorkoutRepository:
         :param data: Datos del entrenamiento.
         :return: Un diccionario con los datos del entrenamiento creado o un mensaje de error.
         """
-        # Verificar el rol del usuario
         check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
         if "error" in check_result:
             return check_result
 
-        # Validar los datos obligatorios
-        required_fields = ['name', 'description', 'exercises', 'duration']
+        required_fields = ['name', 'description', 'duration']
         if not all(field in data and data[field] for field in required_fields):
             return {"error": "Faltan parámetros obligatorios o hay valores no válidos.", "status": status.HTTP_400_BAD_REQUEST}
 
-        exercises = data.get('exercises')
-        
-        # Validar que 'exercises' sea una lista de diccionarios
-        if not isinstance(exercises, list) or not all(isinstance(ex, dict) for ex in exercises):
+        # Parsear ejercicios
+        exercises = WorkoutRepository.parse_exercises(data)
+        if not exercises:
             return {"error": "El parámetro 'exercises' debe ser una lista de objetos.", "status": status.HTTP_400_BAD_REQUEST}
 
-        # Crear el entrenamiento
+        media_file = data.get('media')
+        media_url = None
+
+        if media_file:
+            try:
+                media_url = upload_to_gcs(media_file, f"workouts/{data['name']}_media.jpg")
+            except Exception as e:
+                return {"error": f"Error al subir la imagen: {str(e)}", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
         workout = Workout.objects.create(
             name=data['name'],
             description=data['description'],
-            media=data.get('media'),
-            duration=data['duration']
+            media=media_url,
+            duration=int(data['duration'])
         )
-
-        # Añadir los ejercicios al entrenamiento
-        exercises_data = []
-        missing_exercises = []  # Lista para almacenar los nombres de ejercicios no encontrados
 
         for exercise in exercises:
             try:
@@ -253,31 +276,17 @@ class WorkoutRepository:
                     reps=exercise['reps'],
                     rest=exercise['rest']
                 )
-                exercises_data.append({
-                    "name": exercise['name'],
-                    "sets": exercise['sets'],
-                    "reps": exercise['reps'],
-                    "rest": exercise['rest']
-                })
             except Exercise.DoesNotExist:
-                missing_exercises.append(exercise['name'])  # Agregar nombre del ejercicio a la lista de faltantes
+                pass  # Manejar ejercicios no encontrados, si es necesario
 
-        response_data = {
-            "data": {
-                "id": workout.id,
-                "name": workout.name,
-                "description": workout.description,
-                "exercises": exercises_data,
-                "media": workout.media,
-                "duration": workout.duration,
-            }
-        }
-
-        # Si hay ejercicios no encontrados, incluir mensaje adicional en la respuesta
-        if missing_exercises:
-            response_data["data"]["missing_exercises"] = missing_exercises
-
-        return response_data
+        return {"data": {
+            "id": workout.id,
+            "name": workout.name,
+            "description": workout.description,
+            "exercises": exercises,
+            "media": workout.media,
+            "duration": workout.duration,
+        }}
 
 
     @staticmethod

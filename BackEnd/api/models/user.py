@@ -73,9 +73,9 @@ class User(AbstractUser):
     birth_date = models.DateField(null=True, blank=True)
     gender_choices = [('M', 'Male'), ('F', 'Female'), ('O', 'Other')]
     gender = models.CharField(max_length=1, choices=gender_choices, null=True, blank=True)
-    profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='awaiting_assignment')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='cliente')
+    profile_photo = models.URLField(max_length=2000, null=True, blank=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='awaiting_assignment')
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='cliente')
 
     USERNAME_FIELD = 'email'  # Email es el identificador único para la autenticación
     REQUIRED_FIELDS = ['first_name', 'last_name']  # Campos obligatorios además de email

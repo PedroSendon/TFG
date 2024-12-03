@@ -23,6 +23,7 @@ const ProfilePage: React.FC = () => {
                 headers: { 'Authorization': `Bearer ${accessToken}` },
             });
             if (profileResponse.ok) setUserData(await profileResponse.json());
+
         } catch (error) {
             console.error('Error fetching profile data', error);
         } finally {
@@ -31,7 +32,6 @@ const ProfilePage: React.FC = () => {
     };
 
     if (loading) return <p>{t('loading_profile')}</p>;
-
     const handleLogout = () => {
         localStorage.clear();
         sessionStorage.clear();
@@ -63,9 +63,11 @@ const ProfilePage: React.FC = () => {
                 >
                     <Box display="flex" alignItems="center" justifyContent="space-between">
                         <Box display="flex" alignItems="center">
-                            <Avatar sx={{ width: '60px', height: '60px', marginRight: '15px' }}>
-                                <img src="/src/components/perfil.jpg" alt={t('profile_picture_alt')} style={{ width: '100%', height: '100%' }} />
-                            </Avatar>
+                            <Avatar
+                                sx={{ width: '60px', height: '60px', marginRight: '15px' }}
+                                src={userData?.profilePhoto} // Usa la URL firmada
+                                alt={t('profile_picture_alt')}
+                            />
                             <Box>
                                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{userData?.username}</Typography>
                                 <Typography variant="body2" color="textSecondary">{userData?.email}</Typography>
@@ -117,7 +119,7 @@ const ProfilePage: React.FC = () => {
                                 <ListItemText
                                     primary={t('activity_level')}
                                     secondary={t(userData?.activityLevel || 'No info')}
-                                />                         
+                                />
                             </ListItem>
                             <Divider component="li" />
                             <ListItem>

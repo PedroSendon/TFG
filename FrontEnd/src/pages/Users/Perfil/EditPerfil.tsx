@@ -41,38 +41,38 @@ const EditProfilePage: React.FC = () => {
 
     const handleSave = async () => {
         try {
-          const accessToken = localStorage.getItem('access_token');
-    
-          if (!accessToken) {
-            console.error(t('no_token'));
-            return;
-          }
-          const response = await fetch('http://127.0.0.1:8000/api/profile/update/', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({
-              firstName: profileData.firstName,
-              lastName: profileData.lastName,
-              currentWeight: profileData.currentWeight,
-              weightGoal: profileData.weightGoal,
-              activityLevel: profileData.activityLevel,
-              trainingFrequency: profileData.trainingFrequency,
-            }),
-          });
-    
-          if (response.ok) {
-            setPlansAssigned(false); // Cambia el estado en el contexto
-            history.push('/profile'); // Redirige al perfil
-          } else {
-            console.error(t('profile_update_error'), response.statusText);
-          }
+            const accessToken = localStorage.getItem('access_token');
+
+            if (!accessToken) {
+                console.error(t('no_token'));
+                return;
+            }
+            const response = await fetch('http://127.0.0.1:8000/api/profile/update/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({
+                    firstName: profileData.firstName,
+                    lastName: profileData.lastName,
+                    currentWeight: profileData.currentWeight,
+                    weightGoal: profileData.weightGoal,
+                    activityLevel: profileData.activityLevel,
+                    trainingFrequency: profileData.trainingFrequency,
+                }),
+            });
+
+            if (response.ok) {
+                setPlansAssigned(false); // Cambia el estado en el contexto
+                history.push('/profile'); // Redirige al perfil
+            } else {
+                console.error(t('profile_update_error'), response.statusText);
+            }
         } catch (error) {
-          console.error(t('request_error'), error);
+            console.error(t('request_error'), error);
         }
-      };
+    };
 
     const handleCancel = () => {
         history.push('/profile'); // Redirige al perfil sin guardar cambios
@@ -85,10 +85,16 @@ const EditProfilePage: React.FC = () => {
             formData.append('profilePhoto', file);
 
             try {
+                const accessToken = localStorage.getItem('access_token');
+
+                if (!accessToken) {
+                    console.error(t('no_token'));
+                    return;
+                }
                 const response = await fetch('http://127.0.0.1:8000/api/profile/photo/', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Asegúrate de incluir el token de autenticación
+                        'Authorization': `Bearer ${accessToken}`,  // Elimina 'Content-Type'
                     },
                     body: formData,
                 });
@@ -147,7 +153,7 @@ const EditProfilePage: React.FC = () => {
 
     return (
         <Container maxWidth="sm" sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', mt: 2, p: 3, borderRadius: '8px' }}>
-  
+
             <Header title={t('edit_profile')} />
 
             <Box textAlign="center" mb={3}>
@@ -155,7 +161,7 @@ const EditProfilePage: React.FC = () => {
                     src={profileData.profilePicture}
                     alt="Preview"
                     sx={{
-                        width: 150, height: 150, mx: 'auto', borderRadius: '8px', border: '2px solid #000', mt:'18%'
+                        width: 150, height: 150, mx: 'auto', borderRadius: '8px', border: '2px solid #000', mt: '18%'
                     }}
                 />
                 <Button

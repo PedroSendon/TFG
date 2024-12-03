@@ -372,7 +372,7 @@ def change_password(request):
     return Response({"message": result['success']}, status=status.HTTP_200_OK)
 
 
-@api_view(['PUT'])
+@api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated]) 
 def upload_profile_photo(request):
     """
@@ -381,18 +381,18 @@ def upload_profile_photo(request):
     user_id = request.user.id  # Usamos el usuario autenticado
 
     # Validar si se ha proporcionado un archivo
-    photo = request.FILES.get('photo')
+    photo = request.FILES.get('profilePhoto')
     if not photo:
         return Response({"error": "No se proporcionó una foto."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Actualizar la foto de perfil
-    updated_profile = UserDetailsRepository.update_profile_photo(
-        user_id, photo)
+    updated_profile = UserDetailsRepository.update_profile_photo(user_id, photo)
 
     if updated_profile is None:
         return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
     return Response(updated_profile, status=status.HTTP_200_OK)
+
 
 
 @api_view(['GET'])

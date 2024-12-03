@@ -1,5 +1,6 @@
 from django.apps import apps
 from google.cloud import storage
+from datetime import timedelta
 
 def get_signed_url(bucket_name: str, blob_name: str, expiration_time: int = 3600) -> str:
     try:
@@ -37,3 +38,37 @@ def list_bucket_files():
 
 
 
+
+def upload_to_gcs(file, filename):
+    """
+    Subir un archivo a Google Cloud Storage y devolver una URL pública.
+    """
+    bucket_name = 'fitprox'
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(f"{filename}")
+
+    # Subir el archivo desde un archivo de tipo `File`
+    blob.upload_from_file(file)
+
+    # Generar una URL firmada (válida por 1 día, por ejemplo)
+    signed_url = blob.generate_signed_url(
+        version="v4",
+        expiration=timedelta(days=1),  # Cambia la duración según tus necesidades
+        method="GET"
+    )
+    return signed_url
+
+
+
+
+def generate_signed_url(bucket_name, blob_name, expiration=3600):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+    signed_url = blob.generate_signed_url(
+        version="v4",
+        expiration=timedelta(seconds=expiration),
+        method="GET",
+    )
+    return signed_url

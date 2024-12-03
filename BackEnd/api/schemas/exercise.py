@@ -29,14 +29,13 @@ class ExerciseUpdateSchema(BaseModel):
 
     class Config:
         from_attributes = True
-
+        
 class CreateExerciseSchema(BaseModel):
     name: str
     description: str
-    muscleGroups: list
+    muscleGroups: List[str]
     instructions: str
-    media: str = None
-
+    media: Optional[str]
     @validator('muscleGroups')
     def muscle_groups_must_be_list_of_strings(cls, v):
         if not isinstance(v, list) or not all(isinstance(item, str) for item in v):

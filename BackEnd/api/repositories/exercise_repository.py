@@ -8,7 +8,9 @@ from api.models.process import ExerciseLog
 from django.db.models import Sum
 from datetime import datetime
 from rest_framework import status
-
+from google.cloud import storage
+from datetime import timedelta
+from api.utils.googleCloud import upload_to_gcs
 
 class ExerciseRepository:
 
@@ -53,34 +55,40 @@ class ExerciseRepository:
             }
         except Exercise.DoesNotExist:
             return None
-
+    
     @staticmethod
     def create_exercise(user, data):
-        """
-        Crear un nuevo ejercicio en el sistema.
-        :param user: El usuario que realiza la solicitud.
-        :param data: Los datos de la solicitud.
-        :return: Un diccionario con los datos del ejercicio creado o un mensaje de error.
-        """
-        # Crear el nuevo ejercicio
         try:
-            # Verificar si el objeto `user` es una instancia de `User`
-            check_result = UserRepository.check_user_role(
-                user, ['entrenador', 'administrador'])
+            check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
             if "error" in check_result:
                 return check_result
 
-            schema = CreateExerciseSchema(**data)
-            validated_data = schema.dict()
+            # Validar datos
+            required_fields = ['name', 'description', 'muscleGroups', 'instructions']
+            if not all(field in data for field in required_fields):
+                return {"error": "Faltan campos obligatorios", "status": status.HTTP_400_BAD_REQUEST}
+
+   
+            # Subir la imagen si existe
+            media_url = None
+            media_file = data.get('media')  # El archivo viene de request.FILES
+
+            if media_file:
+                try:
+                    media_url = upload_to_gcs(media_file, f"exercises/{data['name']}_media.jpg")
+                except Exception as e:
+                    return {"error": f"Error al subir la imagen: {str(e)}", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
+            # Crear el ejercicio
             exercise = Exercise.objects.create(
-                name=validated_data['name'],
-                description=validated_data['description'],
-                instructions=validated_data['instructions'],
-                media=validated_data.get('media')
+                name=data['name'],
+                description=data['description'],
+                instructions=data['instructions'],
+                media=media_url
             )
 
-            # Usar el método set_muscle_groups para almacenar la lista como una cadena separada por comas
-            muscle_groups_str = ','.join(validated_data['muscleGroups'])
+            # Asignar los grupos musculares
+            muscle_groups_str = ','.join(data['muscleGroups'])
             exercise.set_muscle_groups(muscle_groups_str)
             exercise.save()
 
@@ -95,14 +103,10 @@ class ExerciseRepository:
                 }
             }
         except ValidationError as e:
-            # Capturar y personalizar el mensaje de error
-            error_messages = e.errors()
-            error_details = {
-                "error": " ".join([f"{err['loc'][0]}: {err['msg']}" for err in error_messages]).replace(" ", "\n")
-            }
-            return {"error": error_details, "status": status.HTTP_400_BAD_REQUEST}
+            return {"error": e.errors(), "status": status.HTTP_400_BAD_REQUEST}
         except Exception as e:
             return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
 
     @staticmethod
     def update_exercise(exercise_id: int, user, data: dict):

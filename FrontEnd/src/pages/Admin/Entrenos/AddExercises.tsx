@@ -11,7 +11,8 @@ import {
     Chip,
     Typography,
     SelectChangeEvent,
-    InputLabel
+    InputLabel,
+    IconButton
 } from '@mui/material'; // Importación de componentes de Material UI.
 import { useHistory } from 'react-router-dom'; // Hook para redirección.
 import { IonFabButton, IonIcon, IonContent, IonPage } from '@ionic/react';
@@ -21,7 +22,7 @@ import { LanguageContext } from '../../../context/LanguageContext';
 import musclesCa from '../../../locales/muscles_ca.json';
 import musclesEs from '../../../locales/muscles_es.json';
 import musclesEn from '../../../locales/muscles_en.json';
-import { CameraAlt } from '@mui/icons-material';
+import { CameraAlt, Close } from '@mui/icons-material';
 
 interface MuscleGroupsData {
     muscleGroups: string[];
@@ -29,7 +30,9 @@ interface MuscleGroupsData {
 
 const AddExercises: React.FC = () => {
     const history = useHistory();
-    const [media, setMedia] = useState<string | null>(null);
+    const [media, setMedia] = useState<File | string | null>(null);
+    const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t, language } = useContext(LanguageContext); // Usar el contexto de idioma
     const muscleGroupsCa: MuscleGroupsData = musclesCa;
@@ -87,67 +90,62 @@ const AddExercises: React.FC = () => {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setMedia(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            setMedia(file); // Guarda el archivo directamente
+            setMediaPreview(URL.createObjectURL(file)); // Genera una URL temporal para la vista previa
         }
     };
-
+    
+    
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
     
-        // Validar los campos antes de enviarlos al backend
+        const accessToken = localStorage.getItem('access_token');
+    
         if (!formData.name || !formData.description || !formData.muscleGroups.length || !formData.instructions) {
-            setErrors({ ...errors, form: 'Todos los campos son obligatorios' });
+            setErrors({ form: 'Todos los campos son obligatorios' });
             return;
         }
-        const accessToken = localStorage.getItem('access_token');
     
         if (!accessToken) {
             console.error(t('no_token'));
             return;
         }
     
-        console.log('Datos que se enviarán:', JSON.stringify({
-            name: formData.name,
-            description: formData.description,
-            muscleGroups: formData.muscleGroups,
-            instructions: formData.instructions,
-            media: media,
-        }));
+        const formDataToSend = new FormData();
+        formDataToSend.append('name', formData.name);
+        formDataToSend.append('description', formData.description);
+        formDataToSend.append('muscleGroups', JSON.stringify(formData.muscleGroups)); // Convertimos muscleGroups a JSON
+        formDataToSend.append('instructions', formData.instructions);
     
-        // Realizar la solicitud al backend
+        if (media) {
+            formDataToSend.append('media', media); // Adjuntar el archivo de media
+        }
+    
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/exercises/create/', { 
+            const response = await fetch('http://127.0.0.1:8000/api/exercises/create/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`, 
+                    Authorization: `Bearer ${accessToken}`,
                 },
-                body: JSON.stringify({
-                    name: formData.name,
-                    description: formData.description,
-                    muscleGroups: formData.muscleGroups,
-                    instructions: formData.instructions,
-                    media: media || "",  // Envía una cadena vacía si `media` es `null`
-                }),
+                body: formDataToSend, // Asegúrate de enviar FormData
             });
     
-            const data = await response.json();
             if (response.ok) {
+                const data = await response.json();
                 console.log('Ejercicio creado con éxito:', data);
                 history.push('/admin/workout');
             } else {
+                const data = await response.json();
                 console.error('Error al crear el ejercicio:', data);
-                setErrors({ ...errors, form: 'Error al crear el ejercicio. Verifique los datos.' });
+                setErrors({ form: 'Error al crear el ejercicio. Verifique los datos.' });
             }
         } catch (error) {
             console.error('Error al conectar con el servidor:', error);
-            setErrors({ ...errors, form: 'Error de conexión. Inténtelo más tarde.' });
+            setErrors({ form: 'Error de conexión. Inténtelo más tarde.' });
         }
     };
+    
+    
     
 
     const handleCancel = () => {
@@ -260,7 +258,7 @@ const AddExercises: React.FC = () => {
 
                         <Grid item xs={12}>
                             <Button
-                                onClick={handleMediaUpload}
+                                onClick={() => fileInputRef.current?.click()}
                                 fullWidth
                                 variant="outlined"
                                 startIcon={<CameraAlt />}
@@ -274,6 +272,14 @@ const AddExercises: React.FC = () => {
                             >
                                 {t('upload_image_video')}
                             </Button>
+                            {media && (
+                                <Box mt={2} textAlign="center">
+                                    {mediaPreview && <img src={mediaPreview} alt="Preview" style={{ width: '100%', borderRadius: '8px' }} />}
+                                    <IconButton onClick={() => setMedia(null)} aria-label="delete" color="error">
+                                        <Close />
+                                    </IconButton>
+                                </Box>
+                            )}
                             <input
                                 type="file"
                                 accept="image/*"
@@ -281,7 +287,6 @@ const AddExercises: React.FC = () => {
                                 style={{ display: 'none' }}
                                 onChange={handleFileChange}
                             />
-                            {media && <Box mt={2}><img src={media} alt="Preview" style={{ width: '100%' }} /></Box>}
                         </Grid>
 
                         <Grid item xs={12}>

@@ -10,7 +10,7 @@ class Workout(models.Model):
     description = models.TextField()
     exercises = models.ManyToManyField(
         Exercise, through='WorkoutExercise', related_name='workouts')
-    media = models.URLField(blank=True, null=True)
+    media = models.URLField(max_length=2000, null=True, blank=True)
 
     # Duración promedio del entrenamiento en minutos
     duration = models.PositiveIntegerField(default=60)

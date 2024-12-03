@@ -2,7 +2,7 @@ from django.urls import path
 
 from django.conf.urls.static import static  # Import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from BackEnd import settings
+from BackEnd.settings import MEDIA_ROOT, MEDIA_URL
 from .views import user
 from .views import macros
 from .views import workout
@@ -16,6 +16,7 @@ from .views import image
 urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('profile/photo/', user.upload_profile_photo, name='upload-profile-photo'),
 
     # Usuarios
     path('register/', user.register, name='register'),
@@ -54,7 +55,6 @@ urlpatterns = [
     path('profile/', user.get_user_profile, name='get-user-profile'),
     path('profile/update/', user.update_user_profile, name='update-user-profile'),
     path('profile/password/', user.change_password, name='change-password'),
-    path('profile/photo/', user.upload_profile_photo, name='upload-profile-photo'),
     
 
     # Workouts
@@ -112,4 +112,4 @@ urlpatterns = [
     
 
     
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(MEDIA_URL, document_root=MEDIA_ROOT)

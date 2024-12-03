@@ -49,7 +49,7 @@ else:
         }
     }
 
-
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GCS_CREDENTIALS_FILE = os.path.join(BASE_DIR, 'BackEnd', 'credentials.json')
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GCS_CREDENTIALS_FILE
 
@@ -71,7 +71,7 @@ print(f"Bucket name: {bucket.name}")
 SECRET_KEY = 'django-insecure-dpf!)y5i@$q=_ha*$f%oyswk*2l=l20*#ub@o)x7^_k=71@^l*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-MEDIA_URL = '/media/'
+MEDIA_URL = f'https://storage.googleapis.com/{GCS_BUCKET_NAME}/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'BackEnd', 'media/')
 
 # SECURITY WARNING: don't run with debug turned on in production!

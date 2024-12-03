@@ -26,10 +26,10 @@ import { CameraAlt, Close, Delete } from '@mui/icons-material';
 
 const AddWorkouts: React.FC = () => {
     const history = useHistory();
-    const [media, setMedia] = useState<string | null>(null);
+    const [media, setMedia] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useContext(LanguageContext); // Usar el contexto de idioma
-    const [showActionSheet, setShowActionSheet] = useState(false);
+    const [mediaPreview, setMediaPreview] = useState<string | null>(null); // Nueva variable para la vista previa
 
 
     const [formData, setFormData] = useState({
@@ -55,26 +55,38 @@ const AddWorkouts: React.FC = () => {
     const handleSave = async () => {
         try {
             const accessToken = localStorage.getItem('access_token');
-
+    
             if (!accessToken) {
                 console.error(t('no_token'));
                 return;
             }
+    
+            const formData2 = new FormData();
+            formData2.append('name', formData.name);
+            formData2.append('description', formData.description);
+            formData2.append('duration', String(formData.duration));
+    
+            // Añade cada ejercicio como parte del FormData
+            workoutDetails.exercises.forEach((exercise, index) => {
+                formData2.append(`exercises[${index}][name]`, exercise.name);
+                formData2.append(`exercises[${index}][sets]`, String(exercise.sets));
+                formData2.append(`exercises[${index}][reps]`, String(exercise.reps));
+                formData2.append(`exercises[${index}][rest]`, String(exercise.rest));
+            });
+    
+            if (media) {
+                formData2.append('media', media); // Adjuntar el archivo de media
+            }
+            console.log('FormData:', formData2);
+    
             const response = await fetch('http://127.0.0.1:8000/api/workouts/create/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,
                 },
-                body: JSON.stringify({
-                    name: formData.name,
-                    description: formData.description,
-                    exercises: workoutDetails.exercises,
-                    media: media,
-                    duration: formData.duration, // Añadido
-                }),
+                body: formData2, // Enviar FormData en lugar de JSON
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
                 console.log('Entrenamiento creado con éxito:', data);
@@ -87,6 +99,8 @@ const AddWorkouts: React.FC = () => {
             console.error('Error al conectar con el servidor:', error);
         }
     };
+    
+    
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
         const { name, value } = e.target;
@@ -119,13 +133,11 @@ const AddWorkouts: React.FC = () => {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setMedia(reader.result as string); // Guardar la imagen subida
-            };
-            reader.readAsDataURL(file);
+            setMedia(file); // Guarda el archivo directamente
+            setMediaPreview(URL.createObjectURL(file)); // Genera una URL temporal para la vista previa
         }
     };
+    
 
     const handlePhotoOption = (option: string) => {
         if (option === 'upload') {
@@ -179,6 +191,15 @@ const AddWorkouts: React.FC = () => {
     useEffect(() => {
         fetchExercises();
     }, []);
+
+    useEffect(() => {
+        return () => {
+            if (mediaPreview) {
+                URL.revokeObjectURL(mediaPreview); // Libera la memoria de la URL temporal
+            }
+        };
+    }, [mediaPreview]);
+    
 
     return (
         <Container sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', marginTop: '20%' }}>
@@ -264,7 +285,7 @@ const AddWorkouts: React.FC = () => {
                             </Button>
                             {media && (
                                 <Box mt={2} textAlign="center">
-                                    <img src={media} alt="Preview" style={{ width: '100%', borderRadius: '8px' }} />
+                                    {mediaPreview && <img src={mediaPreview} alt="Preview" style={{ width: '100%', borderRadius: '8px' }} />}
                                     <IconButton onClick={() => setMedia(null)} aria-label="delete" color="error">
                                         <Close />
                                     </IconButton>
