@@ -36,6 +36,9 @@ const Navbar = () => {
   const [isAdminView, setIsAdminView] = useState<boolean>(localStorage.getItem('isAdminView') === 'true');
   const history = useHistory();
   const location = useLocation();
+  const [userData, setUserData] = useState<{ profilePhoto?: string } | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
 
   useEffect(() => {
     const fetchUserRoleAndStatus = async () => {
@@ -63,12 +66,31 @@ const Navbar = () => {
     };
 
     fetchUserRoleAndStatus();
+    fetchUserProfile();
     window.addEventListener('storage', handleStorageChange);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
+
+
+
   }, [history]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) return;
+      const profileResponse = await fetch(`http://127.0.0.1:8000/api/profile/`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+      });
+      if (profileResponse.ok) setUserData(await profileResponse.json());
+    } catch (error) {
+      console.error('Error fetching profile data', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleNavigation = (path: string) => {
     history.push(path);
@@ -103,11 +125,26 @@ const Navbar = () => {
         >
           {filteredNavItems.map((item, index) => {
             const IconComponent = iconMap[item.icon as keyof typeof iconMap];
+
+            const isProfileIcon = item.label === 'profile_label' && userData?.profilePhoto; // Verifica si es el ítem de perfil
+            const avatarIcon = (
+              <img
+                src={userData?.profilePhoto}
+                alt="Profile"
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                }}
+              />
+            );
+
             return (
               <BottomNavigationAction
                 key={index}
                 label={t(item.label)}
-                icon={<IconComponent sx={{ fontSize: 24 }} />}
+                icon={isProfileIcon ? avatarIcon : <IconComponent sx={{ fontSize: 24 }} />}
                 sx={{
                   color: location.pathname === item.path ? '#FFFFFF' : '#6b6b6b',
                   backgroundColor: location.pathname === item.path ? '#c1c1c1' : 'transparent',
@@ -117,6 +154,7 @@ const Navbar = () => {
               />
             );
           })}
+
         </BottomNavigation>
       </Paper>
     </AppBar>
