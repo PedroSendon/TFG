@@ -205,54 +205,64 @@ class UserRepository:
     @staticmethod
     def update_user_details(user_id, data, request_user):
         try:
-            # Verificar si el usuario tiene permisos
-            if not isinstance(request_user, User):
-                request_user = User.objects.get(id=request_user.id)
-
+            # Verificar permisos
             if request_user.role not in ['administrador', 'entrenador', 'nutricionista']:
                 return False, "No tienes permisos para modificar usuarios"
-            
-            # Obtener el usuario a modificar
+
+            # Obtener usuario
             user = UserRepository.get_user_by_id(user_id)
             if not user:
                 return False, "Usuario no encontrado"
 
-            # Actualizar los datos del usuario
+            # Actualizar campos básicos
             user.first_name = data.get('first_name', user.first_name)
             user.last_name = data.get('last_name', user.last_name)
             user.role = data.get('role', user.role)
+
+            # Manejo de imagen de perfil
+            new_profile_photo = data.get('profilePhoto')  # Archivo subido
+            if new_profile_photo:
+                # Eliminar la imagen anterior de GCS si existe
+                if user.profile_photo:
+                    delete_file_from_gcs(user.profile_photo)
+
+                # Subir la nueva imagen a GCS
+                try:
+                    uploaded_url = upload_to_gcs(new_profile_photo, f"profile_photos/user_{user.id}_profile.jpg")
+                    user.profile_photo = uploaded_url
+                except Exception as e:
+                    print(f"Error al subir la nueva imagen: {e}")
+                    return False, "Error al subir la nueva imagen"
+
             user.save()
 
-            # Obtener o crear `UserDetails` y asignar valores predeterminados si es necesario
-            user_details, created = UserDetails.objects.get_or_create(
+            # Actualizar detalles del usuario
+            user_details, _ = UserDetails.objects.get_or_create(
                 user=user,
                 defaults={
-                    'height': 170,  # Valor predeterminado
+                    'height': 170,
                     'weight_goal': "maintain",
                     'physical_activity_level': "sedentary",
                     'weekly_training_days': 3,
-                    'weight': 70.0
+                    'weight': 70.0,
                 }
             )
-            
+
+            # Actualizar otros datos
             weight_goal_map = {
                 "Ganar masa muscular": "gain_muscle",
                 "Perder peso": "lose_weight",
-                "Mantenimiento": "maintain"
+                "Mantener peso": "maintain",
             }
-            # Asignar valores desde `data` o mantener los actuales
-            user_details.height = data.get('height') or user_details.height
+            user_details.height = data.get('height', user_details.height)
             user_details.weight_goal = weight_goal_map.get(data.get('weightGoal'), user_details.weight_goal)
             user_details.physical_activity_level = data.get('activityLevel', user_details.physical_activity_level)
             user_details.weekly_training_days = data.get('trainingFrequency', user_details.weekly_training_days)
-
-            # Guardar el peso actualizado
             new_weight = data.get('currentWeight', user_details.weight)
             user_details.weight = new_weight
-            print(f"Detalles del usuario antes de guardar: {user_details.__dict__}")  # Depuración
             user_details.save()
 
-            # Crear un nuevo registro de peso si el peso actual fue modificado
+            # Registrar el nuevo peso si cambió
             if new_weight:
                 WeightRecord.objects.create(user=user, weight=new_weight)
 
@@ -261,6 +271,7 @@ class UserRepository:
         except Exception as e:
             print(f"Error al actualizar el usuario: {e}")
             return False, "Error al actualizar el usuario."
+
 
 
     @staticmethod
@@ -499,7 +510,7 @@ class UserRepository:
                 "role": user.role,
                 "status": user.status,
                 "email": user.email,
-                "profile_photo": user.profile_photo.url if user.profile_photo else None,
+                "profile_photo": user.profile_photo if user.profile_photo else None,
             }
         except User.DoesNotExist:
             return None

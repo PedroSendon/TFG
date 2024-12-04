@@ -328,8 +328,14 @@ def update_user_as_admin(request, user_id):
     Modificar los datos de un usuario existente desde el modo administrador.
     """
     try:
-        # Llamar a la función del repositorio para actualizar el usuario
-        success, message = UserRepository.update_user_details(user_id, request.data, request.user)
+        # Extraer el archivo y otros datos del request
+        profile_photo = request.FILES.get('profilePhoto')
+        data = request.data.dict()  # Convertir a diccionario
+
+        if profile_photo:
+            data['profilePhoto'] = profile_photo
+
+        success, message = UserRepository.update_user_details(user_id, data, request.user)
 
         if success:
             return Response({"message": message}, status=status.HTTP_200_OK)
@@ -342,8 +348,6 @@ def update_user_as_admin(request, user_id):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 

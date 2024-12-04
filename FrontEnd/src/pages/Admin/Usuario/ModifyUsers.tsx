@@ -81,7 +81,7 @@ const ModifyUserPage: React.FC = () => {
                     trainingFrequency: data.training_frequency,
                     role: data.role,
                 });
-                setProfilePicture(data.profile_picture || 'https://via.placeholder.com/150'); // Establecer la imagen de perfil
+                setProfilePicture(data.profile_photo); // Establecer la imagen de perfil
             } else {
                 console.error("Fetch error: ", await response.text());
             }
@@ -104,39 +104,46 @@ const ModifyUserPage: React.FC = () => {
     const handleSave = async () => {
         try {
             const accessToken = localStorage.getItem('access_token');
-
+    
             if (!accessToken) {
                 console.error(t('no_token'));
                 return;
             }
-
+    
+            // Crear FormData para enviar la imagen y los demás datos
+            const formData = new FormData();
+            formData.append('first_name', profileData.firstName);
+            formData.append('last_name', profileData.lastName);
+            formData.append('currentWeight', String(profileData.currentWeight));
+            formData.append('weightGoal', profileData.weightGoal);
+            formData.append('activityLevel', profileData.activityLevel);
+            formData.append('trainingFrequency', String(profileData.trainingFrequency));
+            formData.append('role', profileData.role);
+    
+            // Adjuntar la imagen de perfil si se seleccionó una nueva
+            if (fileInputRef.current?.files?.[0]) {
+                formData.append('profilePhoto', fileInputRef.current.files[0]);
+            }
+    
             const response = await fetch(`http://127.0.0.1:8000/api/users/update/${userId}/`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`, // Si necesitas un token de autenticación
+                    'Authorization': `Bearer ${accessToken}`,
                 },
-                body: JSON.stringify({
-                    first_name: profileData.firstName,
-                    last_name: profileData.lastName,
-                    currentWeight: profileData.currentWeight,
-                    weightGoal: profileData.weightGoal,
-                    activityLevel: profileData.activityLevel,
-                    trainingFrequency: profileData.trainingFrequency,
-                    role: profileData.role,
-                }),
+                body: formData, // Enviar FormData
             });
-
+    
             if (response.ok) {
-                const data = await response.json();
-                history.push('/admin/users'); // Redirigir a la página de administración después de guardar
+                history.push('/admin/users'); // Redirigir tras éxito
             } else {
-                console.error(t('update_error'));
+                console.error(t('update_error'), await response.text());
             }
         } catch (error) {
             console.error(t('request_error'), error);
         }
     };
+
+    
     const handleCancel = () => {
         history.push('/admin/users');  // Cancelar y redirigir a la lista de ejercicios
     };
