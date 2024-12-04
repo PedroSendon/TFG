@@ -289,8 +289,8 @@ const AddExercises: React.FC = () => {
                             />
                         </Grid>
 
-                        <Grid item xs={12}>
-                            <Box display="flex" gap={2} sx={{ mt: 2 }}>
+                        <Grid item xs={12} >
+                            <Box display="flex" gap={2} sx={{ mt: 2, mb:5 }}>
                                 <Button
                                     fullWidth
                                     variant="outlined"

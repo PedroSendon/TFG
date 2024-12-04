@@ -161,41 +161,35 @@ class ExerciseRepository:
 
         
     @staticmethod
-    def delete_workout(user, workout_id):
+    def delete_exercise_by_id(exercise_id: int) -> bool:
         """
-        Eliminar un entrenamiento existente en el sistema, incluyendo su imagen asociada en Google Cloud Storage.
+        Elimina un ejercicio por su ID, incluyendo su imagen en Google Cloud Storage.
 
-        :param user: Usuario que realiza la solicitud.
-        :param workout_id: ID del entrenamiento a eliminar.
-        :return: True si el entrenamiento fue eliminado, False si no se encontró, o un mensaje de error.
+        :param exercise_id: ID del ejercicio a eliminar.
+        :return: True si el ejercicio fue eliminado, False si no se encontró.
         """
-        # Verificar el rol del usuario
-        check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
-        if "error" in check_result:
-            return {"error": check_result["error"], "status": check_result["status"]}
-
         try:
-            # Obtener el entrenamiento
-            workout = Workout.objects.get(id=workout_id)
+            # Obtener el ejercicio por su ID
+            exercise = Exercise.objects.get(id=exercise_id)
 
-            # Si tiene una imagen asociada, eliminarla usando el método `delete_file_from_gcs`
-            if workout.media:  # Si el modelo tiene un campo `media` asociado
-                delete_success = delete_file_from_gcs(workout.media)
+            # Si tiene una imagen asociada, eliminarla de Google Cloud Storage
+            if exercise.media:
+                delete_success = delete_file_from_gcs(exercise.media)
                 if not delete_success:
-                    print(f"Advertencia: No se pudo eliminar la imagen asociada del entrenamiento {workout_id}.")
+                    print(f"Advertencia: No se pudo eliminar la imagen asociada al ejercicio con ID {exercise_id}.")
 
-            # Eliminar las relaciones ManyToMany (si existen)
-            workout.exercises.clear()  # Limpiar relaciones con ejercicios
-
-            # Eliminar el registro del entrenamiento en la base de datos
-            workout.delete()
+            # Eliminar el registro del ejercicio en la base de datos
+            exercise.delete()
             return True
-        except Workout.DoesNotExist:
+
+        except Exercise.DoesNotExist:
             return False
         except Exception as e:
-             # Agregar un log o manejar el error adecuadamente
-            print(f"Error al eliminar el entrenamiento o la imagen: {e}")
-            return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+            # Agregar un log o manejar el error adecuadamente
+            print(f"Error al eliminar el ejercicio o la imagen: {e}")
+            return False
+
+
 
 
     @staticmethod

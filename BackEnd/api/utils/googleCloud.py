@@ -71,7 +71,7 @@ def generate_signed_url(bucket_name, blob_name, expiration=3600):
 
 def delete_file_from_gcs(file_url: str) -> bool:
     """
-    Eliminar un archivo de Google Cloud Storage dado su URL.
+    Eliminar un archivo de Google Cloud Storage dado su URL completa (puede ser una URL firmada).
 
     :param file_url: URL completa del archivo en Google Cloud Storage.
     :return: True si el archivo se eliminó correctamente, False en caso contrario.
@@ -81,17 +81,17 @@ def delete_file_from_gcs(file_url: str) -> bool:
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
 
-        # Extraer el nombre del archivo desde la URL
-        blob_name = file_url.split('/')[-1]
-        blob = bucket.blob(blob_name)
+        # Extraer el nombre del archivo completo (incluyendo el prefijo de la carpeta) desde la URL
+        blob_path = "/".join(file_url.split('/')[-2:]).split('?')[0]  # Considera "exercises/<filename>"
+        blob = bucket.blob(blob_path)
 
         # Verificar si el archivo existe antes de intentar eliminarlo
         if blob.exists():
             blob.delete()
-            print(f"Archivo {blob_name} eliminado correctamente de Google Cloud Storage.")
+            print(f"Archivo {blob_path} eliminado correctamente de Google Cloud Storage.")
             return True
         else:
-            print(f"El archivo {blob_name} no existe en el bucket {bucket_name}.")
+            print(f"El archivo {blob_path} no existe en el bucket {bucket_name}.")
             return False
     except Exception as e:
         print(f"Error al intentar eliminar el archivo de Google Cloud Storage: {e}")
