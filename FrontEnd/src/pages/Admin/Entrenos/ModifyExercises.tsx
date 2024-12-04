@@ -60,12 +60,16 @@ const ModifyExercises: React.FC = () => {
             return;
         }
     
-        const updatedExercise = {
-            id: exerciseId,  // Ahora enviamos el ID en el cuerpo
-            ...exerciseDetails,
-            muscle_groups: exerciseDetails.muscleGroups,
-            media,
-        };
+        const formDataToSend = new FormData();
+        formDataToSend.append('id', exerciseId);
+        formDataToSend.append('name', exerciseDetails.name);
+        formDataToSend.append('description', exerciseDetails.description);
+        formDataToSend.append('muscleGroups', JSON.stringify(exerciseDetails.muscleGroups));
+        formDataToSend.append('instructions', exerciseDetails.instructions);
+    
+        if (fileInputRef.current?.files?.[0]) {
+            formDataToSend.append('media', fileInputRef.current.files[0]); // Adjuntar nueva imagen si se selecciona
+        }
     
         try {
             const accessToken = localStorage.getItem('access_token');
@@ -78,27 +82,25 @@ const ModifyExercises: React.FC = () => {
             const response = await fetch('http://127.0.0.1:8000/api/exercises/update/', {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,  // Agrega el token JWT aquí
+                    Authorization: `Bearer ${accessToken}`,
                 },
-                body: JSON.stringify(updatedExercise),
+                body: formDataToSend, // Enviar como FormData
             });
     
             if (response.ok) {
-                const data = await response.json();
-                console.log('Datos del ejercicio guardados:', data);
-                setShowToast(true);
+                const responseData = await response.json();
+                console.log('Ejercicio modificado con éxito:', responseData);
                 history.push('/admin/workout');
             } else {
                 const errorData = await response.json();
                 console.error('Error al modificar el ejercicio:', errorData);
-                setShowToast(true);
             }
         } catch (error) {
             console.error('Error en la conexión:', error);
-            setShowToast(true);
         }
     };
+    
+    
     
 
 

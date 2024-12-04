@@ -109,50 +109,40 @@ class ExerciseRepository:
 
 
     @staticmethod
-    def update_exercise(exercise_id: int, user, data: dict):
+    def update_exercise(user, data, files):
         """
         Modificar un ejercicio existente.
         """
-        # Verificar permisos
         if user.role not in ['entrenador', 'administrador']:
             return {"error": "No tienes permisos para modificar ejercicios", "status": status.HTTP_403_FORBIDDEN}
 
-        # Validar datos con ExerciseUpdateSchema
         try:
-            schema = ExerciseUpdateSchema(**data)
-            validated_data = schema.dict(exclude_unset=True)
-        except ValidationError as e:
-            return {"error": "Datos no válidos", "details": e.errors(), "status": status.HTTP_400_BAD_REQUEST}
+            exercise = Exercise.objects.get(id=data['id'])
+            old_media_url = exercise.media  # Guardar URL de la imagen actual
 
-        # Intentar obtener y actualizar el ejercicio
-        try:
-            exercise = Exercise.objects.get(id=exercise_id)
-            old_media_url = exercise.media  # Guardar la URL anterior de la imagen
+            # Actualizar los campos
+            if 'name' in data:
+                exercise.name = data['name']
+            if 'description' in data:
+                exercise.description = data['description']
+            if 'muscleGroups' in data:
+                exercise.muscleGroups = ','.join(data.getlist('muscleGroups'))
+            if 'instructions' in data:
+                exercise.instructions = data['instructions']
 
-            # Actualizar los campos con los datos validados
-            if 'name' in validated_data:
-                exercise.name = validated_data['name']
-            if 'description' in validated_data:
-                exercise.description = validated_data['description']
-            if 'muscleGroups' in validated_data:
-                exercise.muscleGroups = ','.join(validated_data['muscleGroups'])
-            if 'instructions' in validated_data:
-                exercise.instructions = validated_data['instructions']
-            # Gestionar la actualización de la imagen
-            media_file = data.get('media')  # Obtener la nueva imagen si está en los datos
+            # Subir nueva imagen si se envió un archivo
+            media_file = files.get('media')
             if media_file:
                 try:
-                    # Subir la nueva imagen
                     new_media_url = upload_to_gcs(media_file, f"exercises/{data['name']}_media.jpg")
-                    exercise.media = new_media_url
-                    delete_file_from_gcs(old_media_url)
+                    exercise.media = new_media_url  # Actualizar URL de la imagen
+                    if old_media_url:
+                        delete_file_from_gcs(old_media_url)  # Eliminar la imagen anterior
                 except Exception as e:
                     return {"error": f"Error al subir la nueva imagen: {str(e)}", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
 
-
             exercise.save()
 
-            # Retornar datos del ejercicio actualizado con el estado 200
             return {
                 "data": {
                     "id": exercise.id,
@@ -160,14 +150,15 @@ class ExerciseRepository:
                     "description": exercise.description,
                     "muscleGroups": exercise.get_muscle_groups(),
                     "instructions": exercise.instructions,
-                    "media": exercise.media
+                    "media": exercise.media,
                 },
-                "status": status.HTTP_200_OK
+                "status": status.HTTP_200_OK,
             }
         except Exercise.DoesNotExist:
-            # Si no se encuentra el ejercicio, devolver 404
             return {"error": "Ejercicio no encontrado", "status": status.HTTP_404_NOT_FOUND}
-        
+        except Exception as e:
+            return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
         
     @staticmethod
     def delete_workout(user, workout_id):

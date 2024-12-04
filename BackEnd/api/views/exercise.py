@@ -146,17 +146,18 @@ def update_exercise(request):
     Modificar un ejercicio existente.
     """
     exercise_id = request.data.get('id')
-
     if not exercise_id:
         return Response({"error": "El parámetro 'id' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
 
-    result = ExerciseRepository.update_exercise(exercise_id, request.user, request.data)
+    # Llamar al repositorio para manejar la lógica de negocio
+    result = ExerciseRepository.update_exercise(request.user, request.data, request.FILES)
     
     if 'error' in result:
-        # Devuelve el código de estado proporcionado en el resultado
         return Response({"error": result['error'], "details": result.get("details")}, status=result.get('status', status.HTTP_400_BAD_REQUEST))
 
     return Response({
         "message": "Ejercicio modificado con éxito.",
         "data": result['data']
     }, status=result['status'])
+
+

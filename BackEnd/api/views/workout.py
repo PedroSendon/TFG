@@ -1,3 +1,4 @@
+import json
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -44,7 +45,6 @@ def get_workout_by_day(request, day):
         "workoutName": workout.name,
         "description": workout.description,
         "exercises": exercises,
-        "imageUrl": workout.media,
     }
     
     return Response(workout_data, status=status.HTTP_200_OK)
@@ -184,19 +184,18 @@ def update_workout(request, workout_id):
         workout_id=workout_id,
         name=request.data.get('name'),
         description=request.data.get('description'),
-        exercises=request.data.get('exercises'),
-        media=request.data.get('media', None)
+        exercises=json.loads(request.data.get('exercises', '[]')),
     )
 
     # Comprobar si el resultado contiene un error y devolver el código de estado adecuado
     if 'error' in result:
-        status_code = result.get('status', status.HTTP_400_BAD_REQUEST)  # Usar el estado especificado en `result`, si existe
-        return Response({"error": result["error"]}, status=status_code)
+        return Response({"error": result["error"]}, status=result.get("status", status.HTTP_400_BAD_REQUEST))
     
     return Response({
         "message": "Entrenamiento actualizado con éxito.",
         "data": result
     }, status=status.HTTP_200_OK)
+
 
 
     

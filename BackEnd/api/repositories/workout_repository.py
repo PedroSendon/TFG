@@ -33,7 +33,6 @@ class WorkoutRepository:
             "id": workout.id,
             "name": workout.name,
             "description": workout.description,
-            "media": workout.media,
             "duration": workout.duration,
         } for workout in workouts]
 
@@ -58,14 +57,12 @@ class WorkoutRepository:
                 "id": workout.id,
                 "name": workout.name,
                 "description": workout.description,
-                "media": workout.media
             } for workout in workouts]
 
             training_plans_data.append({
                 "plan_id": plan.id,
                 "plan_name": plan.name,
                 "plan_description": plan.description,
-                "plan_media": plan.media,
                 "workouts": workouts_data
             })
 
@@ -201,7 +198,6 @@ class WorkoutRepository:
                 "id": workout.id,
                 "name": workout.name,
                 "description": workout.description,
-                "media": workout.media,
                 "exercises": exercises_data
             }
 
@@ -251,19 +247,9 @@ class WorkoutRepository:
         if not exercises:
             return {"error": "El parámetro 'exercises' debe ser una lista de objetos.", "status": status.HTTP_400_BAD_REQUEST}
 
-        media_file = data.get('media')
-        media_url = None
-
-        if media_file:
-            try:
-                media_url = upload_to_gcs(media_file, f"workouts/{data['name']}_media.jpg")
-            except Exception as e:
-                return {"error": f"Error al subir la imagen: {str(e)}", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
-
         workout = Workout.objects.create(
             name=data['name'],
             description=data['description'],
-            media=media_url,
             duration=int(data['duration'])
         )
 
@@ -285,51 +271,35 @@ class WorkoutRepository:
             "name": workout.name,
             "description": workout.description,
             "exercises": exercises,
-            "media": workout.media,
             "duration": workout.duration,
         }}
 
 
     @staticmethod
-    def update_workout(user, workout_id, name, description, exercises, media=None):
+    def update_workout(user, workout_id, name, description, exercises):
         """
         Actualizar un entrenamiento existente en el sistema.
         """
         try:
+            # Verificar permisos
             check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
             if "error" in check_result:
-                # Cambiar el código de estado a 403 si el usuario no tiene permisos
                 return {"error": "No tienes permisos para realizar esta acción", "status": status.HTTP_403_FORBIDDEN}
 
-            # Intentar obtener el entrenamiento; si no existe, devolver error 404
+            # Intentar obtener el entrenamiento
             try:
                 workout = Workout.objects.get(id=workout_id)
             except Workout.DoesNotExist:
                 return {"error": "Entrenamiento no encontrado", "status": status.HTTP_404_NOT_FOUND}
 
-            # Si se proporciona un nuevo archivo de media
-            if media:
-                # Eliminar la imagen anterior de Google Cloud Storage si existe
-                if workout.media:
-                    delete_success = delete_file_from_gcs(workout.media)
-                    if not delete_success:
-                        print(f"Advertencia: No se pudo eliminar la imagen anterior del workout {workout_id}.")
-
-                # Subir la nueva imagen a Google Cloud Storage
-                try:
-                    new_media_url = upload_to_gcs(media, f"workouts/{name}_media.jpg")
-                    workout.media = new_media_url
-                except Exception as e:
-                    return {"error": f"Error al subir la nueva imagen: {str(e)}", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
-
-
-            # Actualizar detalles del entrenamiento
+        
+            # Actualizar los detalles del entrenamiento
             workout.name = name
             workout.description = description
             workout.save()
 
-            # Eliminar ejercicios anteriores y añadir los nuevos
-            WorkoutExercise.objects.filter(workout=workout).delete()
+            # Actualizar la lista de ejercicios relacionados
+            WorkoutExercise.objects.filter(workout=workout).delete()  # Eliminar relaciones anteriores
             exercises_data = []
             for exercise in exercises:
                 try:
@@ -355,12 +325,12 @@ class WorkoutRepository:
                 "name": workout.name,
                 "description": workout.description,
                 "exercises": exercises_data,
-                "media": workout.media
+                "duration": workout.duration
             }
 
-        except Workout.DoesNotExist:
-            return {"error": "Entrenamiento no encontrado", "status": status.HTTP_404_NOT_FOUND}
-            
+        except Exception as e:
+            return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
     @staticmethod
     def delete_workout(user, workout_id):
         """
@@ -378,13 +348,7 @@ class WorkoutRepository:
         try:
             # Obtener el workout
             workout = Workout.objects.get(id=workout_id)
-            
-            # Si tiene una imagen o multimedia asociada, usar `delete_file_from_gcs` para eliminarla
-            if workout.media:
-                delete_success = delete_file_from_gcs(workout.media)
-                if not delete_success:
-                    print(f"Advertencia: No se pudo eliminar el archivo multimedia asociado al entrenamiento {workout_id}.")
-
+             
             # Si el modelo tiene relaciones a través de WorkoutExercise, eliminarlas
             workout.exercises.clear()  # Elimina la relación ManyToMany antes de eliminar el workout
 

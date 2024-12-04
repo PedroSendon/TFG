@@ -18,7 +18,6 @@ class WorkoutSchema(BaseModel):
     name: str
     description: str
     exercises: List[WorkoutExerciseSchema]  # Cambiado para incluir la relación con los ejercicios
-    media: Optional[str] = None  # URL para media (opcional)
     
     # Nuevos campos añadidos
     duration: int

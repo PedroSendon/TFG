@@ -30,7 +30,6 @@ const ModifyWorkoutPage: React.FC = () => {
     duration: 30,
   });
 
-  const [media, setMedia] = useState<string | null>(data?.media || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showToast, setShowToast] = useState(false);
   const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
@@ -57,7 +56,6 @@ const ModifyWorkoutPage: React.FC = () => {
           exercises: data.exercises,
           duration: data.duration || 30,
         });
-        setMedia(data.media || null);
       } catch (error) {
         console.error('Error fetching workout details:', error);
       }
@@ -87,67 +85,45 @@ const ModifyWorkoutPage: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      // Mostrar el toast mientras se procesa la solicitud
-      setShowToast(true);
-  
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        console.error('No token found');
-        return;
-      }
-  
-      const response = await fetch(`http://127.0.0.1:8000/api/workouts/${data.id}/update/`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          name: workoutDetails.name,
-          description: workoutDetails.description,
-          media: media,  // Enviar media si está disponible
-          exercises: workoutDetails.exercises.map(exercise => ({
+        const formDataToSend = new FormData();
+        formDataToSend.append('name', workoutDetails.name);
+        formDataToSend.append('description', workoutDetails.description);
+        formDataToSend.append('exercises', JSON.stringify(workoutDetails.exercises.map(exercise => ({
             name: exercise.name,
             series: exercise.sets,
             reps: exercise.reps,
             rest: exercise.rest,
-          })),
-        }),
-      });
-  
-      const result = await response.json();
-  
-      if (response.ok) {
-        // Mostrar mensaje de éxito y redirigir
-        console.log('Entrenamiento actualizado con éxito:', result);
-        history.push('/admin/workout');
-      } else {
-        // Manejo de errores
-        console.error('Error al actualizar el entrenamiento:', result.error);
-        alert(`Error: ${result.error}`);
-      }
+        }))));
+
+
+        const response = await fetch(`http://127.0.0.1:8000/api/workouts/${workoutId}/update/`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            },
+            body: formDataToSend,
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('Entrenamiento actualizado con éxito:', result);
+            history.push('/admin/workout');
+        } else {
+            const errorData = await response.json();
+            console.error('Error al actualizar el entrenamiento:', errorData);
+            alert(`Error: ${errorData.error}`);
+        }
     } catch (error) {
-      console.error('Error en la solicitud de actualización:', error);
-    } finally {
-      setShowToast(false);  // Ocultar el toast después de completar la solicitud
+        console.error('Error al conectar con el servidor:', error);
     }
-  };
+};
+
   
 
   const handleCancel = () => {
     history.push('/admin/workout');
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMedia(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleExerciseChange = (index: number, field: string, value: string) => {
     const updatedExercises = [...workoutDetails.exercises];
@@ -175,29 +151,10 @@ const ModifyWorkoutPage: React.FC = () => {
 
       <Header title={t('modify_workout_title')} />
 
-      {/* Image Section */}
-      <Box textAlign="center" mb={3} sx={{ paddingTop: '16%' }}>
-        <Avatar
-          src={media || undefined}
-          alt="Preview"
-          sx={{
-            width: 150, height: 150, margin: '0 auto', borderRadius: '10px', border: '2px solid #000',
-          }}
-        />
-        <Button
-          variant="outlined"
-          startIcon={<CameraAlt />}
-          onClick={() => fileInputRef.current?.click()}
-          sx={{ color: '#000', borderColor: '#000', mt: 1 }}
-        >
-          {t('change_image_video')}
-        </Button>
-        <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-      </Box>
 
       {/* Form Section */}
       <form>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ paddingTop: '16%' }}>
           <Grid item xs={12}>
             <TextField
               fullWidth

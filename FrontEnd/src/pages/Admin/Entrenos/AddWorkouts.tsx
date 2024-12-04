@@ -26,10 +26,7 @@ import { CameraAlt, Close, Delete } from '@mui/icons-material';
 
 const AddWorkouts: React.FC = () => {
     const history = useHistory();
-    const [media, setMedia] = useState<File | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useContext(LanguageContext); // Usar el contexto de idioma
-    const [mediaPreview, setMediaPreview] = useState<string | null>(null); // Nueva variable para la vista previa
 
 
     const [formData, setFormData] = useState({
@@ -74,9 +71,7 @@ const AddWorkouts: React.FC = () => {
                 formData2.append(`exercises[${index}][rest]`, String(exercise.rest));
             });
     
-            if (media) {
-                formData2.append('media', media); // Adjuntar el archivo de media
-            }
+      
             console.log('FormData:', formData2);
     
             const response = await fetch('http://127.0.0.1:8000/api/workouts/create/', {
@@ -120,40 +115,6 @@ const AddWorkouts: React.FC = () => {
         exercises: [],
     });
 
-    const handleExerciseChange = (index: number, field: string, value: string | number) => {
-        const updatedExercises = [...workoutDetails.exercises];
-        updatedExercises[index] = { ...updatedExercises[index], [field]: value };
-        setWorkoutDetails({ ...workoutDetails, exercises: updatedExercises });
-    };
-
-    const handleMediaUpload = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            setMedia(file); // Guarda el archivo directamente
-            setMediaPreview(URL.createObjectURL(file)); // Genera una URL temporal para la vista previa
-        }
-    };
-    
-
-    const handlePhotoOption = (option: string) => {
-        if (option === 'upload') {
-            handleMediaUpload();
-        } else if (option === 'delete') {
-            setMedia(null); // Eliminar imagen
-        }
-    };
-
-    const handleSelectChange = (event: SelectChangeEvent<string>) => {
-        const { name, value } = event.target;
-        setFormData({
-            ...formData,
-            [name as string]: value,
-        });
-    };
 
     const handleDeleteExercise = (index: number) => {
         const updatedExercises = workoutDetails.exercises.filter((_, i) => i !== index);
@@ -192,13 +153,7 @@ const AddWorkouts: React.FC = () => {
         fetchExercises();
     }, []);
 
-    useEffect(() => {
-        return () => {
-            if (mediaPreview) {
-                URL.revokeObjectURL(mediaPreview); // Libera la memoria de la URL temporal
-            }
-        };
-    }, [mediaPreview]);
+
     
 
     return (
@@ -268,35 +223,6 @@ const AddWorkouts: React.FC = () => {
                                     },
                                     '& .MuiInputLabel-root.Mui-focused': { color: '#555555' },
                                 }}
-                            />
-                        </Grid>
-
-                        <Grid item xs={12}>
-                            <Button
-                                onClick={() => fileInputRef.current?.click()}
-                                variant="outlined"
-                                startIcon={<CameraAlt />}
-                                fullWidth
-                                sx={{
-                                    color: '#777', borderColor: '#777', fontWeight: 'bold', width: '100%', borderRadius: '8px', padding: '8px',
-                                }}
-                            >
-                                {t('upload_image')}
-                            </Button>
-                            {media && (
-                                <Box mt={2} textAlign="center">
-                                    {mediaPreview && <img src={mediaPreview} alt="Preview" style={{ width: '100%', borderRadius: '8px' }} />}
-                                    <IconButton onClick={() => setMedia(null)} aria-label="delete" color="error">
-                                        <Close />
-                                    </IconButton>
-                                </Box>
-                            )}
-                            <input
-                                type="file"
-                                accept="image/*"
-                                ref={fileInputRef}
-                                style={{ display: 'none' }}
-                                onChange={handleFileChange}
                             />
                         </Grid>
 

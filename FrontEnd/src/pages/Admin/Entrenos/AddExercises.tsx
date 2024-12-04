@@ -270,7 +270,7 @@ const AddExercises: React.FC = () => {
                                     '&:hover': { backgroundColor: '#f5f5f5' },
                                 }}
                             >
-                                {t('upload_image_video')}
+                                {t('upload_image')}
                             </Button>
                             {media && (
                                 <Box mt={2} textAlign="center">
