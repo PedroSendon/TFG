@@ -816,8 +816,15 @@ class UserDetailsRepository:
             user.last_name = profile_data.get('lastName', user.last_name)
             profile_photo = profile_data.get('profilePhoto')
             
+            
             if profile_photo:
-                # Subir manualmente la imagen a GCS
+                # Si ya tiene una foto de perfil, eliminar la anterior
+                if user.profile_photo:
+                    delete_success = delete_file_from_gcs(user.profile_photo)
+                    if not delete_success:
+                        print(f"Advertencia: No se pudo eliminar la foto de perfil anterior del usuario con ID {user_id}.")
+
+                # Subir manualmente la nueva imagen a GCS
                 uploaded_url = upload_to_gcs(profile_photo, f"user_{user.id}_profile.jpg")
                 user.profile_photo = uploaded_url  # Guardar solo la URL
 
