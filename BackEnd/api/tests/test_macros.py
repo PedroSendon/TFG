@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from api.models.user import User
 from api.models.macros import MealPlan, UserNutritionPlan
+from unittest.mock import patch
 
 class GetAllMealPlansTests(APITestCase):
 
@@ -685,10 +686,6 @@ class GetMealPlansByCategoryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance.")
 
-
-
-
-
     def test_get_mealplans_by_category_not_found(self):
         """
         Test para verificar el caso cuando no hay planes de comidas en la categoría solicitada.
@@ -715,3 +712,138 @@ class GetMealPlansByCategoryTests(APITestCase):
         # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn("Authentication credentials were not provided", response.data["detail"])
+
+
+class AddMealPlanTests(APITestCase):
+    def setUp(self):
+        # Crear un usuario con rol de nutricionista
+        self.nutritionist_user = User.objects.create(
+            email="nutritionist@example.com",
+            password="password123",
+            role="nutricionista"
+        )
+
+        # Crear un usuario sin permisos
+        self.regular_user = User.objects.create(
+            email="regular@example.com",
+            password="password123",
+            role="cliente",
+            birth_date='1995-09-15',
+        )
+
+        # URL del endpoint
+        self.url = reverse('create_meal_plan')
+
+    def test_create_meal_plan_success(self):
+        """
+        Verificar que un nutricionista puede crear un plan de comidas exitosamente.
+        """
+        self.client.force_authenticate(user=self.nutritionist_user)
+        payload = {
+            "name": "High Protein Plan",
+            "kcal": 2000,
+            "proteins": 150.5,
+            "carbs": 200.3,
+            "fats": 60.0,
+            "dietType": "muscleGain",
+            "mealDistribution": [30, 30, 20, 20],  # Porcentajes que suman 100
+            "description": "Plan para ganar masa muscular."
+        }
+        response = self.client.post(self.url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn("message", response.json())
+        self.assertIn("data", response.json())
+        self.assertEqual(response.json()["message"], "Plan de comidas añadido exitosamente")
+
+        # Verificar que el plan se creó en la base de datos
+        self.assertTrue(MealPlan.objects.filter(name="High Protein Plan").exists())
+
+    def test_create_meal_plan_missing_fields(self):
+        """
+        Verificar que el endpoint devuelve un error si faltan campos obligatorios.
+        """
+        self.client.force_authenticate(user=self.nutritionist_user)
+        payload = {
+            "kcal": 2000,
+            "proteins": 150.5
+        }  # Faltan 'carbs', 'fats' y 'dietType'
+        response = self.client.post(self.url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.json())
+        self.assertTrue("Faltan los campos obligatorios" in response.json()["error"])
+
+    def test_create_meal_plan_invalid_diet_type(self):
+        """
+        Verificar que el endpoint devuelve un error si el dietType no es válido.
+        """
+        self.client.force_authenticate(user=self.nutritionist_user)
+        payload = {
+            "kcal": 2000,
+            "proteins": 150.5,
+            "carbs": 200.3,
+            "fats": 60.0,
+            "dietType": "invalidType",  # Tipo de dieta inválido
+            "mealDistribution": [30, 30, 20, 20]
+        }
+        response = self.client.post(self.url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.json())
+        self.assertEqual(response.json()["error"], "Categoría inválida. Debe ser weightLoss, muscleGain o maintenance.")
+
+    def test_create_meal_plan_invalid_meal_distribution(self):
+        """
+        Verificar que el endpoint devuelve un error si mealDistribution no es válida.
+        """
+        self.client.force_authenticate(user=self.nutritionist_user)
+        payload = {
+            "kcal": 2000,
+            "proteins": 150.5,
+            "carbs": 200.3,
+            "fats": 60.0,
+            "dietType": "muscleGain",
+            "mealDistribution": [30, 30, 30]  # No suma 100
+        }
+        response = self.client.post(self.url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.json())
+        self.assertEqual(response.json()["error"], "meal_distribution debe ser una lista de porcentajes que sumen 100.")
+
+    def test_create_meal_plan_no_permissions(self):
+        """
+        Verificar que un usuario sin permisos no puede crear un plan de comidas.
+        """
+        self.client.force_authenticate(user=self.regular_user)
+        payload = {
+            "name": "Unauthorized Plan",
+            "kcal": 2000,
+            "proteins": 150.5,
+            "carbs": 200.3,
+            "fats": 60.0,
+            "dietType": "maintenance",
+            "mealDistribution": [30, 30, 20, 20]
+        }
+        response = self.client.post(self.url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("error", response.json())
+        self.assertEqual(response.json()["error"], "No tienes permisos para realizar esta acción.")
+
+    @patch('api.repositories.macros_repository.MealPlan.objects.create')
+    def test_create_meal_plan_server_error(self, mock_create):
+        """
+        Verificar que el endpoint devuelve un error si ocurre un problema en el servidor.
+        """
+        self.client.force_authenticate(user=self.nutritionist_user)
+        mock_create.side_effect = Exception("Simulated server error")
+        payload = {
+            "name": "Server Error Plan",
+            "kcal": 2000,
+            "proteins": 150.5,
+            "carbs": 200.3,
+            "fats": 60.0,
+            "dietType": "weightLoss",
+            "mealDistribution": [30, 30, 20, 20]
+        }
+        response = self.client.post(self.url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertIn("error", response.json())
+        self.assertTrue("Error al agregar el plan de comidas" in response.json()["error"])

@@ -41,7 +41,7 @@
   "gain": "guanyar",
   "lose": "perdre",
   "training_days": "Quants dies pots entrenar a la setmana?",
-  "day_s": "{count} dia(es)",
+  "day_s": "dia(es)",
   "daily_training_time": "Quant temps pots entrenar al dia?",
   "less_than_1_hour": "Menys d'1 hora",
   "1_2_hours": "1-2 hores",

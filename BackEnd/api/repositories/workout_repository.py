@@ -208,23 +208,29 @@ class WorkoutRepository:
     def parse_exercises(data):
         """
         Extraer y formatear los ejercicios desde los datos de la solicitud.
-        :param data: Datos del request (dict-like).
-        :return: Lista de ejercicios formateados.
+        :param data: Datos del request (dict-like o list-like).
+        :return: Lista de ejercicios formateados o None si hay un error.
         """
-        exercises = []
-        index = 0
-        while True:
-            exercise_name = data.get(f'exercises[{index}][name]')
-            if not exercise_name:
-                break  # Sal del bucle si no hay más ejercicios
-            exercises.append({
-                'name': exercise_name,
-                'sets': int(data.get(f'exercises[{index}][sets]', 0)),
-                'reps': int(data.get(f'exercises[{index}][reps]', 0)),
-                'rest': int(data.get(f'exercises[{index}][rest]', 0)),
-            })
-            index += 1
-        return exercises
+        exercises = data.get('exercises', [])
+        if not isinstance(exercises, list):
+            return None  # Error si 'exercises' no es una lista
+
+        parsed_exercises = []
+        for exercise in exercises:
+            if not all(k in exercise for k in ['name', 'sets', 'reps', 'rest']):
+                return None  # Error si faltan campos obligatorios en algún ejercicio
+
+            try:
+                parsed_exercises.append({
+                    'name': exercise['name'],
+                    'sets': int(exercise['sets']),
+                    'reps': int(exercise['reps']),
+                    'rest': int(exercise['rest']),
+                })
+            except ValueError:
+                return None  # Error si algún campo no tiene el formato adecuado
+        return parsed_exercises
+
             
     @staticmethod
     def create_workout(user, data):
@@ -253,6 +259,7 @@ class WorkoutRepository:
             duration=int(data['duration'])
         )
 
+        nonexistent_exercises = []
         for exercise in exercises:
             try:
                 existing_exercise = Exercise.objects.get(name=exercise['name'])
@@ -264,7 +271,14 @@ class WorkoutRepository:
                     rest=exercise['rest']
                 )
             except Exercise.DoesNotExist:
-                pass  # Manejar ejercicios no encontrados, si es necesario
+                nonexistent_exercises.append(exercise['name'])
+
+        if nonexistent_exercises:
+            return {
+                "error": f"Los siguientes ejercicios no existen: {', '.join(nonexistent_exercises)}",
+                "status": status.HTTP_400_BAD_REQUEST
+            }
+
 
         return {"data": {
             "id": workout.id,
@@ -292,11 +306,14 @@ class WorkoutRepository:
             except Workout.DoesNotExist:
                 return {"error": "Entrenamiento no encontrado", "status": status.HTTP_404_NOT_FOUND}
 
-        
             # Actualizar los detalles del entrenamiento
             workout.name = name
             workout.description = description
             workout.save()
+
+            # Validar ejercicios
+            if not isinstance(exercises, list):
+                return {"error": "El campo 'exercises' debe ser una lista válida.", "status": status.HTTP_400_BAD_REQUEST}
 
             # Actualizar la lista de ejercicios relacionados
             WorkoutExercise.objects.filter(workout=workout).delete()  # Eliminar relaciones anteriores

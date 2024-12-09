@@ -6,7 +6,6 @@ from BackEnd.settings import MEDIA_ROOT, MEDIA_URL
 from .views import user
 from .views import macros
 from .views import workout
-from .views import statistics
 from .views import exercise
 from .views import trainingplan
 from django.urls import re_path
@@ -17,6 +16,7 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/photo/', user.upload_profile_photo, name='upload-profile-photo'),
+    
 
     # Usuarios
     path('register/', user.register, name='register'),
@@ -93,22 +93,14 @@ urlpatterns = [
     # Macros
     path('mealplans/all/', macros.get_all_mealplans, name='get-all-mealplans'),  # Primero la ruta más específica
     path('mealplans/<str:category>/<int:id>/', macros.get_mealplan, name='get-mealplan'),
+    path('mealplans/create/', macros.add_mealplan, name='create_meal_plan'),
     path('mealplans/<int:id>/', macros.get_mealplan_by_id, name='get-mealplan'),
     path('mealplans/<str:category>/<int:id>/update/', macros.update_mealplan, name='update-mealplan'),
     path('mealplans/<str:category>/<int:id>/delete/', macros.delete_mealplan, name='delete-mealplan'),
     path('mealplans/', macros.get_user_mealplan, name='get-mealplans'),
     re_path(r'^mealplans/(?P<category>.+)/$', macros.get_mealplans_by_category, name='get-mealplans-by-category'),
 
-    path('mealplans/create/', macros.add_mealplan, name='create_meal_plan'),
     path('diet-categories/', macros.list_diet_categories, name='get-diet-categories'),
-    path('mealplans/prueba/', macros.prueba, name='preuba'),
-
-    # Endpoints para ExerciseLog
-    path('exercise-log/', statistics.create_exercise_log, name='create-exercise-log'),
-    path('exercise-log/user/<int:user_id>/', statistics.get_exercise_logs_by_user, name='get-exercise-logs-by-user'),
-    path('exercise-log/<int:log_id>/', statistics.update_exercise_log, name='update-exercise-log'),
-    path('exercise-log/<int:log_id>/delete/', statistics.delete_exercise_log, name='delete-exercise-log'),
-
     
 
     

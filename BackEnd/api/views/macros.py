@@ -34,37 +34,6 @@ def get_all_mealplans(request):
         return Response({"error": f"Error al obtener los planes de comida: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
-def get_macronutrient_by_id(request):
-    """
-    Obtener los detalles de una recomendación de macronutrientes por ID.
-    """
-    recommendation_id = request.query_params.get('id')
-
-    if not recommendation_id:
-        return Response({"error": "El parámetro 'id' es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        recommendation_id = int(recommendation_id)
-    except ValueError:
-        return Response({"error": "El parámetro 'id' debe ser un número."}, status=status.HTTP_400_BAD_REQUEST)
-
-    recommendation = MacrosRepository.get_mealplan_by_id(recommendation_id)
-
-    if recommendation:
-        return Response(recommendation, status=status.HTTP_200_OK)
-    else:
-        return Response({"error": "Recomendación no encontrada"}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def prueba(request):
-    return Response({"message": "Hola mundo"}, status=status.HTTP_200_OK)
-
-
-
 @api_view(['POST'])
 def add_mealplan(request):
     # Llamar al repositorio para crear el MealPlan

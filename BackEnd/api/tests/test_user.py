@@ -9,10 +9,8 @@ from api.models.trainingplan import TrainingPlan
 from api.models.workout import UserWorkout
 from api.models.user import DietPreferences, User, UserDetails, WeightRecord
 from django.contrib.auth.hashers import make_password, check_password
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.http import JsonResponse
-from django.conf import settings
-from api.utils.googleCloud import get_signed_url
+from unittest.mock import patch
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 class RegisterTests(APITestCase):
 
@@ -176,7 +174,7 @@ class LoginTests(APITestCase):
         # Verificar si devuelve el estado 400 en lugar de 401
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("error", response.data)
-'''
+
 class CreateUserDetailsTests(APITestCase):
 
     def setUp(self):
@@ -193,7 +191,7 @@ class CreateUserDetailsTests(APITestCase):
 
         # Asegura datos de prueba válidos en `self.valid_data` para cumplir con `UserDetailsSchema` y `DietPreferencesSchema`
         self.valid_data = {
-            "height": 180,  # Cambia 'ciento ochenta' por 180
+            "height": 180, 
             "weight": 75.5,
             "weight_goal": "Ganar masa muscular",
             "weekly_training_days": 4,
@@ -202,7 +200,6 @@ class CreateUserDetailsTests(APITestCase):
             "available_equipment": "Pesas Libres",
             "diet_type": "Balanceado",
             "meals_per_day": 3,
-            "macronutrient_intake": {"carbs": 50, "protein": 30, "fats": 20}
         }
 
 
@@ -212,7 +209,7 @@ class CreateUserDetailsTests(APITestCase):
     def test_create_user_details_success(self):
         self.authenticate_user()
         response = self.client.post(self.url, data=self.valid_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["message"], "Detalles del usuario guardados correctamente.")
         self.assertTrue(UserDetails.objects.filter(user=self.user).exists())
         self.assertTrue(DietPreferences.objects.filter(user=self.user).exists())
@@ -273,21 +270,13 @@ class CreateUserDetailsTests(APITestCase):
         )
 
         response = self.client.post(self.url, data=self.valid_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Verificar que los detalles han sido actualizados
         user_details = UserDetails.objects.get(user=self.user)
         self.assertEqual(user_details.height, 180)
-        self.assertEqual(user_details.weight_goal, "Ganar masa muscular")
+        self.assertEqual(user_details.weight_goal, "gain_muscle")
 
-    def test_create_user_details_invalid_macronutrient_intake(self):
-        self.authenticate_user()
-        invalid_data = self.valid_data.copy()
-        invalid_data["macronutrient_intake"] = {"carbs": 150, "protein": 30, "fats": 20}  # Excede 100%
-        response = self.client.post(self.url, data=invalid_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("error", response.data)
-'''
 
 class GetUserByEmailTests(APITestCase):
 
@@ -361,6 +350,7 @@ class GetAllUsersTests(APITestCase):
             role="cliente"
         )
         self.url = reverse('get-all-users')
+        
 
     def test_get_all_users_as_admin(self):
         """
@@ -390,14 +380,12 @@ class GetAllUsersTests(APITestCase):
 class UpdateUserAsAdminTests(APITestCase):
 
     def setUp(self):
-        # Crear un usuario administrador y un usuario regular para la prueba
+        # Crear usuarios para las pruebas
         self.admin_user = User.objects.create(
             first_name="Admin",
             last_name="User",
             email="admin@example.com",
             password=make_password("password123"),
-            birth_date="1990-01-01",
-            gender="M",
             role="administrador"
         )
         self.regular_user = User.objects.create(
@@ -405,69 +393,94 @@ class UpdateUserAsAdminTests(APITestCase):
             last_name="User",
             email="regular@example.com",
             password=make_password("password123"),
-            birth_date="1995-01-01",
-            gender="M",
             role="cliente"
         )
+        # Crear detalles del usuario con valores válidos
+        UserDetails.objects.create(
+            user=self.regular_user,
+            height=175,
+            weight=70.5,  # Valor no nulo requerido
+            weight_goal="maintain",
+            weekly_training_days=3,
+            daily_training_time="1-2 horas",
+            physical_activity_level="moderado",
+            available_equipment="sin_equipamiento"
+        )
+
+        # URL del endpoint con el ID del usuario regular
         self.url = reverse('update-user', kwargs={'user_id': self.regular_user.id})
 
-    def test_update_user_as_admin_success(self):
-        """
-        Prueba para verificar que un administrador puede actualizar los datos de un usuario.
-        """
+        # Mock para evitar subidas reales de imágenes
+        self.gcs_patcher = patch('api.utils.googleCloud.upload_to_gcs', return_value='https://fake-url.com/media.jpg')
+        self.mock_upload_to_gcs = self.gcs_patcher.start()
+
+
+    def tearDown(self):
+        # Detener el mock después de los tests
+        self.gcs_patcher.stop()
+
+    def test_admin_can_update_user_details(self):
+        """Verificar que un administrador puede actualizar los datos de un usuario"""
         self.client.force_authenticate(user=self.admin_user)
-        data = {
+        payload = {
             "first_name": "Updated",
             "last_name": "User",
-            "role": "cliente",
             "weightGoal": "Ganar masa muscular",
-            "activityLevel": "Moderada",
-            "trainingFrequency": 3,
-            "currentWeight": 70.5,
-            "height": 180 
+            "currentWeight": 80.5
         }
-        response = self.client.put(self.url, data, format='json')
+        response = self.client.put(self.url, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["message"], "Usuario y detalles actualizados exitosamente.")
+        self.assertIn("Usuario y detalles actualizados exitosamente.", response.data["message"])
+
+        # Verificar cambios en la base de datos
+        updated_user = User.objects.get(id=self.regular_user.id)
+        self.assertEqual(updated_user.first_name, "Updated")
+        self.assertEqual(updated_user.details.weight, 80.5)
+        self.assertEqual(updated_user.details.weight_goal, "gain_muscle")
 
 
-    def test_update_user_no_permission(self):
-        """
-        Prueba para verificar que un usuario sin permisos no puede actualizar otros usuarios.
-        """
+    def test_non_admin_cannot_update_user(self):
+        """Verificar que un usuario sin permisos no puede actualizar los datos de otro usuario"""
         self.client.force_authenticate(user=self.regular_user)
-        data = {
-            "first_name": "Unauthorized",
-            "last_name": "Update"
+        payload = {
+            "first_name": "Hacker",
+            "last_name": "User"
         }
-        response = self.client.put(self.url, data, format='json')
+        response = self.client.put(self.url, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response.data["error"], "No tienes permisos para modificar usuarios")
+        self.assertIn("No tienes permisos para modificar usuarios", response.data["error"])
 
     def test_update_nonexistent_user(self):
-        """
-        Prueba para verificar el comportamiento al intentar actualizar un usuario que no existe.
-        """
+        """Verificar que intentar actualizar un usuario inexistente retorna un error 404"""
         self.client.force_authenticate(user=self.admin_user)
-        url = reverse('update-user', kwargs={'user_id': 9999})
-        data = {
+        non_existent_url = reverse('update-user', kwargs={'user_id': 9999})
+        payload = {
             "first_name": "Nonexistent",
             "last_name": "User"
         }
-        response = self.client.put(url, data, format='json')
+        response = self.client.put(non_existent_url, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.data["error"], "Usuario no encontrado")
+        self.assertIn("Usuario no encontrado", response.data["error"])
 
-    def test_update_user_unauthenticated(self):
-        """
-        Prueba para verificar que el acceso no autenticado está prohibido.
-        """
-        data = {
-            "first_name": "Unauthorized",
-            "last_name": "Update"
+    def test_unauthenticated_user_cannot_update(self):
+        """Verificar que un usuario no autenticado no puede actualizar los datos de un usuario"""
+        payload = {
+            "first_name": "Anonymous",
+            "last_name": "User"
         }
-        response = self.client.put(self.url, data, format='json')
+        response = self.client.put(self.url, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_invalid_data_returns_error(self):
+        """Verificar que datos inválidos generan un error de validación"""
+        self.client.force_authenticate(user=self.admin_user)
+        payload = {
+            "weightGoal": "Invalid Goal"  # Valor inválido
+        }
+        response = self.client.put(self.url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("El objetivo de peso proporcionado no es válido", response.data["error"])
+
 
 class DeleteUserTests(APITestCase):
 
@@ -499,11 +512,17 @@ class DeleteUserTests(APITestCase):
         Prueba para verificar que un administrador puede eliminar un usuario exitosamente.
         """
         self.client.force_authenticate(user=self.admin_user)
+        
+        # Confirmar que el usuario existe antes de la eliminación
+        self.assertTrue(User.objects.filter(id=self.regular_user.id).exists())
+        
         response = self.client.delete(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, msg=f"Error: {response.data}")
         self.assertEqual(response.data["message"], "Usuario eliminado exitosamente.")
+        
         # Verificar que el usuario ha sido eliminado
         self.assertFalse(User.objects.filter(id=self.regular_user.id).exists())
+
 
     def test_delete_user_no_permission(self):
         """
@@ -1805,5 +1824,3 @@ class ChangePasswordTests(APITestCase):
         }
         response = self.client.put(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-

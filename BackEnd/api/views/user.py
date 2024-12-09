@@ -324,13 +324,9 @@ def get_user_details(request, user_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_user_as_admin(request, user_id):
-    """
-    Modificar los datos de un usuario existente desde el modo administrador.
-    """
     try:
-        # Extraer el archivo y otros datos del request
         profile_photo = request.FILES.get('profilePhoto')
-        data = request.data.dict()  # Convertir a diccionario
+        data = request.data.copy()
 
         if profile_photo:
             data['profilePhoto'] = profile_photo
@@ -347,7 +343,9 @@ def update_user_as_admin(request, user_id):
             return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        print(f"Error inesperado: {e}")
+        return Response({"error": f"Error inesperado: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 
@@ -441,7 +439,7 @@ def create_user_details(request):
         UserDetailsRepository.create_user_details(user_id, data)
 
         return Response(
-            {"message": "User details created successfully"},
+            {"message": "Detalles del usuario guardados correctamente."},
             status=status.HTTP_201_CREATED,
         )
 

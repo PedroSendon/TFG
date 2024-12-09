@@ -154,7 +154,7 @@ const Register: React.FC = () => {
         localStorage.setItem('refresh_token', data.refresh); // Almacena el token de refresco
 
         // Redirigir al usuario a otra página, por ejemplo el formulario o dashboard
-        history.push('/form');
+        history.push('/form/introduction');
       } else {
         const errorData = await response.json();
         console.log('Error:', errorData);

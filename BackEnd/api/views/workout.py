@@ -178,13 +178,17 @@ def update_workout(request, workout_id):
     """
     Actualizar un entrenamiento existente en el sistema.
     """
-    # Llamamos al repositorio y le pasamos el usuario y los datos necesarios para la actualización
+    # Directamente usa los datos deserializados
+    exercises = request.data.get('exercises', [])
+    if not isinstance(exercises, list):
+        return Response({"error": "El campo 'exercises' debe ser una lista de objetos."}, status=status.HTTP_400_BAD_REQUEST)
+
     result = WorkoutRepository.update_workout(
         user=request.user,
         workout_id=workout_id,
         name=request.data.get('name'),
         description=request.data.get('description'),
-        exercises=json.loads(request.data.get('exercises', '[]')),
+        exercises=exercises,  # Pasamos directamente la lista
     )
 
     # Comprobar si el resultado contiene un error y devolver el código de estado adecuado

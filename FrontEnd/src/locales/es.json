@@ -41,7 +41,7 @@
   "gain": "ganar",
   "lose": "perder",
   "training_days": "¿Cuántos días puedes entrenar a la semana?",
-  "day_s": "{count} día(s)",
+  "day_s": "día(s)",
   "daily_training_time": "¿Cuánto tiempo puedes entrenar al día?",
   "less_than_1_hour": "Menos de 1 hora",
   "1_2_hours": "1-2 horas",

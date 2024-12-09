@@ -37,7 +37,7 @@ def upload_profile_photo(request):
     user.profile_photo = profile_photo
     user.save()
 
-    return Response({"message": "Foto de perfil subida correctamente.", "profile_photo_url": user.profile_photo.url}, status=status.HTTP_200_OK)
+    return Response({"message": "Foto de perfil subida correctamente."}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

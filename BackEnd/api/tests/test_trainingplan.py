@@ -32,7 +32,6 @@ class CreateTrainingPlanTests(APITestCase):
             "name": "Plan Avanzado",
             "description": "Este es un plan avanzado de entrenamiento",
             "selectedTraining": [self.workout1.id, self.workout2.id],
-            "media": "http://example.com/media/training.jpg",
             "difficulty": "avanzado",
             "equipment": "Dumbbells, Kettlebells",
             "duration": 30
@@ -49,7 +48,6 @@ class CreateTrainingPlanTests(APITestCase):
         training_plan = response.data["data"]
         self.assertEqual(training_plan["name"], "Plan Avanzado")
         self.assertEqual(training_plan["description"], "Este es un plan avanzado de entrenamiento")
-        self.assertEqual(training_plan["media"], "http://example.com/media/training.jpg")
         self.assertEqual(training_plan["difficulty"], "avanzado")
         self.assertEqual(training_plan["equipment"], "Dumbbells, Kettlebells")
         self.assertEqual(training_plan["duration"], 30)
@@ -67,7 +65,6 @@ class CreateTrainingPlanTests(APITestCase):
             "name": "Plan Intermedio",
             "description": "Entrenamiento de nivel intermedio",
             "selectedTraining": [999, 1000],  # IDs inexistentes
-            "media": "http://example.com/media/training.jpg",
             "difficulty": "intermedio",
             "equipment": "Barbells",
             "duration": 30
@@ -93,7 +90,6 @@ class CreateTrainingPlanTests(APITestCase):
             "name": "Plan Moderado",
             "description": "Entrenamiento moderado",
             "selectedTraining": [self.workout1.id, self.workout2.id],
-            "media": "http://example.com/media/training.jpg",
             "difficulty": "moderado",
             "equipment": "None",
             "duration": "invalid_duration"  # Duración no válida
@@ -117,7 +113,6 @@ class CreateTrainingPlanTests(APITestCase):
             "name": "Plan Básico",
             "description": "Entrenamiento básico",
             "selectedTraining": [self.workout1.id, self.workout2.id],
-            "media": "http://example.com/media/training.jpg",
             "difficulty": "ligero",
             "equipment": "None",
             "duration": 15
@@ -130,6 +125,8 @@ class CreateTrainingPlanTests(APITestCase):
         # Verificar que el estado de la respuesta es 401 UNAUTHORIZED
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn("Authentication credentials were not provided", response.data["detail"])
+
+
 class GetTrainingPlansTests(APITestCase):
 
     def setUp(self):
@@ -152,7 +149,6 @@ class GetTrainingPlansTests(APITestCase):
             difficulty="ligero",
             equipment="Ninguno",
             duration=30,
-            media="http://example.com/media/basic-plan.jpg"
         )
         self.training_plan1.workouts.set([self.workout1, self.workout2])
 
@@ -162,7 +158,6 @@ class GetTrainingPlansTests(APITestCase):
             difficulty="avanzado",
             equipment="Barra, Mancuernas",
             duration=60,
-            media="http://example.com/media/advanced-plan.jpg"
         )
         self.training_plan2.workouts.set([self.workout1])
 
@@ -241,7 +236,6 @@ class DeleteTrainingPlanTests(APITestCase):
             difficulty="moderado",
             equipment="Dumbbells",
             duration=45,
-            media="http://example.com/media/test-plan.jpg"
         )
 
     def test_delete_training_plan_success(self):
@@ -311,7 +305,6 @@ class GetTrainingPlanTests(APITestCase):
             difficulty="intermedio",
             equipment="Pesas",
             duration=30,
-            media="http://example.com/media/test-plan.jpg"
         )
         self.training_plan.workouts.set([self.workout1, self.workout2])
 
@@ -393,7 +386,6 @@ class UpdateTrainingPlanTests(APITestCase):
             difficulty="intermedio",
             equipment="Pesas",
             duration=30,
-            media="http://example.com/media/test-plan.jpg"
         )
         self.training_plan.workouts.set([self.workout1, self.workout2])
 
@@ -530,7 +522,6 @@ class DeleteTrainingPlanTests(APITestCase):
             difficulty="moderado",
             equipment="Dumbbells",
             duration=45,
-            media="http://example.com/media/test-plan.jpg"
         )
 
     def test_delete_training_plan_success(self):
@@ -596,7 +587,6 @@ class GetAssignedTrainingPlanTests(APITestCase):
             difficulty="intermedio",
             equipment="Pesas",
             duration=30,
-            media="http://example.com/media/test-plan.jpg"
         )
 
         # Crear una relación de UserWorkout para asociar el usuario con el plan de entrenamiento
@@ -693,7 +683,6 @@ class GetNextPendingWorkoutTests(APITestCase):
             difficulty="intermedio",
             equipment="Pesas",
             duration=30,
-            media="http://example.com/media/test-plan.jpg"
         )
 
         # Crear la relación de UserWorkout para el plan del usuario
@@ -802,7 +791,6 @@ class MarkWorkoutCompleteTests(APITestCase):
             difficulty="intermedio",
             equipment="Pesas",
             duration=30,
-            media="http://example.com/media/test-plan.jpg"
         )
 
         # Crear la relación de UserWorkout para el plan del usuario

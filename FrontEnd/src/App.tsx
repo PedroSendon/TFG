@@ -5,7 +5,6 @@ import { LanguageContext, LanguageProvider } from './context/LanguageContext';
 import { PlansProvider } from './context/PlansContext';
 import Register from './pages/Register/Register';
 import Login from './pages/LogIn/LogIn';
-import Form from './pages/Users/Form/Form';
 import Home from './pages/Inicio/Inicio';
 import WorkoutOverview from './pages/Users/Workout/WorkoutOverview';
 import WorkoutDay from './pages/Users/Workout/WorkoutDay';
@@ -37,6 +36,12 @@ import MealPlanDetails from './pages/Admin/Nutricion/MealPlanDetails';
 import WorkoutDetails from './pages/Admin/Entrenos/WorkoutDetails';
 import TrainingPlanDetails from './pages/Admin/Entrenos/TrainingPlanDetails';
 import ExerciseDetails from './pages/Admin/Entrenos/ExerciseDetails';
+import Introduction from './pages/Users/Form/Introduction';
+import PersonalData from './pages/Users/Form/PersonalData';
+import FormComplete from './pages/Users/Form/FormComplete';
+import Goals from './pages/Users/Form/Goals';
+import PhysicalActivity from './pages/Users/Form/PhysicalActivity';
+import DietAndNutrition from './pages/Users/Form/DietAndNutrition';
 
 /* MUI icons */
 import TriangleIcon from '@mui/icons-material/ChangeHistory';  // Replace with icons that resemble Ionic icons
@@ -52,9 +57,16 @@ const App: React.FC = () => {
       <Router>
         <Switch>
           <Route exact path="/register" component={Register} />
-          <Route exact path="/form" component={Form} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/" component={Home} />
+
+          {/* Form Routes */}
+          <Route exact path="/form/introduction" component={Introduction} />
+          <Route exact path="/form/personaldata" component={PersonalData} />
+          <Route exact path="/form/goals" component={Goals} />
+          <Route exact path="/form/physicalactivity" component={PhysicalActivity} />
+          <Route exact path="/form/dietandnutrition" component={DietAndNutrition} />
+          <Route exact path="/form/summary" component={FormComplete} />
 
           {/* Workout Routes */}
           <Route exact path="/workout" component={WorkoutOverview} />

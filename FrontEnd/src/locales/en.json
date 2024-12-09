@@ -41,7 +41,7 @@
   "gain": "win",
   "lose": "lose",
   "training_days": "How many days can you train weekly?",
-  "day_s": "{count} day(s)",
+  "day_s": "day(s)",
   "daily_training_time": "How long can you train a day?",
   "less_than_1_hour": "Less than 1 hour",
   "1_2_hours": "1-2 hours",

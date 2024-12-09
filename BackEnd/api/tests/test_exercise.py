@@ -5,6 +5,8 @@ from api.models.trainingplan import TrainingPlan
 from api.models.exercise import Exercise
 from api.models.user import User
 from api.models.workout import UserWorkout, Workout, WorkoutExercise
+from unittest.mock import patch
+
 
 class ExerciseCreationTests(APITestCase):
     
@@ -37,6 +39,9 @@ class ExerciseCreationTests(APITestCase):
         
         # URL para crear un ejercicio
         self.url = reverse('create-exercise')
+        # Mock para evitar subidas reales
+        self.gcs_patcher = patch('api.utils.googleCloud.upload_to_gcs', return_value='https://fake-url.com/media.jpg')
+        self.gcs_patcher.start()
 
     def test_create_exercise_as_admin(self):
         """
@@ -48,7 +53,6 @@ class ExerciseCreationTests(APITestCase):
             "description": "Push-up exercise description",
             "muscleGroups": ["Pectorales", "Tríceps"],
             "instructions": "Baja hasta que los codos estén a 90 grados. Empuja hacia arriba.",
-            "media": "http://example.com/media/push-up.jpg"
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -65,7 +69,6 @@ class ExerciseCreationTests(APITestCase):
             "description": "Squat exercise description",
             "muscleGroups": ["Cuádriceps", "Glúteos"],
             "instructions": "Baja hasta que tus rodillas estén a 90 grados. Empuja hacia arriba.",
-            "media": "http://example.com/media/squat.jpg"
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -83,7 +86,6 @@ class ExerciseCreationTests(APITestCase):
             "description": "Push-up exercise description",
             "muscleGroups": ["Pectorales", "Tríceps"],
             "instructions": "Baja hasta que los codos estén a 90 grados. Empuja hacia arriba.",
-            "media": "http://example.com/media/push-up.jpg"
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -104,17 +106,15 @@ class ExerciseCreationTests(APITestCase):
         data = {
             "name": "Push-up",
             "description": "Push-up exercise description",
-            "muscleGroups": "Pectorales, Tríceps",  # Debería ser una lista, no una cadena
+            "muscleGroups": "Pectorales, Tríceps",  # Enviado como cadena, no lista
             "instructions": "Baja hasta que los codos estén a 90 grados. Empuja hacia arriba.",
-            "media": "http://example.com/media/push-up.jpg"
         }
         response = self.client.post(self.url, data, format='json')
+        print(f"Respuesta del servidor: {response.data}")  # Debugging
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        # Verificar que el mensaje de error contiene la descripción correcta del problema
+
         error_message = response.data["error"]
-        # Remueve los saltos de línea antes de realizar la verificación
-        formatted_error_message = error_message['error'].replace('\n', ' ')
-        self.assertIn("Input should be a valid list", formatted_error_message)
+        self.assertIn("El campo 'muscleGroups' debe ser una lista", error_message)
 
 
     def test_create_exercise_missing_fields(self):
@@ -122,17 +122,17 @@ class ExerciseCreationTests(APITestCase):
         Test para verificar el manejo de errores cuando faltan campos obligatorios.
         """
         self.client.force_authenticate(user=self.trainer_user)
-        data = {
-            "name": "Push-up"
-            # Falta "description", "muscleGroups" y "instructions"
-        }
+        data = {"name": "Push-up"}  # Falta description, muscleGroups e instructions
+
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
-        # Verificar que el mensaje de error contiene cada campo requerido
+
+        # Verificar el mensaje de error esperado
         error_message = response.data["error"]
-        self.assertIn("description: Field required muscleGroups: Field required instructions: Field required", error_message['error'].replace('\n', ' '))
+        self.assertIn("Faltan los siguientes campos obligatorios: description, muscleGroups, instructions", error_message)
+
         self.assertEqual(Exercise.objects.count(), 0)
+
 
 
 class ExerciseRetrievalTests(APITestCase):
@@ -458,7 +458,8 @@ class UpdateExerciseTests(APITestCase):
             media="http://example.com/media/push-up.jpg",
             instructions="Baja hasta que los codos estén a 90 grados. Empuja hacia arriba."
         )
-    '''
+
+
     def test_update_exercise_success(self):
             """
             Test para actualizar un ejercicio con éxito con permisos de administrador.
@@ -494,7 +495,6 @@ class UpdateExerciseTests(APITestCase):
         # Confirmamos que el estado devuelto es 404 NOT FOUND
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("Ejercicio no encontrado", response.data["error"])
-    '''
 
     def test_update_exercise_permission_denied(self):
         """
@@ -520,9 +520,10 @@ class UpdateExerciseTests(APITestCase):
             "description": "Updated description"
         }
         response = self.client.put(url, data, format='json')
-        
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Datos no válidos", response.data["error"])
+        self.assertIn("El campo 'name' no puede estar vacío", response.data["error"])
+
 
     def test_update_exercise_missing_id(self):
         """

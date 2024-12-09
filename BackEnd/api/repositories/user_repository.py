@@ -1,7 +1,5 @@
 from datetime import datetime
 from typing import Dict
-from google.cloud import storage
-
 from pydantic import ValidationError
 from api.utils.googleCloud import upload_to_gcs, generate_signed_url, delete_file_from_gcs
 from api.schemas.user import UserAdminCreate
@@ -10,14 +8,18 @@ from api.models.workout import UserWorkout, Imagen, WeeklyWorkout
 from api.models.trainingplan import TrainingPlan
 from django.contrib.auth.hashers import check_password, make_password
 from api.models.user import User, UserDetails, DietPreferences, WeightRecord
-from api.models.process import ProgressTracking
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
 from rest_framework import status
-from rest_framework.response import Response 
 
 
 class UserRepository:
+
+    GOAL_MAPPING = {
+        "Ganar masa muscular": "gain_muscle",
+        "Perder peso": "lose_weight",
+        "Mantenimiento": "maintain"
+    }
 
     @staticmethod
     def get_unassigned_users_for_admin(user):
@@ -27,10 +29,11 @@ class UserRepository:
         """
         if not isinstance(user, User):
             user = User.objects.get(id=user.id)
-        
+
         # Verificar que el rol del usuario sea 'administrador'
         if user.role == 'administrador':
-            users = User.objects.filter(status__in=['awaiting_assignment', 'training_only', 'nutrition_only'])
+            users = User.objects.filter(
+                status__in=['awaiting_assignment', 'training_only', 'nutrition_only'])
             unassigned_users_data = []
 
             for user in users:
@@ -41,7 +44,7 @@ class UserRepository:
                     plan_type_needed = ['nutrition']
                 elif user.status == 'nutrition_only':
                     plan_type_needed = ['training']
-                
+
                 unassigned_users_data.append({
                     'id': user.id,
                     'name': f"{user.first_name} {user.last_name}",
@@ -50,7 +53,7 @@ class UserRepository:
                     'profile_photo': user.profile_photo if user.profile_photo else None,
                     'plans_needed': plan_type_needed
                 })
-            
+
             return unassigned_users_data
         else:
             return {"error": "No tienes permiso para ver esta información.", "status": status.HTTP_403_FORBIDDEN}
@@ -63,13 +66,12 @@ class UserRepository:
         """
         if not isinstance(user, User):
             user = User.objects.get(id=user.id)
-        
+
         # Verificamos que el rol sea 'nutricionista' en lugar de 'entrenador'
         if user.role == 'nutricionista':
             return User.objects.filter(status__in=['awaiting_assignment', 'training_only'])
         else:
             return {"error": "No tienes permiso para ver esta información.", "status": status.HTTP_403_FORBIDDEN}
-
 
     @staticmethod
     def get_unassigned_users_for_training(user):
@@ -86,8 +88,6 @@ class UserRepository:
         else:
             return {"error": "No tienes permiso para ver esta información.", "status": status.HTTP_403_FORBIDDEN}
 
-
-
     @staticmethod
     def get_user_role(user_id):
         """
@@ -98,20 +98,22 @@ class UserRepository:
             return {"role": user.role}
         except User.DoesNotExist:
             return None
-        
+
     @staticmethod
     def get_user_plans(user_id):
         """
         Obtener el MealPlan y el TrainingPlan asignados a un usuario.
         """
         try:
-            
+
             user = User.objects.get(id=user_id)
             # Obtener el plan de comidas (MealPlan)
-            meal_plan = user.user_nutrition_plans.plan if hasattr(user, 'user_nutrition_plans') else None
+            meal_plan = user.user_nutrition_plans.plan if hasattr(
+                user, 'user_nutrition_plans') else None
 
             # Obtener el último plan de entrenamiento (TrainingPlan)
-            user_workout = user.user_workouts.last()  # Obtener el último UserWorkout si hay varios
+            # Obtener el último UserWorkout si hay varios
+            user_workout = user.user_workouts.last()
             training_plan = user_workout.training_plan if user_workout else None
 
             return {
@@ -144,7 +146,8 @@ class UserRepository:
             user = User.objects.get(id=user_id)
             if not user.user_workouts.exists():  # Verificar si el usuario tiene un plan asignado
                 return False, "El usuario no tiene un plan de entrenamiento asignado.", status.HTTP_404_NOT_FOUND
-            user.user_workouts.all().delete()  # Eliminar todas las instancias de UserWorkout asociadas al usuario
+            # Eliminar todas las instancias de UserWorkout asociadas al usuario
+            user.user_workouts.all().delete()
             if user.status == 'training_only':
                 user.status = 'awaiting_assignment'
                 user.save()
@@ -159,15 +162,17 @@ class UserRepository:
     def remove_nutrition_plan_from_user(user_id, current_user):
         try:
             user = User.objects.get(id=user_id)
-            if not hasattr(user, 'user_nutrition_plans'):  # Verificar si el usuario tiene un plan de nutrición
+            # Verificar si el usuario tiene un plan de nutrición
+            if not hasattr(user, 'user_nutrition_plans'):
                 return False, "El usuario no tiene un plan nutricional asignado.", status.HTTP_404_NOT_FOUND
-            user.user_nutrition_plans.delete()  # Eliminar la relación con el plan de nutrición
+            # Eliminar la relación con el plan de nutrición
+            user.user_nutrition_plans.delete()
             if user.status == 'nutrition_only':
                 user.status = 'awaiting_assignment'
                 user.save()
             if user.status == 'assigned':
                 user.status = 'training_only'
-                user.save() 
+                user.save()
             return True, "Plan nutricional eliminado exitosamente.", status.HTTP_200_OK
         except User.DoesNotExist:
             return False, "Usuario no encontrado.", status.HTTP_404_NOT_FOUND
@@ -192,10 +197,12 @@ class UserRepository:
                 first_name=user_data['first_name'],
                 last_name=user_data['last_name'],
                 email=user_data['email'],
-                password=make_password(user_data['password']),  # Hash de la contraseña
+                # Hash de la contraseña
+                password=make_password(user_data['password']),
                 birth_date=user_data['birth_date'],
                 gender=user_data['gender'],
-                role=user_data.get('role', 'cliente'),  # Rol por defecto "cliente"
+                # Rol por defecto "cliente"
+                role=user_data.get('role', 'cliente'),
                 is_active=True,  # El usuario está activo por defecto
             )
             return user
@@ -205,11 +212,10 @@ class UserRepository:
     @staticmethod
     def update_user_details(user_id, data, request_user):
         try:
-            # Verificar permisos
             if request_user.role not in ['administrador', 'entrenador', 'nutricionista']:
                 return False, "No tienes permisos para modificar usuarios"
 
-            # Obtener usuario
+
             user = UserRepository.get_user_by_id(user_id)
             if not user:
                 return False, "Usuario no encontrado"
@@ -222,13 +228,11 @@ class UserRepository:
             # Manejo de imagen de perfil
             new_profile_photo = data.get('profilePhoto')  # Archivo subido
             if new_profile_photo:
-                # Eliminar la imagen anterior de GCS si existe
-                if user.profile_photo:
-                    delete_file_from_gcs(user.profile_photo)
-
-                # Subir la nueva imagen a GCS
                 try:
-                    uploaded_url = upload_to_gcs(new_profile_photo, f"profile_photos/user_{user.id}_profile.jpg")
+                    if user.profile_photo:
+                        delete_file_from_gcs(user.profile_photo)
+                    uploaded_url = upload_to_gcs(
+                        new_profile_photo, f"profile_photos/user_{user.id}_profile.jpg")
                     user.profile_photo = uploaded_url
                 except Exception as e:
                     print(f"Error al subir la nueva imagen: {e}")
@@ -237,42 +241,41 @@ class UserRepository:
             user.save()
 
             # Actualizar detalles del usuario
-            user_details, _ = UserDetails.objects.get_or_create(
-                user=user,
-                defaults={
-                    'height': 170,
-                    'weight_goal': "maintain",
-                    'physical_activity_level': "sedentary",
-                    'weekly_training_days': 3,
-                    'weight': 70.0,
-                }
-            )
+            user_details, _ = UserDetails.objects.get_or_create(user=user)
 
-            # Actualizar otros datos
+            # Mapeo de objetivos de peso
             weight_goal_map = {
                 "Ganar masa muscular": "gain_muscle",
                 "Perder peso": "lose_weight",
                 "Mantener peso": "maintain",
             }
-            user_details.height = data.get('height', user_details.height)
-            user_details.weight_goal = weight_goal_map.get(data.get('weightGoal'), user_details.weight_goal)
-            user_details.physical_activity_level = data.get('activityLevel', user_details.physical_activity_level)
-            user_details.weekly_training_days = data.get('trainingFrequency', user_details.weekly_training_days)
-            new_weight = data.get('currentWeight', user_details.weight)
-            user_details.weight = new_weight
-            user_details.save()
+            if data.get('weightGoal') and data['weightGoal'] not in weight_goal_map:
+                return False, "El objetivo de peso proporcionado no es válido"
 
-            # Registrar el nuevo peso si cambió
+
+            # Actualizar detalles adicionales
+            user_details.weight_goal = weight_goal_map.get(
+                data.get('weightGoal'), user_details.weight_goal)
+            user_details.physical_activity_level = data.get(
+                'activityLevel', user_details.physical_activity_level)
+            user_details.weekly_training_days = data.get(
+                'trainingFrequency', user_details.weekly_training_days)
+
+            new_weight = data.get('currentWeight', user_details.weight)
             if new_weight:
+                user_details.weight = new_weight
+                # Registrar el nuevo peso si cambió
                 WeightRecord.objects.create(user=user, weight=new_weight)
+
+            user_details.save()
 
             return True, "Usuario y detalles actualizados exitosamente."
 
+        except User.DoesNotExist:
+            return False, "Usuario no encontrado"
         except Exception as e:
             print(f"Error al actualizar el usuario: {e}")
-            return False, "Error al actualizar el usuario."
-
-
+            return False, "Error al actualizar el usuario"
 
     @staticmethod
     def create_user_as_admin(admin_user, user_data):
@@ -300,7 +303,8 @@ class UserRepository:
                 return {"error": "El usuario con este correo electrónico ya existe.", "status": status.HTTP_400_BAD_REQUEST}
 
             # Hash de la contraseña
-            user_data_validated.password = make_password(user_data_validated.password)
+            user_data_validated.password = make_password(
+                user_data_validated.password)
 
             # Asignar el rol (cliente por defecto si no se proporciona)
             role = user_data.get('role', 'cliente')
@@ -317,7 +321,7 @@ class UserRepository:
             )
 
             return {"data": user, "status": status.HTTP_201_CREATED}
-        
+
         except Exception as e:
             return {"error": f"Error creando usuario: {str(e)}", "status": status.HTTP_400_BAD_REQUEST}
 
@@ -345,7 +349,7 @@ class UserRepository:
             return user
         except User.DoesNotExist:
             return None
-        
+
     @staticmethod
     def get_user_profile(user_id):
         """
@@ -368,7 +372,6 @@ class UserRepository:
                 profile_photo_signed_url = generate_signed_url(
                     'fitprox', f"profile_photos/user_{user.id}_profile.jpg"
                 )
-
 
             profile_data = {
                 "username": f"{user.first_name} {user.last_name}",
@@ -420,19 +423,23 @@ class UserRepository:
         except TrainingPlan.DoesNotExist:
             return False, "Plan de entrenamiento no encontrado.", status.HTTP_404_NOT_FOUND
 
-        check_result = UserRepository.check_user_role(request_user, ['administrador', 'entrenador'])
+        check_result = UserRepository.check_user_role(
+            request_user, ['administrador', 'entrenador'])
         if "error" in check_result:
             return False, check_result["error"], status.HTTP_403_FORBIDDEN
 
         try:
             user = User.objects.get(id=user_id)
             UserWorkout.objects.filter(user=user).delete()
-            user_workout = UserWorkout.objects.create(user=user, training_plan=training_plan)
+            user_workout = UserWorkout.objects.create(
+                user=user, training_plan=training_plan)
 
             for workout in training_plan.workouts.all():
-                WeeklyWorkout.objects.create(user_workout=user_workout, workout=workout, completed=False)
+                WeeklyWorkout.objects.create(
+                    user_workout=user_workout, workout=workout, completed=False)
 
-            user.status = 'assigned' if UserNutritionPlan.objects.filter(user=user).exists() else 'training_only'
+            user.status = 'assigned' if UserNutritionPlan.objects.filter(
+                user=user).exists() else 'training_only'
             user.save()
             return True, "Plan de entrenamiento asignado exitosamente.", status.HTTP_200_OK
 
@@ -441,12 +448,13 @@ class UserRepository:
         except Exception as e:
             return False, str(e), status.HTTP_400_BAD_REQUEST
 
-
     @staticmethod
     def assign_concret_nutrition_plan_to_user(user_id, plan_id, request_user):
-        check_result = UserRepository.check_user_role(request_user, ['administrador', 'nutricionista'])
+        check_result = UserRepository.check_user_role(
+            request_user, ['administrador', 'nutricionista'])
         if "error" in check_result:
-            return False, "No tienes permisos para realizar esta acción", status.HTTP_403_FORBIDDEN  # Quitar el espacio extra
+            # Quitar el espacio extra
+            return False, "No tienes permisos para realizar esta acción", status.HTTP_403_FORBIDDEN
 
         try:
             nutrition_plan = MealPlan.objects.get(id=plan_id)
@@ -454,7 +462,8 @@ class UserRepository:
             UserNutritionPlan.objects.filter(user=user).delete()
             UserNutritionPlan.objects.create(user=user, plan=nutrition_plan)
 
-            user.status = 'assigned' if UserWorkout.objects.filter(user=user).exists() else 'nutrition_only'
+            user.status = 'assigned' if UserWorkout.objects.filter(
+                user=user).exists() else 'nutrition_only'
             user.save()
             return True, "Plan nutricional asignado exitosamente.", status.HTTP_200_OK
 
@@ -465,22 +474,21 @@ class UserRepository:
         except Exception as e:
             return False, str(e), status.HTTP_400_BAD_REQUEST
 
-
-
-
     @staticmethod
     def check_user_role(user, allowed_roles):
+        """
+        Verifica si el usuario tiene uno de los roles permitidos.
+        :param user: Usuario a verificar.
+        :param allowed_roles: Lista de roles permitidos.
+        :return: Un diccionario con un error o el usuario.
+        """
         if not isinstance(user, User):
-            try:
-                user = User.objects.get(id=user if isinstance(user, int) else user.id)
-            except User.DoesNotExist:
-                return {"error": "Usuario no encontrado.", "status": status.HTTP_404_NOT_FOUND}
+            return {"error": "Usuario no válido.", "status": status.HTTP_400_BAD_REQUEST}
 
         if user.role not in allowed_roles:
             return {"error": "No tienes permisos para realizar esta acción.", "status": status.HTTP_403_FORBIDDEN}
 
         return {"user": user}
-
 
     @staticmethod
     def get_user_by_id2(user_id, request_user):
@@ -496,7 +504,7 @@ class UserRepository:
 
             if request_user.role not in ['administrador', 'entrenador', 'nutricionista']:
                 return {"error": "No tienes permisos para ver esta información.", "status": status.HTTP_403_FORBIDDEN}
-            
+
             user = User.objects.get(id=user_id)
             details = user.details if hasattr(user, 'details') else None
 
@@ -604,7 +612,8 @@ class UserRepository:
                 user = User.objects.get(id=user.id)
 
             # Obtener detalles del usuario y preferencias de dieta
-            user_data = User.objects.select_related('details', 'diet_preferences').filter(id=user.id).first()
+            user_data = User.objects.select_related(
+                'details', 'diet_preferences').filter(id=user.id).first()
             if not user_data:
                 return None
 
@@ -656,7 +665,8 @@ class UserRepository:
                 },
 
                 # Weight Records
-                'weight_records': list(weight_records)  # Convertir los registros de peso a una lista de diccionarios
+                # Convertir los registros de peso a una lista de diccionarios
+                'weight_records': list(weight_records)
             }
 
             return user_details
@@ -664,8 +674,6 @@ class UserRepository:
         except Exception as e:
             print(f"Error fetching user details: {e}")
             return None
-
-
 
 
 class UserDetailsRepository:
@@ -713,7 +721,8 @@ class UserDetailsRepository:
                 if reverse:
                     # Traducción inversa (backend -> frontend)
                     reverse_mapping = {v: k for k, v in mapping.items()}
-                    details_data[field] = reverse_mapping.get(details_data[field], details_data[field])
+                    details_data[field] = reverse_mapping.get(
+                        details_data[field], details_data[field])
                 else:
                     # Traducción normal (frontend -> backend)
                     if details_data[field] in mapping:
@@ -721,9 +730,9 @@ class UserDetailsRepository:
                     elif not details_data[field]:
                         # Si el campo está vacío o no se envió, asignar un valor predeterminado
                         if field == 'diet_type':
-                            details_data[field] = 'balanced'  # Valor predeterminado
+                            # Valor predeterminado
+                            details_data[field] = 'balanced'
         return details_data
-
 
     @staticmethod
     def create_user_details(user_id: int, data: Dict):
@@ -735,19 +744,28 @@ class UserDetailsRepository:
         """
         user = User.objects.get(id=user_id)
 
+
+        if not isinstance(data.get('height'), (int, float)):
+            raise ValidationError({"height": ["Debe ser un número válido."]})
+
+
+        data['weight_goal'] = UserRepository.GOAL_MAPPING.get(data['weight_goal'], data['weight_goal'])
+
+        
+
         # Verificar si ya existen detalles del usuario
         user_details, created = UserDetails.objects.update_or_create(
-                user=user,
-                defaults={
-                    'height': data['height'],
-                    'weight': data['weight'],
-                    'weight_goal': data['weight_goal'],
-                    'weekly_training_days': data['weekly_training_days'],
-                    'daily_training_time': data['daily_training_time'],
-                    'physical_activity_level': data['physical_activity_level'],
-                    'available_equipment': data['available_equipment'],
-                }
-            )
+            user=user,
+            defaults={
+                'height': data['height'],
+                'weight': data['weight'],
+                'weight_goal': data['weight_goal'],
+                'weekly_training_days': data['weekly_training_days'],
+                'daily_training_time': data['daily_training_time'],
+                'physical_activity_level': data['physical_activity_level'],
+                'available_equipment': data['available_equipment'],
+            }
+        )
         # Guardar preferencias de dieta
         diet_preferences, created = DietPreferences.objects.update_or_create(
             user=user,
@@ -761,8 +779,6 @@ class UserDetailsRepository:
         WeightRecordRepository.crear_registro_peso(user, data['weight'])
 
         return user_details, diet_preferences
-
-
 
     @staticmethod
     def get_user_profile(user_id):
@@ -803,8 +819,6 @@ class UserDetailsRepository:
         today = date.today()
         return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
 
-
-
     @staticmethod
     def update_user_profile(user_id, profile_data):
         """
@@ -819,34 +833,40 @@ class UserDetailsRepository:
             user_details = user.details
 
             # Variables para verificar si `weightGoal` o `trainingFrequency` cambian
-            weight_goal_changed = profile_data.get('weightGoal') != user_details.weight_goal
-            training_frequency_changed = profile_data.get('trainingFrequency') != user_details.weekly_training_days
+            weight_goal_changed = profile_data.get(
+                'weightGoal') != user_details.weight_goal
+            training_frequency_changed = profile_data.get(
+                'trainingFrequency') != user_details.weekly_training_days
 
             # Actualizar los campos básicos
             user.first_name = profile_data.get('firstName', user.first_name)
             user.last_name = profile_data.get('lastName', user.last_name)
             profile_photo = profile_data.get('profilePhoto')
-            
-            
+
             if profile_photo:
                 # Si ya tiene una foto de perfil, eliminar la anterior
                 if user.profile_photo:
                     delete_success = delete_file_from_gcs(user.profile_photo)
                     if not delete_success:
-                        print(f"Advertencia: No se pudo eliminar la foto de perfil anterior del usuario con ID {user_id}.")
+                        print(f"Advertencia: No se pudo eliminar la foto de perfil anterior del usuario con ID {
+                              user_id}.")
 
                 # Subir manualmente la nueva imagen a GCS
-                uploaded_url = upload_to_gcs(profile_photo, f"user_{user.id}_profile.jpg")
+                uploaded_url = upload_to_gcs(
+                    profile_photo, f"user_{user.id}_profile.jpg")
                 user.profile_photo = uploaded_url  # Guardar solo la URL
-
 
             user.save()
 
             # Actualizar los detalles del usuario
-            user_details.weight = profile_data.get('currentWeight', user_details.weight)
-            user_details.weight_goal = profile_data.get('weightGoal', user_details.weight_goal)
-            user_details.physical_activity_level = profile_data.get('activityLevel', user_details.physical_activity_level)
-            user_details.weekly_training_days = profile_data.get('trainingFrequency', user_details.weekly_training_days)
+            user_details.weight = profile_data.get(
+                'currentWeight', user_details.weight)
+            user_details.weight_goal = profile_data.get(
+                'weightGoal', user_details.weight_goal)
+            user_details.physical_activity_level = profile_data.get(
+                'activityLevel', user_details.physical_activity_level)
+            user_details.weekly_training_days = profile_data.get(
+                'trainingFrequency', user_details.weekly_training_days)
             user_details.save()
 
             # Verificar si hubo cambios en `weightGoal` o `trainingFrequency`
@@ -870,7 +890,6 @@ class UserDetailsRepository:
 
         except User.DoesNotExist:
             return None
-
 
     @staticmethod
     def change_user_password(user_id, current_password, new_password, confirm_password):
@@ -923,7 +942,8 @@ class UserDetailsRepository:
                 # Subir la imagen a GCS y obtener la URL pública o firmada
                 file_name = f"profile_photos/user_{user.id}_profile.jpg"
                 uploaded_url = upload_to_gcs(photo, file_name)
-                signed_url = generate_signed_url('fitprox', f"profile_photos/{file_name}")
+                signed_url = generate_signed_url(
+                    'fitprox', f"profile_photos/{file_name}")
 
                 user.profile_photo = uploaded_url  # Guarda la URL pública
                 user.save()
@@ -935,7 +955,6 @@ class UserDetailsRepository:
 
         except User.DoesNotExist:
             return None
-
 
     @staticmethod
     def get_all_users(request_user):
@@ -962,7 +981,6 @@ class UserDetailsRepository:
 
         return user_data
 
-
     @staticmethod
     def delete_user_by_id(user_id, request_user):
         """
@@ -975,26 +993,25 @@ class UserDetailsRepository:
 
             if request_user.role != 'administrador':
                 return False, "No tienes permisos para eliminar usuarios."
-            
+
             # Intentar obtener el usuario
             user = User.objects.get(id=user_id)
-            
+
             # Eliminar la imagen de perfil en Google Cloud Storage, si existe
-            if user.profile_image:  # Suponiendo que el campo de la imagen de perfil se llama `profile_image`
-                delete_success = delete_file_from_gcs(user.profile_image)
+            if user.profile_photo:  # Suponiendo que el campo de la imagen de perfil se llama `profile_image`
+                delete_success = delete_file_from_gcs(user.profile_photo)
                 if not delete_success:
-                    print(f"Advertencia: No se pudo eliminar la imagen de perfil del usuario {user_id}.")
+                    print(
+                        f"Advertencia: No se pudo eliminar la imagen de perfil del usuario {user_id}.")
 
             # Eliminar el usuario y sus relaciones
             user.delete()
             return True, "Usuario eliminado exitosamente."
-            
+
         except User.DoesNotExist:
             return False, "Usuario no encontrado."
         except Exception as e:
             return False, f"Error al eliminar el usuario: {str(e)}"
-
-
 
     @staticmethod
     def get_monthly_user_growth(year=None):
@@ -1030,13 +1047,15 @@ class ImagenRepository:
         """
         return Imagen.objects.first()
 
+
 class UserWorkoutRepository:
 
     @staticmethod
     def mark_workout_as_completed(user_id, workout_id):
         try:
             user_workout = UserWorkout.objects.get(user_id=user_id)
-            workout = WeeklyWorkout.objects.get(user_workout=user_workout, workout_id=workout_id)
+            workout = WeeklyWorkout.objects.get(
+                user_workout=user_workout, workout_id=workout_id)
             workout.completed = True
             workout.save()
 
@@ -1048,20 +1067,21 @@ class UserWorkoutRepository:
             # Devolver un mensaje con el error y el código 404
             return {"error": "Workout not found for the user"}, status.HTTP_404_NOT_FOUND
 
-
     @staticmethod
     def check_and_reset_all_workouts(user_workout):
         """
         Verifica si todos los entrenamientos del plan están completos.
         Si es así, los reinicia a incompletos para empezar el ciclo de nuevo.
         """
-        weekly_workouts = WeeklyWorkout.objects.filter(user_workout=user_workout)
+        weekly_workouts = WeeklyWorkout.objects.filter(
+            user_workout=user_workout)
         if all(workout.completed for workout in weekly_workouts):
             for workout in weekly_workouts:
                 workout.completed = False
                 workout.save()
             user_workout.progress = 0  # Reiniciar el progreso del plan si es necesario
             user_workout.save()
+
 
 class WeightRecordRepository:
     @staticmethod
@@ -1095,7 +1115,6 @@ class WeightRecordRepository:
             return registro_peso, None
         except User.DoesNotExist:
             return None, "Usuario no encontrado."
-        
 
     @staticmethod
     def get_latest_weight_record(user):
@@ -1108,4 +1127,3 @@ class WeightRecordRepository:
             user = User.objects.get(id=user.id)
 
         return WeightRecord.objects.filter(user=user).order_by('-date', '-id').first()
-        

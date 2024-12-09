@@ -167,32 +167,45 @@ class CreateWorkoutTests(APITestCase):
         self.assertIn("Faltan parámetros obligatorios", response.data["error"])
 
     def test_create_workout_with_nonexistent_exercise(self):
-        """
-        Test para verificar la respuesta cuando se incluye un ejercicio que no existe.
-        """
         self.client.force_authenticate(user=self.trainer)
 
-        # Datos con un ejercicio inexistente "Pull-up"
         data = {
             "name": "Mixed Workout",
             "description": "Workout with existing and nonexistent exercises",
             "duration": 30,
             "exercises": [
                 {"name": "Push-up", "sets": 3, "reps": 10, "rest": 60},
-                {"name": "Pull-up", "sets": 2, "reps": 8, "rest": 90}  # "Pull-up" no existe en la base de datos
+                {"name": "Nonexistent Exercise", "sets": 3, "reps": 10, "rest": 60}
             ]
         }
 
         response = self.client.post(self.url, data, format='json')
 
-        # Verificar que el estado de la respuesta es 201 CREATED
+        # Verificar que el estado de la respuesta sea 400
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Verificar que el mensaje de error sea el esperado
+        self.assertIn("Los siguientes ejercicios no existen", response.data["error"])
+        self.assertIn("Nonexistent Exercise", response.data["error"])
+
+    def test_create_workout_all_valid_exercises(self):
+        self.client.force_authenticate(user=self.trainer)
+
+        data = {
+            "name": "Valid Workout",
+            "description": "Workout with only valid exercises",
+            "duration": 30,
+            "exercises": [
+                {"name": "Push-up", "sets": 3, "reps": 10, "rest": 60},
+                {"name": "Squat", "sets": 4, "reps": 12, "rest": 90}
+            ]
+        }
+
+        response = self.client.post(self.url, data, format='json')
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["message"], "Entrenamiento creado con éxito.")
 
-        # Verificar que solo el ejercicio "Push-up" está en los datos del entrenamiento
-        workout_data = response.data["data"]
-        self.assertEqual(len(workout_data["exercises"]), 1)
-        self.assertEqual(workout_data["exercises"][0]["name"], "Push-up")
 
     def test_create_workout_with_invalid_user_role(self):
         """
@@ -288,6 +301,7 @@ class UpdateWorkoutTests(APITestCase):
         self.assertEqual(len(workout_data["exercises"]), 2)
         self.assertEqual(workout_data["exercises"][0]["name"], "Push-up")
         self.assertEqual(workout_data["exercises"][1]["name"], "Squat")
+
 
     def test_update_workout_invalid_user_role(self):
         """
@@ -446,11 +460,11 @@ class GetWorkoutsByUserTests(APITestCase):
         self.training_plan = TrainingPlan.objects.create(
             name="Plan de Ejemplo",
             description="Descripción del plan de ejemplo",
-            media="http://example.com/media.png",
-            difficulty="Intermedio",
+            difficulty="Intermedio",  # Asegúrate de que esta opción exista en DIFFICULTY_LEVELS
             equipment="Pesas",
             duration=30
         )
+
         self.user_workout = UserWorkout.objects.create(
             user=self.user,
             training_plan=self.training_plan,
@@ -460,7 +474,6 @@ class GetWorkoutsByUserTests(APITestCase):
         self.workout = Workout.objects.create(
             name="Entrenamiento 1",
             description="Primer entrenamiento",
-            media="http://example.com/workout1.png",
             duration=60
         )
         self.training_plan.workouts.add(self.workout)
@@ -555,7 +568,6 @@ class GetWorkoutDetailsTests(APITestCase):
         self.workout = Workout.objects.create(
             name="Entrenamiento de Prueba",
             description="Descripción del entrenamiento de prueba",
-            media="http://example.com/workout.png",
             duration=60
         )
         self.exercise = Exercise.objects.create(
@@ -640,7 +652,6 @@ class GetWorkoutByDayTests(APITestCase):
         self.workout = Workout.objects.create(
             name="Entrenamiento Día 1",
             description="Entrenamiento especial para el primer día",
-            media="http://example.com/workout_day1.png",
             duration=60
         )
         self.exercise1 = Exercise.objects.create(
@@ -726,7 +737,6 @@ class GetWorkoutExercisesByDayTests(APITestCase):
         self.workout = Workout.objects.create(
             name="Entrenamiento Día 1",
             description="Rutina para el día 1",
-            media="http://example.com/workout_image.png",
             duration=60
         )
         self.training_plan.workouts.add(self.workout)

@@ -1,40 +1,14 @@
 from pydantic import ValidationError
 from api.repositories.user_repository import UserRepository
-from api.schemas.exercise import ExerciseUpdateSchema, CreateExerciseSchema
+from api.schemas.exercise import CreateExerciseSchema
 from api.models.user import User
 from api.models.exercise import Exercise
-from api.models.workout import UserWorkout, Workout, WorkoutExercise
-from api.models.process import ExerciseLog
-from django.db.models import Sum
-from datetime import datetime
+from api.models.workout import UserWorkout, WorkoutExercise
 from rest_framework import status
-from google.cloud import storage
-from datetime import timedelta
 from api.utils.googleCloud import upload_to_gcs, delete_file_from_gcs
 
 class ExerciseRepository:
 
-    @staticmethod
-    def get_exercise_popularity(year=None):
-        """
-        Obtener la popularidad de los ejercicios más realizados en la plataforma.
-        :param year: Año para filtrar los datos.
-        :return: Una lista de diccionarios con el nombre del ejercicio y las veces repetidas.
-        """
-        if year is None:
-            year = datetime.now().year
-
-        # Filtrar los registros de ejercicios por año y agrupar por ejercicio
-        popularity = (
-            ExerciseLog.objects
-            .filter(date__year=year)
-            .values('exercise__name')
-            .annotate(times_repeated=Sum('sets_completed'))
-            .order_by('-times_repeated')
-        )
-
-        # Convertir el resultado a una lista de diccionarios
-        return [{"exercise": entry['exercise__name'], "timesRepeated": entry['times_repeated']} for entry in popularity]
 
     @staticmethod
     def get_exercise_by_id(exercise_id):
@@ -59,20 +33,25 @@ class ExerciseRepository:
     @staticmethod
     def create_exercise(user, data):
         try:
+            # Verificar roles
             check_result = UserRepository.check_user_role(user, ['entrenador', 'administrador'])
             if "error" in check_result:
                 return check_result
 
-            # Validar datos
+            # Validar datos obligatorios
             required_fields = ['name', 'description', 'muscleGroups', 'instructions']
-            if not all(field in data for field in required_fields):
-                return {"error": "Faltan campos obligatorios", "status": status.HTTP_400_BAD_REQUEST}
+            missing_fields = [field for field in required_fields if field not in data]
+            if missing_fields:
+                return {"error": f"Faltan los siguientes campos obligatorios: {', '.join(missing_fields)}", "status": status.HTTP_400_BAD_REQUEST}
 
-   
+            # Validar que muscleGroups sea una lista y convertir si es posible
+            muscle_groups = data.get('muscleGroups')
+            if not isinstance(muscle_groups, list):
+                return {"error": "El campo 'muscleGroups' debe ser una lista", "status": status.HTTP_400_BAD_REQUEST}
+
             # Subir la imagen si existe
             media_url = None
             media_file = data.get('media')  # El archivo viene de request.FILES
-
             if media_file:
                 try:
                     media_url = upload_to_gcs(media_file, f"exercises/{data['name']}_media.jpg")
@@ -88,8 +67,7 @@ class ExerciseRepository:
             )
 
             # Asignar los grupos musculares
-            muscle_groups_str = ','.join(data['muscleGroups'])
-            exercise.set_muscle_groups(muscle_groups_str)
+            exercise.set_muscle_groups(muscle_groups)
             exercise.save()
 
             return {
@@ -102,11 +80,10 @@ class ExerciseRepository:
                     "media": exercise.media
                 }
             }
-        except ValidationError as e:
-            return {"error": e.errors(), "status": status.HTTP_400_BAD_REQUEST}
         except Exception as e:
-            return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
-
+            # Registrar cualquier error no manejado
+            print(f"Error en create_exercise: {str(e)}")
+            return {"error": "Error interno del servidor", "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
 
     @staticmethod
     def update_exercise(user, data, files):
@@ -120,13 +97,22 @@ class ExerciseRepository:
             exercise = Exercise.objects.get(id=data['id'])
             old_media_url = exercise.media  # Guardar URL de la imagen actual
 
+            if not data.get('name'):
+                return {"error": "El campo 'name' no puede estar vacío", "status": status.HTTP_400_BAD_REQUEST}
+            if 'muscleGroups' in data and not isinstance(data['muscleGroups'], list):
+                return {"error": "El campo 'muscleGroups' debe ser una lista de cadenas de texto", "status": status.HTTP_400_BAD_REQUEST}
+            if not data.get('instructions'):
+                return {"error": "El campo 'instructions' no puede estar vacío", "status": status.HTTP_400_BAD_REQUEST}
+            if not data.get('description'):
+                return {"error": "El campo 'description' no puede estar vacío", "status": status.HTTP_400_BAD_REQUEST}
+
             # Actualizar los campos
             if 'name' in data:
                 exercise.name = data['name']
             if 'description' in data:
                 exercise.description = data['description']
             if 'muscleGroups' in data:
-                exercise.muscleGroups = ','.join(data.getlist('muscleGroups'))
+                exercise.set_muscle_groups(data.get('muscleGroups'))
             if 'instructions' in data:
                 exercise.instructions = data['instructions']
 
