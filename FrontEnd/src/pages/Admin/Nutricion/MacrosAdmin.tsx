@@ -147,13 +147,12 @@ const MacrosAdmin: React.FC = () => {
     return (
         <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', padding: '3rem 0' }}>
             <Header title={t('nutrition_management_title')} />
-            <Container sx={{ paddingTop: '8%', pb: 4, }}>
+            <Container sx={{ paddingTop: '8%', pb: 4 }}>
                 <Box
                     sx={{
                         position: 'fixed',
                         top: 0,
                         left: 0,
-
                         width: '100vw',
                         backgroundColor: '#f5f5f5',
                         paddingTop: '16%',
@@ -182,78 +181,94 @@ const MacrosAdmin: React.FC = () => {
                     </Tabs>
                 </Box>
                 <Grid container spacing={2} sx={{ mt: 4, mb: 5 }}>
-                    {(macros[categories[selectedCategory]?.name] || []).map((macro) => (
-                        <Grid item xs={12} sm={6} md={4} key={macro.id}>
-                            <Card
-                                sx={{
-                                    backgroundColor: '#ffffff',
-                                    borderRadius: '12px',
-                                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                                    border: '1px solid #e0e0e0',
-                                    paddingX: '16px',
-                                }}
-                                onClick={() => handleDetailsMacros(macro.id)}
-                            >
-                                <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    {/* Título del macro alineado a la izquierda y ocupando todo el ancho */}
-                                    <Typography sx={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
-                                        {macro.name || 'Macro Plan'}
-                                    </Typography>
-
-                                    {/* Contenedor para la información y los botones */}
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                        {/* Información del macro alineada a la izquierda */}
-                                        <Typography variant="body2" sx={{ color: '#6b6b6b' }}>
-                                            {macro.kcal} Kcal, Proteins: {macro.proteins}g, Carbs: {macro.carbs}g, Fats: {macro.fats}g
+                    {/* Verificar si hay macros para la categoría seleccionada */}
+                    {macros[categories[selectedCategory]?.name]?.length > 0 ? (
+                        macros[categories[selectedCategory]?.name].map((macro) => (
+                            <Grid item xs={12} sm={6} md={4} key={macro.id}>
+                                <Card
+                                    sx={{
+                                        backgroundColor: '#ffffff',
+                                        borderRadius: '12px',
+                                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                                        border: '1px solid #e0e0e0',
+                                        paddingX: '16px',
+                                    }}
+                                    onClick={() => handleDetailsMacros(macro.id)}
+                                >
+                                    <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                        <Typography sx={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
+                                            {macro.name || 'Macro Plan'}
                                         </Typography>
-
-                                        {/* Botones alineados a la derecha */}
-                                        <Box sx={{ display: 'flex', gap: '7px' }}>
-                                            <IconButton
-                                                onClick={(event) => {
-                                                    event.stopPropagation();
-                                                    handleEditMacros(macro);
-                                                }}
-                                                sx={{
-                                                    border: '1px solid #000',
-                                                    backgroundColor: '#FFFFFF',
-                                                    color: '#000',
-                                                    borderRadius: '5px',
-                                                    padding: '4px',
-                                                    fontSize: '0.8em',
-                                                    '&:hover': { backgroundColor: '#f3f3f3' },
-                                                }}
-                                            >
-                                                <EditIcon fontSize="small" />
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={(event) => {
-                                                    event.stopPropagation();
-                                                    openDeleteDialog(macro.id);
-                                                }}
-                                                sx={{
-                                                    border: '1px solid #FF0000',
-                                                    backgroundColor: '#FFFFFF',
-                                                    color: '#FF0000',
-                                                    borderRadius: '5px',
-                                                    padding: '4px',
-                                                    fontSize: '0.8em',
-                                                    '&:hover': { backgroundColor: '#f3f3f3' },
-                                                }}
-                                            >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                width: '100%',
+                                            }}
+                                        >
+                                            <Typography variant="body2" sx={{ color: '#6b6b6b' }}>
+                                                {macro.kcal} Kcal, Proteins: {macro.proteins}g, Carbs: {macro.carbs}g, Fats: {macro.fats}g
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', gap: '7px' }}>
+                                                <IconButton
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        handleEditMacros(macro);
+                                                    }}
+                                                    sx={{
+                                                        border: '1px solid #000',
+                                                        backgroundColor: '#FFFFFF',
+                                                        color: '#000',
+                                                        borderRadius: '5px',
+                                                        padding: '4px',
+                                                        fontSize: '0.8em',
+                                                        '&:hover': { backgroundColor: '#f3f3f3' },
+                                                    }}
+                                                >
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                                <IconButton
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        openDeleteDialog(macro.id);
+                                                    }}
+                                                    sx={{
+                                                        border: '1px solid #FF0000',
+                                                        backgroundColor: '#FFFFFF',
+                                                        color: '#FF0000',
+                                                        borderRadius: '5px',
+                                                        padding: '4px',
+                                                        fontSize: '0.8em',
+                                                        '&:hover': { backgroundColor: '#f3f3f3' },
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Box>
                                         </Box>
-                                    </Box>
-                                </CardContent>
-                            </Card>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))
+                    ) : (
+                        // Mensaje cuando no hay macros en la categoría seleccionada
+                        <Grid item xs={12}>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    textAlign: 'center',
+                                    color: '#6b6b6b',
+                                    marginTop: '2rem',
+                                }}
+                            >
+                                {t('no_plans_message')} {/* Traducción del mensaje */}
+                            </Typography>
                         </Grid>
-                    ))}
+                    )}
                 </Grid>
-
-
-
-                {/* Botón flotante para añadir un nuevo usuario */}
+    
+                {/* Botón flotante para añadir un nuevo plan */}
                 <Fab
                     onClick={handleAddMacros}
                     sx={{
@@ -277,7 +292,7 @@ const MacrosAdmin: React.FC = () => {
                 >
                     <Add sx={{ fontSize: 24 }} />
                 </Fab>
-
+    
                 <Dialog open={showDialog} onClose={() => setShowDialog(false)}>
                     <DialogTitle>{t('confirm_delete_alert_title')}</DialogTitle>
                     <DialogContent>
@@ -285,13 +300,16 @@ const MacrosAdmin: React.FC = () => {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setShowDialog(false)}>{t('cancel_button')}</Button>
-                        <Button onClick={handleDelete} sx={{ color: '#FF0000' }}>{t('delete_button')}</Button>
+                        <Button onClick={handleDelete} sx={{ color: '#FF0000' }}>
+                            {t('delete_button')}
+                        </Button>
                     </DialogActions>
                 </Dialog>
             </Container>
             <Navbar />
         </Box>
     );
+    
 };
 
 export default MacrosAdmin;

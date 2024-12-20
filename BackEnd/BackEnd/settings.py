@@ -24,6 +24,9 @@ IS_TESTING = 'test' in sys.argv
 # Base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', cast=bool)
+
 # Configuración de la base de datos
 if IS_TESTING:
     DATABASES = {
@@ -40,12 +43,11 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'smartgym',  # Nombre de la base de datos que creaste en pgAdmin
-            # Usuario de PostgreSQL (por defecto suele ser 'postgres')
-            'USER': 'postgres',
-            'PASSWORD': 'Admin',  # Contraseña de PostgreSQL
-            'HOST': 'localhost',  # Dirección del servidor de base de datos
-            'PORT': '5432',  # Puerto de PostgreSQL (por defecto 5432)
+            'NAME': config('POSTGRES_DB'),
+            'USER': config('POSTGRES_USER'),
+            'PASSWORD': config('POSTGRES_PASSWORD'),
+            'HOST': config('POSTGRES_HOST', default='db'),
+            'PORT': config('POSTGRES_PORT', default=5432, cast=int),
         }
     }
 
@@ -57,27 +59,22 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GCS_CREDENTIALS_FILE
 STORAGE_CLIENT = storage.Client()
 
 # Nombre del bucket
-GCS_BUCKET_NAME = 'fitprox'
+GCS_BUCKET_NAME = config('GS_BUCKET_NAME', default='default-bucket-name')
 
 bucket = STORAGE_CLIENT.bucket('fitprox')
 
-# Verifica si puedes acceder al bucket
-print(f"Bucket name: {bucket.name}")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dpf!)y5i@$q=_ha*$f%oyswk*2l=l20*#ub@o)x7^_k=71@^l*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 MEDIA_URL = f'https://storage.googleapis.com/{GCS_BUCKET_NAME}/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'BackEnd', 'media/')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool, default=False)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
 
 
 # Application definition
@@ -131,17 +128,7 @@ SIMPLE_JWT = {
 }
 
 ROOT_URLCONF = 'BackEnd.urls'
-'''
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.path.join(BASE_DIR, 'BackEnd', 'meta-router-439617-d1-641fbf138cf5.json')
-)
 
-DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'firprox'  # Tu bucket de GCS
-GS_PROJECT_ID = 'meta-router-439617-d1'  # Tu proyecto de GCS
-GS_DEFAULT_ACL = 'publicRead'
-MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
-'''
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -205,6 +192,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

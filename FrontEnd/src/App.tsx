@@ -132,7 +132,7 @@ const App: React.FC = () => {
 // Component for Navbar Display Control
 const NavbarWrapper: React.FC = () => {
   const location = useLocation();
-  const noNavbarRoutes = ['/login', '/register', '/', '/form'];
+  const noNavbarRoutes = ['/login', '/register', '/', '/form', '/form/introduction', '/form/personaldata', '/form/goals', '/form/physicalactivity', '/form/dietandnutrition', '/form/summary'];
   const showNavbar = !noNavbarRoutes.includes(location.pathname);
 
   return showNavbar ? <Navbar /> : null;

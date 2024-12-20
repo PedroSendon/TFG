@@ -848,8 +848,7 @@ class UserDetailsRepository:
                 if user.profile_photo:
                     delete_success = delete_file_from_gcs(user.profile_photo)
                     if not delete_success:
-                        print(f"Advertencia: No se pudo eliminar la foto de perfil anterior del usuario con ID {
-                              user_id}.")
+                        print(f"Advertencia: No se pudo eliminar la foto de perfil anterior del usuario con ID {user_id}")
 
                 # Subir manualmente la nueva imagen a GCS
                 uploaded_url = upload_to_gcs(

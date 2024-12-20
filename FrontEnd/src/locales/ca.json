@@ -398,5 +398,10 @@
   "role_error": "El rol d'usuari no és reconegut.",
   "all_assigned_message": "Tots els usuaris estan assignats!",
   "no_pending_users_message": "Bon treball! Tots els usuaris tenen plans assignats. Ara mateix no hi ha usuaris pendents.",
-  "no_pending_users_icon_alt": "Tots els plans assignats"
+  "no_pending_users_icon_alt": "Tots els plans assignats",
+  "no_workouts_message": "No hi ha entrenaments disponibles.",
+  "no_exercises_message": "No hi ha exercicis disponibles.",
+  "no_trainingPlans_message": "No hi ha plans d'entrenament disponibles.",
+  "no_plans_message": "No hi ha plans disponibles."
+
 }

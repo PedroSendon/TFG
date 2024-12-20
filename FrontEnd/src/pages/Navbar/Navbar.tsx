@@ -101,9 +101,11 @@ const Navbar = () => {
   }
 
   const currentRole = isAdminView ? userRole : 'cliente';
+
   const filteredNavItems = navItems[currentRole as keyof typeof navItems].filter((item: NavItem) => {
-    if (item.condition === 'plansAssigned') return plansAssigned;
-    if (item.condition === '!plansAssigned') return !plansAssigned;
+    const hasPlansAssigned = plansAssigned === true; // O explícitamente verifica su valor
+    if (item.condition === 'plansAssigned') return hasPlansAssigned;
+    if (item.condition === '!plansAssigned') return !hasPlansAssigned;
     return true;
   });
 

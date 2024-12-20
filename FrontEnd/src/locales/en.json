@@ -398,5 +398,10 @@
   "role_error": "User role is not recognized.",
   "all_assigned_message": "All users are assigned!",
   "no_pending_users_message": "Great job! All users have been assigned plans. No pending users at the moment.",
-  "no_pending_users_icon_alt": "All plans assigned"
+  "no_pending_users_icon_alt": "All plans assigned",
+  "no_workouts_message": "No workouts available.",
+    "no_exercises_message": "No exercises available.",
+    "no_trainingPlans_message": "No training plans available.",
+    "no_plans_message": "No plans available."
+
 }

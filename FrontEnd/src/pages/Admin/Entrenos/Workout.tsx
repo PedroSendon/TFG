@@ -269,69 +269,80 @@ const WorkoutsExercises: React.FC = () => {
                 </Box>
                 <Box sx={{ mt: 4, paddingTop: '9%' }}>
                     <Grid container spacing={2}>
-                        {(selectedSection === 'workouts' ? workouts : selectedSection === 'trainingPlans' ? trainingPlans : exercises).map((item) => (
-                            <Grid item xs={12} key={item.id}>
-                                <Card sx={{
-                                    backgroundColor: '#FFFFFF',
-                                    borderRadius: '10px',
-                                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                                    border: '1px solid #e0e0e0',
-                                    paddingX: 2,
-                                    '&:hover': {
-                                        transform: 'scale(1.02)',
-                                        boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)'
-                                    },
-                                    transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                                }}
-                                    onClick={() => handleCardClick(item.id)} // Añadimos el evento onClick
+                        {(selectedSection === 'workouts' ? workouts : selectedSection === 'trainingPlans' ? trainingPlans : exercises).length > 0 ? (
+                            (selectedSection === 'workouts' ? workouts : selectedSection === 'trainingPlans' ? trainingPlans : exercises).map((item) => (
+                                <Grid item xs={12} key={item.id}>
+                                    <Card sx={{
+                                        backgroundColor: '#FFFFFF',
+                                        borderRadius: '10px',
+                                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                                        border: '1px solid #e0e0e0',
+                                        paddingX: 2,
+                                        '&:hover': {
+                                            transform: 'scale(1.02)',
+                                            boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.15)'
+                                        },
+                                        transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                                    }}
+                                        onClick={() => handleCardClick(item.id)} // Añadimos el evento onClick
+                                    >
+                                        <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <Typography sx={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
+                                                {item.name}
+                                            </Typography>
+                                            {/* Botones alineados a la derecha */}
+                                            <Box sx={{ display: 'flex', gap: '7px' }}>
+                                                <IconButton
+                                                    onClick={(e) => { e.stopPropagation(); handleEdit(item.id, selectedSection); }}
+                                                    sx={{
+                                                        border: '1px solid #000',
+                                                        backgroundColor: '#FFFFFF',
+                                                        color: '#000',
+                                                        borderRadius: '5px',
+                                                        padding: '4px',
+                                                        fontSize: '0.8em',
+                                                        '&:hover': { backgroundColor: '#f3f3f3' },
+                                                    }}
+                                                >
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                                <IconButton
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const type = selectedSection === 'workouts' ? 'workout' :
+                                                            selectedSection === 'exercises' ? 'exercise' :
+                                                                'trainingPlan';
+                                                        openDeleteDialog(item.id, type);
+                                                    }}
+                                                    sx={{
+                                                        border: '1px solid #FF0000',
+                                                        backgroundColor: '#FFFFFF',
+                                                        color: '#FF0000',
+                                                        borderRadius: '5px',
+                                                        padding: '4px',
+                                                        fontSize: '0.8em',
+                                                        '&:hover': { backgroundColor: '#f3f3f3' },
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+
+                                            </Box>
+
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))
+                        ) : (
+                            <Grid item xs={12}>
+                                <Typography
+                                    variant="h6"
+                                    sx={{ textAlign: 'center', color: '#6b6b6b', marginTop: '2rem' }}
                                 >
-                                    <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <Typography sx={{ color: '#000000', fontWeight: 'bold', fontSize: '1em' }}>
-                                            {item.name}
-                                        </Typography>
-                                        {/* Botones alineados a la derecha */}
-                                        <Box sx={{ display: 'flex', gap: '7px' }}>
-                                            <IconButton
-                                                onClick={(e) => { e.stopPropagation(); handleEdit(item.id, selectedSection); }}
-                                                sx={{
-                                                    border: '1px solid #000',
-                                                    backgroundColor: '#FFFFFF',
-                                                    color: '#000',
-                                                    borderRadius: '5px',
-                                                    padding: '4px',
-                                                    fontSize: '0.8em',
-                                                    '&:hover': { backgroundColor: '#f3f3f3' },
-                                                }}
-                                            >
-                                                <EditIcon fontSize="small" />
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const type = selectedSection === 'workouts' ? 'workout' :
-                                                        selectedSection === 'exercises' ? 'exercise' :
-                                                            'trainingPlan';
-                                                    openDeleteDialog(item.id, type);
-                                                }}
-                                                sx={{
-                                                    border: '1px solid #FF0000',
-                                                    backgroundColor: '#FFFFFF',
-                                                    color: '#FF0000',
-                                                    borderRadius: '5px',
-                                                    padding: '4px',
-                                                    fontSize: '0.8em',
-                                                    '&:hover': { backgroundColor: '#f3f3f3' },
-                                                }}
-                                            >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
-
-                                        </Box>
-
-                                    </CardContent>
-                                </Card>
+                                    {t(`no_${selectedSection}_message`)}
+                                </Typography>
                             </Grid>
-                        ))}
+                        )}
                     </Grid>
                 </Box>
 
@@ -357,7 +368,7 @@ const WorkoutsExercises: React.FC = () => {
                         },
                     }}
                 >
-                   <Add sx={{ fontSize: 24 }} />
+                    <Add sx={{ fontSize: 24 }} />
                 </Fab>
             </Container>
             {/* Diálogo de confirmación de eliminación */}

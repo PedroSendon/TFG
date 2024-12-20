@@ -399,5 +399,10 @@
   "role_error": "El rol de usuario no es reconocido.",
   "all_assigned_message": "¡Todos los usuarios están asignados!",
   "no_pending_users_message": "¡Buen trabajo! Todos los usuarios tienen planes asignados. No hay usuarios pendientes en este momento.",
-  "no_pending_users_icon_alt": "Todos los planes asignados"
+  "no_pending_users_icon_alt": "Todos los planes asignados",
+  "no_workouts_message": "No hay entrenamientos disponibles.",
+  "no_exercises_message": "No hay ejercicios disponibles.",
+  "no_trainingPlans_message": "No hay planes de entrenamiento disponibles.",
+  "no_plans_message": "No hay planes disponibles."
+
 }

@@ -233,8 +233,7 @@ class ExerciseRepository:
                                 "rest": workout_exercise.rest
                             }
 
-            print(f"No se encontró el ejercicio con ID {
-                  exercise_id} en el workout con ID {workout_id}")
+            print(f"No se encontró el ejercicio con ID { exercise_id} en el workout con ID {workout_id}")
             return None
         except UserWorkout.DoesNotExist:
             print(f"No se encontró un UserWorkout para el usuario {user}")

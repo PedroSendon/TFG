@@ -85,7 +85,7 @@ const Login: React.FC = () => {
                     // Redirigir en función del rol del usuario
                     switch (userRole.role) {
                         case 'cliente':
-                            history.push('/workout');
+                            history.push('/profile');
                             break;
                         case 'entrenador':
                             history.push('/admin/workout');
